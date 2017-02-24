@@ -1,75 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE log4j:configuration PUBLIC "-//APACHE//DTD LOG4J 1.2//EN" "log4j.dtd">
-<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml" />
+    <property name="LOG_FILE" value="${LOG_FILE:-${LOG_PATH:-${LOG_TEMP:-${java.io.tmpdir:-/tmp}}/}spring.log}"/>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    <property name="LOG_FILE" value="${LOG_FILE:-${LOG_PATH:-${LOG_TEMP:-${java.io.tmpdir:-/tmp}}/}spring.log}"/>
+    <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
 
-	<!-- Appenders -->
-	<appender name="console" class="org.apache.log4j.ConsoleAppender">
-		<param name="Target" value="System.out" />
-		<param name="threshold" value="debug" />
-		<layout class="org.apache.log4j.EnhancedPatternLayout">
-			<param name="ConversionPattern" value="%-5p [%c] [%X{msisdn}] %t %m%n" />
-		</layout>
-	</appender>
-	
-	<!-- <appender name="file" class="org.apache.log4j.FileAppender">
-        <param name="file" value="/var/log/tomcat/sp.log" />
-        <param name="append" value="false" />
-        <param name="threshold" value="debug" />
-        <layout class="org.apache.log4j.PatternLayout">
-            <param name="ConversionPattern" value="%d{ISO8601} %-5p [%c{1}] - %m%n" />
-        </layout>
-        <layout class="org.apache.log4j.EnhancedPatternLayout">
-			<param name="ConversionPattern" value="%-5p [%c] [%X{msisdn}] %t %m%n" />
-		</layout>
-    </appender> -->
-    
-    <appender name="rollingAppender" class="org.apache.log4j.DailyRollingFileAppender">
-       <param name="File" value="/var/log/tomcat/spFeLogBack.log" />
-       <param name="DatePattern" value="'.'yyyy-MM-dd" />
-       <layout class="org.apache.log4j.PatternLayout">
-          <param name="ConversionPattern" value="[%p] %d %c %M - %m%n"/>          
-       </layout>
+    <appender name="ROLLING-FILE"
+              class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <encoder>
+            <pattern>${FILE_LOG_PATTERN}</pattern>
+        </encoder>
+        <file>${LOG_FILE}</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- daily rollover -->
+            <fileNamePattern>${LOG_FILE}.%d{yyyy-MM-dd}.log</fileNamePattern>
+        </rollingPolicy>
     </appender>
-    
 
-	<logger name="org.hibernate.SQL">
-		<level value="ERROR" />
-	</logger>
-	
-	<logger name="org.springframework.web.*">
-		<level value="INFO" />
-	</logger>
-	
-	
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="ROLLING-FILE"/>
+    </root>
 
-	<logger name="org.eclipse.jetty.webapp.WebAppClassLoader">
-		<level value="INFO" />
-	</logger>
-
-	<logger name="uaicontacts.controller">
-		<level value="INFO" />
-	</logger>
-
-	<logger name="com.events.log.RequestLogFilter">
-		<level value="INFO" />
-		<appender-ref ref="rollingAppender" />
-		<appender-ref ref="console" />
-	</logger>
-	<logger name="com.events.log.SessionListener">
-		<level value="INFO" />
-		<appender-ref ref="rollingAppender" />
-		<appender-ref ref="console" />
-	</logger>
-
-	<!-- <logger name="org.springframework.web">
-		<level value="trace" />
-	</logger> -->
-	
-	<!-- Root Logger -->
-	<root>
-		<level value="INFO" />
-		<appender-ref ref="console" />
-		<appender-ref ref="rollingAppender" />
-	</root>
-
-</log4j:configuration>
+</configuration>
