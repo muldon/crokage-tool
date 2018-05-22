@@ -1,6 +1,8 @@
 package com.ufu;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,8 +21,13 @@ import com.google.code.stackexchange.schema.StackExchangeSite;
 import com.ufu.bot.googleSearch.GoogleWebSearchOld;
 import com.ufu.bot.googleSearch.SearchQuery;
 import com.ufu.bot.googleSearch.SearchResult;
+import com.ufu.bot.service.PitBotService;
 import com.ufu.bot.service.TagsService;
+import com.ufu.bot.to.Comment;
+import com.ufu.bot.to.Post;
 import com.ufu.bot.to.Tags;
+import com.ufu.bot.to.User;
+import com.ufu.bot.util.BotUtils;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -30,7 +37,14 @@ public class BotApplicationTests {
 	
 	@Autowired
 	private TagsService tagsService;
-	@Test
+	
+	@Autowired
+	private PitBotService pitBotService;
+	
+	@Autowired
+	private BotUtils botUtils;
+	
+	//@Test
 	public void contextLoads() {
 	}
 
@@ -86,6 +100,74 @@ public class BotApplicationTests {
 		System.out.println();
 		
 	}
+	
+	
+	@Test
+	public void getComments() {
+		logger.info("\n\nTesting getComments....");
+		Integer postId = 910522;
+		List<Comment> comments = pitBotService.getCommentsByPostId(postId);
+		for (Comment comment : comments) {
+			logger.info(comment.getText());
+		}
+		
+
+	}
+		
+	
+	@Test
+	public void getAnswers() {
+		logger.info("\n\nTesting getAnswers....");
+		Integer postId = 910374;
+		List<Post> answers = pitBotService.findAnswersByQuestionId(postId);
+		for (Post answer : answers) {
+			logger.info(answer.getBody());
+		}
+		
+
+	}
+	
+	
+	@Test
+	public void getUser() {
+		logger.info("\n\nTesting getUser....");
+		Integer userId = 112532;
+		User user = pitBotService.findUserById(userId);
+		System.out.println(user);
+
+	}
+		
+	
+	@Test
+	public void getRelatedQuestionsIds() {
+		logger.info("\n\nTesting getRelatedQuestionsIds....");
+		
+		Set<Integer> set = new HashSet<>();
+		set.add(910374);
+		
+		
+		Set<Integer> allRelatedQuestionsIds = pitBotService.recoverRelatedQuestionsIds(set);
+		System.out.println(allRelatedQuestionsIds);
+
+	}
+	
+	
+
+	@Test
+	public void testStemStop() throws Exception {
+		logger.info("\n\ntestStemStop....");
+		Integer questionId = 910522;
+		
+		Post post = pitBotService.findPostById(questionId);
+		botUtils.initializeConfigs();
+		String[] bodyContent = botUtils.separateWordsCodePerformStemmingStopWords(post.getBody(),"body");
+		System.out.println(bodyContent[0]);
+		System.out.println(bodyContent[1]);
+		System.out.println(bodyContent[2]);
+		
+
+	}
+		
 	
 
 }

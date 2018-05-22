@@ -42,7 +42,7 @@ import org.springframework.stereotype.Component;
 
 import com.ufu.bot.repository.GenericRepository;
 import com.ufu.bot.to.Feature;
-import com.ufu.bot.to.ProcessedPosts;
+import com.ufu.bot.to.ProcessedPostOld;
 
 
 
@@ -68,14 +68,23 @@ public class BotUtils {
 	
 	
 	public static final String CODE_REGEX_EXPRESSION = "(?sm)<pre><code>(.*?)</code></pre>";
+	//public static final String CODE_REGEX_EXPRESSION = "(?sm)<pre.*?><code>(.*?)</code></pre>";
 	public static final Pattern CODE_PATTERN = Pattern.compile(CODE_REGEX_EXPRESSION, Pattern.DOTALL); 
+	
+	public static final String CODE_MIN_REGEX_EXPRESSION = "(?sm)<code>(.*?)</code>";
+	public static final Pattern CODE_MIN_PATTERN = Pattern.compile(CODE_MIN_REGEX_EXPRESSION, Pattern.DOTALL); 
 	
 	public static final String BLOCKQUOTE_EXPRESSION = "(?sm)<blockquote>(.*?)</blockquote>";
 	public static final Pattern BLOCKQUOTE_PATTERN = Pattern.compile(BLOCKQUOTE_EXPRESSION, Pattern.DOTALL);
 	
 	//public static final String LINK_EXPRESSION_OUT = "(?sm)<a href=(.*?) rel=\"nofollow\">";
-	public static final String LINK_EXPRESSION_OUT = "(?sm)<a href=(.*?)</a>";
+	//public static final String LINK_EXPRESSION_OUT = "(?sm)<a href=(.*?)>";
+	public static final String LINK_EXPRESSION_OUT = "(?sm)<a href=\"(.*?)\"(.*?)</a>";
 	public static final Pattern LINK_PATTERN = Pattern.compile(LINK_EXPRESSION_OUT, Pattern.DOTALL);
+	
+	public static final String LINK_TARGET_EXPRESSION_OUT = "(?sm)http(.*?)\\s";
+	public static final Pattern LINK_TARGET_PATTERN = Pattern.compile(LINK_TARGET_EXPRESSION_OUT, Pattern.DOTALL);
+	
 	
 	public static final String IMG_EXPRESSION_OUT = "(?sm)<img (.*?)>";
 	public static final Pattern IMG_PATTERN = Pattern.compile(IMG_EXPRESSION_OUT, Pattern.DOTALL);
@@ -92,6 +101,11 @@ public class BotUtils {
 			"</a>","<img src=","alt=","<ol>","</ol>","<li>","</li>","<ul>",
 			"</ul>","<br>","</br>","<h1>","</h1>","<h2>","</h2>","<strong>","</strong>",
 			"<code>","</code>","<em>","</em>","<hr>"};
+	
+	private static String htmlTagsWithCode[] = {"<p>","</p>","<blockquote>","</blockquote>", /*"<a href=\"","\">",*/
+			"</a>","<img src=","alt=","<ol>","</ol>","<li>","</li>","<ul>",
+			"</ul>","<br>","</br>","<h1>","</h1>","<h2>","</h2>","<strong>","</strong>",
+			"<em>","</em>","<hr>"};
 	
 	
 	public void initializeConfigs() throws Exception {
@@ -155,7 +169,7 @@ public class BotUtils {
 	
 	
 	
-	private static String substitituiSimbolosHTML(String finalContent) {
+	private static String translateHTMLSimbols(String finalContent) {
 		finalContent = finalContent.replaceAll("&amp;","&");
 		finalContent = finalContent.replaceAll("&lt;", "<");
 		finalContent = finalContent.replaceAll("&gt;", ">");
@@ -176,30 +190,70 @@ public class BotUtils {
 	}
 	
 
+	public String buildPresentationBody(String body) {
+		
+		String finalBody = translateHTMLSimbols(body);
+		
+		finalBody = finalBody.replaceAll(IMG_EXPRESSION_OUT, " ");
+		
+		finalBody = extractLinksTargets(finalBody);
+		
+		finalBody = removeHtmlTagsExceptCode(finalBody);
+		
+		return finalBody;
+	}
 	
-	public String[] separaSomentePalavrasNaoSomentePalavras(String content, String parte) throws Exception {
+
+
+	public List<String> getCodes(String presentingBody) {
+		String codeContent = "";
+		List<String> codes = getCodeValues(CODE_PATTERN, presentingBody);
+		//int i=0;
+		for(String code: codes){
+			//codeContent+= "code "+(i+1)+":"+code+ "\n\n";
+			codeContent+= code+ "\n\n";
+			//i++;
+		}
+		logger.info("\nCodes: "+codeContent);
+		return codes;
+	}
+
+	public String buildProcessedBodyStemmedStopped(String presentingBody) {
+		
+		String finalStr = presentingBody.replaceAll(LINK_TARGET_EXPRESSION_OUT, "");
+		
+		finalStr = finalStr.replaceAll(CODE_REGEX_EXPRESSION, "");
+		
+		finalStr = finalStr.replaceAll(CODE_MIN_REGEX_EXPRESSION, "");
+		
+		
+		return finalStr;
+	}
+
+	
+	public String[] separateWordsCodePerformStemmingStopWords(String content, String parte) throws Exception {
 		String[] finalContent = new String[4];
 		
 		//volta simbolos de marcacao HTML para estado original 
-		String simbolosOriginais = substitituiSimbolosHTML(content);		
+		String originalSymbols = translateHTMLSimbols(content);		
 		
-		String textoSemCodigosLinksEBlackquotes = simbolosOriginais.replaceAll(LINK_EXPRESSION_OUT, " ");
+		String textWithoutCodesLinksAndBlackquotes = originalSymbols.replaceAll(LINK_EXPRESSION_OUT, " ");
 		
-		textoSemCodigosLinksEBlackquotes = textoSemCodigosLinksEBlackquotes.replaceAll(IMG_EXPRESSION_OUT, " ");
+		textWithoutCodesLinksAndBlackquotes = textWithoutCodesLinksAndBlackquotes.replaceAll(IMG_EXPRESSION_OUT, " ");
 		
 		//blockquotes
 		String blockquoteContent = "";
-		List<String> blockquotes = getCodeValues(BLOCKQUOTE_PATTERN, textoSemCodigosLinksEBlackquotes);
+		List<String> blockquotes = getCodeValues(BLOCKQUOTE_PATTERN, textWithoutCodesLinksAndBlackquotes);
 		for(String blockquote: blockquotes){
 			blockquoteContent+= blockquote+ " ";
 		}
-		blockquoteContent = retiraHtmlTags(blockquoteContent);
+		blockquoteContent = removeHtmlTags(blockquoteContent);
 		blockquoteContent = blockquoteContent.replaceAll("\n", " ");
-		textoSemCodigosLinksEBlackquotes = textoSemCodigosLinksEBlackquotes.replaceAll(BLOCKQUOTE_EXPRESSION, " ");
+		textWithoutCodesLinksAndBlackquotes = textWithoutCodesLinksAndBlackquotes.replaceAll(BLOCKQUOTE_EXPRESSION, " ");
 		
 		//codes
 		String codeContent = "";
-		List<String> codes = getCodeValues(CODE_PATTERN, textoSemCodigosLinksEBlackquotes);
+		List<String> codes = getCodeValues(CODE_PATTERN, textWithoutCodesLinksAndBlackquotes);
 		//int i=0;
 		for(String code: codes){
 			//codeContent+= "code "+(i+1)+":"+code+ "\n\n";
@@ -208,7 +262,7 @@ public class BotUtils {
 		}
 		
 		//codeContent = codeContent.replaceAll("\n", " ");
-		codeContent = retiraHtmlTags(codeContent);
+		codeContent = removeHtmlTags(codeContent);
 					
 		//textoSemCodigosLinksEBlackquotes = textoSemCodigosLinksEBlackquotes.replaceAll(BLOCKQUOTE_EXPRESSION, " ");
 		//String codeToBeJoinedInBody = retiraSimbolosCodeParaBody(codeContent);
@@ -220,40 +274,43 @@ public class BotUtils {
 		bloquesAndLinks += " "+codeContent;*/
 		
 		
-		textoSemCodigosLinksEBlackquotes = textoSemCodigosLinksEBlackquotes.replaceAll(CODE_REGEX_EXPRESSION, " ");
-		textoSemCodigosLinksEBlackquotes = retiraHtmlTags(textoSemCodigosLinksEBlackquotes);
+		textWithoutCodesLinksAndBlackquotes = textWithoutCodesLinksAndBlackquotes.replaceAll(CODE_REGEX_EXPRESSION, " ");
+		textWithoutCodesLinksAndBlackquotes = removeHtmlTags(textWithoutCodesLinksAndBlackquotes);
 		
 		//trata antes de pegar somenta as palavras
 		
-		String separated = retiraSimbolosImportantesNaoCodigo(textoSemCodigosLinksEBlackquotes,parte);
+		String separated = removeOtherSymbolsAccordingToPostPart(textWithoutCodesLinksAndBlackquotes,parte);
 		
 		
-		String somentePalavras = getOnlyWords(separated);
+		String onlyWords = getOnlyWords(separated);
 		/*List<String> palavras = getWords(ONLY_WORDS_PATTERN, separated);
 		for(String word: palavras){
 			somentePalavras+= word+ " ";
 		}*/
-		somentePalavras = somentePalavras.toLowerCase()+ " ";
+		onlyWords = onlyWords.toLowerCase()+ " ";
 		
-		String naoSomentePalavras = "";
+		String specificTerms = "";
 		List<String> naoPalavras = getWords(NOT_ONLY_WORDS_PATTERN, separated);
 		for(String word: naoPalavras){
-			naoSomentePalavras+= word+ " ";
+			specificTerms+= word+ " ";
 		}
-		naoSomentePalavras+= blockquoteContent;
+		specificTerms+= blockquoteContent;
 		
-		naoSomentePalavras = retiraSimbolosEspeciais(naoSomentePalavras);
+		specificTerms = removeSpecialSymbols(specificTerms);
 		
-		String stoppedStemmed = tokenizeStopStem(somentePalavras.trim());
+		String stoppedStemmed = tokenizeStopStem(onlyWords.trim());
 		
 		finalContent[0] = stoppedStemmed; //+ " "+somentePalavrasCodeClean;
-		finalContent[1] = naoSomentePalavras.trim();
+		finalContent[1] = specificTerms.trim();
 		finalContent[2] = codeContent.trim();
 		
 		return finalContent;
 		
 
 	}
+	
+	
+	
 	
 	
 
@@ -269,7 +326,7 @@ public class BotUtils {
 
 
 
-	public String retiraSimbolosImportantesNaoCodigo(String finalContent, String parte) {
+	public String removeOtherSymbolsAccordingToPostPart(String finalContent, String parte) {
 		if(parte.equals("title")){
 			finalContent = finalContent.replaceAll("\\?", " ");
 		}else {
@@ -283,7 +340,7 @@ public class BotUtils {
 	/**
 	 * Retira tags de marcação do body ou title  
 	 */
-	public static String retiraHtmlTags(String content) {
+	public static String removeHtmlTags(String content) {
 		if(content==null || content.trim().equals("")){
 			return "";
 		}
@@ -298,6 +355,25 @@ public class BotUtils {
 		
 	}
 	
+	/**
+	 * Retira tags de marcação do body ou title  
+	 */
+	public static String removeHtmlTagsExceptCode(String content) {
+		if(content==null || content.trim().equals("")){
+			return "";
+		}
+		//boolean startedHtml = false;
+		for(String tag: htmlTagsWithCode){
+			content= content.replaceAll(tag," ");
+		}
+		//content= content.replaceAll("<code>","\n<code>\n");
+		//content= content.replaceAll("</code>","\n</code>\n");
+		//content = content.replaceAll("<a href=", " ");
+		//content = content.replaceAll("</a>", " ");
+
+		return content;
+		
+	}
 	
 	
 	public static List<String> getWords(Pattern patter,String str) {
@@ -313,7 +389,7 @@ public class BotUtils {
 	
 	
 	
-	public static String retiraSimbolosEspeciais(String finalContent) {
+	public static String removeSpecialSymbols(String finalContent) {
 		
 		//nao precisam de espaco
 		finalContent = finalContent.replaceAll("\\+"," ");
@@ -460,11 +536,11 @@ public class BotUtils {
 	}
 	
 	public void getPostsLinks() {
-		logger.info("Recuperando PostLinks... ");
+		logger.info("Retrieving PostLinks... ");
 		if(allPostLinks==null){
 			allPostLinks = genericRepository.getAllPostLinks();
 		}
-		logger.info("PostLinks recuperados: " + allPostLinks.size());
+		logger.info("PostLinks retrieved: " + allPostLinks.size());
 
 	}
 	
@@ -524,7 +600,7 @@ public class BotUtils {
 	
 	
 	@SuppressWarnings("unchecked")
-	public HashMap<String, Feature> extractFeatures(ProcessedPosts master, ProcessedPosts duplicated) throws Exception {
+	public HashMap<String, Feature> extractFeatures(ProcessedPostOld master, ProcessedPostOld duplicated) throws Exception {
 
 		HashMap<String, Feature> result = new LinkedHashMap();
 				
@@ -607,14 +683,14 @@ public class BotUtils {
 	}
 	
 	
-	/*public void removePostsWithIncompleteTitlesOld(Set<ProcessedPosts> processedPostsByFilter, Set<ProcessedPosts> closedDuplicatedNonMastersByTag) {
+	/*public void removePostsWithIncompleteTitlesOld(Set<ProcessedPostOld> processedPostsByFilter, Set<ProcessedPostOld> closedDuplicatedNonMastersByTag) {
 		logger.info("Removing invalid posts. Processedposts before: "+processedPostsByFilter.size());
 		StringTokenizer st = null;
-		Set<ProcessedPosts> invalidPosts = new HashSet<>();
+		Set<ProcessedPostOld> invalidPosts = new HashSet<>();
 		
 		
 			
-		for(ProcessedPosts processedPosts: processedPostsByFilter) {
+		for(ProcessedPostOld processedPosts: processedPostsByFilter) {
 			st = new StringTokenizer(processedPosts.getTitle());
 			if(st.countTokens() <= 3) {
 				invalidPosts.add(processedPosts);
@@ -629,7 +705,7 @@ public class BotUtils {
 		logger.info("...now removing invalid posts from closedDuplicatedNonMastersIdsByTag. Before: "+closedDuplicatedNonMastersByTag.size());
 		invalidPosts = new HashSet<>();
 		
-		for(ProcessedPosts processedPosts: closedDuplicatedNonMastersByTag) {
+		for(ProcessedPostOld processedPosts: closedDuplicatedNonMastersByTag) {
 			st = new StringTokenizer(processedPosts.getTitle());
 			if(st.countTokens() <= 3) {
 				invalidPosts.add(processedPosts);
@@ -686,6 +762,36 @@ public class BotUtils {
             System.out.println("Key : " + entry.getKey() + " Value : " + entry.getValue());
         }
     }
+
+
+	public String extractLinksTargets(String strInput) {
+		final Matcher matcher = LINK_PATTERN.matcher(strInput);
+	    while (matcher.find()) {
+	    /*    System.out.println(matcher.group(0));
+	        System.out.println(matcher.group(1));
+	        System.out.println(matcher.group(2));*/
+	        
+	        strInput = strInput.replace(matcher.group(0), matcher.group(1));
+	        strInput = strInput.replace(matcher.group(2), "");
+	        
+	        
+	    }
+		return strInput;
+	}
+	
+	
+	public String removeLinkTargets(String strInput) {
+		final Matcher matcher = LINK_TARGET_PATTERN.matcher(strInput);
+	    while (matcher.find()) {
+	        strInput = strInput.replace(matcher.group(0), "");
+	    }
+		return strInput;
+	}
+
+
+
+
+	
 	
 	
 }

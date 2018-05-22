@@ -4,30 +4,30 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import com.ufu.bot.to.Posts;
-import com.ufu.bot.to.ProcessedPosts;
+import com.ufu.bot.to.Post;
+import com.ufu.bot.to.ProcessedPostOld;
 
 
 public interface GenericRepository {
 	
 	
-	public List<Posts> findAllQuestions();
+	public List<Post> findAllQuestions();
 
 	public Map<Integer, Set<Integer>> getAllPostLinks();
 
-	public Map<Posts, List<Posts>> getQuestionsByFilters(String tagFilter,Integer limit, String maxCreationDate);
+	//public Map<Post, List<Post>> getQuestionsByFilters(String tagFilter,Integer limit, String maxCreationDate);
 	
-	public List<Posts> getSomePosts();
+	public List<Post> getSomePosts();
 
-	public Set<ProcessedPosts> getProcessedQuestions(String tagFilter);
+	public Set<ProcessedPostOld> getProcessedQuestions(String tagFilter);
 
-	//public Set<Posts> findClosedDuplicatedNonMastersByTagExceptProcessedQuestions(String tagFilter);
+	//public Set<Post> findClosedDuplicatedNonMastersByTagExceptProcessedQuestions(String tagFilter);
 
-	public Set<Posts> getQuestionsByFilters(String tagFilter);
+	public Set<Post> getPostsByFilters(String tagFilter);
 
-	public Set<ProcessedPosts> findClosedDuplicatedNonMastersByTag(String tagFilter);
+	public Set<Integer> findRelatedQuestionsIds(Set<Integer> allQuestionsIds);
 
-	public Set<Integer> findClosedDuplicatedNonMastersByTagStrict(String tagFilter);
+	
 	
 
 	

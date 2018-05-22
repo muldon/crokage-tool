@@ -5,13 +5,13 @@ import java.util.Set;
 
 import org.springframework.data.repository.CrudRepository;
 
-import com.ufu.bot.to.ProcessedPosts;
+import com.ufu.bot.to.ProcessedPostOld;
 
 
 
-public interface ProcessedPostsRepository extends CrudRepository<ProcessedPosts, Integer> {
+public interface ProcessedPostsRepository extends CrudRepository<ProcessedPostOld, Integer> {
 
-	List<ProcessedPosts> findByIdIn(Set<Integer> allApiIdsExceptDifferentPairsQuestionsIds);
+	List<ProcessedPostOld> findByIdIn(Set<Integer> allApiIdsExceptDifferentPairsQuestionsIds);
     
 	
 

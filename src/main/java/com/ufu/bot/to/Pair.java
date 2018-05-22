@@ -25,7 +25,7 @@ public class Pair {
 	private Integer question1Id;
 	
 	@Transient
-	private ProcessedPosts question1;
+	private ProcessedPostOld question1;
 	
 	
 	@Transient
@@ -35,7 +35,7 @@ public class Pair {
 	private Integer question2Id;
 	
 	@Transient
-	private ProcessedPosts question2;
+	private ProcessedPostOld question2;
 
 	@Transient
 	private String question2Type;
@@ -185,12 +185,12 @@ public class Pair {
 	}
 
 
-	public ProcessedPosts getQuestion1() {
+	public ProcessedPostOld getQuestion1() {
 		return question1;
 	}
 
 
-	public void setQuestion1(ProcessedPosts question1) {
+	public void setQuestion1(ProcessedPostOld question1) {
 		this.question1 = question1;
 	}
 
@@ -205,12 +205,12 @@ public class Pair {
 	}
 
 
-	public ProcessedPosts getQuestion2() {
+	public ProcessedPostOld getQuestion2() {
 		return question2;
 	}
 
 
-	public void setQuestion2(ProcessedPosts question2) {
+	public void setQuestion2(ProcessedPostOld question2) {
 		this.question2 = question2;
 	}
 

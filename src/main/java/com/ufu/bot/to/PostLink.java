@@ -10,7 +10,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 @Entity
-@Table(name = "postlinks")
+@Table(name = "postlinksmin")
 public class PostLink {
 	private static final long serialVersionUID = -111652190111815641L;
 	@Id
