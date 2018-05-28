@@ -110,7 +110,7 @@ public class PitBotService {
 	}
 
 
-	
+	/*
 	public void stemStop(List<ProcessedPostOld> somePosts) throws Exception {
 		for (ProcessedPostOld processedPostOld : somePosts) {
 			String body = processedPostOld.getBody();
@@ -143,7 +143,7 @@ public class PitBotService {
 		}
 		
 	}
-
+*/
 
 	public void savePost(ProcessedPostOld newPost) {
 		processedPostsRepository.save(newPost);

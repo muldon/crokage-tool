@@ -1,8 +1,6 @@
 package com.ufu.bot.util;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -10,6 +8,7 @@ import java.io.StringReader;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -19,9 +18,11 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Properties;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.StrTokenizer;
@@ -38,6 +39,7 @@ import org.apache.lucene.util.AttributeFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.ufu.bot.repository.GenericRepository;
@@ -48,6 +50,10 @@ import com.ufu.bot.to.ProcessedPostOld;
 
 @Component
 public class BotUtils {
+	
+	@Value("${minTokenSize}")
+	public Integer minTokenSize;
+	
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 	private static Map<String, String> sourceToMaster;
 	private static CharArraySet stopWords;
@@ -60,6 +66,7 @@ public class BotUtils {
 	//private static Set<PostLink> allPostLinks;
 	private static Map<Integer, Set<Integer>> allPostLinks;
 	
+
 	@Autowired
 	private CosineSimilarity cs1;
 	
@@ -95,17 +102,39 @@ public class BotUtils {
 	public static final String NOT_ONLY_WORDS_EXPRESSION = "(?<!\\S)(?!\\p{Alpha}+(?!\\S))\\S+";
 	public static final Pattern NOT_ONLY_WORDS_PATTERN = Pattern.compile(NOT_ONLY_WORDS_EXPRESSION, Pattern.DOTALL);
 	
+	
+	public static final String COMMENTS_REGEX_EXPRESSION = "//.*|(\"(?:\\\\[^\"]|\\\\\"|.)*?\")|(?s)/\\*.*?\\*/";
+	public static final String COMMENTS_REPLACEMENT_EXPRESSION = "$1 ";
+	
 	private final String TMP_PATH = "/home/rodrigo/tmp/";
+	
+	public static final String CLASSES_CAMEL_CASE_REGEX_EXPRESSION = "\\b[A-Z][a-z]*([A-Z][a-z]*)*\\b";
+	
+	public static final String DOUBLE_QUOTES_REGEX_EXPRESSION = "\"(.*?)\"";
+		
+	
+	public static final String keywords[] = { "abstract", "assert", "boolean",
+            "break", "byte", "case", "catch", "char", "class", "const",
+            "continue", "default", "do", "double", "else", "extends", "false",
+            "final", "finally", "float", "for", "goto", "if", "implements",
+            "import", "instanceof", "int", "interface", "long", "native",
+            "new", "null", "package", "private", "protected", "public",
+            "return", "short", "static", "strictfp", "super", "switch",
+            "synchronized", "this", "throw", "throws", "transient", "true",
+            "try", "void", "volatile", "while" };
+
+   	
 	
 	private static String htmlTags[] = {"<p>","</p>","<pre>","</pre>","<blockquote>","</blockquote>", /*"<a href=\"","\">",*/
 			"</a>","<img src=","alt=","<ol>","</ol>","<li>","</li>","<ul>",
 			"</ul>","<br>","</br>","<h1>","</h1>","<h2>","</h2>","<strong>","</strong>",
 			"<code>","</code>","<em>","</em>","<hr>"};
 	
-	private static String htmlTagsWithCode[] = {"<p>","</p>","<blockquote>","</blockquote>", /*"<a href=\"","\">",*/
+	private static String htmlTagsWithCodeAndBlockquotes[] = {"<p>","</p>", /*"<a href=\"","\">",*/
 			"</a>","<img src=","alt=","<ol>","</ol>","<li>","</li>","<ul>",
 			"</ul>","<br>","</br>","<h1>","</h1>","<h2>","</h2>","<strong>","</strong>",
 			"<em>","</em>","<hr>"};
+	
 	
 	
 	public void initializeConfigs() throws Exception {
@@ -119,6 +148,14 @@ public class BotUtils {
 			standardTokenizer.close();
 			loadTagSynonyms();
 		}
+		
+		if(minTokenSize==null) {
+			Properties prop = new Properties();
+			prop.load(BotUtils.class.getClassLoader().getResourceAsStream("application.properties")); 
+			minTokenSize = new Integer(prop.getProperty("minTokenSize"));
+			
+		}
+		
 				
 	}
 	
@@ -132,6 +169,7 @@ public class BotUtils {
 	
 	
 	public String tokenizeStopStem(String input) throws Exception {
+		String token;
 		if (StringUtils.isBlank(input)) {
 			return "";
 		}
@@ -146,12 +184,16 @@ public class BotUtils {
 			if (sb.length() > 0) {
 				sb.append(" ");
 			}
-			sb.append(charTermAttribute.toString());
+			token = charTermAttribute.toString();
+			if(token.length()>minTokenSize) {
+				sb.append(token);
+			}
+			
 		}
 
 		stream.end();
 		stream.close();
-		
+		token = null;
 		
 		return sb.toString();
 	}
@@ -190,6 +232,24 @@ public class BotUtils {
 	}
 	
 
+	public List<String> getCodes(String presentingBody) {
+		String codeContent = "";
+		List<String> codes = getCodeValues(CODE_PATTERN, presentingBody);
+		//int i=0;
+		for(String code: codes){
+			//codeContent+= "code "+(i+1)+":"+code+ "\n\n";
+			codeContent+= code+ "\n\n";
+			//i++;
+		}
+		//logger.info("\nCodes: \n"+codeContent);
+		return codes;
+	}
+
+	/**
+	 * Remove images and html tags, except codes. For the links, leaves only the target.
+	 * @param body
+	 * @return
+	 */
 	public String buildPresentationBody(String body) {
 		
 		String finalBody = translateHTMLSimbols(body);
@@ -205,33 +265,73 @@ public class BotUtils {
 	
 
 
-	public List<String> getCodes(String presentingBody) {
-		String codeContent = "";
-		List<String> codes = getCodeValues(CODE_PATTERN, presentingBody);
-		//int i=0;
-		for(String code: codes){
-			//codeContent+= "code "+(i+1)+":"+code+ "\n\n";
-			codeContent+= code+ "\n\n";
-			//i++;
-		}
-		logger.info("\nCodes: "+codeContent);
-		return codes;
-	}
-
-	public String buildProcessedBodyStemmedStopped(String presentingBody) {
+	public String buildProcessedBodyStemmedStopped(String presentingBody, boolean isAnswer) throws Exception {
 		
 		String finalStr = presentingBody.replaceAll(LINK_TARGET_EXPRESSION_OUT, "");
 		
-		finalStr = finalStr.replaceAll(CODE_REGEX_EXPRESSION, "");
+		//finalStr = finalStr.replaceAll(CODE_MIN_REGEX_EXPRESSION, "");
+		//finalStr = finalStr.replaceAll("<code>", " ").replaceAll("</code>", " ");
 		
-		finalStr = finalStr.replaceAll(CODE_MIN_REGEX_EXPRESSION, "");
+		//blockquotes
+		String blockquoteContent = "";
+		List<String> blockquotes = getCodeValues(BLOCKQUOTE_PATTERN, finalStr);
+		for(String blockquote: blockquotes){
+			blockquoteContent+= blockquote+ "\n\n";
+		}
 		
+		String textWithoutCodesLinksAndBlackquotes = finalStr.replaceAll(BLOCKQUOTE_EXPRESSION, " ");
+		
+		
+		String codeContent = "";
+		List<String> codes = getCodeValues(CODE_PATTERN, textWithoutCodesLinksAndBlackquotes);
+		//int i=0;
+		for(String code: codes){
+			codeContent+= code+ "\n\n";
+		}
+		
+		textWithoutCodesLinksAndBlackquotes = textWithoutCodesLinksAndBlackquotes.replaceAll(CODE_REGEX_EXPRESSION, " ");
+		
+		List<String> smallCodes = getCodeValues(CODE_MIN_PATTERN, textWithoutCodesLinksAndBlackquotes);
+		for(String code: smallCodes){
+			codeContent+= code+ "\n\n";
+		}
+		
+		
+		textWithoutCodesLinksAndBlackquotes = textWithoutCodesLinksAndBlackquotes.replaceAll(CODE_MIN_REGEX_EXPRESSION, " ");
+		
+		textWithoutCodesLinksAndBlackquotes = removeOtherSymbolsAccordingToPostPart(textWithoutCodesLinksAndBlackquotes,isAnswer);
+		
+		String onlyWords = getOnlyWords(textWithoutCodesLinksAndBlackquotes);
+		
+		onlyWords = onlyWords.toLowerCase()+ " ";
+		
+		String specificTerms = "";
+		List<String> notOnlyWords = getWords(NOT_ONLY_WORDS_PATTERN, textWithoutCodesLinksAndBlackquotes);
+		for(String word: notOnlyWords){
+			specificTerms+= word+ " ";
+		}
+		
+		specificTerms = removeSpecialSymbols(specificTerms.trim());
+		
+		String stoppedStemmed = tokenizeStopStem(onlyWords.trim());
+		
+		finalStr = stoppedStemmed + " "+specificTerms+ " "+blockquoteContent+ " "+codeContent;
+		//System.out.println(finalStr);
+		codeContent = null;
+		textWithoutCodesLinksAndBlackquotes= null;
+		specificTerms = null;
+		stoppedStemmed = null;
+		onlyWords = null;
+		blockquoteContent = null;
+		//replace \n to space
+		//replace more than one space by one space only
+		finalStr = StringUtils.normalizeSpace(finalStr);
 		
 		return finalStr;
 	}
 
 	
-	public String[] separateWordsCodePerformStemmingStopWords(String content, String parte) throws Exception {
+	public String[] separateWordsCodePerformStemmingStopWords(String content, boolean isAnswer) throws Exception {
 		String[] finalContent = new String[4];
 		
 		//volta simbolos de marcacao HTML para estado original 
@@ -279,7 +379,7 @@ public class BotUtils {
 		
 		//trata antes de pegar somenta as palavras
 		
-		String separated = removeOtherSymbolsAccordingToPostPart(textWithoutCodesLinksAndBlackquotes,parte);
+		String separated = removeOtherSymbolsAccordingToPostPart(textWithoutCodesLinksAndBlackquotes,isAnswer);
 		
 		
 		String onlyWords = getOnlyWords(separated);
@@ -326,8 +426,8 @@ public class BotUtils {
 
 
 
-	public String removeOtherSymbolsAccordingToPostPart(String finalContent, String parte) {
-		if(parte.equals("title")){
+	public String removeOtherSymbolsAccordingToPostPart(String finalContent, boolean isAnswer) {
+		if(!isAnswer){
 			finalContent = finalContent.replaceAll("\\?", " ");
 		}else {
 			finalContent = finalContent.replaceAll("\\:", " ");
@@ -363,7 +463,7 @@ public class BotUtils {
 			return "";
 		}
 		//boolean startedHtml = false;
-		for(String tag: htmlTagsWithCode){
+		for(String tag: htmlTagsWithCodeAndBlockquotes){
 			content= content.replaceAll(tag," ");
 		}
 		//content= content.replaceAll("<code>","\n<code>\n");
@@ -433,7 +533,13 @@ public class BotUtils {
 	}
 	
 	
-	
+public static String removeSpecialSymbolsTitles(String finalContent) {
+		
+		finalContent = removeSpecialSymbols(finalContent);
+		finalContent = finalContent.replaceAll("\\?", "");
+		
+		return finalContent;
+	}
 
 
 
@@ -674,13 +780,6 @@ public class BotUtils {
 
 
 
-	public String formatCode(String code) {
-		if(code==null) {
-			return "";
-		}
-		code = code.replaceAll("\n", " ");
-		return code;
-	}
 	
 	
 	/*public void removePostsWithIncompleteTitlesOld(Set<ProcessedPostOld> processedPostsByFilter, Set<ProcessedPostOld> closedDuplicatedNonMastersByTag) {
@@ -723,40 +822,6 @@ public class BotUtils {
 	
 	
 	
-	
-	public void buildFileContent(Integer limit, LinkedHashMap<Integer, String> idContent, String path) throws IOException {
-		FileWriter writer=null;
-				
-		int count = 1;		
-				
-		for (Entry<Integer, String> entry : idContent.entrySet()) {
-			if (!entry.getValue().equals("-") && count<=limit) {
-				try {
-				
-					Integer postId = entry.getKey();
-					String content = entry.getValue();
-					
-					writer = new FileWriter(new File(path+postId+".txt")); 
-					writer.write(content);
-				
-					count++;
-					
-				} catch (Exception e) {
-					e.printStackTrace();
-				} finally {
-					writer.flush();
-					writer.close();
-					writer = null;
-				}
-			}
-		}
-			
-			
-		
-		
-	}
-	
-	
 	public static <K, V> void printMap(Map<K, V> map) {
         for (Map.Entry<K, V> entry : map.entrySet()) {
             System.out.println("Key : " + entry.getKey() + " Value : " + entry.getValue());
@@ -790,7 +855,15 @@ public class BotUtils {
 
 
 
+	 public static boolean isJavaKeyword(String keyword) {
+	        return (Arrays.binarySearch(keywords, keyword) >= 0);
+	    }
 
+
+	public static String removeDuplicatedTokens(String processedBodyStemmedStopped, String separator) {
+		processedBodyStemmedStopped = Arrays.stream(processedBodyStemmedStopped.split(separator)).distinct().collect(Collectors.joining(separator));
+		return processedBodyStemmedStopped;
+	}
 	
 	
 	

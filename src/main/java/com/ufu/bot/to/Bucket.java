@@ -1,6 +1,7 @@
 package com.ufu.bot.to;
 
 import java.util.List;
+import java.util.Set;
 
 
 public class Bucket {
@@ -16,7 +17,9 @@ public class Bucket {
 	
 	private Integer postScore;
 	
-	private List<String> code;
+	private List<String> codes;
+	
+	private Set<String> classesNames;
 	    
 	private Integer userReputation;
 	
@@ -109,15 +112,6 @@ public class Bucket {
 
 
 
-	public List<String> getCode() {
-		return code;
-	}
-
-
-
-	public void setCode(List<String> code) {
-		this.code = code;
-	}
 
 
 
@@ -154,8 +148,34 @@ public class Bucket {
 	@Override
 	public String toString() {
 		return "Bucket [postId=" + postId + ", parentId=" + parentId + ", presentingBody=" + presentingBody + ", processedBodyStemmedStopped=" + processedBodyStemmedStopped + ", postScore="
-				+ postScore + ", code=" + code + ", userReputation=" + userReputation + "]";
+				+ postScore + ", codes=" + codes + ", userReputation=" + userReputation + "]";
 	}
+
+
+
+	public List<String> getCodes() {
+		return codes;
+	}
+
+
+
+	public void setCodes(List<String> codes) {
+		this.codes = codes;
+	}
+
+
+
+	public Set<String> getClassesNames() {
+		return classesNames;
+	}
+
+
+
+	public void setClassesNames(Set<String> classesNames) {
+		this.classesNames = classesNames;
+	}
+
+
 
 
 

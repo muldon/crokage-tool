@@ -8,7 +8,10 @@ import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.ufu.bot.PitBotApp;
+import org.apache.commons.lang3.StringUtils;
+
+import com.ufu.bot.to.Bucket;
+import com.ufu.bot.to.Post;
 import com.ufu.bot.to.SoThread;
 import com.ufu.bot.util.BotUtils;
 
@@ -48,7 +51,7 @@ public class Tester {
 		BotUtils botUtils = new BotUtils();
 		botUtils.initializeConfigs();
 		
-		String text = "<p>I have this field:</p>" + 
+		String another1PreCodeAndCode = "<p>I have this field:</p>" + 
 				"" + 
 				"<pre><code>HashMap&lt;String, HashMap&gt; selects = new HashMap&lt;String, HashMap&gt;();" + 
 				"</code></pre>" + 
@@ -150,7 +153,7 @@ public class Tester {
 		
 		HashSet soLinksIds = new HashSet<>(); 
 		
-		List<String> links = botUtils.getCodeValues(BotUtils.LINK_PATTERN, textLink);
+		//List<String> links = botUtils.getCodeValues(BotUtils.LINK_PATTERN, textLink);
 		//identifyQuestionsIdsFromUrls(links,soLinksIds);
 		//System.out.println(soLinksIds);
 		
@@ -428,16 +431,117 @@ public class Tester {
 		
 		String another6Code = "<p><code>IDE</code> may not be enough for designing everything (but it helps lot in development), its always better to learn API and IDE both together.</p>";
 		
-		String presentingBody = botUtils.buildPresentationBody(another2);
+		/*String presentingBody = botUtils.buildPresentationBody(another6Code);
 		System.out.println(presentingBody);
 		List<String> codes = botUtils.getCodes(presentingBody);
-		String processedBodyStemmedStopped = botUtils.buildProcessedBodyStemmedStopped(presentingBody);
-		System.out.println(processedBodyStemmedStopped);
+		String processedBodyStemmedStopped = botUtils.buildProcessedBodyStemmedStopped(presentingBody,true);
+		System.out.println(processedBodyStemmedStopped);*/
 		
+		
+		testGetClassesNames();
 		
 	}
 	
+	/**
+	 * 
+	 * 
+	**/
+	private void testGetClassesNames() {
+		String code1 = "//Main bucket\n" + 
+				"		Bucket mainBucket = new Bucket();\n" + 
+				"		mainBucket.setClassesNames(apis);\n" + 
+				"		\n" + 
+				"		String presentingBody = botUtils.buildPresentationBody(googleQuery);\n" + 
+				"		\n" + 
+				"		List<String> codes = botUtils.getCodes(presentingBody);\n" + 
+				"		mainBucket.setCodes(codes);\n" + 
+				"		\n" + 
+				"		String processedBodyStemmedStopped = botUtils.buildProcessedBodyStemmedStopped(presentingBody,false);\n" + 
+				"		mainBucket.setProcessedBodyStemmedStopped(processedBodyStemmedStopped+apisNames);\n" + 
+				"		\n" + 
+				"		System.out.println(mainBucket);\n" + 
+				"		\n" + 
+				"		//Remaining buckets\n" + 
+				"		Set<Bucket> buckets = new HashSet<>();\n" + 
+				"		\n" + 
+				"		/**\n" + 
+				"	* sss\n" + 
+				"	* aaa\n" + 
+				" 	**/ " + 
+				"		for(SoThread thread: threads) {\n" + 
+				"			\n" + 
+				"			List<Post> answers = thread.getAnswers();\n" + 
+				"			for(Post answer: answers) {\n" + 
+				"				Bucket bucket = buildBucket(answer,true);\n" + 
+				"				buckets.add(bucket);\n" + 
+				"			}\n" + 
+				"		}\n" + 
+				"\n" + 
+				"\n" + 
+				"public class Tester {\n" + 
+				"\n" + 
+				"	public Tester() throws Exception {\n" + 
+				"		String str = \"How do I send an HTML email? javascript javac dd JAVA\";\n" + 
+				"		StringTokenizer st = new StringTokenizer(str);\n" + 
+				"		Boolean containToken = Pattern.compile(\".*\\\\bjava\\\\b.*\").matcher(str.toLowerCase()).find();\n" + 
+				"		String token;\n" + 
+				"		}\n" + 
+				"}\n" + 
+				"\n" + 
+				"private Set<ProcessedPostOld> getAllPostsFromSet() {\n" + 
+				"		Set<ProcessedPostOld> processedPostsByFilter = new HashSet();\n" + 
+				"		\n" + 
+				"		logger.info(\"now creating new TOs...\");\n" + 
+				"		for(Post post: postsByFilter) {\n" + 
+				"			ProcessedPostOld newPost = new ProcessedPostOld();\n" + 
+				"			BeanUtils.copyProperties(post,newPost);\n" + 
+				"			processedPostsByFilter.add(newPost);\n" + 
+				"		}\n" + 
+				"		logger.info(\"finished new TOs...\");\n" + 
+				"		return processedPostsByFilter;\n" + 
+				"	}\n" + 
+				"\n" + 
+				"";
+		
 	
+		//remove java keywords
+		for(String keyword: BotUtils.keywords){
+			code1= code1.replaceAll(keyword,"");
+		}
+		
+		//remove double quotes
+		code1= code1.replaceAll(BotUtils.DOUBLE_QUOTES_REGEX_EXPRESSION,"");
+		/*Pattern pattern0 = Pattern.compile(BotUtils.DOUBLE_QUOTES_REGEX_EXPRESSION);
+		Matcher matcher0 = pattern0.matcher(code1);
+		while (matcher0.find()) {
+			System.out.println(matcher0.group(0));
+		}*/
+		
+		//remove comments
+		System.out.println(code1);
+		code1 = code1.replaceAll( "//.*|(\"(?:\\\\[^\"]|\\\\\"|.)*?\")|(?s)/\\*.*?\\*/", "$1 " );
+		System.out.println(code1);
+		
+		
+		//Get classes in camel case
+		String regex = "\\b[A-Z][a-z]*([A-Z][a-z]*)*\\b";
+		
+		Set<String> classes = new HashSet<>();
+		
+		Pattern pattern = Pattern.compile(regex);
+		Matcher matcher = pattern.matcher(code1);
+		while (matcher.find()) {
+			classes.add(matcher.group(0));
+		}
+		
+		for(String className: classes) {
+			System.out.println(className);
+		}
+		
+		
+	}
+
+
 	private String step3(List<String> apis, String query) {
 		String completeQuery = "";
 		

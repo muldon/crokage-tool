@@ -960,3 +960,18 @@ delete from processedposts
 
 
 select * from posts where id = 4234985
+
+select count(p.id)
+from postsmin p
+where p.owneruserid is null
+
+select *
+from postsmin p
+where p.id = 46107706
+
+
+select *
+from postsmin p
+--where p.body like '%<code>%' and p.body not like '%<pre>%' 
+where p.body like '%<blockquote>%'  
+limit 10

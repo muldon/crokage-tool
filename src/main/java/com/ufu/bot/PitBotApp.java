@@ -7,6 +7,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -53,9 +54,9 @@ public class PitBotApp {
 	@Autowired
 	private BotUtils botUtils;
 	
-	@Value("${preProcess}")
+	/*@Value("${preProcess}")
 	public Boolean preProcess;  //true - false
-	
+*/	
 	@Value("${inputQueriesPath}")
 	public String inputQueriesPath;  
 	
@@ -72,6 +73,9 @@ public class PitBotApp {
 		
 	@Value("${pickUpOnlyTheFirstQuery}")
 	public Boolean pickUpOnlyTheFirstQuery;
+	
+	@Value("${minTokenSize}")
+	public Integer minTokenSize;
 	
 	/*@Value("${tagFilter}")
 	public String tagFilter;  //null for all
@@ -112,28 +116,29 @@ public class PitBotApp {
 		
 		logger.info("Initializing app...");
 		initializeVariables();
-		
+		botUtils.initializeConfigs();
 		getPropertyValueFromLocalFile();
 		
 				
 		logger.info("\nConsidering parameters: \n"
-				+ "\n preProcess: "+preProcess
+				//+ "\n preProcess: "+preProcess
 				+ "\n inputQueriesPath: "+inputQueriesPath
 				+ "\n numberOfRackClasses: "+numberOfRackClasses
 				+ "\n numberOfGoogleResults: "+numberOfGoogleResults
 				+ "\n pathFileEnvFlag: "+pathFileEnvFlag
 				+ "\n isTest: "+isTest
 				+ "\n shuffleListOfQueriesBeforeGoogleSearch: "+shuffleListOfQueriesBeforeGoogleSearch
+				+ "\n minTokenSize: "+minTokenSize
 				+ "\n pickUpOnlyTheFirstQuery: "+pickUpOnlyTheFirstQuery
 				+ "\n");
 		
 		/*
 		 * Do not proceed with rest of the app if the task is preprocess. 
 		 */
-		if(preProcess) {
+		/*if(preProcess) {
 			preProcess();
 			return;
-		}
+		}*/
 		
 		
 
@@ -181,7 +186,7 @@ public class PitBotApp {
 	}
 
 	
-	private void runSteps(String query) {
+	private void runSteps(String query) throws Exception {
 		
 		/*
 		 * Step 2: API Classes Extraction
@@ -239,7 +244,7 @@ public class PitBotApp {
 		 * 
 		 */
 		initTime = System.currentTimeMillis();
-		Set<Bucket> buckets = step7(threads);
+		Set<Bucket> buckets = step7(threads, googleQuery, apis);
 		botUtils.reportElapsedTime(initTime,"Step 7: Text Processing");
 		
 		
@@ -249,7 +254,7 @@ public class PitBotApp {
 	
 
 	private Set<Integer> getStaticIdsForTests() {
-		HashSet<Integer> soPostsIds = new HashSet<>();
+		HashSet<Integer> soPostsIds = new LinkedHashSet<>();
 		soPostsIds.add(10117026);
 		soPostsIds.add(6416706);
 		soPostsIds.add(10117051);
@@ -282,6 +287,7 @@ public class PitBotApp {
 		logger.info("RACK: discovering related classes to query: "+query);
 		CodeTokenProvider ctProvider = new CodeTokenProvider(query);
 		List<String> apis = ctProvider.recommendRelevantAPIs();
+		apis = apis.subList(0, numberOfRackClasses);
 		logger.info("Finished... discored classes:"+ apis.stream().limit(numberOfRackClasses).collect(Collectors.toList()));
 		return apis;
 	}
@@ -297,7 +303,14 @@ public class PitBotApp {
 		if(!containJavaToken) {
 			completeQuery += "java ";
 		}
-		completeQuery += query + " "+ apis.get(0) +" "+ apis.get(1);
+		
+		completeQuery += query;
+		
+		for(int i=0; i<numberOfRackClasses;i++) {
+			completeQuery += " "+ apis.get(i);
+		}
+		
+		completeQuery = BotUtils.removeDuplicatedTokens(completeQuery," ");
 		
 		return completeQuery;
 	}
@@ -438,21 +451,48 @@ public class PitBotApp {
 	/**
 	 * Generate buckets structures representing posts
 	 * @param threads
+	 * @param apis 
+	 * @param googleQuery 
 	 * @return A set of buckets
+	 * @throws Exception 
 	 */
-	public Set<Bucket> step7(Set<SoThread> threads) {
+	public Set<Bucket> step7(Set<SoThread> threads, String googleQuery, List<String> apis) throws Exception {
+		
+		//Main bucket
+		Bucket mainBucket = new Bucket();
+		String presentingBody = botUtils.buildPresentationBody(googleQuery);
+		
+		Set<String> classesNames = new LinkedHashSet<>();
+		/*
+		 * Classes present in the query are suppose to be more relevant then the ones found by RACK.
+		 * The false positives like the word "How" is adjusted in the relevance calculation process where it will not belong to 
+		 * the intersection of codes present between the main bucket and the code section of the post being compared.  
+		 */
+		getClassesNamesForString(classesNames,presentingBody);
+		classesNames.addAll(apis);
+		mainBucket.setClassesNames(classesNames);
+		
+		String processedBodyStemmedStopped = BotUtils.removeSpecialSymbolsTitles(presentingBody);
+		processedBodyStemmedStopped = StringUtils.normalizeSpace(processedBodyStemmedStopped);
+		
+		//Remove duplicates
+		processedBodyStemmedStopped = BotUtils.removeDuplicatedTokens(processedBodyStemmedStopped," ");
+		
+		mainBucket.setProcessedBodyStemmedStopped(processedBodyStemmedStopped);
+		
+		System.out.println(mainBucket);
+		
+		//Remaining buckets
 		Set<Bucket> buckets = new HashSet<>();
 		
 		for(SoThread thread: threads) {
 			
 			List<Post> answers = thread.getAnswers();
 			for(Post answer: answers) {
-				Bucket bucket = buildBucket(answer);
+				Bucket bucket = buildBucket(answer,true);
 				buckets.add(bucket);
 			}
-			
 		}
-		
 		
 		return buckets;
 	}
@@ -460,19 +500,74 @@ public class PitBotApp {
 	
 
 
-	private Bucket buildBucket(Post answer) {
+	private Bucket buildBucket(Post post,boolean isAnswer) throws Exception {
 		Bucket bucket = new Bucket();
-		bucket.setParentId(answer.getParentId());
-		bucket.setPostId(answer.getId());
-		bucket.setPostScore(answer.getScore());
-		bucket.setUserReputation(answer.getUser().getReputation());
+		bucket.setParentId(post.getParentId());
+		bucket.setPostId(post.getId());
+		bucket.setPostScore(post.getScore());
 		
-		String presentingBody = botUtils.buildPresentationBody(answer.getBody());
+		bucket.setUserReputation(post.getUser()!=null? post.getUser().getReputation():null);
+		
+		String presentingBody = botUtils.buildPresentationBody(post.getBody());
+		bucket.setPresentingBody(presentingBody);
+		
 		List<String> codes = botUtils.getCodes(presentingBody);
+		bucket.setCodes(codes);
 		
-		String processedBodyStemmedStopped = botUtils.buildProcessedBodyStemmedStopped(presentingBody);
+		String processedBodyStemmedStopped = botUtils.buildProcessedBodyStemmedStopped(presentingBody,isAnswer);
+		bucket.setProcessedBodyStemmedStopped(processedBodyStemmedStopped);
+		
+		if(isAnswer) { //extract classes names
+			getClassesNames(bucket);
+		}
+		
+		
 		
 		return bucket;
+	}
+
+	private void getClassesNames(Bucket bucket) {
+
+		Set<String> classesNames = new HashSet();
+		List<String> codes = bucket.getCodes(); 
+		for(String code: codes) {
+			getClassesNamesForString(classesNames,code);
+		}
+		
+		bucket.setClassesNames(classesNames);
+		
+		/*for(String className: classes) {
+			System.out.println(className);
+		}*/
+		
+		
+	}
+
+	private void getClassesNamesForString(Set<String> classesNames, String code) {
+		//remove java keywords
+		for(String keyword: BotUtils.keywords){
+			code= code.replaceAll(keyword,"");
+		}
+		
+		//remove double quotes
+		code= code.replaceAll(BotUtils.DOUBLE_QUOTES_REGEX_EXPRESSION,"");
+		
+		//remove comments
+		//System.out.println(code);
+		code = code.replaceAll( BotUtils.COMMENTS_REGEX_EXPRESSION, BotUtils.COMMENTS_REPLACEMENT_EXPRESSION );
+		//System.out.println(code);
+		
+		//Get classes in camel case
+		
+		Pattern pattern = Pattern.compile(BotUtils.CLASSES_CAMEL_CASE_REGEX_EXPRESSION);
+		Matcher matcher = pattern.matcher(code);
+		while (matcher.find()) {
+			if(matcher.group(0)!=null && matcher.group(0).length()>2) {
+				classesNames.add(matcher.group(0));
+			}
+			
+		}
+		
 	}
 
 	private Set<Post> getPostsFromThreads(Set<SoThread> threads) {
@@ -559,7 +654,7 @@ public class PitBotApp {
 			}
 			
 			if(post.getPostTypeId().equals(2)) { 
-				logger.info("Post "+questionId+ " is an answer. Fetching thread its parent: "+post.getParentId());
+				logger.info("Post "+questionId+ " is an answer. Fetching its parent thread: "+post.getParentId());
 				//soPostsIds.remove(post.getParentId()); //fetch the parent only once
 				if(!soPostsIds.contains(post.getParentId())) {
 					post = pitBotService.findPostById(post.getParentId());
@@ -621,11 +716,11 @@ public class PitBotApp {
 	
 	
 
-	private void preProcess() throws Exception {
+	/*private void preProcess() throws Exception {
 		
-		/*
+		
 		 * a previous script filled postsmin table containing only java posts
-		 */
+		 
 		postsByFilter = pitBotService.getAllPosts();
 		processedPostsByFilter = getAllPostsFromSet();
 		logger.info("Number of posts to perform stemming and remove stop words: "+processedPostsByFilter.size());
@@ -634,7 +729,7 @@ public class PitBotApp {
 		processedPostsByFilter = null; 
 		
 	}
-
+*/
 	
 	private Set<ProcessedPostOld> getAllPostsFromSet() {
 		Set<ProcessedPostOld> processedPostsByFilter = new HashSet();
@@ -651,7 +746,7 @@ public class PitBotApp {
 
 	
 	
-	private void performStemStop() throws Exception {
+	/*private void performStemStop() throws Exception {
 		List<ProcessedPostOld> tmpList = new ArrayList<>();
 		tmpList.addAll(processedPostsByFilter);
 		
@@ -677,7 +772,7 @@ public class PitBotApp {
 		pitBotService.stemStop(somePosts);
 				
 		tmpList = null;
-	}
+	}*/
 
 	
 }

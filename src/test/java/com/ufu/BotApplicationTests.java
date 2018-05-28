@@ -160,7 +160,7 @@ public class BotApplicationTests {
 		
 		Post post = pitBotService.findPostById(questionId);
 		botUtils.initializeConfigs();
-		String[] bodyContent = botUtils.separateWordsCodePerformStemmingStopWords(post.getBody(),"body");
+		String[] bodyContent = botUtils.separateWordsCodePerformStemmingStopWords(post.getBody(),true);
 		System.out.println(bodyContent[0]);
 		System.out.println(bodyContent[1]);
 		System.out.println(bodyContent[2]);
