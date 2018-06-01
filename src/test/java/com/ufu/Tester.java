@@ -1,18 +1,20 @@
 package com.ufu;
 
+import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.lang3.StringUtils;
-
+import com.google.common.base.Charsets;
+import com.google.common.io.Resources;
+import com.ufu.bot.PitBotApp;
 import com.ufu.bot.to.Bucket;
-import com.ufu.bot.to.Post;
-import com.ufu.bot.to.SoThread;
 import com.ufu.bot.util.BotUtils;
 
 public class Tester {
@@ -438,15 +440,52 @@ public class Tester {
 		System.out.println(processedBodyStemmedStopped);*/
 		
 		
-		testGetClassesNames();
+		//testGetClassesNames();
+		String input = "How to Convert Iterator to ArrayList? a two man he He is the what";
+		String removed = botUtils.removeStopWords(input);
+		//System.out.println(removed);
+		
+		testStep8();
+		
+		
 		
 	}
 	
+	private void testStep8() throws IOException {
+		URL url;
+		String text1,text2,text3,text4,text5,text6,text7,text8,text9,text10;
+		
+		String[] fileNames = {"ds_2012","ds_2013","ds_2014","ds_2015","ds_CDS","ds_IBM","hp-cs.txt","hp-dh.txt","huck-finn.txt","les-mis.txt","50-shades.txt"};
+		
+		Set<Bucket> buckets = new LinkedHashSet<>();
+		Bucket main = new Bucket();
+		main.setPostId(0);
+		//main.setProcessedBodyStemmedStopped("how it fits into the larger picture of an organization, explains IBM’s Jeff Jonas, distinguished");
+		main.setProcessedBodyStemmedStopped("anyone anywhere at no cost and with almost no restrictions whatsoevermay give copy it, it away you or re-use CHAPTER II. The Boys Escape Jim CHAPTER VIII. Sleeping in the Woods");
+		
+		PitBotApp app = new PitBotApp();
+		app.setMainBucket(main);
+		
+		for(int i=0; i<fileNames.length; i++){
+			url = Resources.getResource(fileNames[i]);
+			text1 = Resources.toString(url, Charsets.UTF_8);
+			Bucket bucket = new Bucket();
+			bucket.setProcessedBodyStemmedStopped(text1);
+			bucket.setPostId(i+1);
+			buckets.add(bucket);
+		}
+		
+		
+		app.step8(buckets);
+		
+	}
+
 	/**
+	 * @throws Exception 
 	 * 
 	 * 
 	**/
-	private void testGetClassesNames() {
+	private void testGetClassesNames() throws Exception {
 		String code1 = "//Main bucket\n" + 
 				"		Bucket mainBucket = new Bucket();\n" + 
 				"		mainBucket.setClassesNames(apis);\n" + 
@@ -520,7 +559,7 @@ public class Tester {
 		//remove comments
 		System.out.println(code1);
 		code1 = code1.replaceAll( "//.*|(\"(?:\\\\[^\"]|\\\\\"|.)*?\")|(?s)/\\*.*?\\*/", "$1 " );
-		System.out.println(code1);
+		//System.out.println(code1);
 		
 		
 		//Get classes in camel case
@@ -534,9 +573,11 @@ public class Tester {
 			classes.add(matcher.group(0));
 		}
 		
-		for(String className: classes) {
+		/*for(String className: classes) {
 			System.out.println(className);
-		}
+		}*/
+		
+		
 		
 		
 	}

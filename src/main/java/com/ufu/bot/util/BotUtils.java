@@ -33,6 +33,7 @@ import org.apache.lucene.analysis.core.LowerCaseFilter;
 import org.apache.lucene.analysis.core.StopFilter;
 import org.apache.lucene.analysis.en.EnglishAnalyzer;
 import org.apache.lucene.analysis.en.PorterStemFilter;
+import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.analysis.standard.StandardTokenizer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.util.AttributeFactory;
@@ -135,6 +136,9 @@ public class BotUtils {
 			"</ul>","<br>","</br>","<h1>","</h1>","<h2>","</h2>","<strong>","</strong>",
 			"<em>","</em>","<hr>"};
 	
+	//stemmed - stopped
+	private static String unncessaryWords[] = {"java", "how", "what"};
+	
 	
 	
 	public void initializeConfigs() throws Exception {
@@ -173,7 +177,9 @@ public class BotUtils {
 		if (StringUtils.isBlank(input)) {
 			return "";
 		}
-		standardTokenizer.setReader(new StringReader(input));
+		StringReader sr = new StringReader(input);
+		
+		standardTokenizer.setReader(sr);
 		TokenStream stream = new StopFilter(new LowerCaseFilter(new PorterStemFilter(standardTokenizer)), stopWords);
 
 		CharTermAttribute charTermAttribute = standardTokenizer.addAttribute(CharTermAttribute.class);
@@ -194,9 +200,44 @@ public class BotUtils {
 		stream.end();
 		stream.close();
 		token = null;
-		
+		sr = null;
 		return sb.toString();
 	}
+	
+	
+	public String removeStopWords(String textFile) throws Exception {
+		String token;
+		if (StringUtils.isBlank(textFile)) {
+			return "";
+		}
+		StringReader sr = new StringReader(textFile);
+		standardTokenizer.setReader(sr);
+		
+		TokenStream stream = new StopFilter(standardTokenizer, stopWords);
+
+		CharTermAttribute charTermAttribute = standardTokenizer.addAttribute(CharTermAttribute.class);
+		stream.reset();
+
+		StringBuilder sb = new StringBuilder();
+		while (stream.incrementToken()) {
+			if (sb.length() > 0) {
+				sb.append(" ");
+			}
+			token = charTermAttribute.toString();
+			if(token.length()>minTokenSize) {
+				sb.append(token);
+			}
+			
+		}
+
+		stream.end();
+		stream.close();
+		token = null;
+		sr = null;
+		return sb.toString();
+	}
+	
+	
 	
 	
 	public void reportElapsedTime(long initTime, String processName) {
@@ -315,7 +356,8 @@ public class BotUtils {
 		
 		String stoppedStemmed = tokenizeStopStem(onlyWords.trim());
 		
-		finalStr = stoppedStemmed + " "+specificTerms+ " "+blockquoteContent+ " "+codeContent;
+		//finalStr = stoppedStemmed + " "+specificTerms+ " "+blockquoteContent+ " "+codeContent;
+		finalStr = stoppedStemmed + " "+specificTerms+ " "+blockquoteContent;
 		//System.out.println(finalStr);
 		codeContent = null;
 		textWithoutCodesLinksAndBlackquotes= null;
@@ -863,6 +905,18 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 	public static String removeDuplicatedTokens(String processedBodyStemmedStopped, String separator) {
 		processedBodyStemmedStopped = Arrays.stream(processedBodyStemmedStopped.split(separator)).distinct().collect(Collectors.joining(separator));
 		return processedBodyStemmedStopped;
+	}
+
+
+	public String removeUnnecessaryWords(String content) {
+		if(content==null || content.trim().equals("")){
+			return "";
+		}
+		//boolean startedHtml = false;
+		for(String word: unncessaryWords){
+			content= content.replaceAll(word," ");
+		}
+		return content;
 	}
 	
 	

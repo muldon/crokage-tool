@@ -7,11 +7,14 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -28,10 +31,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.Lists;
 import com.ufu.bot.googleSearch.GoogleWebSearch;
 import com.ufu.bot.googleSearch.SearchQuery;
 import com.ufu.bot.googleSearch.SearchResult;
 import com.ufu.bot.service.PitBotService;
+import com.ufu.bot.tfidf.TfIdf;
+import com.ufu.bot.tfidf.VectorSpaceModel;
+import com.ufu.bot.tfidf.ngram.NgramTfIdf;
 import com.ufu.bot.to.Bucket;
 import com.ufu.bot.to.Comment;
 import com.ufu.bot.to.Post;
@@ -82,8 +89,8 @@ public class PitBotApp {
 */	
 	
 	/*
-	 * Path to a file which contains a FLAG indicating if the environment is test or production. This file (environmentFlag.properties) contains only one line with a boolean value (isTest = true|false)
-	 * If isTest = true, the proxy is not applied for the google search engine. Otherwise, proxy is set.   
+	 * Path to a file which contains a FLAG indicating if the environment is test or production. This file (environmentFlag.properties) contains only one line with a boolean value (useProxy = true|false)
+	 * If useProxy = true, the proxy is not applied for the google search engine. Otherwise, proxy is set.   
 	 */
 	@Value("${pathFileEnvFlag}")
 	public String pathFileEnvFlag;   
@@ -91,7 +98,7 @@ public class PitBotApp {
 	/*
 	 * Stores the value obtained from the pathFileEnvFlag file 
 	 */
-	private Boolean isTest;
+	private Boolean useProxy;
 	
 	@Value("${runGoogleSearch}")
 	public Boolean runGoogleSearch;
@@ -109,7 +116,7 @@ public class PitBotApp {
 	
 	protected Set<ProcessedPostOld> processedPostsByFilter;
 	protected Set<Post> postsByFilter;
-
+	public Bucket mainBucket;
 	
 	@PostConstruct
 	public void init() throws Exception {
@@ -126,7 +133,7 @@ public class PitBotApp {
 				+ "\n numberOfRackClasses: "+numberOfRackClasses
 				+ "\n numberOfGoogleResults: "+numberOfGoogleResults
 				+ "\n pathFileEnvFlag: "+pathFileEnvFlag
-				+ "\n isTest: "+isTest
+				+ "\n useProxy: "+useProxy
 				+ "\n shuffleListOfQueriesBeforeGoogleSearch: "+shuffleListOfQueriesBeforeGoogleSearch
 				+ "\n minTokenSize: "+minTokenSize
 				+ "\n pickUpOnlyTheFirstQuery: "+pickUpOnlyTheFirstQuery
@@ -247,11 +254,20 @@ public class PitBotApp {
 		Set<Bucket> buckets = step7(threads, googleQuery, apis);
 		botUtils.reportElapsedTime(initTime,"Step 7: Text Processing");
 		
+		/*
+		 * Step 7: Relevance Calculation
+		 * 
+		 */
+		initTime = System.currentTimeMillis();
+		List<Bucket> rankedBuckets = step8(buckets);
+		botUtils.reportElapsedTime(initTime,"Step 8: Relevance Calculation");
+		
 		
 	}
 
 	
 	
+
 
 	private Set<Integer> getStaticIdsForTests() {
 		HashSet<Integer> soPostsIds = new LinkedHashSet<>();
@@ -459,7 +475,7 @@ public class PitBotApp {
 	public Set<Bucket> step7(Set<SoThread> threads, String googleQuery, List<String> apis) throws Exception {
 		
 		//Main bucket
-		Bucket mainBucket = new Bucket();
+		mainBucket = new Bucket();
 		String presentingBody = botUtils.buildPresentationBody(googleQuery);
 		
 		Set<String> classesNames = new LinkedHashSet<>();
@@ -472,24 +488,35 @@ public class PitBotApp {
 		classesNames.addAll(apis);
 		mainBucket.setClassesNames(classesNames);
 		
-		String processedBodyStemmedStopped = BotUtils.removeSpecialSymbolsTitles(presentingBody);
-		processedBodyStemmedStopped = StringUtils.normalizeSpace(processedBodyStemmedStopped);
+		String processedBodyStopped = BotUtils.removeSpecialSymbolsTitles(presentingBody);
+		
+		//after stemming, add classes names
+		for(String className: classesNames){
+			processedBodyStopped+= " "+className;
+		}
+		
+		//stemming and stop words
+		processedBodyStopped = botUtils.tokenizeStopStem(processedBodyStopped);
+		
+		//remove unnecessary words, used in the question but not useful to match with the answers
+		processedBodyStopped = botUtils.removeUnnecessaryWords(processedBodyStopped);
 		
 		//Remove duplicates
-		processedBodyStemmedStopped = BotUtils.removeDuplicatedTokens(processedBodyStemmedStopped," ");
+		processedBodyStopped = BotUtils.removeDuplicatedTokens(processedBodyStopped," ");
 		
-		mainBucket.setProcessedBodyStemmedStopped(processedBodyStemmedStopped);
+		processedBodyStopped = StringUtils.normalizeSpace(processedBodyStopped);
+		mainBucket.setProcessedBodyStemmedStopped(processedBodyStopped);
 		
-		System.out.println(mainBucket);
+		logger.info("Main bucket: "+mainBucket);
 		
 		//Remaining buckets
-		Set<Bucket> buckets = new HashSet<>();
+		Set<Bucket> buckets = new LinkedHashSet<>();
 		
 		for(SoThread thread: threads) {
 			
 			List<Post> answers = thread.getAnswers();
 			for(Post answer: answers) {
-				Bucket bucket = buildBucket(answer,true);
+				Bucket bucket = buildAnswerPostBucket(answer);
 				buckets.add(bucket);
 			}
 		}
@@ -499,8 +526,62 @@ public class PitBotApp {
 
 	
 
+	public List<Bucket> step8(Set<Bucket> buckets) {
+		List<Bucket> bucketsList = new ArrayList<>(buckets);
+		
+		/*
+		 * Calculate tfidf for all terms
+		 */
+		List<Bucket> rankedBuckets = new ArrayList<>();
+		List<String> bucketsTexts = new ArrayList<>();
+		bucketsTexts.add(mainBucket.getProcessedBodyStemmedStopped());
+		for(Bucket bucket: buckets){
+			bucketsTexts.add(bucket.getProcessedBodyStemmedStopped());
+		}
+		
+		List<Collection<String>> documents =  Lists.newArrayList(NgramTfIdf.ngramDocumentTerms(Lists.newArrayList(1,2,3), bucketsTexts));
+		List<Map<String, Double>> tfs = Lists.newArrayList(TfIdf.tfs(documents));
+		Map<String, Double> idfAll = TfIdf.idfFromTfs(tfs);
+		
+		Map<String,Double> tfsMainBucket = tfs.remove(0);
+		HashMap<String, Double> tfIdfMainBucket = (HashMap)TfIdf.tfIdf(tfsMainBucket, idfAll);
+		//buckets.remove(buckets.iterator().next());
+		HashMap<String, Double> tfIdfOtherBucket;
+		
+		int pos = 0;
+		
+		for(Map<String, Double> tfsMap: tfs){
+			tfIdfOtherBucket = (HashMap)TfIdf.tfIdf(tfsMap, idfAll);
+			double cosine = VectorSpaceModel.cosineSimilarity(tfIdfMainBucket, tfIdfOtherBucket);
+			Bucket bucket = bucketsList.get(pos);
+			bucket.setCosSim(cosine);
+			pos++;
+		}
 
-	private Bucket buildBucket(Post post,boolean isAnswer) throws Exception {
+       showBucketsOrderByCosineDesc(bucketsList);
+		
+		
+		return null;
+	}
+
+	private void showBucketsOrderByCosineDesc(List<Bucket> bucketsList) {
+		Collections.sort(bucketsList, new Comparator<Bucket>() {
+		    public int compare(Bucket o1, Bucket o2) {
+		        return o2.getCosSim().compareTo(o1.getCosSim());
+		    }
+		});
+		int pos=0;
+		for(Bucket bucket: bucketsList){
+			logger.info("Rank: "+pos+ " cosine: "+bucket.getCosSim()+" id: "+bucket.getPostId()+ " - "+bucket.getProcessedBodyStemmedStopped().substring(0, 50));
+			pos++;
+			if(pos==10){
+				break;
+			}
+		}
+		
+	}
+
+	private Bucket buildAnswerPostBucket(Post post) throws Exception {
 		Bucket bucket = new Bucket();
 		bucket.setParentId(post.getParentId());
 		bucket.setPostId(post.getId());
@@ -514,33 +595,33 @@ public class PitBotApp {
 		List<String> codes = botUtils.getCodes(presentingBody);
 		bucket.setCodes(codes);
 		
-		String processedBodyStemmedStopped = botUtils.buildProcessedBodyStemmedStopped(presentingBody,isAnswer);
-		bucket.setProcessedBodyStemmedStopped(processedBodyStemmedStopped);
 		
-		if(isAnswer) { //extract classes names
-			getClassesNames(bucket);
+		//extract classes names
+		Set<String> classesNames = getClassesNames(codes);
+		bucket.setClassesNames(classesNames);
+		
+		String processedBodyStemmedStopped = "";
+		
+		for(String className: classesNames){
+			processedBodyStemmedStopped+= className+ " ";
 		}
+		processedBodyStemmedStopped+= presentingBody;
+		processedBodyStemmedStopped = botUtils.buildProcessedBodyStemmedStopped(processedBodyStemmedStopped,true);
 		
 		
+		bucket.setProcessedBodyStemmedStopped(processedBodyStemmedStopped);
 		
 		return bucket;
 	}
 
-	private void getClassesNames(Bucket bucket) {
+	private Set<String> getClassesNames(List<String> codes) {
 
 		Set<String> classesNames = new HashSet();
-		List<String> codes = bucket.getCodes(); 
 		for(String code: codes) {
 			getClassesNamesForString(classesNames,code);
 		}
-		
-		bucket.setClassesNames(classesNames);
-		
-		/*for(String className: classes) {
-			System.out.println(className);
-		}*/
-		
-		
+		return classesNames;
+				
 	}
 
 	private void getClassesNamesForString(Set<String> classesNames, String code) {
@@ -558,11 +639,10 @@ public class PitBotApp {
 		//System.out.println(code);
 		
 		//Get classes in camel case
-		
 		Pattern pattern = Pattern.compile(BotUtils.CLASSES_CAMEL_CASE_REGEX_EXPRESSION);
 		Matcher matcher = pattern.matcher(code);
 		while (matcher.find()) {
-			if(matcher.group(0)!=null && matcher.group(0).length()>2) {
+			if(matcher.group(0)!=null && matcher.group(0).length()>3) {
 				classesNames.add(matcher.group(0));
 			}
 			
@@ -570,14 +650,14 @@ public class PitBotApp {
 		
 	}
 
-	private Set<Post> getPostsFromThreads(Set<SoThread> threads) {
+	/*private Set<Post> getPostsFromThreads(Set<SoThread> threads) {
 		Set<Post> allPosts = new HashSet<>();
 		for(SoThread thread: threads){
 			
 			
 		}
 		return allPosts;
-	}
+	}*/
 
 
 
@@ -596,7 +676,7 @@ public class PitBotApp {
 	private void getPropertyValueFromLocalFile() {
 		Properties prop = new Properties();
 		InputStream input = null;
-		isTest = true;
+		useProxy = false;
 		try {
 
 			input = new FileInputStream(pathFileEnvFlag);
@@ -605,15 +685,15 @@ public class PitBotApp {
 			prop.load(input);
 
 			// get the property value and print it out
-			String isTestStr = prop.getProperty("isTest");
-			if(!StringUtils.isBlank(isTestStr)) {
-				isTest = new Boolean(isTestStr);
+			String useProxyStr = prop.getProperty("useProxy");
+			if(!StringUtils.isBlank(useProxyStr)) {
+				useProxy = new Boolean(useProxyStr);
 			}
-			String msg = "\nEnvironment property is: ";
-			if(isTest) {
-				msg+= "Test";
+			String msg = "\nEnvironment property is (useProxy): ";
+			if(useProxy) {
+				msg+= "with proxy";
 			}else {
-				msg+= "Production";
+				msg+= "no proxy";
 			}
 			
 			logger.info(msg);
@@ -644,7 +724,7 @@ public class PitBotApp {
 
 	private Set<SoThread> assembleListOfThreads(Set<Integer> soPostsIds) {
 		//allQuestionsIds.addAll(soQuestionsIds);
-		Set<SoThread> threads = new HashSet<>();
+		Set<SoThread> threads = new LinkedHashSet<>();
 		
 		for(Integer questionId: soPostsIds) {
 			Post post = pitBotService.findPostById(questionId);
@@ -744,6 +824,14 @@ public class PitBotApp {
 		return processedPostsByFilter;
 	}
 
+	public Bucket getMainBucket() {
+		return mainBucket;
+	}
+
+	public void setMainBucket(Bucket mainBucket) {
+		this.mainBucket = mainBucket;
+	}
+
 	
 	
 	/*private void performStemStop() throws Exception {
@@ -774,5 +862,6 @@ public class PitBotApp {
 		tmpList = null;
 	}*/
 
+	
 	
 }

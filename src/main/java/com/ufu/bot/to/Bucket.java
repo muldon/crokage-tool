@@ -23,7 +23,7 @@ public class Bucket {
 	    
 	private Integer userReputation;
 	
-	
+	private Double cosSim;
 	
 	
 	public Bucket() {
@@ -145,11 +145,6 @@ public class Bucket {
 
 
 
-	@Override
-	public String toString() {
-		return "Bucket [postId=" + postId + ", parentId=" + parentId + ", presentingBody=" + presentingBody + ", processedBodyStemmedStopped=" + processedBodyStemmedStopped + ", postScore="
-				+ postScore + ", codes=" + codes + ", userReputation=" + userReputation + "]";
-	}
 
 
 
@@ -173,6 +168,25 @@ public class Bucket {
 
 	public void setClassesNames(Set<String> classesNames) {
 		this.classesNames = classesNames;
+	}
+
+
+
+	public Double getCosSim() {
+		return cosSim;
+	}
+
+
+
+	public void setCosSim(Double cosSim) {
+		this.cosSim = cosSim;
+	}
+
+
+
+	@Override
+	public String toString() {
+		return "Bucket [postId=" + postId + ", parentId=" + parentId + ", presentingBody=" + presentingBody + ", processedBodyStemmedStopped=" + processedBodyStemmedStopped + ", postScore=" + postScore + ", codes=" + codes + ", classesNames=" + classesNames + ", userReputation=" + userReputation + ", cosSim=" + cosSim + "]";
 	}
 
 
