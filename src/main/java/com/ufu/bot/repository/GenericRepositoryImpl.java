@@ -36,10 +36,7 @@ public class GenericRepositoryImpl implements GenericRepository {
 		return (List<Post>) q.getResultList();
 	}
 
-	
-
-	
-	
+		
 
 	
 

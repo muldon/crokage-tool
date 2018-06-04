@@ -75,14 +75,7 @@ public class VectorSpaceModel {
 		return Math.sqrt(magnitude);
 	}
 	
-	private static double getMagnitude(HashMap<String, Double> weights) {
-		double magnitude = 0;
-		for (double weight : weights.values()) {
-			magnitude += weight * weight;
-		}
-		
-		return Math.sqrt(magnitude);
-	}
+	
 	
 	/**
 	 * This will take two documents and return the dot product.
@@ -102,18 +95,7 @@ public class VectorSpaceModel {
 		return product;
 	}
 	
-	private static double getDotProduct(HashMap<String, Double> query, HashMap<String, Double> weights2) {
-		double product = 0;
-		for (String term : query.keySet()) {
-			Double secondWeight = weights2.get(term);
-			if(secondWeight!=null){
-				product += query.get(term) * secondWeight;
-			}
-			
-		}
-		
-		return product;
-	}
+	
 	
 	/**
 	 * This will return the cosine similarity of two documents.
@@ -128,8 +110,6 @@ public class VectorSpaceModel {
 	
 	
 	
-	public static double cosineSimilarity(HashMap<String, Double> query, HashMap<String, Double> weights2) {
-		return getDotProduct(query, weights2) / (getMagnitude(query) * getMagnitude(weights2));
-	}
+	
 	
 }

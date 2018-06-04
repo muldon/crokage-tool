@@ -44,6 +44,7 @@ import com.ufu.bot.to.Comment;
 import com.ufu.bot.to.Post;
 import com.ufu.bot.to.ProcessedPostOld;
 import com.ufu.bot.to.SoThread;
+import com.ufu.bot.util.BotComposer;
 import com.ufu.bot.util.BotUtils;
 
 import core.CodeTokenProvider;
@@ -60,6 +61,10 @@ public class PitBotApp {
 	
 	@Autowired
 	private BotUtils botUtils;
+	
+	@Autowired
+	private BotComposer botComposer;
+		
 	
 	/*@Value("${preProcess}")
 	public Boolean preProcess;  //true - false
@@ -116,7 +121,10 @@ public class PitBotApp {
 	
 	protected Set<ProcessedPostOld> processedPostsByFilter;
 	protected Set<Post> postsByFilter;
-	public Bucket mainBucket;
+	private Bucket mainBucket;
+	
+	private Double avgScore;
+	private Double avgReputation;
 	
 	@PostConstruct
 	public void init() throws Exception {
@@ -263,10 +271,15 @@ public class PitBotApp {
 		botUtils.reportElapsedTime(initTime,"Step 8: Relevance Calculation");
 		
 		
+		//showBucketsOrderByCosineDesc(bucketsList);
+		showRankedList(rankedBuckets);
+		
+		
 	}
 
 	
 	
+
 
 
 	private Set<Integer> getStaticIdsForTests() {
@@ -437,6 +450,9 @@ public class PitBotApp {
 		
 		List<String> textsToVerify = new ArrayList<>();
 		for(Post post: allPostsFromAllThreads) {
+			/*if(post.getId().equals(10975386)){
+				logger.info("Good post is here: "+post);
+			}*/
 			textsToVerify.add(post.getBody());
 		}
 		for(Comment comment: allCommentsFromAllThreads) {
@@ -507,7 +523,8 @@ public class PitBotApp {
 		processedBodyStopped = StringUtils.normalizeSpace(processedBodyStopped);
 		mainBucket.setProcessedBodyStemmedStopped(processedBodyStopped);
 		
-		logger.info("Main bucket: "+mainBucket);
+		//logger.info("Main bucket: "+mainBucket);
+		logger.info("Main bucket: "+mainBucket.getProcessedBodyStemmedStopped()+ " - classes: "+mainBucket.getClassesNames());
 		
 		//Remaining buckets
 		Set<Bucket> buckets = new LinkedHashSet<>();
@@ -518,8 +535,21 @@ public class PitBotApp {
 			for(Post answer: answers) {
 				Bucket bucket = buildAnswerPostBucket(answer);
 				buckets.add(bucket);
+				
+				if(bucket.getPostScore()!=null) {
+					avgScore      += bucket.getPostScore();
+				}
+				if(bucket.getUserReputation()!=null) {
+					avgReputation += bucket.getUserReputation();
+				}
 			}
 		}
+		
+		if(buckets.size()>0) {
+			avgScore = avgScore / buckets.size();
+			avgReputation = avgReputation / buckets.size();
+		}
+		
 		
 		return buckets;
 	}
@@ -532,7 +562,6 @@ public class PitBotApp {
 		/*
 		 * Calculate tfidf for all terms
 		 */
-		List<Bucket> rankedBuckets = new ArrayList<>();
 		List<String> bucketsTexts = new ArrayList<>();
 		bucketsTexts.add(mainBucket.getProcessedBodyStemmedStopped());
 		for(Bucket bucket: buckets){
@@ -550,19 +579,22 @@ public class PitBotApp {
 		
 		int pos = 0;
 		
+		
 		for(Map<String, Double> tfsMap: tfs){
 			tfIdfOtherBucket = (HashMap)TfIdf.tfIdf(tfsMap, idfAll);
-			double cosine = VectorSpaceModel.cosineSimilarity(tfIdfMainBucket, tfIdfOtherBucket);
-			Bucket bucket = bucketsList.get(pos);
-			bucket.setCosSim(cosine);
+			Bucket postBucket = bucketsList.get(pos);
+			botComposer.calculateScores(avgReputation, avgScore, tfIdfMainBucket, tfIdfOtherBucket, mainBucket, postBucket);
 			pos++;
 		}
-
-       showBucketsOrderByCosineDesc(bucketsList);
 		
 		
-		return null;
+       
+       botComposer.rankList(bucketsList);
+		
+       return bucketsList;
 	}
+
+	
 
 	private void showBucketsOrderByCosineDesc(List<Bucket> bucketsList) {
 		Collections.sort(bucketsList, new Comparator<Bucket>() {
@@ -570,15 +602,27 @@ public class PitBotApp {
 		        return o2.getCosSim().compareTo(o1.getCosSim());
 		    }
 		});
-		int pos=0;
+		int pos=1;
 		for(Bucket bucket: bucketsList){
-			logger.info("Rank: "+pos+ " cosine: "+bucket.getCosSim()+" id: "+bucket.getPostId()+ " - "+bucket.getProcessedBodyStemmedStopped().substring(0, 50));
+			logger.info("Rank: "+(pos)+ " cosine: "+bucket.getCosSim()+" id: "+bucket.getPostId()+ " - "+bucket.getPresentingBody());
+			pos++;
+			if(pos>10){
+				break;
+			}
+		}
+		
+	}
+	
+
+	private void showRankedList(List<Bucket> rankedBuckets) {
+		int pos=0;
+		for(Bucket bucket: rankedBuckets){
+			logger.info("Rank: "+pos+ " total Score: "+bucket.getComposedScore() +" - cosine: "+bucket.getCosSim()+ " - coverageScore: "+bucket.getCoverageScore()+ " - codeScore: "+bucket.getCodeScore() +" - repScore: "+bucket.getRepScore()+ " - upScore: "+bucket.getUpScore()+ " - id: "+bucket.getPostId()+ " - "+bucket.getPresentingBody());
 			pos++;
 			if(pos==10){
 				break;
 			}
 		}
-		
 	}
 
 	private Bucket buildAnswerPostBucket(Post post) throws Exception {
@@ -630,13 +674,11 @@ public class PitBotApp {
 			code= code.replaceAll(keyword,"");
 		}
 		
-		//remove double quotes
+		//remove double quotes contents
 		code= code.replaceAll(BotUtils.DOUBLE_QUOTES_REGEX_EXPRESSION,"");
 		
 		//remove comments
-		//System.out.println(code);
 		code = code.replaceAll( BotUtils.COMMENTS_REGEX_EXPRESSION, BotUtils.COMMENTS_REPLACEMENT_EXPRESSION );
-		//System.out.println(code);
 		
 		//Get classes in camel case
 		Pattern pattern = Pattern.compile(BotUtils.CLASSES_CAMEL_CASE_REGEX_EXPRESSION);
@@ -718,6 +760,8 @@ public class PitBotApp {
 		allQuestionsIds = new HashSet<>();
 		allAnwersIds = new HashSet<>();
 		allCommentsIds = new HashSet<>();
+		avgScore = 0d;
+		avgReputation = 0d;
 		
 	}
 
@@ -778,7 +822,7 @@ public class PitBotApp {
 	private void identifyQuestionsIdsFromUrls(List<String> urls, Set<Integer> soQuestionsIds) {
 		for(String url: urls){
 			if(!url.contains("stackoverflow.com")) {
-				logger.info("Discarting URL because its is not a SO url: "+url);
+				//logger.info("Discarting URL because its is not a SO url: "+url);
 				continue;
 			}
 			//String[] urlPart = url.split("\\/[[:digit:]].*\\/");

@@ -23,11 +23,23 @@ public class Bucket {
 	    
 	private Integer userReputation;
 	
+	/*
+	 * Similarity values compared to main bucket
+	 */
 	private Double cosSim;
+	private Double coverageScore;
+	private Double codeScore;
+	private Double repScore;
+	private Double upScore;
 	
+	private Double composedScore;
 	
 	public Bucket() {
-		
+		cosSim = 0d;
+		coverageScore = 0d;
+		repScore = 0d;
+		upScore = 0d;
+		composedScore = 0d;
 	}
 
 
@@ -184,9 +196,76 @@ public class Bucket {
 
 
 
+	
+
+
+
+
 	@Override
 	public String toString() {
-		return "Bucket [postId=" + postId + ", parentId=" + parentId + ", presentingBody=" + presentingBody + ", processedBodyStemmedStopped=" + processedBodyStemmedStopped + ", postScore=" + postScore + ", codes=" + codes + ", classesNames=" + classesNames + ", userReputation=" + userReputation + ", cosSim=" + cosSim + "]";
+		return "Bucket [postId=" + postId + ", parentId=" + parentId + ", presentingBody=" + presentingBody + ", processedBodyStemmedStopped=" + processedBodyStemmedStopped + ", postScore="
+				+ postScore + ", codes=" + codes + ", classesNames=" + classesNames + ", userReputation=" + userReputation + ", cosSim=" + cosSim + ", coverageScore=" + coverageScore + ", codeScore="
+				+ codeScore + ", repScore=" + repScore + ", upScore=" + upScore + ", composedScore=" + composedScore + "]";
+	}
+
+
+
+	public Double getCoverageScore() {
+		return coverageScore;
+	}
+
+
+
+	public void setCoverageScore(Double coverageScore) {
+		this.coverageScore = coverageScore;
+	}
+
+
+
+	public Double getRepScore() {
+		return repScore;
+	}
+
+
+
+	public void setRepScore(Double repScore) {
+		this.repScore = repScore;
+	}
+
+
+
+	public Double getUpScore() {
+		return upScore;
+	}
+
+
+
+	public void setUpScore(Double upScore) {
+		this.upScore = upScore;
+	}
+
+
+
+	public Double getComposedScore() {
+		return composedScore;
+	}
+
+
+
+	public void setComposedScore(Double composedScore) {
+		this.composedScore = composedScore;
+	}
+
+
+
+	public Double getCodeScore() {
+		return codeScore;
+	}
+
+
+
+	public void setCodeScore(Double codeScore) {
+		this.codeScore = codeScore;
 	}
 
 
