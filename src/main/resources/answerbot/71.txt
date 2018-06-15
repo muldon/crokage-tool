@@ -1,0 +1,10 @@
+----------------- No.71 -----------------
+query : java rounding a decimal value to half_even
+
+----Summary----
+Problem Here Is That It Is Not Possible To Store All Possible Fractions In A Variable Because Of The Limitations Of The Binary Format. So Basically Double Just Approximates The Value You Entered And Thats Why Rounding Errors Occure. You Can Read More About This Topic In For Example This Thread How Does Java.Math.Roundingmode Work?.
+Internally Java.Lang.String Uses Java.Util.Formatter To Create The Formatted String And Roundingmode.Half_up Is Indeed Specified On Line 3610 Of The Private Inner Class Formatspecifier. Since The Source Code For Formatter Is Included In The Jdk You Could Easily Modify Just The One Line That Specifies The Roundingmode Perhaps Even Make It Accept Different Roundingmodes . Since Formatter Is Final You Ca Not Subclass But You Could Just Modify The Code And Put It In Your Own Package. You Would Not Then Need To Use String At All But Rather Call Your Custom Formatter The Way String Does.
+Can I Set The Rounding Mode Used By String.Format ? Short Answer No.
+Is There Another Formatter Or Library That Would Format The Numbers As In My Example? The Bigdecimal Is Converted Internally Via New Mathcontext Compprec Or Plain Half_up . You Can Take The Code Of Java.Util.Formatter Of The Latest Or Your Preferred Version Java And Modify The Creation Of The Mathcontext To Use Half_even. It Should Be 1015minutes Work. But Then You Need A Custom Method To Mimic String.Format.
+I Was Able To Get This To Work In About 20 Minutes. Much Of That Time Was Fixing The Javadoc Comments In Formatter. You Ll Also Need To Rip Out And Modify An Interface Java.Util.Formattable. It Contains One Method.
+----------------------------------------

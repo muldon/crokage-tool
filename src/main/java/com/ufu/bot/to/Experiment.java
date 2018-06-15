@@ -1,5 +1,7 @@
 package com.ufu.bot.to;
 
+import java.sql.Timestamp;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -14,67 +16,30 @@ import javax.xml.bind.annotation.XmlRootElement;
 @Table(name = "experiment")
 public class Experiment {
 	@Id
-    @SequenceGenerator(name="experiment_id", sequenceName="experiment_id",allocationSize=1)
+    @SequenceGenerator(name="experiment_id", sequenceName="experiment_id_seq",allocationSize=1)
     @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="experiment_id")
 	private Integer id;
 
-	private String tag;
-
-	@Column(name="numberoftestedquestions")
-	private Integer numberOfTestedQuestions;
+	@Column(name="externalquestionid")
+	private Integer externalQuestionId;
 
 	@Column(name="date")
-	private String date;
+	private Timestamp date;
 	
-	@Column(name="ttweight")
-	private Double ttWeight;
-		
-	@Column(name="ccweight")
-	private Double ccWeight;
-		
-	@Column(name="bbweight")
-	private Double bbWeight;
-	
-	@Column(name="topictopicweight")
-	private Double topicTopicWeight;
-	
-	@Column(name="btweight")
-	private Double btWeight;
-		
-	@Column(name="tbweight")
-	private Double tbWeight;
-	
-	@Column(name="aaweight")
-	private Double aaWeight;
-	
-	@Column(name="tagtagweight")
-	private Double tagTagWeight;
-	
-	@Column(name="bm25k")
-	private Float bm25k;
-	
-	@Column(name="bm25b")
-	private Float bm25b;
-	
-	private String observacao;
+	private String obs;
 	
 	private String duration;
 	
-	private Integer lote;
+	private Double alpha;
+		
+	private Double beta;
+		
+	private Double gamma;
 	
-	private String base;
+	private Double delta;
 	
-	private String app;
-	
-	@Column(name="maxresultsize")
-	private Integer maxresultsize;
-	
-	@Column(name="estimateweights")
-	private Boolean estimateWeights;
-	
-	private String trm;
-	
-	
+	private Double epsilon;
+
 	public Integer getId() {
 		return id;
 	}
@@ -83,32 +48,83 @@ public class Experiment {
 		this.id = id;
 	}
 
-	public String getTag() {
-		return tag;
+	public Integer getExternalQuestionId() {
+		return externalQuestionId;
 	}
 
-	public void setTag(String tag) {
-		this.tag = tag;
+	public void setExternalQuestionId(Integer externalQuestionId) {
+		this.externalQuestionId = externalQuestionId;
 	}
 
-	public Integer getNumberOfTestedQuestions() {
-		return numberOfTestedQuestions;
-	}
-
-	public void setNumberOfTestedQuestions(Integer numberOfTestedQuestions) {
-		this.numberOfTestedQuestions = numberOfTestedQuestions;
-	}
-
-	
-
-	
-
-	public String getDate() {
+	public Timestamp getDate() {
 		return date;
 	}
 
-	public void setDate(String date) {
+	public void setDate(Timestamp date) {
 		this.date = date;
+	}
+
+	public String getObs() {
+		return obs;
+	}
+
+	public void setObs(String obs) {
+		this.obs = obs;
+	}
+
+	public String getDuration() {
+		return duration;
+	}
+
+	public void setDuration(String duration) {
+		this.duration = duration;
+	}
+
+	public Double getAlpha() {
+		return alpha;
+	}
+
+	public void setAlpha(Double alpha) {
+		this.alpha = alpha;
+	}
+
+	public Double getBeta() {
+		return beta;
+	}
+
+	public void setBeta(Double beta) {
+		this.beta = beta;
+	}
+
+	public Double getGamma() {
+		return gamma;
+	}
+
+	public void setGamma(Double gamma) {
+		this.gamma = gamma;
+	}
+
+	public Double getDelta() {
+		return delta;
+	}
+
+	public void setDelta(Double delta) {
+		this.delta = delta;
+	}
+
+	public Double getEpsilon() {
+		return epsilon;
+	}
+
+	public void setEpsilon(Double epsilon) {
+		this.epsilon = epsilon;
+	}
+
+	@Override
+	public String toString() {
+		return "Experiment [id=" + id + ", externalQuestionId=" + externalQuestionId + ", date=" + date + ", obs=" + obs
+				+ ", duration=" + duration + ", alpha=" + alpha + ", beta=" + beta + ", gamma=" + gamma + ", delta="
+				+ delta + ", epsilon=" + epsilon + "]";
 	}
 
 	@Override
@@ -136,166 +152,25 @@ public class Experiment {
 		return true;
 	}
 
-	
-
-	@Override
-	public String toString() {
-		return "Experiment [id=" + id + ", tag=" + tag + ", numberOfTestedQuestions=" + numberOfTestedQuestions
-				+ ", date=" + date + ", ttWeight=" + ttWeight + ", ccWeight=" + ccWeight + ", bbWeight=" + bbWeight
-				+ ", btWeight=" + btWeight + ", tbWeight=" + tbWeight + ", bm25k=" + bm25k + ", bm25b=" + bm25b
-				+ ", observacao=" + observacao + ", duration=" + duration + ", lote=" + lote + ", base=" + base
-				+ ", maxresultsize=" + maxresultsize + "]";
-	}
-
-	public Double getTtWeight() {
-		return ttWeight;
-	}
-
-	public void setTtWeight(Double ttWeight) {
-		this.ttWeight = ttWeight;
-	}
-
-	public Double getCcWeight() {
-		return ccWeight;
-	}
-
-	public void setCcWeight(Double ccWeight) {
-		this.ccWeight = ccWeight;
-	}
-
-	public Double getBbWeight() {
-		return bbWeight;
-	}
-
-	public void setBbWeight(Double bbWeight) {
-		this.bbWeight = bbWeight;
-	}
-
-	public Double getBtWeight() {
-		return btWeight;
-	}
-
-	public void setBtWeight(Double btWeight) {
-		this.btWeight = btWeight;
-	}
-
-	public Double getTbWeight() {
-		return tbWeight;
-	}
-
-	public void setTbWeight(Double tbWeight) {
-		this.tbWeight = tbWeight;
-	}
-
-	public Float getBm25k() {
-		return bm25k;
-	}
-
-	public void setBm25k(Float bm25k) {
-		this.bm25k = bm25k;
-	}
-
-	public Float getBm25b() {
-		return bm25b;
-	}
-
-	public void setBm25b(Float bm25b) {
-		this.bm25b = bm25b;
-	}
-
-	public String getObservacao() {
-		return observacao;
-	}
-
-	public void setObservacao(String observacao) {
-		this.observacao = observacao;
-	}
-
-	
-
-	public Integer getLote() {
-		return lote;
-	}
-
-	public void setLote(Integer lote) {
-		this.lote = lote;
-	}
-
-	public String getBase() {
-		return base;
-	}
-
-	public void setBase(String base) {
-		this.base = base;
-	}
-
-	
-
-	public Integer getMaxresultsize() {
-		return maxresultsize;
-	}
-
-	public void setMaxresultsize(Integer maxresultsize) {
-		this.maxresultsize = maxresultsize;
-	}
-
-	public String getDuration() {
-		return duration;
-	}
-
-	public void setDuration(String duration) {
+	public Experiment(Integer externalQuestionId, Double alpha, Double beta,
+			Double gamma, Double delta, Double epsilon, Timestamp date, String duration,String obs) {
+		super();
+		this.externalQuestionId = externalQuestionId;
+		this.date = date;
+		this.obs = obs;
 		this.duration = duration;
+		this.alpha = alpha;
+		this.beta = beta;
+		this.gamma = gamma;
+		this.delta = delta;
+		this.epsilon = epsilon;
 	}
 
-	public Double getAaWeight() {
-		return aaWeight;
+	public Experiment() {
+		super();
 	}
+		
 
-	public void setAaWeight(Double aaWeight) {
-		this.aaWeight = aaWeight;
-	}
-
-	public String getTrm() {
-		return trm;
-	}
-
-	public void setTrm(String trm) {
-		this.trm = trm;
-	}
-
-	public Double getTagTagWeight() {
-		return tagTagWeight;
-	}
-
-	public void setTagTagWeight(Double tagTagWeight) {
-		this.tagTagWeight = tagTagWeight;
-	}
-
-	public String getApp() {
-		return app;
-	}
-
-	public void setApp(String app) {
-		this.app = app;
-	}
-
-	public Boolean getEstimateWeights() {
-		return estimateWeights;
-	}
-
-	public void setEstimateWeights(Boolean estimateWeights) {
-		this.estimateWeights = estimateWeights;
-	}
-
-	public Double getTopicTopicWeight() {
-		return topicTopicWeight;
-	}
-
-	public void setTopicTopicWeight(Double topicTopicWeight) {
-		this.topicTopicWeight = topicTopicWeight;
-	}
-
-	
 	
 		
 	

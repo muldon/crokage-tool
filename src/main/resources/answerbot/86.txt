@@ -1,0 +1,10 @@
+----------------- No.86 -----------------
+query : java sql limit | rownum uniformization api
+
+----Summary----
+Try Adding The Max Rows Limit To The Sql Directly Instead Of Using Setmaxresults Ie Add Where Rownum Maxresults To The Sql String. Eclipselink Will Use Rownum In The Query For Max Rows When It Creates The Sql But Since You Are Using Your Own Sql It Will Use The Result Set To Limit Rows.
+10 Is The Default Fetch Size So You Could Try Setting That To Be Bigger.
+Edit The Owasp Features A Sql Injection Prevention Cheatsheet . Using Criteria Queries Is Equivalent To Defense Option 1 Using Prepared Statements.
+The Sql Limit Will Limit Your Sql Query Results To Those That Fall Within A Specified Range. You Can Use It To Show The First X Number Of Results Or To Show A Range From X Y Results.
+So Even If Setting The Fetch Size Is Translated By Jdbc Into A Sql Limit Clause The Big Difference With Forcing A Sql Query With Limit Is That With Jdbc You Re Actually Still Able To Browse All The Results.
+----------------------------------------

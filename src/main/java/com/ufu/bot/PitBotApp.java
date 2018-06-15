@@ -21,28 +21,25 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
-
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Lists;
+import com.ufu.bot.exception.PitBotException;
 import com.ufu.bot.googleSearch.GoogleWebSearch;
 import com.ufu.bot.googleSearch.SearchQuery;
 import com.ufu.bot.googleSearch.SearchResult;
 import com.ufu.bot.service.PitBotService;
 import com.ufu.bot.tfidf.TfIdf;
-import com.ufu.bot.tfidf.VectorSpaceModel;
 import com.ufu.bot.tfidf.ngram.NgramTfIdf;
 import com.ufu.bot.to.Bucket;
 import com.ufu.bot.to.Comment;
+import com.ufu.bot.to.ExternalQuestion;
 import com.ufu.bot.to.Post;
-import com.ufu.bot.to.ProcessedPostOld;
 import com.ufu.bot.to.SoThread;
 import com.ufu.bot.util.BotComposer;
 import com.ufu.bot.util.BotUtils;
@@ -64,13 +61,25 @@ public class PitBotApp {
 	
 	@Autowired
 	private BotComposer botComposer;
-		
 	
-	/*@Value("${preProcess}")
-	public Boolean preProcess;  //true - false
-*/	
+	@Autowired
+	private GoogleWebSearch googleWebSearch;
+	
+	
+	@Value("${useAnswerBotQueries}")
+	public Boolean useAnswerBotQueries;  
+	
 	@Value("${inputQueriesPath}")
 	public String inputQueriesPath;  
+	
+	@Value("${pickUpOnlyTheFirstQuery}")
+	public Boolean pickUpOnlyTheFirstQuery;
+	
+	@Value("${runRack}")
+	public Boolean runRack;  
+		
+	@Value("${runGoogleSearch}")
+	public Boolean runGoogleSearch;  
 	
 	
 	@Value("${numberOfRackClasses}")
@@ -80,11 +89,17 @@ public class PitBotApp {
 	@Value("${numberOfGoogleResults}")
 	public Integer numberOfGoogleResults;  
 	
+	
+	/*@Value("${APIKEY}")
+	public String apiKey;
+	
+	@Value("${CUSTOM_SEARCH_ID}")
+	public String customSearchId; */ 
+	
 	@Value("${shuffleListOfQueriesBeforeGoogleSearch}")
 	public Boolean shuffleListOfQueriesBeforeGoogleSearch;
 		
-	@Value("${pickUpOnlyTheFirstQuery}")
-	public Boolean pickUpOnlyTheFirstQuery;
+	
 	
 	@Value("${minTokenSize}")
 	public Integer minTokenSize;
@@ -105,9 +120,7 @@ public class PitBotApp {
 	 */
 	private Boolean useProxy;
 	
-	@Value("${runGoogleSearch}")
-	public Boolean runGoogleSearch;
-	
+		
 	
 	private List<String> queriesList;
 	
@@ -119,44 +132,46 @@ public class PitBotApp {
 	private long endTime;
 	
 	
-	protected Set<ProcessedPostOld> processedPostsByFilter;
-	protected Set<Post> postsByFilter;
+	//protected Set<Post> postsByFilter;
 	private Bucket mainBucket;
 	
 	private Double avgScore;
 	private Double avgReputation;
 	
-	@PostConstruct
+	private Map<Integer,Post> allRetrievedPostsCache;
+	
+	int countExcludedPosts;
+	int countPostIsAnAnswer;
+	int countRecoveredPostsFromLinks;
+	
+	
+	//@PostConstruct
 	public void init() throws Exception {
 		
 		logger.info("Initializing app...");
-		initializeVariables();
+		//initializeVariables();
 		botUtils.initializeConfigs();
 		getPropertyValueFromLocalFile();
 		
 				
 		logger.info("\nConsidering parameters: \n"
-				//+ "\n preProcess: "+preProcess
-				+ "\n inputQueriesPath: "+inputQueriesPath
-				+ "\n numberOfRackClasses: "+numberOfRackClasses
-				+ "\n numberOfGoogleResults: "+numberOfGoogleResults
 				+ "\n pathFileEnvFlag: "+pathFileEnvFlag
-				+ "\n useProxy: "+useProxy
-				+ "\n shuffleListOfQueriesBeforeGoogleSearch: "+shuffleListOfQueriesBeforeGoogleSearch
-				+ "\n minTokenSize: "+minTokenSize
+				+ "\n useAnswerBotQueries: "+useAnswerBotQueries
+				+ "\n inputQueriesPath: "+inputQueriesPath
 				+ "\n pickUpOnlyTheFirstQuery: "+pickUpOnlyTheFirstQuery
+				+ "\n shuffleListOfQueriesBeforeGoogleSearch: "+shuffleListOfQueriesBeforeGoogleSearch
+				+ "\n runRack: "+runRack
+				+ "\n numberOfRackClasses: "+numberOfRackClasses
+				+ "\n runGoogleSearch: "+runGoogleSearch
+				+ "\n useProxy: "+useProxy
+				+ "\n numberOfGoogleResults: "+numberOfGoogleResults
+				+ "\n minTokenSize: "+minTokenSize
 				+ "\n");
 		
-		/*
-		 * Do not proceed with rest of the app if the task is preprocess. 
-		 */
-		/*if(preProcess) {
-			preProcess();
-			return;
-		}*/
 		
 		
-
+		
+		
 		/*
 		 * Step 1: Question in Natural Language
 		 * Read queries from a text file and insert into a list
@@ -178,14 +193,25 @@ public class PitBotApp {
 	}
 	
 	private void step1() throws Exception {
-		File file = new File(inputQueriesPath);
-		queriesList = new ArrayList<>();
-		try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-		    String line;
-		    while ((line = br.readLine()) != null) {
-		    	logger.info(line);
-		       queriesList.add(line);
-		    }
+		
+		List<ExternalQuestion> answerBotQuestionAnswers = botUtils.readAnswerBotQuestionsAndAnswers();
+		
+		if(useAnswerBotQueries) {
+			
+			queriesList= answerBotQuestionAnswers.stream()
+				.map(ExternalQuestion::getGoogleQuery)
+				.collect(Collectors.toList());
+			
+		}else {
+			File file = new File(inputQueriesPath);
+			queriesList = new ArrayList<>();
+			try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+			    String line;
+			    while ((line = br.readLine()) != null) {
+			    	logger.info(line);
+			       queriesList.add(line);
+			    }
+			}
 		}
 		
 		
@@ -203,22 +229,24 @@ public class PitBotApp {
 	
 	private void runSteps(String query) throws Exception {
 		
-		/*
-		 * Step 2: API Classes Extraction
-		 * RACK  
-		 *   *** Considering only the first query
-		 */
-		initTime = System.currentTimeMillis();
-		List<String> apis = step2(query);
-		botUtils.reportElapsedTime(initTime,"step2 - RACK ");
-		
+		List<String> rackApis = new ArrayList<>();
+		if(runRack){
+			/*
+			 * Step 2: API Classes Extraction
+			 * RACK  
+			 *   *** Considering only the first query
+			 */
+			initTime = System.currentTimeMillis();
+			rackApis = step2(query);
+			botUtils.reportElapsedTime(initTime,"step2 - RACK ");
+		}
 		
 		
 		/*
 		 * Step 3: Query Preparation
 		 * 
 		 */
-		String googleQuery = step3(apis,query);
+		String googleQuery = step3(rackApis,query);
 		
 		
 		Set<Integer> soPostsIds = null;
@@ -259,11 +287,11 @@ public class PitBotApp {
 		 * 
 		 */
 		initTime = System.currentTimeMillis();
-		Set<Bucket> buckets = step7(threads, googleQuery, apis);
+		Set<Bucket> buckets = step7(threads, googleQuery, rackApis);
 		botUtils.reportElapsedTime(initTime,"Step 7: Text Processing");
 		
 		/*
-		 * Step 7: Relevance Calculation
+		 * Step 8: Relevance Calculation
 		 * 
 		 */
 		initTime = System.currentTimeMillis();
@@ -271,51 +299,36 @@ public class PitBotApp {
 		botUtils.reportElapsedTime(initTime,"Step 8: Relevance Calculation");
 		
 		
-		//showBucketsOrderByCosineDesc(bucketsList);
-		showRankedList(rankedBuckets);
+		/*
+		 * Step 9: Answer Generation
+		 * 
+		 */
+		initTime = System.currentTimeMillis();
+		step9(rankedBuckets,googleQuery,rackApis);
+		botUtils.reportElapsedTime(initTime,"Step 9: Answer Generation");
 		
-		
-	}
-
-	
-	
-
-
-
-	private Set<Integer> getStaticIdsForTests() {
-		HashSet<Integer> soPostsIds = new LinkedHashSet<>();
-		soPostsIds.add(10117026);
-		soPostsIds.add(6416706);
-		soPostsIds.add(10117051);
-		soPostsIds.add(35593309);
-		soPostsIds.add(11018325);
-		soPostsIds.add(23329173);
-		soPostsIds.add(40064173);
-		soPostsIds.add(46107706);
-		soPostsIds.add(8174964);
-		soPostsIds.add(9740830);
-		
-		for(Integer id:soPostsIds) {
-			logger.info("id: "+id);
-		}
-		
-		return soPostsIds;
 	}
 
 
 
 
-
+	
 	/**
 	 * Rack tool
 	 * @param query
 	 * @return List<String> representing the associated classes
+	 * @throws PitBotException 
 	 */
-	public List<String> step2(String query) {
+	public List<String> step2(String query){
 		//list is not null. It has been already verified.
 		logger.info("RACK: discovering related classes to query: "+query);
 		CodeTokenProvider ctProvider = new CodeTokenProvider(query);
 		List<String> apis = ctProvider.recommendRelevantAPIs();
+		if(apis.size()<numberOfRackClasses){
+			logger.warn("The number of retrieved APIs from RACK is lower than the number of rack classes set as paramter. Ajusting the parameter to -->"+apis.size()+" apis, returned by RACK for this query.");
+			numberOfRackClasses = apis.size();
+		}
+		//parei aqui
 		apis = apis.subList(0, numberOfRackClasses);
 		logger.info("Finished... discored classes:"+ apis.stream().limit(numberOfRackClasses).collect(Collectors.toList()));
 		return apis;
@@ -356,26 +369,20 @@ public class PitBotApp {
 		Set<Integer> soQuestionsIds = new LinkedHashSet<>();
 		
 		try {
-			SearchQuery searchQuery = new SearchQuery.Builder(googleQuery)
+			SearchQuery searchQuery = new SearchQuery(googleQuery, "stackoverflow.com", numberOfGoogleResults);
 			        //.site("https://stackoverflow.com")
-					.site("stackoverflow.com")
-			        .numResults(numberOfGoogleResults).build();
-			SearchResult result = new GoogleWebSearch().search(searchQuery);
-			//assertThat(result.getSize(), equalTo(10));
+			SearchResult result = googleWebSearch.search(searchQuery,useProxy);
 			List<String> urls = result.getUrls();
-			//List<String> urls = new ArrayList<>();
-			//urls.add("https://stackoverflow.com/questions/21961651/why-does-activesupport-add-method-forty-two-to-array/21962048");
-			
 			identifyQuestionsIdsFromUrls(urls,soQuestionsIds);
 						
-		} catch (IOException e) {
+		} catch (Exception e) {
 			System.out.println("Error ... "+e);
 			e.printStackTrace();
 		}
 		
-		for(Integer soQuestionId: soQuestionsIds) {
+		/*for(Integer soQuestionId: soQuestionsIds) {
 			logger.info("Id: "+soQuestionId);
-		}
+		}*/
 	
 		return soQuestionsIds;
 		
@@ -416,8 +423,13 @@ public class PitBotApp {
 		 */
 		
 		Set<Integer> allRelatedQuestionsIds = pitBotService.recoverRelatedQuestionsIds(allQuestionsIds);
-		logger.info("Number of allRelatedQuestionsIds: "+allRelatedQuestionsIds.size());
 		
+		String relatedIdsStr = "";
+		for(Integer relatedId: allRelatedQuestionsIds) {
+			relatedIdsStr+= relatedId+ " - ";
+		}
+		logger.info("Number of allRelatedQuestionsIds: "+allRelatedQuestionsIds.size()+ " \n List: "+relatedIdsStr);
+				
 		allRelatedQuestionsIds.removeAll(allQuestionsIds);
 		logger.info("Number of remaing threads to assemble: "+allRelatedQuestionsIds.size());
 		
@@ -461,19 +473,23 @@ public class PitBotApp {
 		
 		logger.info("Number of texts to extract links from: "+textsToVerify.size());
 		for(String text: textsToVerify) {
-			
 			List<String> links = botUtils.getCodeValues(BotUtils.LINK_PATTERN, text);
 			identifyQuestionsIdsFromUrls(links, soQuestionsIdsInsideTexts);
 			
 		}
+		logger.info("Number of recovered questions from URLs: "+countRecoveredPostsFromLinks);
+		
 		logger.info("Number of questions ids identified inside links: "+soQuestionsIdsInsideTexts.size());
 		
 		Set<SoThread> newThreadsAssembledFromLinks = assembleListOfThreads(soQuestionsIdsInsideTexts);
 		logger.info("Number of new Threads built from link's ids: "+newThreadsAssembledFromLinks.size());
 		
+		logger.info("Number of posts that are answers and had their parent thread fetched: "+countPostIsAnAnswer);
 		
 		threads.addAll(newThreadsAssembledFromLinks);
 		logger.info("Second total number of threads: "+threads.size()+" as a result of all discovered threads...");
+		
+		logger.info("Total number of posts stored in cache: "+allRetrievedPostsCache.size());
 		
 		return threads;
 	}
@@ -500,7 +516,7 @@ public class PitBotApp {
 		 * The false positives like the word "How" is adjusted in the relevance calculation process where it will not belong to 
 		 * the intersection of codes present between the main bucket and the code section of the post being compared.  
 		 */
-		getClassesNamesForString(classesNames,presentingBody);
+		botUtils.getClassesNamesForString(classesNames,presentingBody);
 		classesNames.addAll(apis);
 		mainBucket.setClassesNames(classesNames);
 		
@@ -594,6 +610,21 @@ public class PitBotApp {
        return bucketsList;
 	}
 
+
+	private void step9(List<Bucket> rankedBuckets,String googleQuery, List<String> rackApis) throws IOException {
+		//showBucketsOrderByCosineDesc(bucketsList);
+		//showRankedList(rankedBuckets);
+		int pos=0;
+		for(Bucket bucket: rankedBuckets){
+			logger.info("Rank: "+(pos+1)+ " total Score: "+bucket.getComposedScore() +" - cosine: "+bucket.getCosSim()+ " - coverageScore: "+bucket.getCoverageScore()+ " - codeSizeScore: "+bucket.getCodeSizeScore() +" - repScore: "+bucket.getRepScore()+ " - upScore: "+bucket.getUpScore()+ " - id: "+bucket.getPostId()+ " \n "+bucket.getPresentingBody());
+			buildOutPutFile(bucket,pos+1,googleQuery,rackApis);
+			pos++;
+			if(pos==20){
+				break;
+			}
+		}
+		
+	}
 	
 
 	private void showBucketsOrderByCosineDesc(List<Bucket> bucketsList) {
@@ -604,7 +635,7 @@ public class PitBotApp {
 		});
 		int pos=1;
 		for(Bucket bucket: bucketsList){
-			logger.info("Rank: "+(pos)+ " cosine: "+bucket.getCosSim()+" id: "+bucket.getPostId()+ " - "+bucket.getPresentingBody());
+			logger.info("Rank: "+(pos)+ " cosine: "+bucket.getCosSim()+" id: "+bucket.getPostId()+ " -\n "+bucket.getPresentingBody());
 			pos++;
 			if(pos>10){
 				break;
@@ -614,36 +645,51 @@ public class PitBotApp {
 	}
 	
 
-	private void showRankedList(List<Bucket> rankedBuckets) {
+	/*private void showRankedList(List<Bucket> rankedBuckets) {
 		int pos=0;
 		for(Bucket bucket: rankedBuckets){
-			logger.info("Rank: "+pos+ " total Score: "+bucket.getComposedScore() +" - cosine: "+bucket.getCosSim()+ " - coverageScore: "+bucket.getCoverageScore()+ " - codeScore: "+bucket.getCodeScore() +" - repScore: "+bucket.getRepScore()+ " - upScore: "+bucket.getUpScore()+ " - id: "+bucket.getPostId()+ " - "+bucket.getPresentingBody());
+			logger.info("Rank: "+(pos+1)+ " total Score: "+bucket.getComposedScore() +" - cosine: "+bucket.getCosSim()+ " - coverageScore: "+bucket.getCoverageScore()+ " - codeSizeScore: "+bucket.getCodeSizeScore() +" - repScore: "+bucket.getRepScore()+ " - upScore: "+bucket.getUpScore()+ " - id: "+bucket.getPostId()+ " \n "+bucket.getPresentingBody());
+			buildOutPutFile(bucket,pos+1);
 			pos++;
-			if(pos==10){
+			if(pos==20){
 				break;
 			}
 		}
-	}
+	}*/
 
-	private Bucket buildAnswerPostBucket(Post post) throws Exception {
+	
+
+	public Bucket buildAnswerPostBucket(Post post) throws Exception {
+		//for tests --remove in production
+		/*if(botUtils==null) {
+			botUtils = new BotUtils();
+		}*/
+		
 		Bucket bucket = new Bucket();
 		bucket.setParentId(post.getParentId());
 		bucket.setPostId(post.getId());
 		bucket.setPostScore(post.getScore());
-		
 		bucket.setUserReputation(post.getUser()!=null? post.getUser().getReputation():null);
+				
+		Post parentPost = allRetrievedPostsCache.get(post.getParentId());
+		if(parentPost==null) {
+			throw new PitBotException("Parent post not found... this does not make sense... ");
+		}
+		
 		
 		String presentingBody = botUtils.buildPresentationBody(post.getBody());
 		bucket.setPresentingBody(presentingBody);
 		
-		List<String> codes = botUtils.getCodes(presentingBody);
-		bucket.setCodes(codes);
+		List<String> preCodes = botUtils.getPreCodes(presentingBody);
+		bucket.setCodes(preCodes);
+		List<String> smallCodes = botUtils.getSimpleCodes(presentingBody);
 		
-		
+		//classes names of parent post are set inside getParentProcessedContentStemmedStopped method
+		String parentProcessedContentStemmedStopped = getParentProcessedContentStemmedStopped(parentPost);
+				
 		//extract classes names
-		Set<String> classesNames = getClassesNames(codes);
-		bucket.setClassesNames(classesNames);
-		
+		Set<String> classesNames = botUtils.getClassesNames(smallCodes);
+		classesNames.addAll(botUtils.getClassesNames(preCodes));
 		String processedBodyStemmedStopped = "";
 		
 		for(String className: classesNames){
@@ -651,46 +697,76 @@ public class PitBotApp {
 		}
 		processedBodyStemmedStopped+= presentingBody;
 		processedBodyStemmedStopped = botUtils.buildProcessedBodyStemmedStopped(processedBodyStemmedStopped,true);
+		processedBodyStemmedStopped+= " "+parentProcessedContentStemmedStopped;
 		
+		classesNames.addAll(parentPost.getClassesNames());   //reinforce classes set with parent post
+		bucket.setClassesNames(classesNames);
 		
 		bucket.setProcessedBodyStemmedStopped(processedBodyStemmedStopped);
 		
 		return bucket;
 	}
 
-	private Set<String> getClassesNames(List<String> codes) {
+	
 
-		Set<String> classesNames = new HashSet();
-		for(String code: codes) {
-			getClassesNamesForString(classesNames,code);
+	private String getParentProcessedContentStemmedStopped(Post parentPost) throws Exception {
+		
+		/*
+		 * First the title: extract classes and processed text
+		 */
+		Set<String> classesNamesParentPost = new LinkedHashSet<>();
+		String presentingTitle = botUtils.buildPresentationBody(parentPost.getTitle());
+		botUtils.getClassesNamesForString(classesNamesParentPost,presentingTitle);
+		
+		String processedTitleStopped = BotUtils.removeSpecialSymbolsTitles(presentingTitle);
+		
+		//after stemming, add classes names
+		for(String className: classesNamesParentPost){
+			processedTitleStopped+= " "+className;
 		}
-		return classesNames;
+		
+		//stemming and stop words
+		processedTitleStopped = botUtils.tokenizeStopStem(processedTitleStopped);
+		
+		//remove unnecessary words, used in the question but not useful to match with the answers
+		processedTitleStopped = botUtils.removeUnnecessaryWords(processedTitleStopped);
+		
+		//Remove duplicates
+		processedTitleStopped = BotUtils.removeDuplicatedTokens(processedTitleStopped," ");
 				
+		
+		/*
+		 * Now the classes and processed text from the body
+		 */
+		
+		
+		String presentingBody = botUtils.buildPresentationBody(parentPost.getBody());
+		//extract classes names
+		List<String> preCodes = botUtils.getPreCodes(presentingBody);
+		List<String> smallCodes = botUtils.getSimpleCodes(presentingBody);
+		
+		classesNamesParentPost.addAll(botUtils.getClassesNames(smallCodes));
+		classesNamesParentPost.addAll(botUtils.getClassesNames(preCodes));
+		
+		Set<String> classesNamesOnlyBody = botUtils.getClassesNames(smallCodes);
+		classesNamesOnlyBody.addAll(botUtils.getClassesNames(preCodes));
+		
+		String processedBodyStemmedStopped="";
+		
+		//extract classes names
+		parentPost.setClassesNames(classesNamesParentPost);
+		
+		for(String className: classesNamesOnlyBody){
+			processedBodyStemmedStopped+= className+ " ";
+		}
+		processedBodyStemmedStopped+= presentingBody;
+		processedBodyStemmedStopped = botUtils.buildProcessedBodyStemmedStopped(processedBodyStemmedStopped,true);
+		
+		processedBodyStemmedStopped = processedTitleStopped + " "+processedBodyStemmedStopped;
+		return processedBodyStemmedStopped;
 	}
 
-	private void getClassesNamesForString(Set<String> classesNames, String code) {
-		//remove java keywords
-		for(String keyword: BotUtils.keywords){
-			code= code.replaceAll(keyword,"");
-		}
-		
-		//remove double quotes contents
-		code= code.replaceAll(BotUtils.DOUBLE_QUOTES_REGEX_EXPRESSION,"");
-		
-		//remove comments
-		code = code.replaceAll( BotUtils.COMMENTS_REGEX_EXPRESSION, BotUtils.COMMENTS_REPLACEMENT_EXPRESSION );
-		
-		//Get classes in camel case
-		Pattern pattern = Pattern.compile(BotUtils.CLASSES_CAMEL_CASE_REGEX_EXPRESSION);
-		Matcher matcher = pattern.matcher(code);
-		while (matcher.find()) {
-			if(matcher.group(0)!=null && matcher.group(0).length()>3) {
-				classesNames.add(matcher.group(0));
-			}
-			
-		}
-		
-	}
+	
 
 	/*private Set<Post> getPostsFromThreads(Set<SoThread> threads) {
 		Set<Post> allPosts = new HashSet<>();
@@ -754,31 +830,38 @@ public class PitBotApp {
 		}
 	}
 
-
-
-	private void initializeVariables() {
+	public PitBotApp() {
 		allQuestionsIds = new HashSet<>();
 		allAnwersIds = new HashSet<>();
 		allCommentsIds = new HashSet<>();
 		avgScore = 0d;
 		avgReputation = 0d;
-		
+		allRetrievedPostsCache = new HashMap<>();
 	}
+
+	/*public void initializeVariables() {
+		allQuestionsIds = new HashSet<>();
+		allAnwersIds = new HashSet<>();
+		allCommentsIds = new HashSet<>();
+		avgScore = 0d;
+		avgReputation = 0d;
+		allRetrievedPostsCache = new HashMap<>();
+	}*/
 
 
 	private Set<SoThread> assembleListOfThreads(Set<Integer> soPostsIds) {
 		//allQuestionsIds.addAll(soQuestionsIds);
 		Set<SoThread> threads = new LinkedHashSet<>();
-		
+				
 		for(Integer questionId: soPostsIds) {
 			Post post = pitBotService.findPostById(questionId);
 			if(post==null) {
-				logger.info("Post has been excluded or is not present in dataset because it is not a java post: "+questionId);
+				countExcludedPosts++;
 				continue; //could have been excluded 
 			}
 			
 			if(post.getPostTypeId().equals(2)) { 
-				logger.info("Post "+questionId+ " is an answer. Fetching its parent thread: "+post.getParentId());
+				countPostIsAnAnswer++;
 				//soPostsIds.remove(post.getParentId()); //fetch the parent only once
 				if(!soPostsIds.contains(post.getParentId())) {
 					post = pitBotService.findPostById(post.getParentId());
@@ -797,6 +880,8 @@ public class PitBotApp {
 			setCommentsUsers(questionComments);
 			post.setComments(questionComments);
 			
+			storeInCache(post);
+			
 			List<Post> answers = pitBotService.findAnswersByQuestionId(post.getId());
 			
 			for(Post answer: answers) {
@@ -806,6 +891,7 @@ public class PitBotApp {
 				List<Comment> answerComments = pitBotService.getCommentsByPostId(answer.getId());
 				setCommentsUsers(answerComments);
 				answer.setComments(answerComments);
+				storeInCache(answer);
 				//allAnwersIds.add(answer.getId());
 			}
 			
@@ -814,11 +900,16 @@ public class PitBotApp {
 			threads.add(soThread);
 			
 		}
+		
+		
+		logger.info("Number of posts that has been excluded, or is not present in dataset because it is not a java post, or is newer than the dataset: "+countExcludedPosts);
+		
 		return threads;
 		
 	}
 
 
+	
 	private void identifyQuestionsIdsFromUrls(List<String> urls, Set<Integer> soQuestionsIds) {
 		for(String url: urls){
 			if(!url.contains("stackoverflow.com")) {
@@ -830,7 +921,7 @@ public class PitBotApp {
 			Matcher matcher = pattern.matcher(url);
 			if (matcher.find()) {
 				soQuestionsIds.add(new Integer(matcher.group(1)));
-				logger.info("Recovering question from URL: "+url);
+				countRecoveredPostsFromLinks++;
 			}
 			//System.out.println(url);
 			
@@ -839,34 +930,11 @@ public class PitBotApp {
 	}    
 	
 	
+	public void storeInCache(Post post) {
+		allRetrievedPostsCache.put(post.getId(), post);
+	}
 
-	/*private void preProcess() throws Exception {
-		
-		
-		 * a previous script filled postsmin table containing only java posts
-		 
-		postsByFilter = pitBotService.getAllPosts();
-		processedPostsByFilter = getAllPostsFromSet();
-		logger.info("Number of posts to perform stemming and remove stop words: "+processedPostsByFilter.size());
-		performStemStop();
-		
-		processedPostsByFilter = null; 
-		
-	}
-*/
 	
-	private Set<ProcessedPostOld> getAllPostsFromSet() {
-		Set<ProcessedPostOld> processedPostsByFilter = new HashSet();
-		
-		logger.info("now creating new TOs...");
-		for(Post post: postsByFilter) {
-			ProcessedPostOld newPost = new ProcessedPostOld();
-			BeanUtils.copyProperties(post,newPost);
-			processedPostsByFilter.add(newPost);
-		}
-		logger.info("finished new TOs...");
-		return processedPostsByFilter;
-	}
 
 	public Bucket getMainBucket() {
 		return mainBucket;
@@ -906,6 +974,30 @@ public class PitBotApp {
 		tmpList = null;
 	}*/
 
-	
+	private Set<Integer> getStaticIdsForTests() {
+		HashSet<Integer> soPostsIds = new LinkedHashSet<>();
+		soPostsIds.add(10117026);
+		soPostsIds.add(6416706);
+		soPostsIds.add(10117051);
+		soPostsIds.add(35593309);
+		soPostsIds.add(11018325);
+		soPostsIds.add(23329173);
+		soPostsIds.add(40064173);
+		soPostsIds.add(46107706);
+		soPostsIds.add(8174964);
+		soPostsIds.add(9740830);
+		
+		for(Integer id:soPostsIds) {
+			logger.info("id: "+id);
+		}
+		
+		return soPostsIds;
+	}
+
+
+	private void buildOutPutFile(Bucket bucket, int pos, String googleQuery, List<String> rackApis) {
+		
+		
+	}
 	
 }

@@ -1,0 +1,10 @@
+----------------- No.28 -----------------
+query : docker build with internal maven dependency hosted on github
+
+----Summary----
+What You Are Trying To Import Is Actually A Maven Project. What I Usually Do In Those Cases Is The Following Nb Pictures Are Taken With Eclipse Mars 4.5.1 You Will Need To Adjust With Your Eclipse Installation.
+Since Your Project Seems To Be Using Pom.Xml Use Maven Is Eclipse Plugin To Create An Eclipse Project.
+If You Have M2eclipse This Will Automatically Configure The Projects With The Maven And Java Nature.
+Regarding The Feedback Wehave Came Up With The Following Solution.
+Make Sure You Do Not Start Docker In A Subdir Of /Home/Me. Or When You Are Starting Docker In /Home/Me/Myproject Make A Directory /Home/Me/Myproject/Shareddir And Copy Settings.Xml To This Dir.
+----------------------------------------

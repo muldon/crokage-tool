@@ -1,0 +1,10 @@
+----------------- No.84 -----------------
+query : installation fail when installing the android plugin for eclipse
+
+----Summary----
+Windows 64 Bit Jdk 64 Bit Solution That Worked For Me  Tried All The Above Solutions None Of Them Worked I Have Been Trying To Solve It From Past Few Days And Now I Done It Successfully.For Me The Problem Was When I First Installed Android Studio My Jdk Version Was 1.7 Then After Installing I Updated The Jdk To 1.8then I Removed Old Jdk Folder And Everything Was Messed Up Even Uninstalling And Reinstalling Android Studio Randomly Did Not Solved The Issue.
+I Got The Problem That The Installation Stopped By  Name Has Stopped Working Error. I Have Installed Java Se Development Kit Already Also Set Both Sdk_home And Java_home That Point To C Program Files Java Jdk1.7.0_21.
+If You Are Getting Message Your Android Sdk Is Out Of Date… — Click Configure —> Project Defaults —> Project Structure Pick Sdks —> Android Sdk And In A Build Target Choose Android 4.2.2 . Click Ok . Now It Should Work Fine.
+Make Sure You Restart Android Studio.
+Go To Your Android Studio Installation Folder And Locate The Bin Folder. Inside The Bin Folder You Will Find Studio.Bat . Execute The File And It Ll Show The Error. If It Is About The Java Path Then Follow The Tip 1.
+----------------------------------------

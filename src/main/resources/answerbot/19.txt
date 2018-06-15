@@ -1,0 +1,10 @@
+----------------- No.19 -----------------
+query : java how do i draw on a jframe without losing it is existing drawing
+
+----Summary----
+I Am Betting That You Are Getting Your Graphics Object Via A Getgraphics Call On A Component And Are Disatisfied Since This Obtains A Graphics Object Which Does Not Persist. It Is For This Reason That You Should Not Do This But Instead Just Do Your Drawing Inside Of The Jpanel Is Paintcomponent. If You Do This All Will Be Happy.
+As An Aside We Ll Be Able To Help You Better If You Tell Us More Of The Pertinent Details Of Your Problem Such As How You Re Getting Your Graphics Object And How You Re Trying To Draw With It Key Issues Here. Otherwise We Re Limited To Taking Wild Guesses About What You Re Trying To Do.
+Something Like This.
+For The Two Common Ways To Do Incremental Paint Check Out Custom Painting Approaches.
+Do Not Call Setsize On Jframe Rather Call Pack Before Setting Jframe Visible Rather Override Getprefferedsize Or Setprefferedsize Of Jpanel And Return A Dimension Which Fits All Drawing In It.
+----------------------------------------

@@ -1,0 +1,10 @@
+----------------- No.50 -----------------
+query : how to disable processing of jsp urls in spring mvc
+
+----Summary----
+It Looks To Me Like Youhave Set Up Your Controller Correctly. As You Pointed Out The Problem Might Be In How Spring Parses Annotations Upon Start Up.
+This Should Make It So That Spring Wo Not Try To Parse Extensions.
+See Also Spring Mvc Pathvariable Getting Truncated.
+And Then In Web/Inf/Spring/Mvcconfig.Xml I Have Something Like This.
+You Can Selectively Add No Cache Headers To Just Index.Html Using Spring Security Xml Configuartion Like This.
+----------------------------------------

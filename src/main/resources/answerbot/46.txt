@@ -1,0 +1,10 @@
+----------------- No.46 -----------------
+query : how do i convert a exist java project to maven project
+
+----Summary----
+Since This Caused Me Quite A Bit Of Grief I Figure I Should Post The Solution I Found. Apparently You Are Not Supposed To Just Include A Regular Lib Jar In A Maven Project Although I Swear I Have Done It Before And It Worked I Found This Way To Include A Local Jar That Is Not Form A Repository From This Post.
+You Can Include A Regular Jar In Your Maven Project Just As You Described Though It Is Not A Best Practice Mainly Because Then You Not Even Lose The Functionality Of Maven For That Jar But Also The Whole Point Of Maven Dependency Management You Will Have To Include That Jar With Your Source To Make It Build.
+Chengdong Is Answer Is Correct You Should Use Configure Convert To Maven Project . However I Must Add The Conversion Process Has Been Greatly Improved Since M2e 0.13.0 M2e 1.1 And M2ewtp 0.16.0 Can Now Convert The Existing Eclipse Settings Into Maven Plugin Configuration .
+Start From M2e 0.13.0 If Not Earlier Than You Can Convert A Java Project To Maven Project From The Context Menu. Here Is How.
+You Can Try Using Mavenexternaldependencyplugin Which Shows A Nice Way To Add External Jars Into Any Maven Project.
+----------------------------------------

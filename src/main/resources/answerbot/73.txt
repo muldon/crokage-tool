@@ -1,0 +1,10 @@
+----------------- No.73 -----------------
+query : hibernate bean validation on submit only
+
+----Summary----
+You Need To Set The Conversion Service In The Beanpropertybindingresult.
+Removing This Jar Javax.Validation Validationapi 1.1.0.Final Solved My Problem. Make Sure U Have Only One Validation Jar. If We Have Two Jars Then They Conflict Resulting In Error.
+Try Adding This Dependency To Your Pom.Xml.
+The Nosuchmethoderror Indicate That You Have Loaded Wrong Version Of Jar That Tend To Have No Method Named Like Which You Have Used. I Highly Recommend You To Use Hibernate 4.0 Or Little Lower Which Turn Out To Be More Stable To Transplant.
+I Filed A Bug Report For This Https //Hibernate.Onjira.Com/Browse/Hhh8028.
+----------------------------------------

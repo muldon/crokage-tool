@@ -1,0 +1,10 @@
+----------------- No.63 -----------------
+query : how to inject a map<string list> in java springs
+
+----Summary----
+Before We Get Spring 3 Which Allows You To Inject Property Constants Directly Into Your Beans Using Annotations I Wrote A Subclass Of The Propertyplaceholderconfigurer Bean That Does The Same Thing. So You Can Mark Up Your Property Setters And Spring Will Autowire Your Properties Into Your Beans Like So.
+Because U Want To Pass It Via The A Tag Href Attribute Add A Onchange Handler On Your Select Tag Then At That Handler Modify The Href Attribute Of The Second Page Link. You Should Use Javascript.
+You May Create A Class With Common Rules And Auto Wire Them In Other Rules? Would Not That Work?.
+There Is A Feature Called Collection Merging That Does Exactly This. See Section 3.3.3.4.1. Collection Merging In The Spring Documentation Or The 2008 Blog Post With An Example That I Wrote On The Subject .
+You Can Take The Same Approach Using Xml Config And Inject It Using Ref Attribute As Well.
+----------------------------------------

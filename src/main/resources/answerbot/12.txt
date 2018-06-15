@@ -1,0 +1,10 @@
+----------------- No.12 -----------------
+query : maven pomeditor dependency graph missing
+
+----Summary----
+If The Dependency Graph Feature Of M2eclipse Does Not Cover Your Needs Maybe Have A Look At The Maven Graph Plugin And In Particular Its Graph Reactor Goal.
+Have Not You Opened The Pom Via Eclipse And Taken A Look Onto The Tabfolders Of The Pom.Xml Where One Entry Is Name Dependency Graph ? Ah Sorry Oversight Something You Can Create A Dependency Tree Via Mvn Dependency Tree On Command Line But This Produces No Graphical View. An Other Better Solution Might Be The Maven Overview Plugin.
+Installed Maven Graph Plugin Http //Mvnplugins.Fusesource.Org/Maven/1.10/Mavengraphplugin/Index.Html Configured It This Way To Hide Third Party Dependencies. Worked Out Fine.
+Another Option Is The Com.Github.Janssk1 Maven Dependency Graph Plugin . This Plugin Outputs The Dependencies To A Graphml File Which Can Be Opened And Edited In An Editor Like Yed.
+Update The Dependency Graph Feature Was Removed In M2eclipse 1.0 . For More Info See Maven Pomeditor Dependency Graph Missing.
+----------------------------------------

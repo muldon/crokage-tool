@@ -1,0 +1,10 @@
+----------------- No.33 -----------------
+query : why static fields are not initialized in time
+
+----Summary----
+Yes They Are Initialized In The Order In Which They Appear In The Source. You Can Read All Of The Gory Details In The Java Language Specification §12.4.2 . See Step 9 Which Reads.
+Execute Either The Class Variable Initializers And Static Initializers Of The Class Or The Field Initializers Of The Interface In Textual Order As Though They Were A Single Block Except That Final Class Variables And Fields Of Interfaces Whose Values Are Compiletime Constants Are Initialized First.
+Numberofinvoices Should Be Static. Invoicenumber Should Not Be Static. And You Should Synchronize The Access To This Field. See Also What Is The Best Way To Increase Number Of Locks In Java.
+You Should Declare Your Numberofinvoices Member As A Static Member.
+You Declared Invoicenumber As Static But Numberofinvoices Is Not Static. In Your Constructor You Are Incrementing The Number Of Invoices Which Being Nonstatic Is Initialised To 0 Every Time You Create An Instance Of It. Then You Assign This Value To Your Invoice Number.
+----------------------------------------

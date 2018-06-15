@@ -3,6 +3,7 @@ package com.ufu.bot.to;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -83,12 +84,13 @@ public class Post {
 	private User user;
 	
 	@Transient
-	//private double[] titleVectors,tagVectors,bodyVectors, topicVectors;
 	private String titleVectors,tagVectors,bodyVectors, topicVectors;
 	
 	@Transient
 	private double similarityScore;
 	
+	@Transient
+	private Set<String> classesNames;
 	
 	@Transient
 	private ArrayList<Post> topKrelatedQuestions;  //lista de ids de posts com maior similaridade ( maior para menor )
@@ -366,6 +368,14 @@ public class Post {
 	public String toString() {
 		return "Post [id=" + id + ", body=" + body + ", title=" + title + ", tags=" + tags + ", postTypeId=" + postTypeId + ", parentId=" + parentId + ", creationDate=" + creationDate + ", score="
 				+ score + ", ownerUserId=" + ownerUserId + ", answerCount=" + answerCount + ", commentCount=" + commentCount + ", user=" + user + "]";
+	}
+
+	public Set<String> getClassesNames() {
+		return classesNames;
+	}
+
+	public void setClassesNames(Set<String> classesNames) {
+		this.classesNames = classesNames;
 	}
 
 	

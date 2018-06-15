@@ -1,0 +1,10 @@
+----------------- No.79 -----------------
+query : error in ocjp exam simulation how many objects are really created
+
+----Summary----
+Since The Id Field Is Static It Will Have The Same Value Throughout And Outside Of All Instances Of Bird .
+After Creating Two Bird Objects The Constructor Will Have Been Called Twice Therefore The Id Will Be 2 .
+See Understanding Instance And Class Members.
+The Issue Is Clearly An Import Export Issue. As Your Test Which Is Using Your Meta Data Is Not Aware Of Those Extra Data. The Bundle You Generated With The Streambundle Needs To Add An Extra Header Information Actually Exporting Those Extra Data.
+Surround With Try Catch Or Declare The Ioexception In Your Method Declaration.
+----------------------------------------

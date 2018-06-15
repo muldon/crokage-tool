@@ -1,0 +1,10 @@
+----------------- No.34 -----------------
+query : at which places are jvm options hidden by sts software how do i make the java hotspot maxpermsize warning go away when using sts
+
+----Summary----
+Compatibility Guide For Jdk 8 Says That In Java 8 The Command Line Flag Maxpermsize Has Been Removed. The Reason Is That The Permanent Generation Was Removed From The Hotspot Heap And Was Moved To Native Memory. So In Order To Remove This Message Edit Maven_opts Environment User Variable.
+In Jboss 6.4 Right Click On The Server And Open Launch Configuration Under Vm Argument You Will Find Dprogram.Name Jbosstools Jbosseap Server Xms1024m Xmx1024m Xx Maxpermsize 256m Update It To Dprogram.Name Jbosstools Jboss 6.4 Server Xms512m Xmx512m This Will Solve Your Problem.
+Java 7.
+Where Maven_projectbasedir By Default Is Your Home Directory. So Two Places You Can Take A Look First Is File Maven_projectbasedir/.Mvn/Jvm.Config If It Exists. Secondly Look At Files Possibly Set Up The Environment Variable Maven_opts. Candidate Files Are .Bashrc .Bash_profile .Profile And Those Files Included By Them Such As /Etc/Profile /Etc/Bash.Bashrc.
+Taking A Cue From An Unrelated Error With Classpaths Classpath Container For Grails In Sts I Deleted .Ivy2 And .Grails Folders. Somehow The Previously Compiled Files Were Stale Despite Cleaning. I Do Have Multiple Workspaces For The Same Project Different Branches Which May Be Using The Same .Ivy2 And .Grails Folders Which Very Likely Caused The Problem.
+----------------------------------------

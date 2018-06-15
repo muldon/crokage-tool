@@ -1,20 +1,30 @@
 package com.ufu;
 
 import java.io.IOException;
+import java.io.StringReader;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+import org.apache.commons.io.IOUtils;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import com.ufu.bot.PitBotApp;
 import com.ufu.bot.to.Bucket;
+import com.ufu.bot.to.Post;
 import com.ufu.bot.util.BotUtils;
 
 public class Tester {
@@ -217,7 +227,7 @@ public class Tester {
 				"    }\n" + 
 				"}\n" + 
 				"\n" + 
-				"class Bar extends Foo {\n" + 
+				"class Bar extends Foo{\n" + 
 				"    public String value() { return \"bar\"; } \n" + 
 				"}\n" + 
 				"\n" + 
@@ -433,6 +443,14 @@ public class Tester {
 		
 		String another6Code = "<p><code>IDE</code> may not be enough for designing everything (but it helps lot in development), its always better to learn API and IDE both together.</p>";
 		
+		String another7Code = "<pre><code>private static string string_fromObject(Object obj[]) {\n" + 
+				"    if(obj == null) return null;\n" + 
+				"    string result = new Foo();\n" + 
+				"    return result;\n" + 
+				"}\n" + 
+				"</code></pre>\n" + 
+				"";
+		
 		/*String presentingBody = botUtils.buildPresentationBody(another6Code);
 		System.out.println(presentingBody);
 		List<String> codes = botUtils.getCodes(presentingBody);
@@ -445,12 +463,103 @@ public class Tester {
 		String removed = botUtils.removeStopWords(input);
 		//System.out.println(removed);
 		
-		testStep8();
+		//testStep8();
+		//readAnswerBotQuestionsAndAnswers();
+		//testReadJson();
+		
+		/*PitBotApp app = new PitBotApp();
+		HashSet<String> classesNames = new HashSet<>();
+		
+		String presentingBody = botUtils.buildPresentationBody(another7Code);
+		List<String> codes = botUtils.getCodes(presentingBody);
+		Set<String> classesNamesBody = botUtils.getClassesNames(codes);
+		System.out.println(classesNamesBody);*/
+		
+		
+		testBuildAnswerPostBucket();
+	}
+	
+	
+
+	private void testBuildAnswerPostBucket() throws Exception {
+		String bodyParent = "<p>Given <code>Iterator&lt;Element&gt;</code>, how can we convert that <code>Iterator</code> to <code>ArrayList&lt;Element&gt;</code> (or <code>List&lt;Element&gt;</code>) in the <strong>best and fastest</strong> way possible, so that we can use <code>ArrayList</code>'s operations on it such as <code>get(index)</code>, <code>add(element)</code>, etc.</p>";
+		String bodyAnswer = "<p>Better use a library like <a href=\"https://google.github.io/guava/releases/20.0/api/docs/com/google/common/collect/Lists.html#newArrayList-java.util.Iterator-\" rel=\"noreferrer\">Guava</a>:</p>\n" + 
+				"\n" + 
+				"<pre><code>import com.google.common.collect.Lists;\n" + 
+				"\n" + 
+				"Iterator&lt;Element&gt; myIterator = ... //some iterator\n" + 
+				"List&lt;Element&gt; myList = Lists.newArrayList(myIterator);\n" + 
+				"</code></pre>\n" + 
+				"\n" + 
+				"<p>Another Guava example:</p>\n" + 
+				"\n" + 
+				"<pre><code>ImmutableList.copyOf(myIterator);\n" + 
+				"</code></pre>\n" + 
+				"\n" + 
+				"<p>or <a href=\"http://commons.apache.org/collections/\" rel=\"noreferrer\">Apache Commons Collections</a>:</p>\n" + 
+				"\n" + 
+				"<pre><code>import org.apache.commons.collections.IteratorUtils;\n" + 
+				"\n" + 
+				"Iterator&lt;Element&gt; myIterator = ...//some iterator\n" + 
+				"\n" + 
+				"List&lt;Element&gt; myList = IteratorUtils.toList(myIterator);       \n" + 
+				"</code></pre>\n" + 
+				"";
+		
+		String bodyAnswer2 = "<p>In Java 8, you can use the new <code>forEachRemaining</code> method that's been added to the <code>Iterator</code> interface:</p>\n" + 
+				"\n" + 
+				"<pre><code>List&lt;Element&gt; list = new ArrayList&lt;&gt;();\n" + 
+				"iterator.forEachRemaining(list::add);\n" + 
+				"</code></pre>\n" + 
+				"";
+		
+		String titleParent = "Convert Iterator to ArrayList";
+		
+		
+		PitBotApp app = new PitBotApp();
+		Post answer = new Post();
+		answer.setId(28491752);
+		answer.setBody(bodyAnswer2);
+		answer.setParentId(10117026);
+				
+		Post parent = new Post();
+		parent.setId(10117026);
+		parent.setTitle(titleParent);
+		parent.setBody(bodyParent);
+		
+		app.storeInCache(parent);
+		
+		//Bucket bucket = app.buildAnswerPostBucket(answer);
+		//System.out.println(bucket);
+		
 		
 		
 		
 	}
-	
+
+
+
+
+
+
+	private void testReadJson() throws IOException, ParseException {
+		
+		URL url = Resources.getResource("jsonExample.json");
+		String json = Resources.toString(url, Charsets.UTF_8);
+		
+		JSONParser parser = new JSONParser();
+		JSONObject jsonObject = (JSONObject)parser.parse(json);
+		// loop array
+        JSONArray items = (JSONArray) jsonObject.get("items");
+        Iterator<JSONObject> iterator = items.iterator();
+        while (iterator.hasNext()) {
+        	JSONObject item = iterator.next();
+        	String link = (String) item.get("link");
+            System.out.println(link);
+        }
+		
+	}
+
 	private void testStep8() throws IOException {
 		URL url;
 		String text1,text2,text3,text4,text5,text6,text7,text8,text9,text10;
@@ -479,6 +588,37 @@ public class Tester {
 		app.step8(buckets);
 		
 	}
+	
+	
+	private void readAnswerBotQuestionsAndAnswers() throws IOException {
+		URL url;
+		String fileContent="";
+		String query="";
+		String answer="";
+				
+		for(int i=0; i<100; i++){
+			url = Resources.getResource(i+".txt");
+			fileContent = Resources.toString(url, Charsets.UTF_8);
+			
+			List<String> lines = IOUtils.readLines(new StringReader(fileContent));
+			query = lines.get(1);
+			query = query.replace("query : ","");
+			
+			lines.remove(0);
+			lines.remove(0);
+			lines.remove(0);
+			lines.remove(0);
+			lines.remove(lines.size()-1);
+			
+			answer = lines.stream().collect(Collectors.joining("\n"));
+			System.out.println(answer);
+			
+		}
+		
+	}
+	
+	
+	
 
 	/**
 	 * @throws Exception 

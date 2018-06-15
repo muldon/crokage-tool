@@ -1,0 +1,10 @@
+----------------- No.95 -----------------
+query : jxbrowser freezes whole application
+
+----Summary----
+I Got It.
+This Helped Me. It Seems The .Validate Solved It.
+I Seemingly Solved It By Creating A New Remoteviews Every Time I Update The Notification.
+It Will Freeze So Do This To Ur Eclipse Config File. Increase The Xms And Xmx By Doing It Manually. U Can Find This File In Eclipse Folder And File Is Named Like This Eclipse.Ini.
+There Is A Simple Solution To This Problem But 2 Computers Lan Network Are Required It Is Also Possible To Do It Using Virtual Machine .
+----------------------------------------

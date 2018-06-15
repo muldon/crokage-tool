@@ -1,0 +1,10 @@
+----------------- No.68 -----------------
+query : bundled jar with jre into exe but the exe does not contain jre
+
+----Summary----
+Since It Has Been Established That Your App. Has A Gui I Will Suggest Java Web Start As The Answer.
+Do You Run An Ide? If Not Do You Otherwise Have Ant Installed? If That Is A Yes To Either One Check Out My Small Jnlp Api Examples . Each Comes With Complete Source And A Build File An Ant Build.Xml .
+The Problem With .Exe Files Is That They Typically Search The Java Runtime On Their Own And There Is No Generic Way To Tell All Of Them Where It Is Located.
+Zip The Jre Folder And Include It As A Resource In Your .Exe File.
+I Used Launch4j To Deploy A Swing App Like This Too. I Just Put The Jre Folder Into The Same Folder As My Exe And Jar File. You Can Deploy A Jre With Your Application Just In Case You Need To Ensure It Has The Version It Needs. So My Application Has Its Own Folder With A Jre Folder In It Other Jar Files My App Uses The Exe And Ini File For Launch4j. I Cannot Remember If I Told Launch4j To Use The Jre In That Folder Or Not But It Has To Know To Use That Local Jre.
+----------------------------------------

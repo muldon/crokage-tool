@@ -1,74 +1,33 @@
 package com.ufu.bot.service;
 
-import java.sql.Timestamp;
-import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.Sets;
-import com.ufu.bot.repository.CommentsRepository;
-import com.ufu.bot.repository.ExperimentRepository;
-import com.ufu.bot.repository.FeatureRepository;
-import com.ufu.bot.repository.GenericRepository;
-import com.ufu.bot.repository.PairRepository;
-import com.ufu.bot.repository.PostsRepository;
-import com.ufu.bot.repository.ProcessedPostsRepository;
-import com.ufu.bot.repository.RecallRateRepository;
-import com.ufu.bot.repository.UsersRepository;
 import com.ufu.bot.to.Comment;
+import com.ufu.bot.to.Evaluation;
 import com.ufu.bot.to.Experiment;
+import com.ufu.bot.to.ExternalQuestion;
 import com.ufu.bot.to.Post;
-import com.ufu.bot.to.ProcessedPostOld;
-import com.ufu.bot.to.RecallRate;
+import com.ufu.bot.to.RelatedPost;
+import com.ufu.bot.to.Result;
+import com.ufu.bot.to.SurveyUser;
 import com.ufu.bot.to.User;
-import com.ufu.bot.util.BotUtils;
+import com.ufu.bot.util.AbstractRepositoriesUtils;
 
 
 
 @Service
 @Transactional
-public class PitBotService {
-	
-	@Autowired
-	protected PostsRepository postsRepository;
-	
-	@Autowired
-	protected CommentsRepository commentsRepository;
-	
-	@Autowired
-	protected ProcessedPostsRepository processedPostsRepository;
-	
-	
-	@Autowired
-	protected GenericRepository genericRepository;
-	
-	@Autowired
-	protected ExperimentRepository experimentRepository;
-	
-	@Autowired
-	protected RecallRateRepository recallRateRepository;
-	
-	@Autowired
-	protected FeatureRepository featureRepository;
-	
-	@Autowired
-	protected PairRepository pairRepository;
-	
-	@Autowired
-	protected UsersRepository usersRepository;
-	
-	
-	@Autowired
-	private BotUtils botUtils;
+public class PitBotService extends AbstractRepositoriesUtils{
+		
 	
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 	
@@ -79,10 +38,7 @@ public class PitBotService {
 	}
 	
 	
-	protected Timestamp getCurrentDate(){
-		Timestamp ts_now = new Timestamp(Calendar.getInstance().getTimeInMillis());
-		return ts_now;
-	}
+	
 
 
 	@Transactional(readOnly = true)
@@ -145,16 +101,6 @@ public class PitBotService {
 	}
 */
 
-	public void savePost(ProcessedPostOld newPost) {
-		processedPostsRepository.save(newPost);
-		
-	}
-
-	@Transactional(readOnly = true)
-	public Set<ProcessedPostOld> getProcessedQuestions(String tagFilter) {
-		return genericRepository.getProcessedQuestions(tagFilter);
-	}
-
 
 	
 
@@ -164,34 +110,17 @@ public class PitBotService {
 	}
 
 
-	public void saveRecallRate(RecallRate recallRate) {
-		recallRateRepository.save(recallRate);
-	}
+
 
 	@Transactional(readOnly = true)
 	public Set<Post> getPostsByFilters(String tagFilter) {
 		return genericRepository.getPostsByFilters(tagFilter);
 	}
 
-	@Transactional(readOnly = true)
-	public ProcessedPostOld findProcessedPostById(Integer id) {
-		return processedPostsRepository.findOne(id);
-	}
+	
 
 
 
-
-	public void cleanOldData(String tagFilter) {
-		//clean old features for this tag
-		featureRepository.deleteByTag(tagFilter);
-		pairRepository.deleteByMaintag(tagFilter);
-		logger.info("cleaned old data for tag... :"+tagFilter);
-	}
-
-
-	public List<ProcessedPostOld> findProcessedPostsByIdIn(Set<Integer> allApiIdsExceptDifferentPairsQuestionsIds) {
-		return processedPostsRepository.findByIdIn(allApiIdsExceptDifferentPairsQuestionsIds);
-	}
 
 
 	public List<Comment> getCommentsByPostId(Integer postId) {
@@ -221,6 +150,93 @@ public class PitBotService {
 	public Set<Post> getAllPosts() {
 		Set<Post> set = Sets.newHashSet(postsRepository.findAll());
 		return set;
+		
+	}
+
+
+
+
+
+	public void saveExternalQuestion(ExternalQuestion externalQuestion) {
+		externalQuestionRepository.save(externalQuestion);
+		
+	}
+
+
+
+
+
+	public List<ExternalQuestion> getAllExternalQuestionsAnswerBot() {
+		return externalQuestionRepository.findAllExternalQuestionsAnswerBot();
+	}
+
+
+
+
+
+	public void saveRelatedPost(RelatedPost relatedPost) {
+		relatedPostRepository.save(relatedPost);
+		
+	}
+
+
+
+
+
+	public List<Post> getRelatedPosts(Integer externalQuestionId) {
+		return relatedPostRepository.findRelatedPosts(externalQuestionId);
+	}
+
+
+
+
+
+	public void saveSurveyUser(SurveyUser surveyUser1) {
+		surveyUserRepository.save(surveyUser1);
+		
+	}
+
+
+
+
+
+	public SurveyUser getSurveyUserByLogin(String login) {
+		return surveyUserRepository.findByLogin(login);
+	}
+
+
+
+
+
+	public void saveEvaluation(Evaluation evaluation) {
+		evaluationRepository.save(evaluation);
+		
+	}
+
+
+
+
+
+	public void saveResult(Result result) {
+		resultRepository.save(result);
+		
+	}
+
+	public void saveExternalQuestionAndRelatedIds(ExternalQuestion answerBotQuestion, Map<Integer, Post> allRetrievedPostsCache) {
+		Set<Integer> relatedPostsIds = allRetrievedPostsCache.keySet();
+		
+		/*
+		 * Save the external question
+		 */
+		externalQuestionRepository.save(answerBotQuestion);
+		
+		/*
+		 * save all related posts 
+		 */
+		for(Integer relatedPostId: relatedPostsIds) {
+			RelatedPost relatedPost = new RelatedPost(relatedPostId,answerBotQuestion.getId());
+			relatedPostRepository.save(relatedPost);
+		}
 		
 	}
 

@@ -1,0 +1,10 @@
+----------------- No.48 -----------------
+query : arabic letters giving me output as
+
+----Summary----
+Could Be That The Parsing Is Ok But The Output Is Wrong.
+In Json I Encode Arabic Text In Uxxxx Format.And It Is Working.
+I Think That In Your Case It Is Encoding Problem On One Of The Sides Either The Sending Side Server Corrupts The Characters Because Does Not Say That They Are Utf8 Or Your Blackberry Device Does Not Support Arabic. But If You Fix This Problem You Will Probably Meet #2 And #3 So Be Strong! Good Luck.
+Since Parameter P Is Arabic Character You Should Not Probably Read It As 8859_1 Encoding Character Since It Does Not Correspond To Arabic Characters Http //En.Wikipedia.Org/Wiki/Iso/Iec_88591 Try To Use Utf8 Encoding For Getting Bytes.
+You Re Printing The Reference To The Array That Is Returned By Shufflearrays . This Does Not Automatically Print Out The Contents Of The Array But Instead Prints The Array Reference. You Would Want To Do Something Like The Following.
+----------------------------------------

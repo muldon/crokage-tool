@@ -1,0 +1,10 @@
+----------------- No.58 -----------------
+query : xml to json using jsonlib
+
+----Summary----
+This Worked For Me With Jsonlib 2.4.
+Update.
+If I Understand Question Correctly I Think Jsonlib Is Unique In Its Assumption Of A String Being Passed Needing To Be Parsed. Other Libs Typically Treat It As String To Include With Escaping Of Doublequotes And Backslashes As Necessary I.E. Work As You Would Expect.
+Jsonsimple Offers A Jsonobject.Escape Method.
+Send The Entire Xml Document As String Instead Of Reading Line By Line.
+----------------------------------------

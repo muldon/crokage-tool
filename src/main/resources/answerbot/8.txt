@@ -1,0 +1,10 @@
+----------------- No.8 -----------------
+query : java integer division result as double
+
+----Summary----
+When You Divide Two Int S You Perform Integer Division Which In This Case Will Result In 22/64 0. Only Once This Is Done Are You Creating A Float . And The Float Representation Of 0 Is 0.0 . If You Want To Perform Floating Point Division You Should Cast Before Dividing.
+Another Alternative Is To Use The Mod Function Or % . If There Is A Nonzero Remainder Then Increment The Integer Result Of The Division.
+In Java You Should Do The Same With Math.Ceil .
+All The Integer Math Solutions Are Going To Be More Efficient Than Any Of The Floating Point Solutions.
+When You Are Using A Binary Operator Both Arguments Should Be Of A Same Type And The Result Will Be In Their Type Too. When You Want To Divide Int / Long It Turns Into Long / Long And The Result Is Long . You Shouldmake It Double / Long Or Int / Double To Get A Double Result. Since Double Is Greater That Int And Long Int And Long Will Be Turned Into Double In Double / Long And Int / Double.
+----------------------------------------

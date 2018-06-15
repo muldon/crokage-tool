@@ -1,0 +1,10 @@
+----------------- No.36 -----------------
+query : java 6 creating and detecting the first double value above long.max_value
+
+----Summary----
+The Max Positive Value Of Long Is 2 To The Power Of 63 1 Since Long In Java Is Signed And Therefore Can Hold Negative Integers. The Left Most Bit Is Reserved For The Sign Which Leaves 63 Bits For The Value Itself.
+Out.Write Arr I Will Write Only The Lowest Byte Of Int. The Best Solution Is To Use Java.Io.Dataoutputstream Which Has Writeint Int Method.
+It Is Not Only Equivalent To The Most Efficient Solution But It Makes It Pretty Obvious What Result You Should Expect.
+This May Also Work Correction Of Your Example But Not Entirely Sure.
+Although As Peterlawrey Suggested You Should Consider Using Double And Biginteger .
+----------------------------------------

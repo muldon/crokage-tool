@@ -1,0 +1,10 @@
+----------------- No.80 -----------------
+query : any yaml based fixture loader for java
+
+----Summary----
+Use Beforemethod Not Beforetest.
+According To Documentation A Method Annotated With Beforetest Is Run Before Any Test Method Belonging To The Classes Inside The Tag Is Run.
+This Class Is In Half The Ws Java Libraries Out There. It Is Really Easy To Load It From Multiple Classloaders And Later Compare Them Causing A Linkageerror.
+What Version Of Java Are You Using? The Newest Versions Ship With This Class In The Rt.Jar.
+One Effective But Sledgehammer Technique To Tracking This Down Is To Modify Classloader From The Java Source To Dump Which Jar This Particular Class Is Loading From At Load Time Then Prepend Your Bootclasspath With Your Modified Version.
+----------------------------------------

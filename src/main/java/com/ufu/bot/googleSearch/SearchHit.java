@@ -1,5 +1,7 @@
 package com.ufu.bot.googleSearch;
 
+import org.springframework.stereotype.Component;
+
 import lombok.Getter;
 
 /**

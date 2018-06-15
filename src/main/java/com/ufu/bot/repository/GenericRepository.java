@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.Set;
 
 import com.ufu.bot.to.Post;
-import com.ufu.bot.to.ProcessedPostOld;
 
 
 public interface GenericRepository {
@@ -19,8 +18,7 @@ public interface GenericRepository {
 	
 	public List<Post> getSomePosts();
 
-	public Set<ProcessedPostOld> getProcessedQuestions(String tagFilter);
-
+	
 	//public Set<Post> findClosedDuplicatedNonMastersByTagExceptProcessedQuestions(String tagFilter);
 
 	public Set<Post> getPostsByFilters(String tagFilter);

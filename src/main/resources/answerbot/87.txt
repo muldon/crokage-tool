@@ -1,0 +1,10 @@
+----------------- No.87 -----------------
+query : main java.lang.outofmemoryerror in hashtable sorting and reversing
+
+----Summary----
+Guava Is Bimap Already Provides A Method For Reversing Its Keyvalue Pairs. Perhaps You Could Change The Interface Of The Map In Question To Bimap Or Else Use The Following Code.
+You Might Consider Using One Of Guava Is Multimap Implementations. For Example.
+I Would Do Something Similar But If You Must Do This Kind Of Thing Frequently Consider Guava Only Replacing The List With Set Seems A Little More Consistent And Prefilling The Reversemap.
+Or More Generally.
+You Could Detect Null Then Return Null Or Defencive Value In This Case It Depends On You Business Logic. After You Properly Handle The Npe Another Thing You Should Consider Is Where To Place The Null Values After Being Sorted In Front Of Or Back Of The Collection.
+----------------------------------------

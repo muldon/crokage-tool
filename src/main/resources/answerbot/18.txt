@@ -1,0 +1,10 @@
+----------------- No.18 -----------------
+query : programmatically discover java unlimited encryption
+
+----Summary----
+Some Ftp Frameworks For Java Support Progress Monitoring. Since I Only Started Looking At These A Few Days Ago I Ca Not Tell You Whether This Suits Your Purpose.
+First Question In The Bouncycastle Faq .
+Ok So It Looks Like The Only Way To Distribute The Unlimited Jce Policy Is To Unpack The Required .Jar S And Overwrite The Existing Ones On Users Computers Either During Installation Or Upon First Run Of The Application. But Even That Appears To Be A Hit Or Miss Process.
+The Alternative Route That A Lot Of People Seem To Be Taking Is Using Apis Such As Bouncycastle Which Supports Higher Levels Of Encryption And Can Be Freely And Easily Distributed Even With Commercial Applications.
+I Imagine That Oracle Made It This Way Because Of Restrictions Previously Imposed Of Certain Countries That Now Seem To Have Been Lifted. I Might Be Wrong But I Have Nevertheless Heard That Java Is Working On A Better Implementation To Solve This Problem!.
+----------------------------------------

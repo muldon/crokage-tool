@@ -1,0 +1,10 @@
+----------------- No.94 -----------------
+query : how to run jacoco with java 7 and springinstrument
+
+----Summary----
+Well I Ca Not Tell You What The Exact Problem With Jacoco Is But I Can Show You How Try With Resources Is Compiled. Basically There Are A Lot Of Compiler Generated Switches To Handle Exceptions Thrown At Various Points.
+No Real Question But Wanted To Throw More Research Out There. Tl Dr It Looks Like You Can Achieve 100% Coverage For Tryfinally But Not For Trywithresource.
+Analysis Java7 Example If The Same 4 Tests Run Against The Java7 Style Example Jacoco Indicates 6/8 Branches Are Covered On The Try Itself And 2/2 On The Nullcheck Within The Try. I Tried A Number Of Additional Tests To Increase Coverage But I Can Find No Way To Get Better Than 6/8. As Others Have Indicated The Decompiled Code Which I Did Also Look At For The Java7 Example Suggests That The Java Compiler Is Generating Unreachable Segments For Trywithresource. Jacoco Is Reporting Accurately That Such Segments Exist.
+No Using 1.8 Features In Your Source Code Requires You To Target A 1.8 Vm. I Just Tried The New Java 8 Release And Tried Compiling With Target 1.7 Source 1.8 And The Compiler Refuses.
+In A 64bit System You Have 2 63bytes Of User Address Space But You Can Still Only Map The Amount Of Actual Memory You Have Physical Page File Mapped Files .
+----------------------------------------

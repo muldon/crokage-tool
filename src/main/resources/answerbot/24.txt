@@ -1,0 +1,10 @@
+----------------- No.24 -----------------
+query : en dash being garbled during http response handling or text manipulation
+
+----Summary----
+I Had The Same Problem Using Apache Commonsfileupload. I Did Not Find Out What Causes The Problems Especially Because I Have The Utf8 Encoding In The Following Places 1. Html Meta Tag 2. Form Acceptcharset Attribute 3. Tomcat Filter On Every Request That Sets The Utf8 Encoding.
+You Do Not Use Utf8 To Encode Text Data For Html Forms. The Html Standard Defines Two Encodings And The Relevant Part Of That Standard Is Here . The Old Encoding Than Handles Ascii Is Application/Xwwwformurlencoded. The New One That Works Properly Is Multipart/Formdata.
+Just Use Apache Commons Upload Library. Add Uriencoding Utf8 To Tomcat Is Connector And Use Fileitem.Getstring Utf8 Instead Of Fileitem.Getstring Without Charset Specified.
+Stringescapeutils.Unescapehtml.
+I Found Solution To This Problem While Parsing Use Iso88591 Format And Use Html.Fromhtml String Method While Storing Your Values Into Bean .Where String Is The Value Inside The Each Tag Of Xml Response.
+----------------------------------------

@@ -1,0 +1,10 @@
+----------------- No.11 -----------------
+query : java ee website planning questions
+
+----Summary----
+I Would Go With The Lift Framework Written In Scala. You Will See A Great Productivity Boost Just By Switching To Scala . Scala Is Also Very Stable And It Is Extremely Easy To Call Java Code From Your Scala Code. Not Only That But It Is Quite Similar To Java But With Some Added Features. For Some Examples You Should Refer To 5 Things A Java Developer Needs To Know About Scala. Twitter Will Move Part Of It Is Codebase To Scala.
+The Advantage Of Using Spring Instead Of Another Framework Is That Springs Philosophy Is To Be Noninvasive . Usually When You Re Using A Framework Most Probably You Ll Start To Depend On That Framework Which Can Be A Bad Issue If The Application Is Considered To Run For A Longer Time Where You Then Have Also To Do Maintenance Etc. Spring Uses The Socalled  Inversion Of Control Ioc Pattern . Basically Your Code Does Not It Can But It Does Not Have To Call Spring But Spring Will Call You Hollywood Principle Do Not Call Me I Will Call You . So For Instance You Can Use Normal Pojos Plain Old Java Objects And You Do Not Have To Inherit From Any Frameworkrelated Classes/Interfaces. Another Big Problem If Not The Biggest In Software Engineering Are Dependencies. You Ll Fight For Reducing Them As Much As Possible Since They Will Make Your Life Harder Especially In Maintenance Later On . Spring Reduces Dependencies Among Your Components Drammatically By Managing The Instantiation Of Components Through Configuration Files And The Dependency Injection Pattern. I Would Not Want To Go On The Best Thing Is That You Start Reading Some Tutorials At The Official Spring Website . Initially It May Need Some Time In The Understanding But Once You Got It You Ll Earn A Lot Of Benefits.
+What Is The Relationship Between Hashcode And Equals ? What Is The Significance Of These Methods? What Are The Requirements For Implementing Them?.
+Why Is Main Method In Java Called As Public Static Void Main String Args ?.
+For Core Java Is Main Is Keyword In Java ? More Info.
+----------------------------------------

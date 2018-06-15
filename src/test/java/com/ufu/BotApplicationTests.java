@@ -1,5 +1,7 @@
 package com.ufu;
 
+import java.sql.Timestamp;
+import java.util.Calendar;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -18,48 +20,35 @@ import com.google.code.stackexchange.common.PagedList;
 import com.google.code.stackexchange.schema.Paging;
 import com.google.code.stackexchange.schema.Question;
 import com.google.code.stackexchange.schema.StackExchangeSite;
-import com.ufu.bot.googleSearch.GoogleWebSearchOld;
-import com.ufu.bot.googleSearch.SearchQuery;
-import com.ufu.bot.googleSearch.SearchResult;
 import com.ufu.bot.service.PitBotService;
-import com.ufu.bot.service.TagsService;
 import com.ufu.bot.to.Comment;
+import com.ufu.bot.to.Evaluation;
+import com.ufu.bot.to.Experiment;
+import com.ufu.bot.to.ExternalQuestion;
 import com.ufu.bot.to.Post;
-import com.ufu.bot.to.Tags;
+import com.ufu.bot.to.RelatedPost;
+import com.ufu.bot.to.Result;
+import com.ufu.bot.to.SurveyUser;
 import com.ufu.bot.to.User;
-import com.ufu.bot.util.BotUtils;
+import com.ufu.bot.util.AbstractRepositoriesUtils;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @WebAppConfiguration
-public class BotApplicationTests {
+public class BotApplicationTests extends AbstractRepositoriesUtils{
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	@Autowired
-	private TagsService tagsService;
-	
-	@Autowired
-	private PitBotService pitBotService;
-	
-	@Autowired
-	private BotUtils botUtils;
+	protected PitBotService pitBotService;
 	
 	//@Test
 	public void contextLoads() {
 	}
 
-	//@Test
-	public void getTags() {
-		List<Tags> tags = tagsService.loadAll();
-		for (Tags tag : tags) {
-			logger.info(tag.toString());
-		}
-		// perspectivaService.saveAll(perspectivas);
-
-	}
 	
 	
-	//@Test
+	
+	/*//@Test
 	public void testGoogleSearch(){
 		 SearchQuery query = new SearchQuery.Builder("“Rails get index of “each” loop ruby-on-rails ruby")
 			        .site("https://stackoverflow.com")
@@ -71,7 +60,7 @@ public class BotApplicationTests {
 			    	System.out.println(url);
 			    }
 	}
-	
+	*/
 	
 	//@Test
 	public void testSoSearch(){
@@ -102,7 +91,17 @@ public class BotApplicationTests {
 	}
 	
 	
-	@Test
+
+	//@Test
+	public void getPost() {
+		Integer postId = 12125311;
+		Post post = postsRepository.findOne(postId);
+		System.out.println(post);
+
+	}
+	
+	
+	//@Test
 	public void getComments() {
 		logger.info("\n\nTesting getComments....");
 		Integer postId = 910522;
@@ -115,7 +114,7 @@ public class BotApplicationTests {
 	}
 		
 	
-	@Test
+	//@Test
 	public void getAnswers() {
 		logger.info("\n\nTesting getAnswers....");
 		Integer postId = 910374;
@@ -128,7 +127,7 @@ public class BotApplicationTests {
 	}
 	
 	
-	@Test
+	//@Test
 	public void getUser() {
 		logger.info("\n\nTesting getUser....");
 		Integer userId = 112532;
@@ -138,7 +137,7 @@ public class BotApplicationTests {
 	}
 		
 	
-	@Test
+	//@Test
 	public void getRelatedQuestionsIds() {
 		logger.info("\n\nTesting getRelatedQuestionsIds....");
 		
@@ -153,7 +152,7 @@ public class BotApplicationTests {
 	
 	
 
-	@Test
+	//@Test
 	public void testStemStop() throws Exception {
 		logger.info("\n\ntestStemStop....");
 		Integer questionId = 910522;
@@ -168,6 +167,68 @@ public class BotApplicationTests {
 
 	}
 		
+	//@Test
+	public void testExternalQuestions() {
+		ExternalQuestion externalQuestion = new ExternalQuestion(1, "question", "answer");
+		pitBotService.saveExternalQuestion(externalQuestion);
+		System.out.println(externalQuestion);
+		
+		List<ExternalQuestion> answerBotQuestions = pitBotService.getAllExternalQuestionsAnswerBot();
+		System.out.println(answerBotQuestions);
+	}
 	
+	//@Test
+	public void testRelatedQuestions() {
+		RelatedPost relatedPost = new RelatedPost(12125311,1);
+		//pitBotService.saveRelatedPost(relatedPost);
+		System.out.println(relatedPost);
+		
+		
+		List<Post> relatedPosts = pitBotService.getRelatedPosts(1);
+		System.out.println(relatedPosts);
+	}
+	
+	
+	//@Test
+	public void insertSurveyUsers() {
+		String user1 = "05134163669";
+		String user2 = "1234567899";
+		SurveyUser surveyUser1 = new SurveyUser(user1,"rodrigo");
+		SurveyUser surveyUser2 = new SurveyUser(user2,"klerisson");
+		pitBotService.saveSurveyUser(surveyUser1);
+		pitBotService.saveSurveyUser(surveyUser2);
+		
+		System.out.println(surveyUser1);
+		
+		SurveyUser surveyUser = pitBotService.getSurveyUserByLogin(user1);
+		System.out.println(surveyUser);
+	}
+	
+	//@Test
+	public void testEvaluation() {
+		Evaluation evaluation = new Evaluation(1,12125311,1,5,new Timestamp(Calendar.getInstance().getTimeInMillis()),true);
+		pitBotService.saveEvaluation(evaluation);
+		System.out.println(evaluation);
+		
+		
+	}	
+	
+	//@Test
+	public void testExperiment() {
+		Experiment experiment = new Experiment(1,0.12,0.24,0.55,0.76,0.99,new Timestamp(Calendar.getInstance().getTimeInMillis()),"duration...","first test");
+		pitBotService.saveExperiment(experiment);
+		System.out.println(experiment);
+		
+		
+	}	
+	
+	//@Test
+	public void testResult() {
+		Result result = new Result(1,"obs...",4,true,0.12,0.24,0.55,0.76);
+		pitBotService.saveResult(result);
+		System.out.println(result);
+		
+		
+	}	
 
 }

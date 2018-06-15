@@ -1,0 +1,10 @@
+----------------- No.23 -----------------
+query : override equals and hashcode methods in superclass or in the sub class or override in both
+
+----Summary----
+It Is Not Always Necessary To Override Hashcode And Equals. But If You Think You Need To Override One Then You Need To Override Both Of Them. Let Is Analyze What Whould Happen If We Override One But Not The Other And We Attempt To Use A Map .
+Bah You Must Override Hashcode In Every Class That Overrides Equals .
+Override Only Hashcode.
+Override Only Equals.
+The Implementation Of Equals Should Depend On State And Type But Not Functionality. You Went Wrong In Your Base Class.
+----------------------------------------

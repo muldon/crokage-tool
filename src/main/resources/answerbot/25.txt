@@ -1,0 +1,10 @@
+----------------- No.25 -----------------
+query : algorithm and hint for scientific calculator
+
+----Summary----
+You Could Always Just Use Two Panels And Cardlayout .
+I Would Not Use Stackoverflow For That Though I Am Interested Whether It Will Work.
+I Would Rather Use Some Plugins To Make Your Code Better Readable Usable Robust Performant Correct Suggested Roadmap.
+From Here You Can Go To.
+Hope This Hint Can Help You To Solve Your Issue.
+----------------------------------------

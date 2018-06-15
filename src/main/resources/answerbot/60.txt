@@ -1,0 +1,10 @@
+----------------- No.60 -----------------
+query : generating bpel files programmatically
+
+----Summary----
+A Build Cycle Is When You Have Cyclic Dependencies E.G. Proj_1 Needs Proj_2 Proj_2 Needs Proj_3 And Proj_3 Needs Proj_1 Again. When Building Eclipse Uses The Dependency Information To Determine Which Projects To Build First But When There Are Cyclic Dependencies It Cannot Decide.
+I Think You Should Chek This Post Get Xpath From The Org.W3c.Dom.Node.
+I Am Currently Working With Apache Poi Http //Poi.Apache.Org/Index.Html Which Is Very Comprehensive. The 2003 File Format Version Is Still In Beta But Seems To Work Well Enough. I Am Not Exercising It Is Power Very Much Just Straightforward Reads And Writes Of Excel But It Seems Reliable.
+If You Do Not Need Fancy Headings Then Just Output Csv .
+It Works Very Well But Has A Few Gotchas You Should Be Aware Of. None Of Them Are Deal Breakers Just Dictate How A Few Things Should Be Done. Just Be Sure To Read The Faq . It Will Explain Them And Tell You How To Avoid Them.
+----------------------------------------

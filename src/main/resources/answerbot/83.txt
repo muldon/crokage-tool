@@ -1,0 +1,10 @@
+----------------- No.83 -----------------
+query : mariadb fails to work after being idle for a period
+
+----Summary----
+The Normal Jdbc Idiom Is To Acquire And Close The Connection And Also Statement And Resultset In The Shortest Possible Scope I.E. In The Very Same Tryfinally Block Of The Method As You Re Executing The Query. You Should Not Hold The Connection Open All The Time. The Db Will Timeout And Reclaim It Sooner Or Later. In Mysql It Is By Default After 8 Hours.
+The Mysql Jdbc Driver Has An Autoreconnect Feature That Can Be Helpful On Occasion See Driver/Datasource Class Names Url Syntax And Configuration Properties For Connector/J And Read The Caveats.
+I Had The Same Issue For My Application And I Have Removed The Idle Time Out Tag Thats It.
+To Improve Connecting Performance You Should Really Consider Using A Connection Pool Like C3p0 Here Is A Developer Guide . Note That Even When Using A Connection Pool You Still Have To Write Proper Jdbc Code Acquire And Close All The Resources In The Shortest Possible Scope. The Connection Pool Will In Turn Worry About Actually Closing The Connection Or Just Releasing It Back To Pool For Further Reuse.
+Just To Provide An Answer This All Turned Out To Be A Jvm Memory Issue. The Jvm Would Run Out Of Memory Overnight. I Do Not Know Why But This Server Had Some Special Garbage Collector Options Turned On For Tomcat And When I Remove Those Not Only Did The Problem Go Away But The Memory Footprint On That Machine Is Much Smaller. The Default Garbage Collector Must Be More Aggressive Then The One That Was Being Used. The Problem Has Not Occurred In Several Weeks And Was Never Related To C3p0 I Do Not Think. C3p0 Was Just The One Catching And Reporting Problems.
+----------------------------------------

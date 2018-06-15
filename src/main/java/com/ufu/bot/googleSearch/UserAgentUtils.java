@@ -2,6 +2,9 @@ package com.ufu.bot.googleSearch;
 
 import java.util.concurrent.ThreadLocalRandom;
 
+import org.springframework.stereotype.Component;
+
+@Component
 public class UserAgentUtils {
 
 	

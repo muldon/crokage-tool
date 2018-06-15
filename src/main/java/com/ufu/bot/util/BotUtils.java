@@ -7,13 +7,13 @@ import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -24,6 +24,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.StrTokenizer;
 import org.apache.commons.lang3.time.DurationFormatUtils;
@@ -33,7 +34,6 @@ import org.apache.lucene.analysis.core.LowerCaseFilter;
 import org.apache.lucene.analysis.core.StopFilter;
 import org.apache.lucene.analysis.en.EnglishAnalyzer;
 import org.apache.lucene.analysis.en.PorterStemFilter;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.analysis.standard.StandardTokenizer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.util.AttributeFactory;
@@ -43,9 +43,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Charsets;
+import com.google.common.io.Resources;
 import com.ufu.bot.repository.GenericRepository;
+import com.ufu.bot.to.ExternalQuestion;
 import com.ufu.bot.to.Feature;
-import com.ufu.bot.to.ProcessedPostOld;
 
 
 
@@ -75,9 +77,9 @@ public class BotUtils {
 	protected GenericRepository genericRepository;
 	
 	
-	public static final String CODE_REGEX_EXPRESSION = "(?sm)<pre><code>(.*?)</code></pre>";
+	public static final String PRE_CODE_REGEX_EXPRESSION = "(?sm)<pre><code>(.*?)</code></pre>";
 	//public static final String CODE_REGEX_EXPRESSION = "(?sm)<pre.*?><code>(.*?)</code></pre>";
-	public static final Pattern CODE_PATTERN = Pattern.compile(CODE_REGEX_EXPRESSION, Pattern.DOTALL); 
+	public static final Pattern PRE_CODE_PATTERN = Pattern.compile(PRE_CODE_REGEX_EXPRESSION, Pattern.DOTALL); 
 	
 	public static final String CODE_MIN_REGEX_EXPRESSION = "(?sm)<code>(.*?)</code>";
 	public static final Pattern CODE_MIN_PATTERN = Pattern.compile(CODE_MIN_REGEX_EXPRESSION, Pattern.DOTALL); 
@@ -137,8 +139,12 @@ public class BotUtils {
 			"<em>","</em>","<hr>"};
 	
 	//stemmed - stopped
-	private static String unncessaryWords[] = {"java", "how", "what"};
+	//private static String unncessaryWords[] = {"java", "how", "what"};
+	private static String unncessaryWords[] = {}; //td-idf comparates a query with an answer content, but this content is reinforced with its parent title and body
 	
+	public BotUtils() throws Exception {
+		initializeConfigs();
+	}
 	
 	
 	public void initializeConfigs() throws Exception {
@@ -273,17 +279,30 @@ public class BotUtils {
 	}
 	
 
-	public List<String> getCodes(String presentingBody) {
-		String codeContent = "";
-		List<String> codes = getCodeValues(CODE_PATTERN, presentingBody);
+	public List<String> getPreCodes(String presentingBody) {
+		//String codeContent = "";
+		List<String> codes = getCodeValues(PRE_CODE_PATTERN, presentingBody);
 		//int i=0;
-		for(String code: codes){
+		/*for(String code: codes){
 			//codeContent+= "code "+(i+1)+":"+code+ "\n\n";
 			codeContent+= code+ "\n\n";
 			//i++;
-		}
+		}*/
 		//logger.info("\nCodes: \n"+codeContent);
 		return codes;
+	}
+	
+	public List<String> getSimpleCodes(String presentingBody) {
+		//first remove pre codes
+		
+		presentingBody = presentingBody.replaceAll(PRE_CODE_REGEX_EXPRESSION, " ");
+		//String codeContent="";
+		List<String> smallCodes = getCodeValues(CODE_MIN_PATTERN, presentingBody);
+		/*for(String code: smallCodes){
+			codeContent+= code+ "\n\n";
+		}*/
+		
+		return smallCodes;
 	}
 
 	/**
@@ -305,6 +324,40 @@ public class BotUtils {
 	}
 	
 
+	public Set<String> getClassesNames(List<String> codes) {
+
+		Set<String> classesNames = new HashSet();
+		for(String code: codes) {
+			getClassesNamesForString(classesNames,code);
+		}
+		return classesNames;
+				
+	}
+
+	public void getClassesNamesForString(Set<String> classesNames, String code) {
+		//remove java keywords
+		for(String keyword: BotUtils.keywords){
+			code= code.replaceAll(keyword,"");
+		}
+		
+		//remove double quotes contents
+		code= code.replaceAll(BotUtils.DOUBLE_QUOTES_REGEX_EXPRESSION,"");
+		
+		//remove comments
+		code = code.replaceAll( BotUtils.COMMENTS_REGEX_EXPRESSION, BotUtils.COMMENTS_REPLACEMENT_EXPRESSION );
+		
+		//Get classes in camel case
+		Pattern pattern = Pattern.compile(BotUtils.CLASSES_CAMEL_CASE_REGEX_EXPRESSION);
+		Matcher matcher = pattern.matcher(code);
+		while (matcher.find()) {
+			if(matcher.group(0)!=null && matcher.group(0).length()>2) {
+				classesNames.add(matcher.group(0));
+			}
+			
+		}
+		
+	}
+	
 
 	public String buildProcessedBodyStemmedStopped(String presentingBody, boolean isAnswer) throws Exception {
 		
@@ -324,13 +377,13 @@ public class BotUtils {
 		
 		
 		String codeContent = "";
-		List<String> codes = getCodeValues(CODE_PATTERN, textWithoutCodesLinksAndBlackquotes);
+		List<String> codes = getCodeValues(PRE_CODE_PATTERN, textWithoutCodesLinksAndBlackquotes);
 		//int i=0;
 		for(String code: codes){
 			codeContent+= code+ "\n\n";
 		}
 		
-		textWithoutCodesLinksAndBlackquotes = textWithoutCodesLinksAndBlackquotes.replaceAll(CODE_REGEX_EXPRESSION, " ");
+		textWithoutCodesLinksAndBlackquotes = textWithoutCodesLinksAndBlackquotes.replaceAll(PRE_CODE_REGEX_EXPRESSION, " ");
 		
 		List<String> smallCodes = getCodeValues(CODE_MIN_PATTERN, textWithoutCodesLinksAndBlackquotes);
 		for(String code: smallCodes){
@@ -353,6 +406,7 @@ public class BotUtils {
 		}
 		
 		specificTerms = removeSpecialSymbols(specificTerms.trim());
+		specificTerms = specificTerms.replaceAll("\\b\\w{1,1}\\b\\s?", "");   //remove single small tokens like "s"
 		
 		String stoppedStemmed = tokenizeStopStem(onlyWords.trim());
 		
@@ -395,7 +449,7 @@ public class BotUtils {
 		
 		//codes
 		String codeContent = "";
-		List<String> codes = getCodeValues(CODE_PATTERN, textWithoutCodesLinksAndBlackquotes);
+		List<String> codes = getCodeValues(PRE_CODE_PATTERN, textWithoutCodesLinksAndBlackquotes);
 		//int i=0;
 		for(String code: codes){
 			//codeContent+= "code "+(i+1)+":"+code+ "\n\n";
@@ -416,7 +470,7 @@ public class BotUtils {
 		bloquesAndLinks += " "+codeContent;*/
 		
 		
-		textWithoutCodesLinksAndBlackquotes = textWithoutCodesLinksAndBlackquotes.replaceAll(CODE_REGEX_EXPRESSION, " ");
+		textWithoutCodesLinksAndBlackquotes = textWithoutCodesLinksAndBlackquotes.replaceAll(PRE_CODE_REGEX_EXPRESSION, " ");
 		textWithoutCodesLinksAndBlackquotes = removeHtmlTags(textWithoutCodesLinksAndBlackquotes);
 		
 		//trata antes de pegar somenta as palavras
@@ -747,57 +801,6 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 	
 	
 	
-	@SuppressWarnings("unchecked")
-	public HashMap<String, Feature> extractFeatures(ProcessedPostOld master, ProcessedPostOld duplicated) throws Exception {
-
-		HashMap<String, Feature> result = new LinkedHashMap();
-				
-		String masterTitle = master.getTitle();
-		String duplicatedTitle = duplicated.getTitle();
-		
-		String masterBody = master.getBody();
-		String duplicatedBody = duplicated.getBody();
-		
-		String masterTags = master.getTagsSyn();
-		String duplicatedTags = duplicated.getTagsSyn();
-	
-		
-		String masterCode= master.getCode();
-		String duplicatedCode = duplicated.getCode();
-		
-		//CC
-		Feature codeCode = computeFeatures(masterCode,duplicatedCode);	
-		result.put("CC", codeCode);
-		
-		//TT
-		Feature titleTitle  = computeFeatures(masterTitle, duplicatedTitle);
-		result.put("TT", titleTitle);
-		
-		//BB
-		Feature bodyBody = computeFeatures(masterBody, duplicatedBody);
-		result.put("BB", bodyBody);
-		
-		//TagTag
-		//Feature tagTag  = computeFeatures(masterTags, duplicatedTags);
-		//result.put("TagTag", tagTag);
-		
-		//TB
-		Feature titleBody = computeFeatures(masterTitle, duplicatedBody);
-		result.put("TB", titleBody);
-
-		//BT
-		Feature bodyTitle = computeFeatures(masterBody, duplicatedTitle);
-		result.put("BT", bodyTitle);
-
-		//TitleTag
-		//Feature TitleTag = computeFeatures(masterTitle, duplicatedTags);
-		//result.put("TitleTag", TitleTag);
-		
-		/*Feature TagTitle = computeFeatures(masterTags,duplicatedTitle);
-		result.put("TagTitle", TagTitle);*/
-		return result;
-	}
-
 	
 	
 	public Feature computeFeatures(String string1, String string2) throws Exception {
@@ -926,5 +929,36 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 	}
 	
 	
+	
+	public List<ExternalQuestion> readAnswerBotQuestionsAndAnswers() throws IOException {
+		List<ExternalQuestion> answerBotQuestionAnswers = new ArrayList<>();
+		
+		URL url;
+		String fileContent="";
+		String query="";
+		String answer="";
+				
+		for(int i=0; i<100; i++){
+			url = Resources.getResource(i+".txt");
+			fileContent = Resources.toString(url, Charsets.UTF_8);
+			
+			List<String> lines = IOUtils.readLines(new StringReader(fileContent));
+			query = lines.get(1);
+			query = query.replace("query : ","");
+			
+			lines.remove(0);
+			lines.remove(0);
+			lines.remove(0);
+			lines.remove(0);
+			lines.remove(lines.size()-1);
+			
+			answer = lines.stream().collect(Collectors.joining("\n"));
+			//System.out.println(answer);
+			answerBotQuestionAnswers.add(new ExternalQuestion(i+1,query,answer));
+		}
+		
+		return answerBotQuestionAnswers;
+		
+	}
 	
 }

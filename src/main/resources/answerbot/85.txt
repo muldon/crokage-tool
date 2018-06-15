@@ -1,0 +1,10 @@
+----------------- No.85 -----------------
+query : how to check returned server code using dom
+
+----Summary----
+Either Disable Dtd Resolving In The Parser Parserspecific Or Set An Empty Entity Resolver.
+This Post From The Xalanj Mailing List Suggests That The Right Way Is For You To Configure The Underlying Source / Reader Yourself To Disable Validation.
+This Was Raised As An Issue With Spring Spr7439 Json Jackson Requestbody Marshalling Throws Awkward Exception Which Was Fixed In Spring 3.1m2 By Having Spring Throw A Org.Springframework.Http.Converter.Httpmessagenotreadableexception In The Case Of A Missing Or Invalid Message Body.
+Note  I Started Testing With Jetty 9.0.0.M4 But That Had Some Other Internal Issues Stopping The Exceptionhandler Completing So Depending On Your Container Jetty Tomcat Other Version You Might Need To Get A Newer Version That Plays Nicely With Whatever Version Of Spring You Are Using.
+In The Http Used On The World Wide Web 403 Forbidden Is An Http Status Code Returned By A Web Server When A User Requests A Web Page Or Media That The Server Does Not Allow Them To. In Other Words The Server Can Be Reached But The Server Declined To Allow Access To The Page.
+----------------------------------------

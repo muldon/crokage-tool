@@ -5,6 +5,8 @@ import java.util.List;
 
 import javax.annotation.concurrent.NotThreadSafe;
 
+import org.springframework.stereotype.Component;
+
 import lombok.Getter;
 
 /**

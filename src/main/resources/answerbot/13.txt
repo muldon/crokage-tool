@@ -1,0 +1,10 @@
+----------------- No.13 -----------------
+query : java.lang.nosuchmethoderror javax.servlet.servletcontext.geteffectivesessiontrackingmodes ljava util set
+
+----Summary----
+Well Just To Tell Everyone I Was Not Able To Solve This Problem. I Used The Native Android Library To Encode And Decode Which Is In The Android.Util.Base64.
+I Found This To Work As A Solution. Add It In Your Weblogic.Xml.
+Reference From Oracle Weblogic Documenation.
+Javax.Servlet.Http.Httpservletrequest.Getparts Is Only Available Starting With Servlet Api 3.0.
+Things To Check.
+----------------------------------------

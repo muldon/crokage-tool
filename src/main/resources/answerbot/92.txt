@@ -1,0 +1,10 @@
+----------------- No.92 -----------------
+query : how to implement a db listener in java
+
+----Summary----
+I Found Myself In A Similar  Scenario . After Going Through The Webs For Over 2 Days I Stumbled Upon This Solution Of Running A Background Thread Which Is Triggered During The Initialization Of A Servlet Init Method .
+Blatent Plug For Votes Here Is An Answer I Gave To A Similar Question Concerning Populating A Jtable From A Jdbc Resultset . As Michael Says There Are A Lot Of Existing Sql Clients So It Is Definitely Not Worth Building Your Own. However If You Want To Populate A Jtable With Resultset Data For A Reason Other Than Writing Your Own Sql Client From Scratch Then The Linked Answer May Help.
+Key Events Are Fired By The Component With The Keyboard Focus When The User Presses Or Releases Keyboard Keys.
+Jtable.Rowatpoint And Jtable.Columnatpoint Returns Coordinated For Getvalueat Int Row Int Column From Unknow Mouseevent Not Sure If Is There Mouselistener Or Mousemotionlistener.
+Strings In Switch Statements Were Added In Java 7. For An Example Take A Look Here. Since Android Development Is Not Currently Based On Java 7 Syntax You Ll Have To Go The Alternate Route. And That Means Ifelse Statements. They Are Not The Prettiest But They Ll Get The Job Done.
+----------------------------------------

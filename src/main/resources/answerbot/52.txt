@@ -1,0 +1,10 @@
+----------------- No.52 -----------------
+query : does c# have an equivalent of java static nested class
+
+----Summary----
+Just Because Class Is Static It Does Not Mean That Its Fields Are Also Static. In Your Case Flowername Is Nonstatic Field So It Belongs To Instance Not Class Which Means That To Set It You Need To Pass Instance Of Your Nested Class.
+Static Classes In Java Are One Of Three Kinds Of Nested Classes Provided By The Language The Other Two Being Nonstatic Nested Classes And Functionscoped Classes .
+In C#.
+Static Classes Of Java Behave The Same Way That Nested Classes Of C# They Have Access To Static Members Of The Enclosing Class But Cannot Access Instance Members Without An Additional Reference To The Enclosing Object. In Contrast Nonstatic Nested Functions Can Access Instance Variables But You Need An Enclosing Instance In Order To Be Instantiated.
+In C# You Can Define The Outer Class With The Static Modifier Which Makes It Impossible To Create Instance Variables Of That Class. These Serve Two Different Purposes. To Create A Similar Effect In Java You Can Define Private Noargs Constructor. The Singleton Pattern Implementation Does So. Also In Java Can Also Create A Class With All Its Members Defined Static But That Does Not Prevent Creation Of New Instances.
+----------------------------------------

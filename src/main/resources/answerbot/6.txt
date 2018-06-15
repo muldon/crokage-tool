@@ -1,0 +1,10 @@
+----------------- No.6 -----------------
+query : how to get jscrollpanes within a jscrollpane to follow parent is resizing
+
+----Summary----
+Here Jtextbox Is The Component You Want To Focus And Jscrollpane Is Your Scrollpane.
+My Comment To The Other Answer.
+You Have To Take Rectangle From Jpanel And Jviewport Too Then Compare For Example.
+Scrollrecttovisible On The Component Itself Is The Whole Point Of That Method It Is Passed Up The Hierarchy Until A Parent Doing The Scroll Is Found.
+Except When The Component Itself Handles It As Jtextfield Does It Is Implemented To Scroll Horizontally To Make The Caret Visible. The Way Out Is To Call The Method On The Field Is Parent.
+----------------------------------------

@@ -1,0 +1,10 @@
+----------------- No.31 -----------------
+query : difference between object reference and object hash code
+
+----Summary----
+Two Different Objects Can Have Same Hashcode . A Reference Is A Unique Pointer To An Object Where Hashcode Is A Convenient Computed Attribute.
+A Reference To An Object Is Just That. A Reference To An Object.
+Is Typically Implemented By Converting The Internal Address Of The Object Into An Integer But This Implementation Technique Is Not Required By The Javatm Programming Language.
+Edit From Peterj According To The Javase6 Object Specification If Oldcat.Equals Newcat Then The Hashcode Of The Two Should Be Equal. It Is Good Programming To Obey By That Contract.
+No Youhave Pointed The Variables Vo1 And Vo4 At The Same Object Like This.
+----------------------------------------

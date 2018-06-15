@@ -1,0 +1,10 @@
+----------------- No.22 -----------------
+query : out of memory while processing large number of objects in hashmap hashtable arraylist
+
+----Summary----
+It Seems Like You Need To Pass Your Program More Memory.
+Use A Database To Keep Things Simple Use A Javaembedded Database Derby Hsql H2 . With That Much Information You Can Really Benefit From Standard Db Caching Timeefficient Storage And Querying. Your Pseudocode Would Be.
+I Do Not Know Why You Think Committing A Transaction Frees Heap Memory. Running Garbage Collection Does That.
+When You Read A String You Should Expect It To Use 24x As Much Memory As It Does On File. This Is Because Each Character Uses Two Bytes But Each String Object Char Uses About 80 Bytes Of Memory E.G. A String Of 4 Characters Uses About 88 Bytes.
+In Short I Would Try A Heap Of At Least 100 Gb Assuming You Have Much More Main Memory Than This.
+----------------------------------------

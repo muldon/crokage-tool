@@ -1,0 +1,10 @@
+----------------- No.51 -----------------
+query : is it such a bad idea to capture outofmemoryerror
+
+----Summary----
+No You Are Doing The Right Thing. Covariant Returns Just Specify That The Class And Classes Below It Must Return A Specific Subclass Of The Original General Class Argument That The Parent Class Returned. It Also Means That Your Subclasses Are Still Compatible With The Original Interface That Requires That It Return An Engine But If You Know That It Is An Icoolcar That It Has An Icoolengine Because The More Specific Interface Knows Of More Specific Functionality. This Applies To Interfaces As Well As Classes This Is Correct Proper And Useful To Boot.
+Because When You Catch Exception You Re Supposed To Handle It Properly . And You Cannot Expect To Handle All Kind Of Exceptions In Your Code. Also When You Catch All Exceptions You May Get An Exception That Cannot Deal With And Prevent Code That Is Upper In The Stack To Handle It Properly.
+It Depends On What You Need. If You Need To Handle Different Types Of Exceptions In Different Ways Then You Should Use Multiple Catch Blocks And Catch As Much Specific Exceptions As You Can.
+You Should Only Catch Exceptions If You Can Properly Handle Them. As You Cannot Properly Handle All Possible Exceptions You Should Not Catch Them.
+Short Story It Is Called Bug Masking. If You Have A Piece Of Code Which Is Not Working Well And Throwing Exceptions Or You Pass Malformed Input To That Piece Of Code And You Just Blind Your Eyes By Catching All Possible Exceptions You Will Actually Never Uncover The Bug And Fix It.
+----------------------------------------

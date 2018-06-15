@@ -1,0 +1,10 @@
+----------------- No.56 -----------------
+query : java throws clause not needed when throwing a new npe and why does adding throws exception give compilation errors
+
+----Summary----
+I Just Want Do Add An Alternative Answer Purely As An Fyi.
+You Can Throw Unchecked Exceptions Without Having To Declare Them If You Really Want To. Unchecked Exceptions Extend Runtimeexception . Throwables That Extend Error Are Also Unchecked But Should Only Be Used For Really Serious Issues Such As Invalid Bytecode .
+To Be Pedantic You Are Not Implementing Iterator.Next If You Need To Add A Checked Exception. Iterator.Next Throws No Checked Exceptions So Basically Iterator.Next Has The Contract That Nothing Too Bad Can Go Wrong The User Really Needs To Think About Opposed To Say File.Open Where You Have To Worry About Ioexceptions Getting Thrown .
+Throw New Exception Is Something You Should Never Do In A Catch Block But You May Have To Or Want To Do Throw New Someexception Throwable Preserving The Full Stack Trace Instead Of Throw Throwable In Order To Conform To The Api Of Your Method E.G. When It Declares To Throw Someexception But You Re Calling Code That Might Throw An Ioexception That You Do Not Want To Add To You Method Is Throws Clause.
+However In Java Se 7 You Can Specify The Exception Types Firstexception And Secondexception In The Throws Clause In The Rethrowexception Method Declaration . The Java Se 7 Compiler Can Determine That The Exception Thrown By The Statement Throw E Must Have Come From The Try Block And The Only Exceptions Thrown By The Try Block Can Be Firstexception And Secondexception. Even Though The Exception Parameter Of The Catch Clause E Is Type Exception The Compiler Can Determine That It Is An Instance Of Either Firstexception Or Secondexception.
+----------------------------------------

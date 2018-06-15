@@ -1,0 +1,10 @@
+----------------- No.26 -----------------
+query : how to iterate through columns rows of a multi dimensional array
+
+----Summary----
+It Is Creating List Points Of Two Dimensional Arrays Not Float S Which Is What You Need.
+For It Is Ususally A Terrible Way To Check If Two Floating Numbers Are Equal. Floating Numbers Should Be Compared Using An Epsilon And You Should Always Keep Track Of The Error Propagation .
+But Anyway You Should Know That Should You Find An Element That Would Match In The Remove Method You D Get An Unsupportedoperationexception Because Arrays.Aslist Simply Wraps Your Array And Your List Is Still Backed The Float Array. And You Cannot Resize Arrays.
+Well You Probably Want Array_name.Length For Getting The Count Of The Rows And Array_name 0 .Length For The Columns. That Is If You Defined Your Array Like So.
+In Java You Have To Be Explicit About When You Are Creating An Object. In This Case First We Check If There Is Already A Hashmap Object Stored In Our Outer Hashmap Under The Key En . If Not We Create An Empty One.
+----------------------------------------

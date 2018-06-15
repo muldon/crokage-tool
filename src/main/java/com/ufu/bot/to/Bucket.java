@@ -28,7 +28,7 @@ public class Bucket {
 	 */
 	private Double cosSim;
 	private Double coverageScore;
-	private Double codeScore;
+	private Double codeSizeScore;
 	private Double repScore;
 	private Double upScore;
 	
@@ -196,16 +196,15 @@ public class Bucket {
 
 
 
-	
-
-
 
 
 	@Override
 	public String toString() {
-		return "Bucket [postId=" + postId + ", parentId=" + parentId + ", presentingBody=" + presentingBody + ", processedBodyStemmedStopped=" + processedBodyStemmedStopped + ", postScore="
-				+ postScore + ", codes=" + codes + ", classesNames=" + classesNames + ", userReputation=" + userReputation + ", cosSim=" + cosSim + ", coverageScore=" + coverageScore + ", codeScore="
-				+ codeScore + ", repScore=" + repScore + ", upScore=" + upScore + ", composedScore=" + composedScore + "]";
+		return "Bucket [postId=" + postId + ", parentId=" + parentId + ", presentingBody=" + presentingBody
+				+ ", processedBodyStemmedStopped=" + processedBodyStemmedStopped + ", postScore=" + postScore
+				+ ", codes=" + codes + ", classesNames=" + classesNames + ", userReputation=" + userReputation
+				+ ", cosSim=" + cosSim + ", coverageScore=" + coverageScore + ", codeSizeScore=" + codeSizeScore + ", repScore="
+				+ repScore + ", upScore=" + upScore + ", composedScore=" + composedScore + "]";
 	}
 
 
@@ -258,15 +257,17 @@ public class Bucket {
 
 
 
-	public Double getCodeScore() {
-		return codeScore;
+	public Double getCodeSizeScore() {
+		return codeSizeScore;
 	}
 
 
 
-	public void setCodeScore(Double codeScore) {
-		this.codeScore = codeScore;
+	public void setCodeSizeScore(Double codeSizeScore) {
+		this.codeSizeScore = codeSizeScore;
 	}
+
+
 
 
 

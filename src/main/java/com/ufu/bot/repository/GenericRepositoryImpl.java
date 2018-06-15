@@ -1,6 +1,5 @@
 package com.ufu.bot.repository;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -16,9 +15,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
-import com.ufu.bot.to.PostLink;
 import com.ufu.bot.to.Post;
-import com.ufu.bot.to.ProcessedPostOld;
+import com.ufu.bot.to.PostLink;
 import com.ufu.bot.util.BotUtils;
 
 @Repository
@@ -99,29 +97,6 @@ public class GenericRepositoryImpl implements GenericRepository {
 
 
 
-	@Override
-	public Set<ProcessedPostOld> getProcessedQuestions(String tagFilter) {
-		logger.info("getProcessedQuestions: "+tagFilter);
-		
-		String sql = " select * from processedposts p " 
-				+ " WHERE  p.posttypeId = 1 ";
-				
-		sql += BotUtils.getQueryComplementByTag(tagFilter);
-		
-		sql += " and p.AnswerCount > 0 ";
-		
-		sql += " and p.score> 5 ";  //subset of java questions
-		
-		sql += " and trim(p.body)!=''";  //body nao deve ser vazio
-		
-		sql += " order by p.id ";
-		
-		Query q = em.createNativeQuery(sql, ProcessedPostOld.class);
-		
-		Set<ProcessedPostOld> questions = new HashSet<>(q.getResultList());
-		
-		return questions;
-	}
 	
 	
 

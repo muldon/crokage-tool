@@ -1,0 +1,10 @@
+----------------- No.29 -----------------
+query : using jdbc with online mysql db for an android app
+
+----Summary----
+How Can I Connect To My Mysql/Postgresql Database? What Settings Should I Use For My Script/Software?.
+In Ssh And It Probably Will Not Work Considering The Faq You Could Try To Simply Modify Your /Etc/Mysql/My.Cnf File By Commenting The Bindaddress Line Wich By Default Only Allows Local Access 127.0.0.1 . Then Try To Restart Your Mysql Service With A Simple Service Mysql Restart To Verify If The Remote Connection Works.
+I Have Gone Through All The Comments Above And Found That 000host.Com Does Not Provide The Facility That Its Database Can Get Accessed By Outside Its Own Space. So With Little Googling I Found Http //Www.Db4free.Net That Provide Free Mysql Database For Testing Purpose. And In This Way My Problem Get Solved. Thanks To All Comentators.
+The Default Port For Mysql Is 3306. Are You Certain That The Hostname And Port You Re Using Is Correct?.
+Check That If Permission Is In The Db Server For Your Ip. If Not Then Grant The Permission For The Ip.
+----------------------------------------

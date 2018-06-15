@@ -1,0 +1,10 @@
+----------------- No.98 -----------------
+query : format indent java code in an android app
+
+----Summary----
+Have You Looked Into Zxing ? Ihave Been Using It Successfully To Create Barcodes. You Can See A Full Working Example In The Bitcoin Application Src.
+As Rob Says Here You Can Use The Java Source Code For The Qr Code Encoder To Create A Raw Barcode And Then Render It As A Bitmap.
+You Could Use The Following Plugin Http //Plugins.Netbeans.Org/Plugin/18365/Formatfiles.
+You Can You Simpledateformat Class To Convert Friendly Date As Following.
+I Tried Replacing.
+----------------------------------------

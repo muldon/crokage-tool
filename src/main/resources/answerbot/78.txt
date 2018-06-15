@@ -1,0 +1,10 @@
+----------------- No.78 -----------------
+query : java double value 0.01 changes to 0.009999999999999787
+
+----Summary----
+Because Java Uses The Ieee Standard For Floatingpoint Arithmetic Ieee 754 Which Defines 0.0 And When It Should Be Used.
+How Come A Primitive Float Value Can Be 0.0?.
+A Good Article On How Float Point Numbers Are Managed In Java / Computers. Http //Www.Artima.Com/Underthehood/Floating.Html.
+The Floating Point Type In Java Is Described In The Jls 4.2.3 Floatingpoint Types Formats And Values .
+Each Of The Four Value Sets Includes Not Only The Finite Nonzero Values That Are Ascribed To It Above But Also Nan Values And The Four Values Positive Zero Negative Zero Positive Infinity And Negative Infinity.
+----------------------------------------

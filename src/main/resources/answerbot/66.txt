@@ -1,0 +1,10 @@
+----------------- No.66 -----------------
+query : use jni to create populate and return a java class instance
+
+----Summary----
+To Get A Jclass For The Row Type You Can Call Getobjectclass On One Of The Rows. This Works.
+Main.Java.
+Mynative.C.
+I Do Not Quite Understand Why You Need Void In Your Code. If You Want To Make The Interface Opaque Just Use Void . Also Do Not Forget To Call Newglobalref And Deleteglobalref On The Returned Jobject This Will Prevent Its Destruction By Garbage Collector.
+You Can Do It With A Long In Java However I Would Argue That Its Not A Very Good Idea To Put A Pointer To Some Native Memory Address In An Instance Variable Of A Language That Is Expected To Be Operating In A Sandbox. Its Sloppy And It Could Be A Exploit Vector Depending On What Your Doing.
+----------------------------------------

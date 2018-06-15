@@ -1,0 +1,10 @@
+----------------- No.99 -----------------
+query : manipulating time in java swing
+
+----Summary----
+Use The Javax.Swing.Timer To Ensure That Updates To The Swing Component Occur On The Edt.
+Use Swing Timer . As The Tutorial Explains It Is The Required Tool For The Job.
+Hopefully This Helps You Out! I Remember When I Started Java And I Would Highly Recommend Getting As Good As Possible At Nongui Related Stuff First But If You Are Ready For Swing Then The Code Above Should Work. Best Of Luck!.
+Use Your Actionlistener In Combination With A Javax.Swing.Timer . The Actionlistener Assigned To The Timer Will Be Called On Regular Intervals With The Specified Delay.
+Consider Extracting The Code For Directly Drawing Of The Arrows And Nodes Out Of Jpanel. Perhaps You Can Create An Arrow And A Node Class That Know How To Draw Themselves For Instance That Has A Public Void Paint Graphics G Method.
+----------------------------------------

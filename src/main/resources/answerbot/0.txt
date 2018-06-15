@@ -1,0 +1,10 @@
+----------------- No.0 -----------------
+query : calculating time diffrence
+
+----Summary----
+No It Does Not Mean It Is Taking 0ms It Shows It Is Taking A Smaller Amount Of Time Than You Can Measure With Currenttimemillis . That May Well Be 10ms Or 15ms. It Is Not A Good Method To Call For Timing It Is More Appropriate For Getting The Current Time.
+Try This.
+Since Java 1.5 You Can Get A More Precise Time Value With System.Nanotime Which Obviously Returns Nanoseconds Instead.
+To Measure How Long Something Takes Consider Using System.Nanotime Instead. The Important Point Here Is Not That The Precision Is Greater But That The Resolution Will Be Greater But Only When Used To Measure The Time Between Two Calls. It Must Not Be Used As A Wall Clock .
+You Can Try This.
+----------------------------------------

@@ -1,0 +1,10 @@
+----------------- No.21 -----------------
+query : generic comparable gets a compiler error
+
+----Summary----
+It Might Have Been Possible For The Java 5 Expert Group To Add A Little More Power To The Specification Of Wildcards In Generic Method Argument Types. I Suspect The Enhancement Did Not Make It Due To Lack Of Time In The Specs Phase. See My Own Recent Question Here How Does The Jls Specify That Wildcards Cannot Be Formally Used Within Methods?.
+The Problem Is That The Compiler Only Knows The Key Type Is Unknown But Does Not Know It Is The Same Unknown Type For The Type Of The Map Is Key And The Type Returned From Get Even Though We As Humans Realize That It Is The Same .
+When You Use Wildcards With Extends You Cant Add Anything In The Collection Except Null . And Also String Is A Final Class Nothing Can Extend String.
+Reason  If It Were Allowed You Could Just Be Adding The Wrong Type Into The Collection.
+You Should Use Such List Whenever You Think That It Can Contain Any Kind Of Animals.
+----------------------------------------
