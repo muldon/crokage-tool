@@ -22,9 +22,10 @@ import org.glassfish.jersey.server.ResourceConfig;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.stereotype.Component;
 
-@Component
-@ApplicationPath("/survey/rest")
+
+//@ApplicationPath("/survey")
 @ComponentScan
+@Component
 public class JerseyConfig extends ResourceConfig {
 
 	

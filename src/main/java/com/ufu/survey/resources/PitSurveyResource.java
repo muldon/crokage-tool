@@ -16,21 +16,48 @@ import org.springframework.stereotype.Component;
 
 import com.ufu.bot.to.Evaluation;
 import com.ufu.bot.to.ExternalQuestion;
+import com.ufu.bot.to.SurveyUser;
 import com.ufu.survey.transfer.ExternalQuestionTransfer;
 import com.ufu.survey.transfer.GenericRestTransfer;
+import com.ufu.survey.transfer.TokenTransfer;
+import com.ufu.survey.util.TokenUtils;
 
 
 
 @Component
-@Path("/pitsurveyresource")
+@Path("/survey")
 @Produces(MediaType.APPLICATION_JSON)
-public class PitSurveyResource extends SuperResource
-{
+public class PitSurveyResource extends SuperResource {
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
+	private String errorMessage = null;
+	private String infoMessage = null;
 		
 	
+	@Path("/authenticateUser")
+	@POST	
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public TokenTransfer save(SurveyUser surveyUser) {
+		try{
+			
+			surveyUser = pitSurveyService.authenticateUser(surveyUser);
+			if(surveyUser==null) {
+				errorMessage = "You have no power here ! ";
+			}
+			
+		
+		}catch(Exception e){
+			errorMessage = "You have no power here ! ";
+			logger.error(errorMessage+e);
+		}
+		
+		return new TokenTransfer(TokenUtils.createToken(surveyUser),surveyUser.getId(),errorMessage);
+	}
+	
+	
+	
 	@GET
-	@Path("/getExternalQuestion/{id}")
+	@Path("/externalQuestions/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public ExternalQuestionTransfer getExternalQuestion(@PathParam("id") Integer externalQuestionId)
 	{
@@ -76,7 +103,7 @@ public class PitSurveyResource extends SuperResource
 	}
 	
 	
-	@Path("/saveEvaluation")
+	@Path("/evaluation")
 	@POST	
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)

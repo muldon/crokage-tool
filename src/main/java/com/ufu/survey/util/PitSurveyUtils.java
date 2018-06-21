@@ -47,7 +47,7 @@ public class PitSurveyUtils {
 			
 			answer = lines.stream().collect(Collectors.joining("\n"));
 			//System.out.println(answer);
-			answerBotQuestionAnswers.add(new ExternalQuestion(i+1,query,answer));
+			//answerBotQuestionAnswers.add(new ExternalQuestion(i+1,query,answer));
 		}
 		
 		return answerBotQuestionAnswers;

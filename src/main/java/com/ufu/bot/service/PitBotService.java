@@ -228,7 +228,7 @@ public class PitBotService extends AbstractRepositoriesUtils{
 		/*
 		 * Save the external question
 		 */
-		externalQuestionRepository.save(answerBotQuestion);
+		answerBotQuestion= externalQuestionRepository.save(answerBotQuestion);
 		
 		/*
 		 * save all related posts 

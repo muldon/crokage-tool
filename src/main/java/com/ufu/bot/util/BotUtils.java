@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -48,6 +49,7 @@ import com.google.common.io.Resources;
 import com.ufu.bot.repository.GenericRepository;
 import com.ufu.bot.to.ExternalQuestion;
 import com.ufu.bot.to.Feature;
+import com.ufu.bot.to.Survey.SurveyEnum;
 
 
 
@@ -930,7 +932,7 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 	
 	
 	
-	public List<ExternalQuestion> readAnswerBotQuestionsAndAnswers() throws IOException {
+	public List<ExternalQuestion> readAnswerBotQuestionsAndAnswersOld() throws IOException {
 		List<ExternalQuestion> answerBotQuestionAnswers = new ArrayList<>();
 		
 		URL url;
@@ -954,11 +956,77 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 			
 			answer = lines.stream().collect(Collectors.joining("\n"));
 			//System.out.println(answer);
-			answerBotQuestionAnswers.add(new ExternalQuestion(i+1,query,answer));
+			//answerBotQuestionAnswers.add(new ExternalQuestion(i+1,query,answer));
 		}
 		
 		return answerBotQuestionAnswers;
 		
 	}
+	
+	
+	public List<ExternalQuestion> readExternalQuestionsAndAnswers(Boolean runRack, String obs) throws IOException {
+		List<ExternalQuestion> externalQuestionAnswers = new ArrayList<>();
+		
+		URL url;
+		String fileContent="";
+				
+		url = Resources.getResource("external_questions.txt");
+		fileContent = Resources.toString(url, Charsets.UTF_8);
+		
+		List<String> lines = IOUtils.readLines(new StringReader(fileContent));
+		
+		Iterator it = lines.iterator();
+		int id=1;
+		
+		while(it.hasNext()){
+			String queryLine = (String)it.next();
+			if(queryLine.startsWith("query:")) {
+				queryLine= queryLine.replace("query:", "").trim();
+				//System.out.println(queryLine);
+				
+				if(!it.hasNext()) {
+					logger.error("Error when reading link from query: "+queryLine);
+				}else {
+					String linkLine = (String)it.next();
+					if(linkLine.startsWith("link:")) {
+						linkLine= linkLine.replace("link:", "").trim();
+						//System.out.println(linkLine);
+						ExternalQuestion externalQuestion = new ExternalQuestion(id,SurveyEnum.BUILDING_GROUND_TRUTH.getId(),queryLine,null,runRack,obs,linkLine);
+						externalQuestionAnswers.add(externalQuestion);
+						id++;
+					}
+					
+				}
+				
+				
+				
+			}
+			
+			
+		}
+		
+		/*for(int i=0; i<100; i++){
+			url = Resources.getResource(i+".txt");
+			fileContent = Resources.toString(url, Charsets.UTF_8);
+			
+			List<String> lines = IOUtils.readLines(new StringReader(fileContent));
+			query = lines.get(1);
+			query = query.replace("query : ","");
+			
+			lines.remove(0);
+			lines.remove(0);
+			lines.remove(0);
+			lines.remove(0);
+			lines.remove(lines.size()-1);
+			
+			answer = lines.stream().collect(Collectors.joining("\n"));
+			//System.out.println(answer);
+			answerBotQuestionAnswers.add(new ExternalQuestion(i+1,query,answer));
+		}*/
+		
+		return externalQuestionAnswers;
+		
+	}
+	
 	
 }

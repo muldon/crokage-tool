@@ -31,13 +31,11 @@ public class ExternalQuestion {
 	@Column(name="userack")	
 	private Boolean useRack;
 	
-	@Column(name="answerbotqueryid")	
-	private Integer answerBotQueryId;
+	private String obs;
 	
-	@Transient
-	private String answerBotAnswer;
+	private String url;
 	
-	
+		
 
 	public Integer getId() {
 		return id;
@@ -79,21 +77,34 @@ public class ExternalQuestion {
 		this.useRack = useRack;
 	}
 
-	public Integer getAnswerBotQueryId() {
-		return answerBotQueryId;
-	}
+	
+	
+	
 
-	public void setAnswerBotQueryId(Integer answerBotqueryId) {
-		this.answerBotQueryId = answerBotqueryId;
-	}
-	
-	
 
 	@Override
 	public String toString() {
 		return "ExternalQuestion [id=" + id + ", surveyId=" + surveyId + ", googleQuery=" + googleQuery + ", classes="
-				+ classes + ", useRack=" + useRack + ", answerBotQueryId=" + answerBotQueryId + "]";
+				+ classes + ", useRack=" + useRack + ", obs=" + obs + ", url=" + url + "]";
 	}
+
+	public String getObs() {
+		return obs;
+	}
+
+	public void setObs(String obs) {
+		this.obs = obs;
+	}
+
+	public String getUrl() {
+		return url;
+	}
+
+	public void setUrl(String url) {
+		this.url = url;
+	}
+
+	
 
 	@Override
 	public int hashCode() {
@@ -120,27 +131,25 @@ public class ExternalQuestion {
 		return true;
 	}
 
-	public ExternalQuestion() {
-		
-	}
+	
 
-	public ExternalQuestion(Integer id, Integer surveyId, String googleQuery, String classes, Boolean useRack,
-			Integer answerBotqueryId) {
+	public ExternalQuestion(Integer id, Integer surveyId, String googleQuery, String classes, Boolean useRack, String obs, String link) {
 		super();
 		this.id = id;
 		this.surveyId = surveyId;
 		this.googleQuery = googleQuery;
 		this.classes = classes;
 		this.useRack = useRack;
-		this.answerBotQueryId = answerBotqueryId;
+		this.obs =obs;
+		this.url=link;
+		
+	}
+
+	public ExternalQuestion() {
+		super();
 	}
 	
-	public ExternalQuestion(Integer answerBotqueryId, String query, String answer) {
-		this.answerBotAnswer = answer;
-		this.googleQuery = query;
-		this.answerBotQueryId = answerBotqueryId;
-	}
-	
+		
 	
 	
 	

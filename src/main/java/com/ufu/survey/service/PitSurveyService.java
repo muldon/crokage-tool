@@ -17,6 +17,7 @@ import com.ufu.bot.to.Experiment;
 import com.ufu.bot.to.ExternalQuestion;
 import com.ufu.bot.to.Post;
 import com.ufu.bot.to.Survey;
+import com.ufu.bot.to.SurveyUser;
 import com.ufu.bot.to.User;
 import com.ufu.bot.util.AbstractRepositoriesUtils;
 
@@ -180,6 +181,14 @@ public class PitSurveyService extends AbstractRepositoriesUtils{
 
 	public void saveEvaluation(Evaluation evaluation) {
 		evaluation.setRatingDate(getCurrentDate());
+		
+	}
+
+
+
+
+	public SurveyUser authenticateUser(SurveyUser surveyUser) {
+		return surveyUserRepository.findByLogin(surveyUser.getLogin());
 		
 	}
 

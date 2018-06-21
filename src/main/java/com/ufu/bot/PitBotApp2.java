@@ -1,9 +1,6 @@
 package com.ufu.bot;
 
-import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -69,11 +66,9 @@ public class PitBotApp2 {
 	@Value("${phaseNumber}")
 	public Integer phaseNumber;  
 	
-	@Value("${useAnswerBotQueries}")
-	public Boolean useAnswerBotQueries;  
+	@Value("${obs}")
+	public String obs;  
 	
-	@Value("${inputQueriesPath}")
-	public String inputQueriesPath;  
 	
 	@Value("${pickUpOnlyTheFirstQuery}")
 	public Boolean pickUpOnlyTheFirstQuery;
@@ -137,7 +132,7 @@ public class PitBotApp2 {
 	
 	//protected Set<Post> postsByFilter;
 	private Bucket mainBucket;
-	private List<ExternalQuestion> answerBotQuestionAnswers;
+	private List<ExternalQuestion> externalQuestions;
 	private Set<SoThread> augmentedThreads;
 	private String googleQuery;
 	private List<String> rackApis;
@@ -164,8 +159,7 @@ public class PitBotApp2 {
 		logger.info("\nConsidering parameters: \n"
 				+ "\n phaseNumber: "+phaseNumber
 				+ "\n pathFileEnvFlag: "+pathFileEnvFlag
-				+ "\n useAnswerBotQueries: "+useAnswerBotQueries
-				+ "\n inputQueriesPath: "+inputQueriesPath
+				+ "\n obs: "+obs
 				+ "\n pickUpOnlyTheFirstQuery: "+pickUpOnlyTheFirstQuery
 				+ "\n shuffleListOfQueriesBeforeGoogleSearch: "+shuffleListOfQueriesBeforeGoogleSearch
 				+ "\n runRack: "+runRack
@@ -183,7 +177,7 @@ public class PitBotApp2 {
 			botUtils.reportElapsedTime(initTime," runPhase1 ");
 			break;
 		case 2:
-			
+			//runPhase1();
 			break;
 			
 		case 3:
@@ -211,26 +205,36 @@ public class PitBotApp2 {
 				
 		
 		if(pickUpOnlyTheFirstQuery) {
-			ExternalQuestion answerBotQuestion = answerBotQuestionAnswers.get(0);
-			answerBotQuestionAnswers = new ArrayList<>();
-			answerBotQuestionAnswers.add(answerBotQuestion);
+			ExternalQuestion answerBotQuestion = externalQuestions.get(0);
+			externalQuestions = new ArrayList<>();
+			externalQuestions.add(answerBotQuestion);
 		}
 		
-		//RACK - retirar
-		//answerBotQuestionAnswers.remove(0);
 		
-		for(ExternalQuestion answerBotQuestion: answerBotQuestionAnswers) {
-			initializeVariables();
-			logger.info("Processing query: "+answerBotQuestion);
-			runSteps2to6(answerBotQuestion.getGoogleQuery()); //which is now only the raw query yet.
+		int count =1;
+		for(ExternalQuestion externalQuestion: externalQuestions) {
+			/*
+			 * Start with only the first 50s
+			 */
+			/*if(externalQuestion.getUrl().contains("kodejava")) {
+				continue;
+			}*/
 			
-			answerBotQuestion.setGoogleQuery(googleQuery);
-			answerBotQuestion.setUseRack(runRack);
-			answerBotQuestion.setClasses(String.join(", ", rackApis));
-			answerBotQuestion.setSurveyId(SurveyEnum.BUILDING_GROUND_TRUTH.getId());
+			initializeVariables();
+			logger.info("Processing query: "+externalQuestion);
+			runSteps2to6(externalQuestion.getGoogleQuery()); //which is now only the raw query yet.
+			
+			externalQuestion.setGoogleQuery(googleQuery);
+			externalQuestion.setUseRack(runRack);
+			externalQuestion.setClasses(String.join(", ", rackApis));
+			externalQuestion.setSurveyId(SurveyEnum.BUILDING_GROUND_TRUTH.getId());
 			
 			logger.info("saving external question and related ids...");
-			pitBotService.saveExternalQuestionAndRelatedIds(answerBotQuestion,allRetrievedPostsCache);
+			pitBotService.saveExternalQuestionAndRelatedIds(externalQuestion,allRetrievedPostsCache);
+			count++;
+			if(count>100) {
+				break;
+			}
 		}
 		
 					
@@ -239,41 +243,14 @@ public class PitBotApp2 {
 
 	private void step1() throws Exception {
 		
-		answerBotQuestionAnswers = botUtils.readAnswerBotQuestionsAndAnswers();
-		
-		if(useAnswerBotQueries) {
+		externalQuestions = botUtils.readExternalQuestionsAndAnswers(runRack,obs);
 			
-			queriesList= answerBotQuestionAnswers.stream()
-				.map(ExternalQuestion::getGoogleQuery)
-				.collect(Collectors.toList());
-			
-		}else {
-			File file = new File(inputQueriesPath);
-			queriesList = new ArrayList<>();
-			try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-			    String line;
-			    while ((line = br.readLine()) != null) {
-			    	logger.info(line);
-			       queriesList.add(line);
-			    }
-			}
-		}
-		
-		
-		if(queriesList.isEmpty()) {
-			throw new Exception("No input query found in the input file. Aborting...");
-		}
-		
-
-		if(shuffleListOfQueriesBeforeGoogleSearch) {
-			Collections.shuffle(queriesList);
-		}
-		
+	
 	}
 
 	private void runSteps2to6(String query) throws Exception {
 		
-		rackApis = new ArrayList<>();
+		
 		if(runRack){
 			/*
 			 * Step 2: API Classes Extraction
@@ -893,6 +870,7 @@ public class PitBotApp2 {
 		avgScore = 0d;
 		avgReputation = 0d;
 		allRetrievedPostsCache = new HashMap<>();
+		rackApis = new ArrayList<>();
 	}
 
 

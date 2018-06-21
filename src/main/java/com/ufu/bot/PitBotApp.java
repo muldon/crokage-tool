@@ -66,11 +66,11 @@ public class PitBotApp {
 	private GoogleWebSearch googleWebSearch;
 	
 	
-	@Value("${useAnswerBotQueries}")
+	/*@Value("${useAnswerBotQueries}")
 	public Boolean useAnswerBotQueries;  
 	
 	@Value("${inputQueriesPath}")
-	public String inputQueriesPath;  
+	public String inputQueriesPath;  */
 	
 	@Value("${pickUpOnlyTheFirstQuery}")
 	public Boolean pickUpOnlyTheFirstQuery;
@@ -156,8 +156,8 @@ public class PitBotApp {
 				
 		logger.info("\nConsidering parameters: \n"
 				+ "\n pathFileEnvFlag: "+pathFileEnvFlag
-				+ "\n useAnswerBotQueries: "+useAnswerBotQueries
-				+ "\n inputQueriesPath: "+inputQueriesPath
+				//+ "\n useAnswerBotQueries: "+useAnswerBotQueries
+				//+ "\n inputQueriesPath: "+inputQueriesPath
 				+ "\n pickUpOnlyTheFirstQuery: "+pickUpOnlyTheFirstQuery
 				+ "\n shuffleListOfQueriesBeforeGoogleSearch: "+shuffleListOfQueriesBeforeGoogleSearch
 				+ "\n runRack: "+runRack
@@ -194,9 +194,9 @@ public class PitBotApp {
 	
 	private void step1() throws Exception {
 		
-		List<ExternalQuestion> answerBotQuestionAnswers = botUtils.readAnswerBotQuestionsAndAnswers();
+		List<ExternalQuestion> answerBotQuestionAnswers = botUtils.readExternalQuestionsAndAnswers(true,"");
 		
-		if(useAnswerBotQueries) {
+		/*if(useAnswerBotQueries) {
 			
 			queriesList= answerBotQuestionAnswers.stream()
 				.map(ExternalQuestion::getGoogleQuery)
@@ -212,7 +212,7 @@ public class PitBotApp {
 			       queriesList.add(line);
 			    }
 			}
-		}
+		}*/
 		
 		
 		if(queriesList.isEmpty()) {
@@ -550,14 +550,17 @@ public class PitBotApp {
 			List<Post> answers = thread.getAnswers();
 			for(Post answer: answers) {
 				Bucket bucket = buildAnswerPostBucket(answer);
-				buckets.add(bucket);
-				
-				if(bucket.getPostScore()!=null) {
+								
+				if(bucket!=null) {
 					avgScore      += bucket.getPostScore();
+					buckets.add(bucket);
+					
+					if(bucket.getUserReputation()!=null) {
+						avgReputation += bucket.getUserReputation();
+					}
 				}
-				if(bucket.getUserReputation()!=null) {
-					avgReputation += bucket.getUserReputation();
-				}
+				
+				
 			}
 		}
 		
@@ -664,6 +667,10 @@ public class PitBotApp {
 		/*if(botUtils==null) {
 			botUtils = new BotUtils();
 		}*/
+		
+		if(post.getScore()<0) {
+			return null; //disconsider posts whose scores are under 0.       
+		}
 		
 		Bucket bucket = new Bucket();
 		bucket.setParentId(post.getParentId());

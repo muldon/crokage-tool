@@ -29,7 +29,7 @@ public class BotInitializer extends SpringBootServletInitializer {
 	 * Para rodar essa app no modo debug, rode essa classe no mode debug. 	  
 	 */
 	public static void main(String[] args) {
-		new BotInitializer().configure(new SpringApplicationBuilder(BotInitializer.class)).run(args).close();;
+		new BotInitializer().configure(new SpringApplicationBuilder(BotInitializer.class)).run(args);
 	}
 	
 	

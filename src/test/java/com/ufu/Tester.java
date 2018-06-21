@@ -24,6 +24,7 @@ import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import com.ufu.bot.PitBotApp;
 import com.ufu.bot.to.Bucket;
+import com.ufu.bot.to.ExternalQuestion;
 import com.ufu.bot.to.Post;
 import com.ufu.bot.util.BotUtils;
 
@@ -476,10 +477,22 @@ public class Tester {
 		System.out.println(classesNamesBody);*/
 		
 		
-		testBuildAnswerPostBucket();
+		//testBuildAnswerPostBucket();
+		
+		testReadAnswerBotQuestions();
 	}
 	
 	
+
+	private void testReadAnswerBotQuestions() throws Exception {
+		BotUtils botUtils = new BotUtils();
+		botUtils.initializeConfigs();
+		//List<ExternalQuestion> answerBotQuestionAnswers = botUtils.readExternalQuestionsAndAnswers(true);
+		//System.out.println(answerBotQuestionAnswers);
+		
+	}
+
+
 
 	private void testBuildAnswerPostBucket() throws Exception {
 		String bodyParent = "<p>Given <code>Iterator&lt;Element&gt;</code>, how can we convert that <code>Iterator</code> to <code>ArrayList&lt;Element&gt;</code> (or <code>List&lt;Element&gt;</code>) in the <strong>best and fastest</strong> way possible, so that we can use <code>ArrayList</code>'s operations on it such as <code>get(index)</code>, <code>add(element)</code>, etc.</p>";

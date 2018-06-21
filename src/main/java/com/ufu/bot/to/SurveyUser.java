@@ -22,12 +22,20 @@ public class SurveyUser {
 	
 	private String nick;
 
-	public String getId() {
+	public Integer getId() {
+		return id;
+	}
+
+	public void setId(Integer id) {
+		this.id = id;
+	}
+
+	public String getLogin() {
 		return login;
 	}
 
-	public void setId(String id) {
-		this.login = id;
+	public void setLogin(String login) {
+		this.login = login;
 	}
 
 	public String getNick() {
@@ -42,8 +50,6 @@ public class SurveyUser {
 		return serialVersionUID;
 	}
 
-	
-
 	@Override
 	public String toString() {
 		return "SurveyUser [id=" + id + ", login=" + login + ", nick=" + nick + "]";
@@ -53,7 +59,7 @@ public class SurveyUser {
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((login == null) ? 0 : login.hashCode());
+		result = prime * result + ((id == null) ? 0 : id.hashCode());
 		return result;
 	}
 
@@ -66,34 +72,22 @@ public class SurveyUser {
 		if (getClass() != obj.getClass())
 			return false;
 		SurveyUser other = (SurveyUser) obj;
-		if (login == null) {
-			if (other.login != null)
+		if (id == null) {
+			if (other.id != null)
 				return false;
-		} else if (!login.equals(other.login))
+		} else if (!id.equals(other.id))
 			return false;
 		return true;
-	}
-
-	public SurveyUser(String id, String nick) {
-		super();
-		this.login = id;
-		this.nick = nick;
 	}
 
 	public SurveyUser() {
 		super();
 	}
 
-	public String getLogin() {
-		return login;
-	}
-
-	public void setLogin(String login) {
+	public SurveyUser(String login, String nick) {
+		super();
 		this.login = login;
-	}
-
-	public void setId(Integer id) {
-		this.id = id;
+		this.nick = nick;
 	}
 
 	

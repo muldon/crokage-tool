@@ -169,12 +169,12 @@ public class BotApplicationTests extends AbstractRepositoriesUtils{
 		
 	//@Test
 	public void testExternalQuestions() {
-		ExternalQuestion externalQuestion = new ExternalQuestion(1, "question", "answer");
+		/*ExternalQuestion externalQuestion = new ExternalQuestion(1, "question", "answer");
 		pitBotService.saveExternalQuestion(externalQuestion);
 		System.out.println(externalQuestion);
 		
 		List<ExternalQuestion> answerBotQuestions = pitBotService.getAllExternalQuestionsAnswerBot();
-		System.out.println(answerBotQuestions);
+		System.out.println(answerBotQuestions);*/
 	}
 	
 	//@Test

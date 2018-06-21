@@ -1,0 +1,399 @@
+----------------- No.0 -----------------
+query Id : 18575022
+query : calculating time diffrence
+
+----------------- No.1 -----------------
+query Id : 23479882
+query : reason for java.lang.integer.integercache between 128 and 127
+
+----------------- No.2 -----------------
+query Id : 27879448
+query : android.view.inflateexception binary xml file line #1 error inflating class android.widget.relativelayout
+
+----------------- No.3 -----------------
+query Id : 29783651
+query : how to handle double quotes in pattern.compile
+
+----------------- No.4 -----------------
+query Id : 3135679
+query : android httpclient hostname in certificate did not match <example.com> < .example.com>
+
+----------------- No.5 -----------------
+query Id : 21398631
+query : fast processing of data
+
+----------------- No.6 -----------------
+query Id : 9457900
+query : how to get jscrollpanes within a jscrollpane to follow parent is resizing
+
+----------------- No.7 -----------------
+query Id : 25428573
+query : how to dynamically split a comma separated string into string arrays splitting on nth comma
+
+----------------- No.8 -----------------
+query Id : 26881419
+query : java integer division result as double
+
+----------------- No.9 -----------------
+query Id : 29075229
+query : how to programmatically set errorpage and etc web.xml parameters in spring
+
+----------------- No.10 -----------------
+query Id : 33994636
+query : run .exe from text file
+
+----------------- No.11 -----------------
+query Id : 2803004
+query : java ee website planning questions
+
+----------------- No.12 -----------------
+query Id : 6475927
+query : maven pomeditor dependency graph missing
+
+----------------- No.13 -----------------
+query Id : 8969497
+query : java.lang.nosuchmethoderror javax.servlet.servletcontext.geteffectivesessiontrackingmodes ljava util set
+
+----------------- No.14 -----------------
+query Id : 23218025
+query : how to convert string into dateformat in java
+
+----------------- No.15 -----------------
+query Id : 11450727
+query : sending file in chunks in java
+
+----------------- No.16 -----------------
+query Id : 16632838
+query : tomcat memory exception
+
+----------------- No.17 -----------------
+query Id : 8464481
+query : how to add page number in header using itext in java
+
+----------------- No.18 -----------------
+query Id : 9331867
+query : programmatically discover java unlimited encryption
+
+----------------- No.19 -----------------
+query Id : 33426469
+query : java how do i draw on a jframe without losing it is existing drawing
+
+----------------- No.20 -----------------
+query Id : 8656085
+query : how to send an image from web service in spring
+
+----------------- No.21 -----------------
+query Id : 30942605
+query : generic comparable gets a compiler error
+
+----------------- No.22 -----------------
+query Id : 13252133
+query : out of memory while processing large number of objects in hashmap hashtable arraylist
+
+----------------- No.23 -----------------
+query Id : 8477682
+query : override equals and hashcode methods in superclass or in the sub class or override in both
+
+----------------- No.24 -----------------
+query Id : 6531272
+query : en dash being garbled during http response handling or text manipulation
+
+----------------- No.25 -----------------
+query Id : 11260746
+query : algorithm and hint for scientific calculator
+
+----------------- No.26 -----------------
+query Id : 15486657
+query : how to iterate through columns rows of a multi dimensional array
+
+----------------- No.27 -----------------
+query Id : 23057456
+query : is there an equivalent to asp.net web api in java world
+
+----------------- No.28 -----------------
+query Id : 34991534
+query : docker build with internal maven dependency hosted on github
+
+----------------- No.29 -----------------
+query Id : 9510369
+query : using jdbc with online mysql db for an android app
+
+----------------- No.30 -----------------
+query Id : 32248366
+query : frequently getting exceptions in java while downloading files from third party download managers in struts2tiles2 framework
+
+----------------- No.31 -----------------
+query Id : 4568896
+query : difference between object reference and object hash code
+
+----------------- No.32 -----------------
+query Id : 20064374
+query : parsing json api starting from an array
+
+----------------- No.33 -----------------
+query Id : 2547713
+query : why static fields are not initialized in time
+
+----------------- No.34 -----------------
+query Id : 33172026
+query : at which places are jvm options hidden by sts software how do i make the java hotspot maxpermsize warning go away when using sts
+
+----------------- No.35 -----------------
+query Id : 8845186
+query : what exactly is apache camel
+
+----------------- No.36 -----------------
+query Id : 12355839
+query : java 6 creating and detecting the first double value above long.max_value
+
+----------------- No.37 -----------------
+query Id : 5785107
+query : get real class of generic type
+
+----------------- No.38 -----------------
+query Id : 22216398
+query : can bufferedreader read bytes
+
+----------------- No.39 -----------------
+query Id : 6190127
+query : how do i write logs and display them realtime in a java swing application
+
+----------------- No.40 -----------------
+query Id : 15315213
+query : why do i keep getting java.net.connectexception in my android application
+
+----------------- No.41 -----------------
+query Id : 19474060
+query : i and j not being initialized. but i already wrote int i and int j. what is wrong
+
+----------------- No.42 -----------------
+query Id : 5388426
+query : jsf 2.0 set locale throughout session from browser and programmatically
+
+----------------- No.43 -----------------
+query Id : 14523117
+query : catchall url rewrite on google app engine java
+
+----------------- No.44 -----------------
+query Id : 1524824
+query : how can i in a jsp page get maven project version number
+
+----------------- No.45 -----------------
+query Id : 28489322
+query : extract subclass elements from list of parent class
+
+----------------- No.46 -----------------
+query Id : 19638691
+query : how do i convert a exist java project to maven project
+
+----------------- No.47 -----------------
+query Id : 1235179
+query : simple way to repeat a string in java
+
+----------------- No.48 -----------------
+query Id : 13452324
+query : arabic letters giving me output as
+
+----------------- No.49 -----------------
+query Id : 4163312
+query : how to set up otherthaneclipse java compiler for eclipse ide
+
+----------------- No.50 -----------------
+query Id : 30168878
+query : how to disable processing of jsp urls in spring mvc
+
+----------------- No.51 -----------------
+query Id : 7351242
+query : is it such a bad idea to capture outofmemoryerror
+
+----------------- No.52 -----------------
+query Id : 1581977
+query : does c# have an equivalent of java static nested class
+
+----------------- No.53 -----------------
+query Id : 33742322
+query : continue to get info from scanner in catch block
+
+----------------- No.54 -----------------
+query Id : 24628402
+query : the simplest way to create jar file
+
+----------------- No.55 -----------------
+query Id : 25865844
+query : oracle jdbc driver auto formatting the date column
+
+----------------- No.56 -----------------
+query Id : 29019958
+query : java throws clause not needed when throwing a new npe and why does adding throws exception give compilation errors
+
+----------------- No.57 -----------------
+query Id : 10387888
+query : advice for new project requiring ajax authentication on java ee platform
+
+----------------- No.58 -----------------
+query Id : 16509777
+query : xml to json using jsonlib
+
+----------------- No.59 -----------------
+query Id : 33538475
+query : java accessing hyperv programaticaly
+
+----------------- No.60 -----------------
+query Id : 15353097
+query : generating bpel files programmatically
+
+----------------- No.61 -----------------
+query Id : 30092041
+query : printing out with byte java
+
+----------------- No.62 -----------------
+query Id : 6243242
+query : testing api which returns multiple values with junit
+
+----------------- No.63 -----------------
+query Id : 5348310
+query : how to inject a map<string list> in java springs
+
+----------------- No.64 -----------------
+query Id : 26747283
+query : wmq jms api ssl sun jdk and ssl_rsa_with_aes_128_cbc_sha
+
+----------------- No.65 -----------------
+query Id : 28808268
+query : why the methods in object class are protected
+
+----------------- No.66 -----------------
+query Id : 10130819
+query : use jni to create populate and return a java class instance
+
+----------------- No.67 -----------------
+query Id : 13763413
+query : jdbc connection from play app
+
+----------------- No.68 -----------------
+query Id : 15462994
+query : bundled jar with jre into exe but the exe does not contain jre
+
+----------------- No.69 -----------------
+query Id : 6343295
+query : java xml create
+
+----------------- No.70 -----------------
+query Id : 33311144
+query : simpledateformat behaviour change in android marshmallow
+
+----------------- No.71 -----------------
+query Id : 30459495
+query : java rounding a decimal value to half_even
+
+----------------- No.72 -----------------
+query Id : 31171489
+query : does collect operation on stream close the stream and underlying resources
+
+----------------- No.73 -----------------
+query Id : 28943485
+query : hibernate bean validation on submit only
+
+----------------- No.74 -----------------
+query Id : 30956461
+query : why is this code working without volatile
+
+----------------- No.75 -----------------
+query Id : 6111645
+query : difference between timertask and executors.newscheduledthreadpool 1
+
+----------------- No.76 -----------------
+query Id : 302016
+query : accessing an sdf sqlserver mobile file from java
+
+----------------- No.77 -----------------
+query Id : 21781161
+query : how can i do something every second libgdx
+
+----------------- No.78 -----------------
+query Id : 7408566
+query : java double value 0.01 changes to 0.009999999999999787
+
+----------------- No.79 -----------------
+query Id : 18297919
+query : error in ocjp exam simulation how many objects are really created
+
+----------------- No.80 -----------------
+query Id : 2768697
+query : any yaml based fixture loader for java
+
+----------------- No.81 -----------------
+query Id : 2694439
+query : how does volatile actually work
+
+----------------- No.82 -----------------
+query Id : 8486933
+query : how to write a script that is parseable in both java and c
+
+----------------- No.83 -----------------
+query Id : 26755943
+query : mariadb fails to work after being idle for a period
+
+----------------- No.84 -----------------
+query Id : 9049595
+query : installation fail when installing the android plugin for eclipse
+
+----------------- No.85 -----------------
+query Id : 15781211
+query : how to check returned server code using dom
+
+----------------- No.86 -----------------
+query Id : 7758117
+query : java sql limit | rownum uniformization api
+
+----------------- No.87 -----------------
+query Id : 17862769
+query : main java.lang.outofmemoryerror in hashtable sorting and reversing
+
+----------------- No.88 -----------------
+query Id : 27476225
+query : why does audiosystem.getaudioinputstream throw illegalargumentexception
+
+----------------- No.89 -----------------
+query Id : 35055861
+query : java lambda expression requires unavoidable null
+
+----------------- No.90 -----------------
+query Id : 17894598
+query : how to give execute permission for google appenginefile
+
+----------------- No.91 -----------------
+query Id : 30155535
+query : java why wo not this bigdecimal loop work
+
+----------------- No.92 -----------------
+query Id : 12618915
+query : how to implement a db listener in java
+
+----------------- No.93 -----------------
+query Id : 22242630
+query : is there a elegant and common way for converting postgresql hstore to jpa 2.1 datatype
+
+----------------- No.94 -----------------
+query Id : 17187029
+query : how to run jacoco with java 7 and springinstrument
+
+----------------- No.95 -----------------
+query Id : 35034649
+query : jxbrowser freezes whole application
+
+----------------- No.96 -----------------
+query Id : 21065103
+query : how to choose lookandfeel from file
+
+----------------- No.97 -----------------
+query Id : 11397817
+query : get the current titlebar and border size of my window and manipulate screenshot image
+
+----------------- No.98 -----------------
+query Id : 35284048
+query : format indent java code in an android app
+
+----------------- No.99 -----------------
+query Id : 22746318
+query : manipulating time in java swing
