@@ -7,7 +7,6 @@ public class TokenTransfer
 	private final Integer userId;
 	private final String errorMessage;
 
-
 	public TokenTransfer(String token, Integer userId, String errorMessage)
 	{
 		this.token = token;

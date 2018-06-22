@@ -222,13 +222,13 @@ public class PitBotApp2 {
 			
 			initializeVariables();
 			logger.info("Processing query: "+externalQuestion);
-			runSteps2to6(externalQuestion.getGoogleQuery()); //which is now only the raw query yet.
+			runSteps2to6(externalQuestion.getRawQuery()); 
 			
 			externalQuestion.setGoogleQuery(googleQuery);
 			externalQuestion.setUseRack(runRack);
 			externalQuestion.setClasses(String.join(", ", rackApis));
 			externalQuestion.setSurveyId(SurveyEnum.BUILDING_GROUND_TRUTH.getId());
-			
+						
 			logger.info("saving external question and related ids...");
 			pitBotService.saveExternalQuestionAndRelatedIds(externalQuestion,allRetrievedPostsCache);
 			count++;

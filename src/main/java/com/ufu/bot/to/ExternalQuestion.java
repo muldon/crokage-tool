@@ -22,6 +22,9 @@ public class ExternalQuestion {
 	
 	@Column(name="surveyid")
 	private Integer surveyId;
+	
+	@Column(name="rawquery")	
+	private String rawQuery;
 
 	@Column(name="googlequery")	
 	private String googleQuery;
@@ -35,6 +38,8 @@ public class ExternalQuestion {
 	
 	private String url;
 	
+	@Column(name="externalid")	
+	private Integer externalId;
 		
 
 	public Integer getId() {
@@ -133,20 +138,36 @@ public class ExternalQuestion {
 
 	
 
-	public ExternalQuestion(Integer id, Integer surveyId, String googleQuery, String classes, Boolean useRack, String obs, String link) {
+	public ExternalQuestion(Integer surveyId, String rawQuery, String googleQuery, String classes, Boolean useRack, String obs, String link,Integer externalId) {
 		super();
-		this.id = id;
 		this.surveyId = surveyId;
 		this.googleQuery = googleQuery;
 		this.classes = classes;
 		this.useRack = useRack;
 		this.obs =obs;
 		this.url=link;
-		
+		this.externalId=externalId;
+		this.rawQuery=rawQuery;
 	}
 
 	public ExternalQuestion() {
 		super();
+	}
+
+	public Integer getExternalId() {
+		return externalId;
+	}
+
+	public void setExternalId(Integer externalId) {
+		this.externalId = externalId;
+	}
+
+	public String getRawQuery() {
+		return rawQuery;
+	}
+
+	public void setRawQuery(String rawQuery) {
+		this.rawQuery = rawQuery;
 	}
 	
 		

@@ -68,8 +68,11 @@
 <part>id</part>
 </key>
 </table>
-<table x="394" y="150" name="externalquestion">
+<table x="404" y="126" name="externalquestion">
 <row name="id" null="1" autoincrement="1">
+<datatype>INTEGER</datatype>
+<default>NULL</default></row>
+<row name="externalId" null="1" autoincrement="0">
 <datatype>INTEGER</datatype>
 <default>NULL</default></row>
 <row name="surveryid" null="1" autoincrement="0">

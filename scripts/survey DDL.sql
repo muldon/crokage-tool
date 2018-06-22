@@ -1,4 +1,4 @@
-
+﻿
 
 DROP SEQUENCE surveyuser_id_seq;
 DROP SEQUENCE evaluation_id_seq;
@@ -156,6 +156,8 @@ CREATE TABLE externalquestion
   answerbotqueryid integer,
   obs character varying(400),
   url character varying(800),
+  externalid integer,
+  rawquery text,
   CONSTRAINT externalquestion_pk PRIMARY KEY (id),
   CONSTRAINT survey_fk FOREIGN KEY (surveyid)
       REFERENCES survey (id) MATCH SIMPLE
@@ -167,7 +169,6 @@ WITH (
 );
 ALTER TABLE externalquestion
   OWNER TO postgres;
-
 
 
 -- Table: relatedpost

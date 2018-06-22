@@ -13,7 +13,6 @@ public class TokenUtils
 
 	public static final String MAGIC_KEY = "obfuscate";
 
-
 	public static String createToken(SurveyUser userDetails)
 	{
 		/* Expires in 48 hours */

@@ -19,8 +19,10 @@ import com.ufu.bot.to.ExternalQuestion;
 import com.ufu.bot.to.SurveyUser;
 import com.ufu.survey.transfer.ExternalQuestionTransfer;
 import com.ufu.survey.transfer.GenericRestTransfer;
+import com.ufu.survey.transfer.ToTransfer;
 import com.ufu.survey.transfer.TokenTransfer;
 import com.ufu.survey.util.TokenUtils;
+
 
 
 
@@ -29,20 +31,23 @@ import com.ufu.survey.util.TokenUtils;
 @Produces(MediaType.APPLICATION_JSON)
 public class PitSurveyResource extends SuperResource {
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
-	private String errorMessage = null;
-	private String infoMessage = null;
+	
 		
 	
 	@Path("/authenticateUser")
 	@POST	
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public TokenTransfer save(SurveyUser surveyUser) {
+	public TokenTransfer authenticateUser(SurveyUser surveyUser) {
+		String errorMessage = null;
+		String infoMessage = null;
+		
 		try{
 			
 			surveyUser = pitSurveyService.authenticateUser(surveyUser);
 			if(surveyUser==null) {
 				errorMessage = "You have no power here ! ";
+				return null;
 			}
 			
 		
@@ -54,19 +59,31 @@ public class PitSurveyResource extends SuperResource {
 		return new TokenTransfer(TokenUtils.createToken(surveyUser),surveyUser.getId(),errorMessage);
 	}
 	
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("/loadUser/{id}")
+	public ToTransfer loadUser(@PathParam("id") Integer id)
+	{
+		logger.info("Loading user : "+id);
+		SurveyUser surveyUser = pitSurveyService.loadUser(id);
+				
+		return new ToTransfer(null,surveyUser, null,null);
+		
+	}
+	
 	
 	
 	@GET
-	@Path("/externalQuestions/{id}")
+	@Path("/loadQuestions/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public ExternalQuestionTransfer getExternalQuestion(@PathParam("id") Integer externalQuestionId)
+	public ToTransfer loadQuestions(@PathParam("id") Integer userId)
 	{
 		String errorMessage = null;
 		String infoMessage = null;
 		
-		ExternalQuestion externalQuestion = null;
+		List<ExternalQuestion> externalQuestions = null;
 		try {
-			externalQuestion = pitSurveyService.findExternalQuestionById(externalQuestionId);
+			externalQuestions = pitSurveyService.loadQuestions(userId);
 						
 		} catch (Exception e) {
 			errorMessage = "Error when loading external question.";
@@ -74,7 +91,7 @@ public class PitSurveyResource extends SuperResource {
 			
 		}
 						
-		return new ExternalQuestionTransfer(null,externalQuestion,errorMessage,infoMessage);
+		return new ToTransfer<ExternalQuestion>(externalQuestions,null,errorMessage,infoMessage);
 		
 	}
 	

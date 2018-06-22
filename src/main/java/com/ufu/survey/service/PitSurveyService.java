@@ -193,6 +193,21 @@ public class PitSurveyService extends AbstractRepositoriesUtils{
 	}
 
 
+
+
+	public SurveyUser loadUser(Integer userId) {
+		return surveyUserRepository.findOne(userId);
+	}
+
+
+
+
+	public List<ExternalQuestion> loadQuestions(Integer userId) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+
 	
 
 

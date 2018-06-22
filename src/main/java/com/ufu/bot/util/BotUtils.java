@@ -991,7 +991,7 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 					if(linkLine.startsWith("link:")) {
 						linkLine= linkLine.replace("link:", "").trim();
 						//System.out.println(linkLine);
-						ExternalQuestion externalQuestion = new ExternalQuestion(id,SurveyEnum.BUILDING_GROUND_TRUTH.getId(),queryLine,null,runRack,obs,linkLine);
+						ExternalQuestion externalQuestion = new ExternalQuestion(SurveyEnum.BUILDING_GROUND_TRUTH.getId(),queryLine,null,null,runRack,obs,linkLine,id);
 						externalQuestionAnswers.add(externalQuestion);
 						id++;
 					}
