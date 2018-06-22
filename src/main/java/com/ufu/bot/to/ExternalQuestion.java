@@ -1,5 +1,7 @@
 package com.ufu.bot.to;
 
+import java.util.List;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -40,6 +42,9 @@ public class ExternalQuestion {
 	
 	@Column(name="externalid")	
 	private Integer externalId;
+	
+	@Transient
+	private List<Post> answers;
 		
 
 	public Integer getId() {
@@ -83,14 +88,12 @@ public class ExternalQuestion {
 	}
 
 	
-	
-	
-
 
 	@Override
 	public String toString() {
-		return "ExternalQuestion [id=" + id + ", surveyId=" + surveyId + ", googleQuery=" + googleQuery + ", classes="
-				+ classes + ", useRack=" + useRack + ", obs=" + obs + ", url=" + url + "]";
+		return "ExternalQuestion [id=" + id + ", surveyId=" + surveyId + ", rawQuery=" + rawQuery + ", googleQuery="
+				+ googleQuery + ", classes=" + classes + ", useRack=" + useRack + ", obs=" + obs + ", url=" + url
+				+ ", externalId=" + externalId + ", answers=" + answers + "]";
 	}
 
 	public String getObs() {

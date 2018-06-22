@@ -1,11 +1,14 @@
 package com.ufu.survey.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,6 +23,7 @@ import com.ufu.bot.to.Survey;
 import com.ufu.bot.to.SurveyUser;
 import com.ufu.bot.to.User;
 import com.ufu.bot.util.AbstractRepositoriesUtils;
+import com.ufu.survey.transfer.ToTransfer;
 
 
 
@@ -29,6 +33,8 @@ public class PitSurveyService extends AbstractRepositoriesUtils{
 		
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 	
+	@Value("${runRack}")
+	public Boolean runRack;  
 	
 	
 	public PitSurveyService() {
@@ -202,9 +208,45 @@ public class PitSurveyService extends AbstractRepositoriesUtils{
 
 
 
-	public List<ExternalQuestion> loadQuestions(Integer userId) {
-		// TODO Auto-generated method stub
-		return null;
+	public void loadQuestions(ToTransfer toTransfer, Boolean internalSurvey) {
+		int randomNum;
+		if(internalSurvey) {
+			List<ExternalQuestion> externalQuestionsWithRack = externalQuestionRepository.findExternalQuestionsInternalSurvey(true);
+			List<ExternalQuestion> externalQuestionsWithoutRack = externalQuestionRepository.findExternalQuestionsInternalSurvey(false);
+						
+			toTransfer.setList(externalQuestionsWithRack);
+					
+			List<ExternalQuestion> randomList1= new ArrayList<>();
+			List<ExternalQuestion> randomList2= new ArrayList<>();
+			
+			//para testes - retirar
+			if(externalQuestionsWithoutRack.isEmpty()) {
+				externalQuestionsWithoutRack.addAll(externalQuestionsWithRack);
+			}
+			
+			for(int i=0; i<externalQuestionsWithoutRack.size(); i++) {//lists contain the same size
+				randomNum = ThreadLocalRandom.current().nextInt(1, 3);
+				if(randomNum==1) {
+					randomList1.add(externalQuestionsWithRack.get(i));
+					randomList2.add(externalQuestionsWithoutRack.get(i));
+				}else {
+					randomList2.add(externalQuestionsWithRack.get(i));
+					randomList1.add(externalQuestionsWithoutRack.get(i));
+				}
+			}
+			
+			toTransfer.setList2(randomList1);
+			toTransfer.setList3(randomList2);
+		
+		}else {
+			//use the winner (parameterized) perspective to show questions
+			List<ExternalQuestion> externalQuestionsWithOrWithoutRack = externalQuestionRepository.findExternalQuestionsInternalSurvey(runRack);
+			
+			
+		}
+		
+		
+		
 	}
 
 

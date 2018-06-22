@@ -10,6 +10,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -24,7 +25,6 @@ import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import com.ufu.bot.PitBotApp;
 import com.ufu.bot.to.Bucket;
-import com.ufu.bot.to.ExternalQuestion;
 import com.ufu.bot.to.Post;
 import com.ufu.bot.util.BotUtils;
 
@@ -479,10 +479,27 @@ public class Tester {
 		
 		//testBuildAnswerPostBucket();
 		
-		testReadAnswerBotQuestions();
+		//testReadAnswerBotQuestions();
+		
+		testRandom();
 	}
 	
 	
+
+	private void testRandom() {
+		for(int i=0; i<20; i++) {
+			int randomNum = ThreadLocalRandom.current().nextInt(1, 3);
+			if(randomNum==1) {
+				System.out.println(randomNum);
+			}else {
+				System.out.println("nopz");
+			}
+			
+		}
+		
+	}
+
+
 
 	private void testReadAnswerBotQuestions() throws Exception {
 		BotUtils botUtils = new BotUtils();
