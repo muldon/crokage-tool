@@ -3,7 +3,9 @@ package com.ufu.bot.to;
 import java.util.List;
 import java.util.Set;
 
+import javax.xml.bind.annotation.XmlRootElement;
 
+@XmlRootElement
 public class Bucket {
 	private static final long serialVersionUID = -11115191211815641L;
 	

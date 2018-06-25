@@ -161,8 +161,7 @@ CREATE TABLE externalquestion
   CONSTRAINT externalquestion_pk PRIMARY KEY (id),
   CONSTRAINT survey_fk FOREIGN KEY (surveyid)
       REFERENCES survey (id) MATCH SIMPLE
-      ON UPDATE NO ACTION ON DELETE NO ACTION,
-  CONSTRAINT external_question_un_url UNIQUE (url)
+      ON UPDATE NO ACTION ON DELETE NO ACTION
 )
 WITH (
   OIDS=FALSE

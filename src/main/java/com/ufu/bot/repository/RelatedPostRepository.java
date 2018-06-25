@@ -15,6 +15,11 @@ public interface RelatedPostRepository extends CrudRepository<RelatedPost, Integ
 			  + " where p.id = r.postid "
 			  + " and r.externalquestionid = ?1",nativeQuery=true)
 	List<Post> findRelatedPosts(Integer externalQuestionId);
+
+	@Query(value="select r.postid "
+			  + " from relatedpost r"
+			  + " where r.externalquestionid = ?1",nativeQuery=true)
+	List<Integer> findRelatedPostsIds(Integer externalQuestionId);
     
 	
 

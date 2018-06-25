@@ -75,7 +75,6 @@ public class Post {
 	@Column(name="communityowneddate")
 	private Timestamp communityOwnedDate;
 	
-	
 	@Transient
 	private List<Comment> comments;  //lista de ids de posts com maior similaridade ( maior para menor )
 	
@@ -100,6 +99,8 @@ public class Post {
 	
 	private String code; */
 	
+	@Transient
+	private Evaluation evaluation;
 
 	public Post() {
 	}
@@ -364,10 +365,21 @@ public class Post {
 		this.user = user;
 	}
 
+	
+
 	@Override
 	public String toString() {
-		return "Post [id=" + id + ", body=" + body + ", title=" + title + ", tags=" + tags + ", postTypeId=" + postTypeId + ", parentId=" + parentId + ", creationDate=" + creationDate + ", score="
-				+ score + ", ownerUserId=" + ownerUserId + ", answerCount=" + answerCount + ", commentCount=" + commentCount + ", user=" + user + "]";
+		return "Post [id=" + id + ", body=" + body + ", title=" + title + ", tags=" + tags + ", postTypeId="
+				+ postTypeId + ", acceptedAnswerId=" + acceptedAnswerId + ", parentId=" + parentId + ", creationDate="
+				+ creationDate + ", score=" + score + ", viewCount=" + viewCount + ", ownerUserId=" + ownerUserId
+				+ ", lastEditorUserId=" + lastEditorUserId + ", lastEditorDisplayName=" + lastEditorDisplayName
+				+ ", lastEditDate=" + lastEditDate + ", lastActivityDate=" + lastActivityDate + ", answerCount="
+				+ answerCount + ", commentCount=" + commentCount + ", favoriteCount=" + favoriteCount + ", closedDate="
+				+ closedDate + ", communityOwnedDate=" + communityOwnedDate + ", comments=" + comments + ", user="
+				+ user + ", titleVectors=" + titleVectors + ", tagVectors=" + tagVectors + ", bodyVectors="
+				+ bodyVectors + ", topicVectors=" + topicVectors + ", similarityScore=" + similarityScore
+				+ ", classesNames=" + classesNames + ", topKrelatedQuestions=" + topKrelatedQuestions + ", evaluation="
+				+ evaluation + "]";
 	}
 
 	public Set<String> getClassesNames() {
@@ -376,6 +388,14 @@ public class Post {
 
 	public void setClassesNames(Set<String> classesNames) {
 		this.classesNames = classesNames;
+	}
+
+	public Evaluation getEvaluation() {
+		return evaluation;
+	}
+
+	public void setEvaluation(Evaluation evaluation) {
+		this.evaluation = evaluation;
 	}
 
 	

@@ -30,12 +30,12 @@ import com.ufu.bot.to.RelatedPost;
 import com.ufu.bot.to.Result;
 import com.ufu.bot.to.SurveyUser;
 import com.ufu.bot.to.User;
-import com.ufu.bot.util.AbstractRepositoriesUtils;
+import com.ufu.bot.util.AbstractService;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @WebAppConfiguration
-public class BotApplicationTests extends AbstractRepositoriesUtils{
+public class BotApplicationTests extends AbstractService{
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	@Autowired

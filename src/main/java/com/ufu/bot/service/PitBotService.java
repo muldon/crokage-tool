@@ -4,14 +4,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.Sets;
-import com.ufu.bot.to.Comment;
 import com.ufu.bot.to.Evaluation;
 import com.ufu.bot.to.Experiment;
 import com.ufu.bot.to.ExternalQuestion;
@@ -19,17 +15,16 @@ import com.ufu.bot.to.Post;
 import com.ufu.bot.to.RelatedPost;
 import com.ufu.bot.to.Result;
 import com.ufu.bot.to.SurveyUser;
-import com.ufu.bot.to.User;
-import com.ufu.bot.util.AbstractRepositoriesUtils;
+import com.ufu.bot.util.AbstractService;
 
 
 
 @Service
 @Transactional
-public class PitBotService extends AbstractRepositoriesUtils{
+public class PitBotService extends AbstractService{
 		
 	
-	private final Logger logger = LoggerFactory.getLogger(this.getClass());
+	//private final Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	
 	
@@ -53,11 +48,7 @@ public class PitBotService extends AbstractRepositoriesUtils{
 	
 	
 
-	@Transactional(readOnly = true)
-	public Post findPostById(Integer id) {
-		return postsRepository.findOne(id);
-	}
-
+	
 	
 
 	@Transactional(readOnly = true)
@@ -123,30 +114,16 @@ public class PitBotService extends AbstractRepositoriesUtils{
 
 
 
-	public List<Comment> getCommentsByPostId(Integer postId) {
-		return commentsRepository.findByPostId(postId,new Sort(Sort.Direction.ASC, "id"));
-	}
 
 
-	/*
-	 * Answers have postTypeId = 2
-	 */
-	public List<Post> findAnswersByQuestionId(Integer questionId) {
-		//return postsRepository.findByParentIdAndPostTypeId(questionId,2,new Sort(Sort.Direction.ASC, "id"));
-		return postsRepository.findByParentId(questionId,new Sort(Sort.Direction.ASC, "id"));
-	}
+	
 
-
-	public User findUserById(Integer userId) {
-		return usersRepository.findOne(userId);
-	}
-
-
+	@Transactional(readOnly = true)
 	public Set<Integer> recoverRelatedQuestionsIds(Set<Integer> allQuestionsIds) {
 		return genericRepository.findRelatedQuestionsIds(allQuestionsIds);
 	}
 
-
+	@Transactional(readOnly = true)
 	public Set<Post> getAllPosts() {
 		Set<Post> set = Sets.newHashSet(postsRepository.findAll());
 		return set;
@@ -165,7 +142,7 @@ public class PitBotService extends AbstractRepositoriesUtils{
 
 
 
-
+	@Transactional(readOnly = true)
 	public List<ExternalQuestion> getAllExternalQuestionsAnswerBot() {
 		return externalQuestionRepository.findAllExternalQuestionsAnswerBot();
 	}
@@ -182,7 +159,7 @@ public class PitBotService extends AbstractRepositoriesUtils{
 
 
 
-
+	@Transactional(readOnly = true)
 	public List<Post> getRelatedPosts(Integer externalQuestionId) {
 		return relatedPostRepository.findRelatedPosts(externalQuestionId);
 	}
@@ -199,7 +176,7 @@ public class PitBotService extends AbstractRepositoriesUtils{
 
 
 
-
+	@Transactional(readOnly = true)
 	public SurveyUser getSurveyUserByLogin(String login) {
 		return surveyUserRepository.findByLogin(login);
 	}
@@ -242,7 +219,39 @@ public class PitBotService extends AbstractRepositoriesUtils{
 
 
 	
+	
 
+
+
+
+
+	public int getCountExcludedPosts() {
+		return countExcludedPosts;
+	}
+
+
+
+
+
+	public void setCountExcludedPosts(int countExcludedPosts) {
+		this.countExcludedPosts = countExcludedPosts;
+	}
+
+
+
+
+
+	public int getCountPostIsAnAnswer() {
+		return countPostIsAnAnswer;
+	}
+
+
+
+
+
+	public void setCountPostIsAnAnswer(int countPostIsAnAnswer) {
+		this.countPostIsAnAnswer = countPostIsAnAnswer;
+	}
 
 	
 	

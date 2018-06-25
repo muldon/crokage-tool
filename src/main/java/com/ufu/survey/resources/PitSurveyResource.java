@@ -86,7 +86,7 @@ public class PitSurveyResource extends SuperResource {
 			pitSurveyService.loadQuestions(toTransfer,internalSurvey);
 						
 		} catch (Exception e) {
-			errorMessage = "Error when loading external question.";
+			errorMessage = "Error when loadQuestions.";
 			logger.error(errorMessage+e);
 			
 		}
@@ -95,7 +95,27 @@ public class PitSurveyResource extends SuperResource {
 		
 	}
 	
-	
+	@GET
+	@Path("/loadNextQuestion/{id}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public ToTransfer loadNextQuestion(@PathParam("id") Integer userId)
+	{
+		String errorMessage = null;
+		String infoMessage = null;
+		ToTransfer toTransfer = new ToTransfer<ExternalQuestion>();
+		
+		try {
+			pitSurveyService.loadNextQuestion(toTransfer,userId);
+						
+		} catch (Exception e) {
+			errorMessage = "Error when loadCurrentQuestion.";
+			logger.error(errorMessage+e);
+			
+		}
+						
+		return toTransfer;
+		
+	}
 	
 	
 	@GET

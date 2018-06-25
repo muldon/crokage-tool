@@ -10,7 +10,11 @@ public class ToTransfer<T>
 	private List<T> list;
 	private List<T> list2;
 	private List<T> list3;
+	
+	private List list4;
+	
 	private T to;
+	private T to2;
 	
 	private String errorMessage;
 	private String infoMessage;
@@ -106,6 +110,22 @@ public class ToTransfer<T>
 
 	public void setInfoMessage(String infoMessage) {
 		this.infoMessage = infoMessage;
+	}
+
+	public T getTo2() {
+		return to2;
+	}
+
+	public void setTo2(T to2) {
+		this.to2 = to2;
+	}
+
+	public List getList4() {
+		return list4;
+	}
+
+	public void setList4(List list4) {
+		this.list4 = list4;
 	}
 
 

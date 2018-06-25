@@ -508,7 +508,7 @@ public class PitBotApp {
 		
 		//Main bucket
 		mainBucket = new Bucket();
-		String presentingBody = botUtils.buildPresentationBody(googleQuery);
+		String presentingBody = botUtils.buildPresentationBody(googleQuery,true);
 		
 		Set<String> classesNames = new LinkedHashSet<>();
 		/*
@@ -684,7 +684,7 @@ public class PitBotApp {
 		}
 		
 		
-		String presentingBody = botUtils.buildPresentationBody(post.getBody());
+		String presentingBody = botUtils.buildPresentationBody(post.getBody(),true);
 		bucket.setPresentingBody(presentingBody);
 		
 		List<String> preCodes = botUtils.getPreCodes(presentingBody);
@@ -722,7 +722,7 @@ public class PitBotApp {
 		 * First the title: extract classes and processed text
 		 */
 		Set<String> classesNamesParentPost = new LinkedHashSet<>();
-		String presentingTitle = botUtils.buildPresentationBody(parentPost.getTitle());
+		String presentingTitle = botUtils.buildPresentationBody(parentPost.getTitle(),true);
 		botUtils.getClassesNamesForString(classesNamesParentPost,presentingTitle);
 		
 		String processedTitleStopped = BotUtils.removeSpecialSymbolsTitles(presentingTitle);
@@ -747,7 +747,7 @@ public class PitBotApp {
 		 */
 		
 		
-		String presentingBody = botUtils.buildPresentationBody(parentPost.getBody());
+		String presentingBody = botUtils.buildPresentationBody(parentPost.getBody(),true);
 		//extract classes names
 		List<String> preCodes = botUtils.getPreCodes(presentingBody);
 		List<String> smallCodes = botUtils.getSimpleCodes(presentingBody);

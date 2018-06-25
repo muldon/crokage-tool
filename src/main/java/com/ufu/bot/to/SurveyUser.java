@@ -8,6 +8,8 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import com.ufu.bot.to.Survey.SurveyEnum;
+
 @XmlRootElement
 @Entity
 @Table(name = "surveyuser")
@@ -92,9 +94,50 @@ public class SurveyUser {
 
 	
 	
-	
-	
 
+
+	public enum SurveyUserEnum {
+		INTERNAL_USER_RODRIGO (1,"Rodrigo"), 
+		INTERNAL_USER_KLERISSON (2,"Klerisson");
+		
+	   
+		private final Integer id;
+		private final String name;
+		
+		
+		
+		SurveyUserEnum(Integer id,String name){
+			this.id = id;
+			this.name = name;
+		
+		}
+		
+		SurveyUserEnum(SurveyUserEnum surveyEnum){
+			this.id = surveyEnum.id;
+			this.name = surveyEnum.name;
+		}
+		
+	   
+	
+		public Integer getId() {
+			return id;
+		}
+	
+		public String getName() {
+			return name;
+		}
+	
+	
+	}	
+	
+	
+	public static Boolean isInternalSurveyUser(Integer userId) {
+		if(userId.equals(SurveyUserEnum.INTERNAL_USER_RODRIGO.getId()) 
+			|| userId.equals(SurveyUserEnum.INTERNAL_USER_KLERISSON.getId())){
+			return true;
+		}
+		return false;
+	}
 	
 	
     

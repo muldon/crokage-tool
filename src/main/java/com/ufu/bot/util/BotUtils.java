@@ -47,8 +47,10 @@ import org.springframework.stereotype.Component;
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import com.ufu.bot.repository.GenericRepository;
+import com.ufu.bot.to.Bucket;
 import com.ufu.bot.to.ExternalQuestion;
 import com.ufu.bot.to.Feature;
+import com.ufu.bot.to.Post;
 import com.ufu.bot.to.Survey.SurveyEnum;
 
 
@@ -70,7 +72,7 @@ public class BotUtils {
 	//private Set<Integer> allDuplicatedQuestionsIds;
 	//private static Set<PostLink> allPostLinks;
 	private static Map<Integer, Set<Integer>> allPostLinks;
-	
+	private Map<Integer,Post> allRetrievedPostsCache;
 
 	@Autowired
 	private CosineSimilarity cs1;
@@ -167,7 +169,7 @@ public class BotUtils {
 			minTokenSize = new Integer(prop.getProperty("minTokenSize"));
 			
 		}
-		
+		allRetrievedPostsCache = new HashMap<>();
 				
 	}
 	
@@ -312,7 +314,7 @@ public class BotUtils {
 	 * @param body
 	 * @return
 	 */
-	public String buildPresentationBody(String body) {
+	public String buildPresentationBody(String body, boolean removeHtmlTags) {
 		
 		String finalBody = translateHTMLSimbols(body);
 		
@@ -320,7 +322,9 @@ public class BotUtils {
 		
 		finalBody = extractLinksTargets(finalBody);
 		
-		finalBody = removeHtmlTagsExceptCode(finalBody);
+		if(removeHtmlTags) {
+			finalBody = removeHtmlTagsExceptCode(finalBody);
+		}
 		
 		return finalBody;
 	}
@@ -1028,5 +1032,24 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 		
 	}
 	
+	public void buildOutPutFile(Bucket bucket, int pos, String googleQuery, List<String> rackApis) {
+		
+		
+	}
+	
+	public void storeInCache(Post post) {
+		if(!allRetrievedPostsCache.containsKey(post.getId())) {
+			allRetrievedPostsCache.put(post.getId(), post);
+		}
+		
+	}
+
+	public Map<Integer, Post> getAllRetrievedPostsCache() {
+		return allRetrievedPostsCache;
+	}
+
+	public void setAllRetrievedPostsCache(Map<Integer, Post> allRetrievedPostsCache) {
+		this.allRetrievedPostsCache = allRetrievedPostsCache;
+	}
 	
 }

@@ -1,6 +1,7 @@
 package com.ufu.bot.to;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -44,7 +45,7 @@ public class ExternalQuestion {
 	private Integer externalId;
 	
 	@Transient
-	private List<Post> answers;
+	private Map<Integer,List<Post>> relatedPosts;
 		
 
 	public Integer getId() {
@@ -93,7 +94,7 @@ public class ExternalQuestion {
 	public String toString() {
 		return "ExternalQuestion [id=" + id + ", surveyId=" + surveyId + ", rawQuery=" + rawQuery + ", googleQuery="
 				+ googleQuery + ", classes=" + classes + ", useRack=" + useRack + ", obs=" + obs + ", url=" + url
-				+ ", externalId=" + externalId + ", answers=" + answers + "]";
+				+ ", externalId=" + externalId + ", relatedPosts=" + relatedPosts + "]";
 	}
 
 	public String getObs() {
@@ -172,6 +173,20 @@ public class ExternalQuestion {
 	public void setRawQuery(String rawQuery) {
 		this.rawQuery = rawQuery;
 	}
+
+	public Map<Integer, List<Post>> getRelatedPosts() {
+		return relatedPosts;
+	}
+
+	public void setRelatedPosts(Map<Integer, List<Post>> relatedPosts) {
+		this.relatedPosts = relatedPosts;
+	}
+
+	
+
+	
+
+	
 	
 		
 	

@@ -43,6 +43,7 @@ import com.ufu.bot.to.SoThread;
 import com.ufu.bot.to.Survey.SurveyEnum;
 import com.ufu.bot.util.BotComposer;
 import com.ufu.bot.util.BotUtils;
+import com.ufu.survey.service.PitSurveyService;
 
 import core.CodeTokenProvider;
 
@@ -55,11 +56,12 @@ public class PitBotApp2 {
 	private PitBotService pitBotService;
 	
 	@Autowired
-	private BotUtils botUtils;
+	private PitSurveyService pitSurveyService;
 	
 	@Autowired
-	private BotComposer botComposer;
+	private BotUtils botUtils;
 	
+		
 	@Autowired
 	private GoogleWebSearch googleWebSearch;
 		
@@ -87,6 +89,11 @@ public class PitBotApp2 {
 	@Value("${numberOfGoogleResults}")
 	public Integer numberOfGoogleResults;  
 	
+	@Value("${internalSurveyRankListSize}")
+	public Integer internalSurveyRankListSize;  
+	
+	@Value("${externalSurveyRankListSize}")
+	public Integer externalSurveyRankListSize;  
 	
 	/*@Value("${APIKEY}")
 	public String apiKey;
@@ -140,10 +147,7 @@ public class PitBotApp2 {
 	private Double avgScore;
 	private Double avgReputation;
 	
-	private Map<Integer,Post> allRetrievedPostsCache;
 	
-	int countExcludedPosts;
-	int countPostIsAnAnswer;
 	int countRecoveredPostsFromLinks;
 	
 	
@@ -168,6 +172,8 @@ public class PitBotApp2 {
 				+ "\n useProxy: "+useProxy
 				+ "\n numberOfGoogleResults: "+numberOfGoogleResults
 				+ "\n minTokenSize: "+minTokenSize
+				+ "\n internalSurveyRankListSize: "+internalSurveyRankListSize
+				+ "\n externalSurveyRankListSize: "+externalSurveyRankListSize
 				+ "\n");
 		
 		switch (phaseNumber) {
@@ -177,7 +183,7 @@ public class PitBotApp2 {
 			botUtils.reportElapsedTime(initTime," runPhase1 ");
 			break;
 		case 2:
-			//runPhase1();
+			runPhase2();
 			break;
 			
 		case 3:
@@ -196,6 +202,8 @@ public class PitBotApp2 {
 		
 	}
 	
+	
+
 	private void runPhase1() throws Exception {
 		/*
 		 * Step 1: Question in Natural Language
@@ -230,16 +238,22 @@ public class PitBotApp2 {
 			externalQuestion.setSurveyId(SurveyEnum.BUILDING_GROUND_TRUTH.getId());
 						
 			logger.info("saving external question and related ids...");
-			pitBotService.saveExternalQuestionAndRelatedIds(externalQuestion,allRetrievedPostsCache);
+			pitBotService.saveExternalQuestionAndRelatedIds(externalQuestion,botUtils.getAllRetrievedPostsCache());
 			count++;
 			if(count>100) {
 				break;
 			}
 		}
-		
-					
+	}
+	
+	
+	private void runPhase2() {
+		//load external questions and their related posts and store in cache
+		pitSurveyService.loadQuestionsAndRelatedPostsToCache();
 		
 	}
+	
+	
 
 	private void step1() throws Exception {
 		
@@ -308,34 +322,7 @@ public class PitBotApp2 {
 	}
 
 	
-	private void runSteps7toTheEnd() throws Exception {
-		/*
-		 * Step 7: Text Processing
-		 * 
-		 */
-		initTime = System.currentTimeMillis();
-		Set<Bucket> buckets = step7(augmentedThreads, googleQuery, rackApis);
-		botUtils.reportElapsedTime(initTime,"Step 7: Text Processing");
-		
-		/*
-		 * Step 8: Relevance Calculation
-		 * 
-		 */
-		initTime = System.currentTimeMillis();
-		List<Bucket> rankedBuckets = step8(buckets);
-		botUtils.reportElapsedTime(initTime,"Step 8: Relevance Calculation");
-		
-		
-		/*
-		 * Step 9: Answer Generation
-		 * 
-		 */
-		initTime = System.currentTimeMillis();
-		step9(rankedBuckets,googleQuery,rackApis);
-		botUtils.reportElapsedTime(initTime,"Step 9: Answer Generation");
-		
-	}
-
+	
 
 	
 
@@ -373,12 +360,11 @@ public class PitBotApp2 {
 		}
 		
 		completeQuery += query;
-		
-		for(int i=0; i<numberOfRackClasses;i++) {
-			completeQuery += " "+ apis.get(i);
-		}
-		
+						
 		if(runRack) {
+			for(int i=0; i<numberOfRackClasses;i++) {
+				completeQuery += " "+ apis.get(i);
+			}
 			completeQuery = BotUtils.removeDuplicatedTokens(completeQuery," ");
 		}
 		
@@ -428,7 +414,7 @@ public class PitBotApp2 {
 	 * @return a list of threads, where each thread is a question with all their answers and comments.
 	 */
 	public Set<SoThread> step5(Set<Integer> soQuestionsIds) {
-		return assembleListOfThreads(soQuestionsIds);
+		return pitBotService.assembleListOfThreads(soQuestionsIds);
 		
 	}
 
@@ -462,7 +448,7 @@ public class PitBotApp2 {
 		allRelatedQuestionsIds.removeAll(allQuestionsIds);
 		logger.info("Number of remaing threads to assemble: "+allRelatedQuestionsIds.size());
 		
-		Set<SoThread> relatedThreads = assembleListOfThreads(allRelatedQuestionsIds);
+		Set<SoThread> relatedThreads = pitBotService.assembleListOfThreads(allRelatedQuestionsIds);
 		
 		logger.info("Number of new threads: "+relatedThreads.size());
 		
@@ -510,150 +496,22 @@ public class PitBotApp2 {
 		
 		logger.info("Number of questions ids identified inside links: "+soQuestionsIdsInsideTexts.size());
 		
-		Set<SoThread> newThreadsAssembledFromLinks = assembleListOfThreads(soQuestionsIdsInsideTexts);
+		Set<SoThread> newThreadsAssembledFromLinks = pitBotService.assembleListOfThreads(soQuestionsIdsInsideTexts);
 		logger.info("Number of new Threads built from link's ids: "+newThreadsAssembledFromLinks.size());
 		
-		logger.info("Number of posts that are answers and had their parent thread fetched: "+countPostIsAnAnswer);
+		logger.info("Number of posts that are answers and had their parent thread fetched: "+pitBotService.getCountPostIsAnAnswer());
 		
 		threads.addAll(newThreadsAssembledFromLinks);
 		logger.info("Second total number of threads: "+threads.size()+" as a result of all discovered threads...");
 		
-		logger.info("Total number of posts stored in cache: "+allRetrievedPostsCache.size());
+		logger.info("Total number of posts stored in cache: "+botUtils.getAllRetrievedPostsCache().size());
 		
 		return threads;
 	}
 
 
 
-	/**
-	 * Generate buckets structures representing posts
-	 * @param threads
-	 * @param apis 
-	 * @param googleQuery 
-	 * @return A set of buckets
-	 * @throws Exception 
-	 */
-	public Set<Bucket> step7(Set<SoThread> threads, String googleQuery, List<String> apis) throws Exception {
-		
-		//Main bucket
-		mainBucket = new Bucket();
-		String presentingBody = botUtils.buildPresentationBody(googleQuery);
-		
-		Set<String> classesNames = new LinkedHashSet<>();
-		/*
-		 * Classes present in the query are suppose to be more relevant then the ones found by RACK.
-		 * The false positives like the word "How" is adjusted in the relevance calculation process where it will not belong to 
-		 * the intersection of codes present between the main bucket and the code section of the post being compared.  
-		 */
-		botUtils.getClassesNamesForString(classesNames,presentingBody);
-		classesNames.addAll(apis);
-		mainBucket.setClassesNames(classesNames);
-		
-		String processedBodyStopped = BotUtils.removeSpecialSymbolsTitles(presentingBody);
-		
-		//after stemming, add classes names
-		for(String className: classesNames){
-			processedBodyStopped+= " "+className;
-		}
-		
-		//stemming and stop words
-		processedBodyStopped = botUtils.tokenizeStopStem(processedBodyStopped);
-		
-		//remove unnecessary words, used in the question but not useful to match with the answers
-		processedBodyStopped = botUtils.removeUnnecessaryWords(processedBodyStopped);
-		
-		//Remove duplicates
-		processedBodyStopped = BotUtils.removeDuplicatedTokens(processedBodyStopped," ");
-		
-		processedBodyStopped = StringUtils.normalizeSpace(processedBodyStopped);
-		mainBucket.setProcessedBodyStemmedStopped(processedBodyStopped);
-		
-		//logger.info("Main bucket: "+mainBucket);
-		logger.info("Main bucket: "+mainBucket.getProcessedBodyStemmedStopped()+ " - classes: "+mainBucket.getClassesNames());
-		
-		//Remaining buckets
-		Set<Bucket> buckets = new LinkedHashSet<>();
-		
-		for(SoThread thread: threads) {
-			
-			List<Post> answers = thread.getAnswers();
-			for(Post answer: answers) {
-				Bucket bucket = buildAnswerPostBucket(answer);
-				buckets.add(bucket);
-				
-				if(bucket.getPostScore()!=null) {
-					avgScore      += bucket.getPostScore();
-				}
-				if(bucket.getUserReputation()!=null) {
-					avgReputation += bucket.getUserReputation();
-				}
-			}
-		}
-		
-		if(buckets.size()>0) {
-			avgScore = avgScore / buckets.size();
-			avgReputation = avgReputation / buckets.size();
-		}
-		
-		
-		return buckets;
-	}
-
 	
-
-	public List<Bucket> step8(Set<Bucket> buckets) {
-		List<Bucket> bucketsList = new ArrayList<>(buckets);
-		
-		/*
-		 * Calculate tfidf for all terms
-		 */
-		List<String> bucketsTexts = new ArrayList<>();
-		bucketsTexts.add(mainBucket.getProcessedBodyStemmedStopped());
-		for(Bucket bucket: buckets){
-			bucketsTexts.add(bucket.getProcessedBodyStemmedStopped());
-		}
-		
-		List<Collection<String>> documents =  Lists.newArrayList(NgramTfIdf.ngramDocumentTerms(Lists.newArrayList(1,2,3), bucketsTexts));
-		List<Map<String, Double>> tfs = Lists.newArrayList(TfIdf.tfs(documents));
-		Map<String, Double> idfAll = TfIdf.idfFromTfs(tfs);
-		
-		Map<String,Double> tfsMainBucket = tfs.remove(0);
-		HashMap<String, Double> tfIdfMainBucket = (HashMap)TfIdf.tfIdf(tfsMainBucket, idfAll);
-		//buckets.remove(buckets.iterator().next());
-		HashMap<String, Double> tfIdfOtherBucket;
-		
-		int pos = 0;
-		
-		
-		for(Map<String, Double> tfsMap: tfs){
-			tfIdfOtherBucket = (HashMap)TfIdf.tfIdf(tfsMap, idfAll);
-			Bucket postBucket = bucketsList.get(pos);
-			botComposer.calculateScores(avgReputation, avgScore, tfIdfMainBucket, tfIdfOtherBucket, mainBucket, postBucket);
-			pos++;
-		}
-		
-		
-       
-       botComposer.rankList(bucketsList);
-		
-       return bucketsList;
-	}
-
-
-	private void step9(List<Bucket> rankedBuckets,String googleQuery, List<String> rackApis) throws IOException {
-		//showBucketsOrderByCosineDesc(bucketsList);
-		//showRankedList(rankedBuckets);
-		int pos=0;
-		for(Bucket bucket: rankedBuckets){
-			logger.info("Rank: "+(pos+1)+ " total Score: "+bucket.getComposedScore() +" - cosine: "+bucket.getCosSim()+ " - coverageScore: "+bucket.getCoverageScore()+ " - codeSizeScore: "+bucket.getCodeSizeScore() +" - repScore: "+bucket.getRepScore()+ " - upScore: "+bucket.getUpScore()+ " - id: "+bucket.getPostId()+ " \n "+bucket.getPresentingBody());
-			buildOutPutFile(bucket,pos+1,googleQuery,rackApis);
-			pos++;
-			if(pos==20){
-				break;
-			}
-		}
-		
-	}
 	
 
 	
@@ -690,112 +548,8 @@ public class PitBotApp2 {
 
 	
 
-	public Bucket buildAnswerPostBucket(Post post) throws Exception {
-		//for tests --remove in production
-		/*if(botUtils==null) {
-			botUtils = new BotUtils();
-		}*/
-		
-		Bucket bucket = new Bucket();
-		bucket.setParentId(post.getParentId());
-		bucket.setPostId(post.getId());
-		bucket.setPostScore(post.getScore());
-		bucket.setUserReputation(post.getUser()!=null? post.getUser().getReputation():null);
-				
-		Post parentPost = allRetrievedPostsCache.get(post.getParentId());
-		if(parentPost==null) {
-			throw new PitBotException("Parent post not found... this does not make sense... ");
-		}
-		
-		
-		String presentingBody = botUtils.buildPresentationBody(post.getBody());
-		bucket.setPresentingBody(presentingBody);
-		
-		List<String> preCodes = botUtils.getPreCodes(presentingBody);
-		bucket.setCodes(preCodes);
-		List<String> smallCodes = botUtils.getSimpleCodes(presentingBody);
-		
-		//classes names of parent post are set inside getParentProcessedContentStemmedStopped method
-		String parentProcessedContentStemmedStopped = getParentProcessedContentStemmedStopped(parentPost);
-				
-		//extract classes names
-		Set<String> classesNames = botUtils.getClassesNames(smallCodes);
-		classesNames.addAll(botUtils.getClassesNames(preCodes));
-		String processedBodyStemmedStopped = "";
-		
-		for(String className: classesNames){
-			processedBodyStemmedStopped+= className+ " ";
-		}
-		processedBodyStemmedStopped+= presentingBody;
-		processedBodyStemmedStopped = botUtils.buildProcessedBodyStemmedStopped(processedBodyStemmedStopped,true);
-		processedBodyStemmedStopped+= " "+parentProcessedContentStemmedStopped;
-		
-		classesNames.addAll(parentPost.getClassesNames());   //reinforce classes set with parent post
-		bucket.setClassesNames(classesNames);
-		
-		bucket.setProcessedBodyStemmedStopped(processedBodyStemmedStopped);
-		
-		return bucket;
-	}
 
 	
-
-	private String getParentProcessedContentStemmedStopped(Post parentPost) throws Exception {
-		
-		/*
-		 * First the title: extract classes and processed text
-		 */
-		Set<String> classesNamesParentPost = new LinkedHashSet<>();
-		String presentingTitle = botUtils.buildPresentationBody(parentPost.getTitle());
-		botUtils.getClassesNamesForString(classesNamesParentPost,presentingTitle);
-		
-		String processedTitleStopped = BotUtils.removeSpecialSymbolsTitles(presentingTitle);
-		
-		//after stemming, add classes names
-		for(String className: classesNamesParentPost){
-			processedTitleStopped+= " "+className;
-		}
-		
-		//stemming and stop words
-		processedTitleStopped = botUtils.tokenizeStopStem(processedTitleStopped);
-		
-		//remove unnecessary words, used in the question but not useful to match with the answers
-		processedTitleStopped = botUtils.removeUnnecessaryWords(processedTitleStopped);
-		
-		//Remove duplicates
-		processedTitleStopped = BotUtils.removeDuplicatedTokens(processedTitleStopped," ");
-				
-		
-		/*
-		 * Now the classes and processed text from the body
-		 */
-		
-		
-		String presentingBody = botUtils.buildPresentationBody(parentPost.getBody());
-		//extract classes names
-		List<String> preCodes = botUtils.getPreCodes(presentingBody);
-		List<String> smallCodes = botUtils.getSimpleCodes(presentingBody);
-		
-		classesNamesParentPost.addAll(botUtils.getClassesNames(smallCodes));
-		classesNamesParentPost.addAll(botUtils.getClassesNames(preCodes));
-		
-		Set<String> classesNamesOnlyBody = botUtils.getClassesNames(smallCodes);
-		classesNamesOnlyBody.addAll(botUtils.getClassesNames(preCodes));
-		
-		String processedBodyStemmedStopped="";
-		
-		//extract classes names
-		parentPost.setClassesNames(classesNamesParentPost);
-		
-		for(String className: classesNamesOnlyBody){
-			processedBodyStemmedStopped+= className+ " ";
-		}
-		processedBodyStemmedStopped+= presentingBody;
-		processedBodyStemmedStopped = botUtils.buildProcessedBodyStemmedStopped(processedBodyStemmedStopped,true);
-		
-		processedBodyStemmedStopped = processedTitleStopped + " "+processedBodyStemmedStopped;
-		return processedBodyStemmedStopped;
-	}
 
 	
 
@@ -810,16 +564,7 @@ public class PitBotApp2 {
 
 
 
-	private void setCommentsUsers(List<Comment> questionComments) {
-		for(Comment comment: questionComments) {
-			if(comment.getUserId()!=null) {
-				comment.setUser(pitBotService.findUserById(comment.getUserId()));
-			}
-			//allCommentsIds.add(comment.getId());
-		}
-		
-	}
-
+	
 
 
 	private void getPropertyValueFromLocalFile() {
@@ -869,69 +614,11 @@ public class PitBotApp2 {
 		allCommentsIds = new HashSet<>();
 		avgScore = 0d;
 		avgReputation = 0d;
-		allRetrievedPostsCache = new HashMap<>();
 		rackApis = new ArrayList<>();
 	}
 
 
-	private Set<SoThread> assembleListOfThreads(Set<Integer> soPostsIds) {
-		//allQuestionsIds.addAll(soQuestionsIds);
-		Set<SoThread> threads = new LinkedHashSet<>();
-				
-		for(Integer questionId: soPostsIds) {
-			Post post = pitBotService.findPostById(questionId);
-			if(post==null) {
-				countExcludedPosts++;
-				continue; //could have been excluded 
-			}
-			
-			if(post.getPostTypeId().equals(2)) { 
-				countPostIsAnAnswer++;
-				//soPostsIds.remove(post.getParentId()); //fetch the parent only once
-				if(!soPostsIds.contains(post.getParentId())) {
-					post = pitBotService.findPostById(post.getParentId());
-				}else {
-					//parent is already present in the list and we be processed later
-					continue;
-				}
-				
-			}
-			
-			if(post.getOwnerUserId()!=null) {
-				post.setUser(pitBotService.findUserById(post.getOwnerUserId()));
-			}
-			
-			List<Comment> questionComments = pitBotService.getCommentsByPostId(questionId);
-			setCommentsUsers(questionComments);
-			post.setComments(questionComments);
-			
-			storeInCache(post);
-			
-			List<Post> answers = pitBotService.findAnswersByQuestionId(post.getId());
-			
-			for(Post answer: answers) {
-				if(answer.getOwnerUserId()!=null) {
-					answer.setUser(pitBotService.findUserById(answer.getOwnerUserId()));
-				}
-				List<Comment> answerComments = pitBotService.getCommentsByPostId(answer.getId());
-				setCommentsUsers(answerComments);
-				answer.setComments(answerComments);
-				storeInCache(answer);
-				//allAnwersIds.add(answer.getId());
-			}
-			
-			
-			SoThread soThread = new SoThread(post,answers);
-			threads.add(soThread);
-			
-		}
-		
-		
-		logger.info("Number of posts that has been excluded, or is not present in dataset because it is not a java post, or is newer than the dataset: "+countExcludedPosts);
-		
-		return threads;
-		
-	}
+	
 
 
 	
@@ -955,9 +642,7 @@ public class PitBotApp2 {
 	}    
 	
 	
-	public void storeInCache(Post post) {
-		allRetrievedPostsCache.put(post.getId(), post);
-	}
+	
 
 	
 
@@ -1020,9 +705,6 @@ public class PitBotApp2 {
 	}
 
 
-	private void buildOutPutFile(Bucket bucket, int pos, String googleQuery, List<String> rackApis) {
-		
-		
-	}
+	
 	
 }

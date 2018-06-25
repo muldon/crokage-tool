@@ -24,15 +24,36 @@ public interface ExternalQuestionRepository extends CrudRepository<ExternalQuest
 			  + " order by e.id",nativeQuery=true)
 	List<ExternalQuestion> findAllExternalQuestionsAnswerBot();
 
-	@Query(value="select e.* "
+	/*@Query(value="select e.* "
 			  + " from externalquestion e, survey s"
 			  + " where e.surveyid = s.id"
 			  + " and s.internalsurvey=true "
 			  + " and e.userack=?1 "
 			  + " order by e.id",nativeQuery=true)
-	List<ExternalQuestion> findExternalQuestionsInternalSurvey(boolean userack);
+	List<ExternalQuestion> findExternalQuestionsInternalSurvey(boolean userack);*/
+	
+	List<ExternalQuestion> findByUseRack(boolean userack);
+
+	/*@Query(value="select * " + 
+				" from externalquestion eq" + 
+				" where eq.surveyid = 1" + 
+				" and eq.id not in " + 
+				" (select e.externalquestionid" + 
+				"  from evaluation e" + 
+				"  where e.surveyuserid = ?1)" + 
+				" order by externalid  " + 
+				" limit 2",nativeQuery=true)
+	List<ExternalQuestion> findNextExternalQuestionInternalSurveyUser(Integer userId);*/
     
 	
-
+	@Query(value="select * " + 
+			" from externalquestion eq" + 
+			" where eq.id not in " + 
+			" (select e.externalquestionid" + 
+			"  from evaluation e" + 
+			"  where e.surveyuserid = ?1)" + 
+			" order by externalid  " + 
+			" limit 2",nativeQuery=true)
+	List<ExternalQuestion> findNextExternalQuestionInternalSurveyUser(Integer userId);
 	
 }
