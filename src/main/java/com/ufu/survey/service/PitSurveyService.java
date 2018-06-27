@@ -286,7 +286,8 @@ public class PitSurveyService extends AbstractService{
 		
 		int pos=0;
 		for(Bucket bucket: rankedBuckets){
-			logger.info("Rank: "+(pos+1)+ " total Score: "+bucket.getComposedScore() +" - cosine: "+bucket.getCosSim()+ " - coverageScore: "+bucket.getCoverageScore()+ " - codeSizeScore: "+bucket.getCodeSizeScore() +" - repScore: "+bucket.getRepScore()+ " - upScore: "+bucket.getUpScore()+ " - id: "+bucket.getPostId()+ " \n "+bucket.getPresentingBody());
+			//logger.info("Rank: "+(pos+1)+ " total Score: "+bucket.getComposedScore() +" - cosine: "+bucket.getCosSim()+ " - coverageScore: "+bucket.getCoverageScore()+ " - codeSizeScore: "+bucket.getCodeSizeScore() +" - repScore: "+bucket.getRepScore()+ " - upScore: "+bucket.getUpScore()+ " - id: "+bucket.getPostId()+ " \n "+bucket.getPresentingBody());
+			logger.info("Rank: "+(pos+1)+ " total Score: "+bucket.getComposedScore() +" - cosine: "+bucket.getCosSim()+ " - coverageScore: "+bucket.getCoverageScore()+ " - codeSizeScore: "+bucket.getCodeSizeScore() +" - repScore: "+bucket.getRepScore()+ " - upScore: "+bucket.getUpScore()+ " - id: "+bucket.getPostId());
 			//botUtils.buildOutPutFile(bucket,pos+1,googleQuery,rackApis);
 			trimmedRankedBuckets.add(bucket);
 			pos++;
@@ -545,8 +546,22 @@ public class PitSurveyService extends AbstractService{
 	}
 
 
-	public void saveEvaluation(Evaluation evaluation) {
-		evaluation.setRatingDate(getCurrentDate());
+	public void saveRatings(Evaluation evaluation) {
+		List<Integer> postsIds = evaluation.getPostsIds();
+		List<Integer> ratings = evaluation.getRatings();
+		
+		for(int i=0; i<postsIds.size(); i++) { //lists have the same size
+			Evaluation eval = new Evaluation(
+					evaluation.getExternalQuestionId(),
+					postsIds.get(i),
+					evaluation.getSurveyUserId(),
+					ratings.get(i),
+					getCurrentDate(),
+					SurveyUser.isInternalSurveyUser(evaluation.getSurveyUserId())
+					);
+			evaluationRepository.save(eval);
+		}
+		
 		
 	}
 

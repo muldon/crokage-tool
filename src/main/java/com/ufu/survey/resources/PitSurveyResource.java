@@ -118,6 +118,12 @@ public class PitSurveyResource extends SuperResource {
 	}
 	
 	
+	
+	
+	
+	
+	
+	
 	@GET
 	@Path("/getAllExternalQuestionsForActiveSurvey/{userId}")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -140,18 +146,18 @@ public class PitSurveyResource extends SuperResource {
 	}
 	
 	
-	@Path("/evaluation")
+	@Path("/saveRatings")
 	@POST	
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public GenericRestTransfer save(Evaluation evaluation) {
+	public GenericRestTransfer saveRatings(Evaluation evaluation) {
 		String errorMessage = null;
 		String infoMessage = null;
 				
 		try{
 			
-			pitSurveyService.saveEvaluation(evaluation);
-			//infoMessage = "Tópico salvo com sucesso ! ";
+			pitSurveyService.saveRatings(evaluation);
+			infoMessage = "Ratings saved successfully.";
 		
 		}catch(Exception e){
 			errorMessage = "Error when saving rating.";

@@ -52,6 +52,7 @@ import com.ufu.bot.to.ExternalQuestion;
 import com.ufu.bot.to.Feature;
 import com.ufu.bot.to.Post;
 import com.ufu.bot.to.Survey.SurveyEnum;
+import com.ufu.bot.to.SurveyUser;
 
 
 
@@ -1051,5 +1052,7 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 	public void setAllRetrievedPostsCache(Map<Integer, Post> allRetrievedPostsCache) {
 		this.allRetrievedPostsCache = allRetrievedPostsCache;
 	}
+	
+	
 	
 }

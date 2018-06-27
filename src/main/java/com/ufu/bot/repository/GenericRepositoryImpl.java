@@ -145,9 +145,9 @@ public class GenericRepositoryImpl implements GenericRepository {
 		
 		//logger.info("In command: "+inCommand);
 		
-		String query = "select * from postlinksmin where postid in " + inCommand+  
+		String query = "select * from postlinksmin where linktypeid = 3 and postid in " + inCommand+  
 				" union " + 
-				" select * from postlinksmin where relatedpostid in " + inCommand; 
+				" select * from postlinksmin where linktypeid = 3 and relatedpostid in " + inCommand; 
 		
 		logger.info(query);
 		

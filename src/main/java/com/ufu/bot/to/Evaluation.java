@@ -1,7 +1,7 @@
 package com.ufu.bot.to;
 
-import java.sql.Date;
 import java.sql.Timestamp;
+import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -10,6 +10,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
@@ -41,6 +42,13 @@ public class Evaluation {
 	@Column(name="internalevaluation")	
 	private Boolean internalEvaluation;
 
+	@Transient
+	private List<Integer> ratings;
+	
+	@Transient
+	private List<Integer> postsIds;
+	
+	
 
 	public Integer getId() {
 		return id;
@@ -162,6 +170,31 @@ public class Evaluation {
 	public Evaluation() {
 		super();
 	}
+
+
+	public List<Integer> getRatings() {
+		return ratings;
+	}
+
+
+	public void setRatings(List<Integer> ratings) {
+		this.ratings = ratings;
+	}
+
+
+	public List<Integer> getPostsIds() {
+		return postsIds;
+	}
+
+
+	public void setPostsIds(List<Integer> postsIds) {
+		this.postsIds = postsIds;
+	}
+
+	
+
+
+	
 	
 	
 
