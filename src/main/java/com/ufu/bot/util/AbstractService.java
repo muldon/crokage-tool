@@ -18,6 +18,7 @@ import com.ufu.bot.repository.ExperimentRepository;
 import com.ufu.bot.repository.ExternalQuestionRepository;
 import com.ufu.bot.repository.GenericRepository;
 import com.ufu.bot.repository.PostsRepository;
+import com.ufu.bot.repository.RankRepository;
 import com.ufu.bot.repository.RelatedPostRepository;
 import com.ufu.bot.repository.ResultRepository;
 import com.ufu.bot.repository.SurveyRepository;
@@ -25,6 +26,7 @@ import com.ufu.bot.repository.SurveyUserRepository;
 import com.ufu.bot.repository.UsersRepository;
 import com.ufu.bot.to.Comment;
 import com.ufu.bot.to.Post;
+import com.ufu.bot.to.RelatedPost.RelationTypeEnum;
 import com.ufu.bot.to.SoThread;
 import com.ufu.bot.to.User;
 
@@ -54,6 +56,10 @@ public abstract class AbstractService {
 	
 	@Autowired
 	protected ResultRepository resultRepository;
+	
+	@Autowired
+	protected RankRepository rankRepository;
+	
 		
 	@Autowired
 	protected UsersRepository usersRepository;
@@ -77,10 +83,10 @@ public abstract class AbstractService {
 	
 
 	@Transactional(readOnly = true)
-	public Set<SoThread> assembleListOfThreads(Set<Integer> soPostsIds) {
+	public Set<SoThread> assembleListOfThreads(Set<Integer> soPostsIds, Integer relationTypeId) {
 		//allQuestionsIds.addAll(soQuestionsIds);
 		Set<SoThread> threads = new LinkedHashSet<>();
-				
+		boolean postIsQuestion = true;		
 		for(Integer questionId: soPostsIds) {
 			Post post = findPostById(questionId);
 			if(post==null) {
@@ -88,9 +94,10 @@ public abstract class AbstractService {
 				continue; //could have been excluded 
 			}
 			
-			if(post.getPostTypeId().equals(2)) { 
+			if(post.getPostTypeId().equals(2)) { //answer
+				postIsQuestion=false;
 				countPostIsAnAnswer++;
-				//soPostsIds.remove(post.getParentId()); //fetch the parent only once
+				//fetch the parent only once
 				if(!soPostsIds.contains(post.getParentId())) {
 					post = findPostById(post.getParentId());
 				}else {
@@ -108,18 +115,30 @@ public abstract class AbstractService {
 			setCommentsUsers(questionComments);
 			post.setComments(questionComments);
 			
-			botUtils.storeInCache(post);
+			botUtils.storeParentPostInCache(post);
 			
-			List<Post> answers = findAnswersByQuestionId(post.getId());
+			List<Post> answers = findUpVotedAnswersByQuestionId(post.getId());
 			
 			for(Post answer: answers) {
+				if(answer.getScore()<1) {
+					continue;    //disconsider posts without positive scores
+				}
 				if(answer.getOwnerUserId()!=null) {
 					answer.setUser(findUserById(answer.getOwnerUserId()));
 				}
 				List<Comment> answerComments = getCommentsByPostId(answer.getId());
 				setCommentsUsers(answerComments);
 				answer.setComments(answerComments);
-				botUtils.storeInCache(answer);
+				if(relationTypeId.equals(RelationTypeEnum.FROM_GOOGLE_QUESTION_OR_ANSWER.getId())) {
+					if(postIsQuestion) {
+						answer.setRelationTypeId(RelationTypeEnum.FROM_GOOGLE_QUESTION.getId());
+					}else {
+						answer.setRelationTypeId(RelationTypeEnum.FROM_GOOGLE_ANSWER.getId());
+					}
+				}else {
+					answer.setRelationTypeId(relationTypeId);
+				}
+				botUtils.storeAnswerPostInCache(answer);
 				//allAnwersIds.add(answer.getId());
 			}
 			
@@ -156,9 +175,10 @@ public abstract class AbstractService {
 	 * Answers have postTypeId = 2
 	 */
 	@Transactional(readOnly = true)
-	public List<Post> findAnswersByQuestionId(Integer questionId) {
+	public List<Post> findUpVotedAnswersByQuestionId(Integer questionId) {
 		//return postsRepository.findByParentIdAndPostTypeId(questionId,2,new Sort(Sort.Direction.ASC, "id"));
-		return postsRepository.findByParentId(questionId,new Sort(Sort.Direction.ASC, "id"));
+		//return postsRepository.findByParentId(questionId,new Sort(Sort.Direction.ASC, "id"));
+		return postsRepository.findUpVotedAnswersByQuestionId(questionId);
 	}
 	
 	@Transactional(readOnly = true)

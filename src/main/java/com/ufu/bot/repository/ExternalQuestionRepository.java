@@ -49,9 +49,10 @@ public interface ExternalQuestionRepository extends CrudRepository<ExternalQuest
 	@Query(value="select * " + 
 			" from externalquestion eq" + 
 			" where eq.id not in " + 
-			" (select e.externalquestionid" + 
-			"  from evaluation e" + 
-			"  where e.surveyuserid = ?1)" + 
+			" (select r.externalquestionid" + 
+			"  from evaluation e, rank r" + 
+			"  where r.id = e.rankid "
+			+ " and e.surveyuserid = ?1)" + 
 			" order by externalid  " + 
 			" limit 2",nativeQuery=true)
 	List<ExternalQuestion> findNextExternalQuestionInternalSurveyUser(Integer userId);

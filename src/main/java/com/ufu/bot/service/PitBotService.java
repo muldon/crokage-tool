@@ -8,10 +8,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.Sets;
+import com.ufu.bot.to.Bucket;
 import com.ufu.bot.to.Evaluation;
 import com.ufu.bot.to.Experiment;
 import com.ufu.bot.to.ExternalQuestion;
 import com.ufu.bot.to.Post;
+import com.ufu.bot.to.Rank;
 import com.ufu.bot.to.RelatedPost;
 import com.ufu.bot.to.Result;
 import com.ufu.bot.to.SurveyUser;
@@ -119,8 +121,8 @@ public class PitBotService extends AbstractService{
 	
 
 	@Transactional(readOnly = true)
-	public Set<Integer> recoverRelatedQuestionsIds(Set<Integer> allQuestionsIds) {
-		return genericRepository.findRelatedQuestionsIds(allQuestionsIds);
+	public Set<Integer> recoverRelatedQuestionsIds(Set<Integer> allQuestionsIds, Integer linkTypeId) {
+		return genericRepository.findRelatedQuestionsIds(allQuestionsIds,linkTypeId);
 	}
 
 	@Transactional(readOnly = true)
@@ -199,19 +201,19 @@ public class PitBotService extends AbstractService{
 		
 	}
 
-	public void saveExternalQuestionAndRelatedIds(ExternalQuestion answerBotQuestion, Map<Integer, Post> allRetrievedPostsCache) {
-		Set<Integer> relatedPostsIds = allRetrievedPostsCache.keySet();
+	public void saveExternalQuestionAndRelatedIds(ExternalQuestion externalQuestion, Map<Integer, Post> answerPostsCache) {
+		Set<Integer> answerPostsIds = answerPostsCache.keySet();
 		
 		/*
 		 * Save the external question
 		 */
-		answerBotQuestion= externalQuestionRepository.save(answerBotQuestion);
+		externalQuestion= externalQuestionRepository.save(externalQuestion);
 		
 		/*
-		 * save all related posts 
+		 * save all related posts (only answers)
 		 */
-		for(Integer relatedPostId: relatedPostsIds) {
-			RelatedPost relatedPost = new RelatedPost(relatedPostId,answerBotQuestion.getId());
+		for(Integer answerPostId: answerPostsIds) {
+			RelatedPost relatedPost = new RelatedPost(answerPostId,externalQuestion.getId(),answerPostsCache.get(answerPostId).getRelationTypeId());
 			relatedPostRepository.save(relatedPost);
 		}
 		
@@ -251,6 +253,20 @@ public class PitBotService extends AbstractService{
 
 	public void setCountPostIsAnAnswer(int countPostIsAnAnswer) {
 		this.countPostIsAnAnswer = countPostIsAnAnswer;
+	}
+
+
+
+
+
+	public void saveRanks(ExternalQuestion externalQuestion, List<Bucket> rankedList, Boolean internalEvaluation) {
+		int order=1;
+		for(Bucket bucket: rankedList) {
+			Rank rank=new Rank(externalQuestion.getId(),bucket.getPostId(),order,internalEvaluation);
+			rankRepository.save(rank);
+			order++;
+		}
+		
 	}
 
 	

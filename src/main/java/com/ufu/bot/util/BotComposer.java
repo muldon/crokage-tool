@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import com.ufu.bot.tfidf.VectorSpaceModel;
 import com.ufu.bot.to.Bucket;
+import com.ufu.bot.to.RelatedPost.RelationTypeEnum;
 
 @Component
 public class BotComposer {
@@ -34,14 +35,37 @@ public class BotComposer {
 	@Value("${epsilonUpScore}")
 	public Double epsilonUpScore; 
 	
+	@Value("${relationType_FROM_GOOGLE_QUESTION}")
+	public Double relationTypeFromGoogleQuestion; 
+	
+	@Value("${relationType_FROM_GOOGLE_ANSWER}")
+	public Double relationTypeFromGoogleAnswer; 
+	
+	@Value("${relationType_RELATED_NOT_DUPE}")
+	public Double relationTypeRelatedNotDupe; 
+	
+	@Value("${relationType_LINKS_INSIDE_TEXTS}")
+	public Double relationTypeLinksInsideTexts; 
+	
+	@Value("${relationType_RELATED_DUPE}")
+	public Double relationTypeRelatedDupe; 
+	
+	
 	
 	public void rankList(List<Bucket> bucketsList) {
+		
 		logger.info("Ranking with weights: "+
 				"\n alphaCosSim = "+alphaCosSim +
 				"\n betaCoverageScore = "+betaCoverageScore +
 				"\n gamaCodeSizeScore = "+gamaCodeSizeScore +
 				"\n deltaRepScore = "+deltaRepScore +
-				"\n epsilonUpScore = "+epsilonUpScore
+				"\n epsilonUpScore = "+epsilonUpScore+
+				//relation weights
+				"\n relationTypeFromGoogleQuestion = "+relationTypeFromGoogleQuestion +
+				"\n relationTypeFromGoogleAnswer = "+relationTypeFromGoogleAnswer +
+				"\n relationTypeRelatedNotDupe = "+relationTypeRelatedNotDupe +
+				"\n relationTypeLinksInsideTexts = "+relationTypeLinksInsideTexts +
+				"\n relationTypeRelatedDupe = "+relationTypeRelatedDupe 
 				);
 		
 		
@@ -51,6 +75,20 @@ public class BotComposer {
 					              + gamaCodeSizeScore * bucket.getCodeSizeScore() 
 					              + deltaRepScore 	  * bucket.getRepScore()
 					              + epsilonUpScore    * bucket.getUpScore(); 
+			double adjuster;
+			
+			if(bucket.getRelationTypeId().equals(RelationTypeEnum.FROM_GOOGLE_QUESTION.getId())) {
+				adjuster = relationTypeFromGoogleQuestion;
+			}else if(bucket.getRelationTypeId().equals(RelationTypeEnum.FROM_GOOGLE_ANSWER.getId())) {
+				adjuster = relationTypeFromGoogleAnswer;
+			}else if(bucket.getRelationTypeId().equals(RelationTypeEnum.RELATED_DUPE.getId())) {
+				adjuster = relationTypeRelatedDupe;
+			}else if(bucket.getRelationTypeId().equals(RelationTypeEnum.RELATED_NOT_DUPE.getId())) {
+				adjuster = relationTypeRelatedNotDupe;
+			}else {
+				adjuster = relationTypeLinksInsideTexts;
+			}
+			composedScore = adjuster*composedScore;
 			
 			bucket.setComposedScore(BotUtils.redondear(composedScore,5));
 		}

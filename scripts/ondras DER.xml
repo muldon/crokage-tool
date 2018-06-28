@@ -37,7 +37,7 @@
 		<type label="SET" length="1" sql="SET" quote=""/>
 		<type label="Bit" length="0" sql="bit" quote=""/>
 	</group>
-</datatypes><table x="947" y="263" name="surveyUser">
+</datatypes><table x="1017" y="212" name="surveyUser">
 <row name="id" null="1" autoincrement="1">
 <datatype>INTEGER</datatype>
 <default>NULL</default></row>
@@ -51,23 +51,6 @@
 <part>id</part>
 </key>
 </table>
-<table x="706" y="119" name="survey">
-<row name="id" null="1" autoincrement="1">
-<datatype>INTEGER</datatype>
-<default>NULL</default></row>
-<row name="name" null="1" autoincrement="0">
-<datatype>VARCHAR</datatype>
-<default>NULL</default></row>
-<row name="description" null="1" autoincrement="0">
-<datatype>VARCHAR</datatype>
-<default>NULL</default></row>
-<row name="internalsurvey" null="1" autoincrement="0">
-<datatype>BINARY</datatype>
-<default>NULL</default></row>
-<key type="PRIMARY" name="">
-<part>id</part>
-</key>
-</table>
 <table x="404" y="126" name="externalquestion">
 <row name="id" null="1" autoincrement="1">
 <datatype>INTEGER</datatype>
@@ -75,10 +58,6 @@
 <row name="externalId" null="1" autoincrement="0">
 <datatype>INTEGER</datatype>
 <default>NULL</default></row>
-<row name="surveryid" null="1" autoincrement="0">
-<datatype>INTEGER</datatype>
-<default>NULL</default><relation table="survey" row="id" />
-</row>
 <row name="googlequery" null="1" autoincrement="0">
 <datatype>VARCHAR</datatype>
 <default>NULL</default></row>
@@ -101,7 +80,7 @@
 <part>id</part>
 </key>
 </table>
-<table x="417" y="398" name="postmin">
+<table x="383" y="389" name="postmin">
 <row name="id" null="1" autoincrement="1">
 <datatype>INTEGER</datatype>
 <default>NULL</default></row>
@@ -115,17 +94,13 @@
 <part>id</part>
 </key>
 </table>
-<table x="676" y="308" name="evaluation">
+<table x="824" y="252" name="evaluation">
 <row name="id" null="1" autoincrement="1">
 <datatype>INTEGER</datatype>
 <default>NULL</default></row>
-<row name="externalquestionid" null="1" autoincrement="0">
+<row name="rankid" null="1" autoincrement="0">
 <datatype>INTEGER</datatype>
-<default>NULL</default><relation table="externalquestion" row="id" />
-</row>
-<row name="postid" null="1" autoincrement="0">
-<datatype>INTEGER</datatype>
-<default>NULL</default><relation table="postmin" row="id" />
+<default>NULL</default><relation table="rank" row="id" />
 </row>
 <row name="surveyuserid" null="1" autoincrement="0">
 <datatype>INTEGER</datatype>
@@ -137,14 +112,11 @@
 <row name="ratingdate" null="1" autoincrement="0">
 <datatype>DATE</datatype>
 <default>NULL</default></row>
-<row name="internalevaluation" null="1" autoincrement="0">
-<datatype>BINARY</datatype>
-<default>NULL</default></row>
 <key type="PRIMARY" name="">
 <part>id</part>
 </key>
 </table>
-<table x="194" y="296" name="relatedpost">
+<table x="200" y="287" name="relatedpost">
 <row name="id" null="1" autoincrement="1">
 <datatype>INTEGER</datatype>
 <default>NULL</default></row>
@@ -156,6 +128,9 @@
 <datatype>INTEGER</datatype>
 <default>NULL</default><relation table="postmin" row="id" />
 </row>
+<row name="relationType" null="1" autoincrement="0">
+<datatype>INTEGER</datatype>
+<default>NULL</default></row>
 <key type="PRIMARY" name="">
 <part>id</part>
 </key>
@@ -226,6 +201,28 @@
 <datatype>BINARY</datatype>
 <default>NULL</default></row>
 <key type="PRIMARY" name="">
+</key>
+</table>
+<table x="636.6666641235352" y="295.33333587646484" name="rank">
+<row name="id" null="1" autoincrement="1">
+<datatype>INTEGER</datatype>
+<default>NULL</default></row>
+<row name="externalquestionid" null="1" autoincrement="0">
+<datatype>INTEGER</datatype>
+<default>NULL</default><relation table="externalquestion" row="id" />
+</row>
+<row name="postid" null="1" autoincrement="0">
+<datatype>INTEGER</datatype>
+<default>NULL</default><relation table="postmin" row="id" />
+</row>
+<row name="rankorder" null="1" autoincrement="0">
+<datatype>INTEGER</datatype>
+<default>NULL</default></row>
+<row name="internalevaluation" null="1" autoincrement="0">
+<datatype>BINARY</datatype>
+<default>NULL</default></row>
+<key type="PRIMARY" name="">
+<part>id</part>
 </key>
 </table>
 </sql>

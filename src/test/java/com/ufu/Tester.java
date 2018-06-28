@@ -23,7 +23,7 @@ import org.json.simple.parser.ParseException;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
-import com.ufu.bot.PitBotApp;
+import com.ufu.bot.PitBotApp2;
 import com.ufu.bot.to.Bucket;
 import com.ufu.bot.to.Post;
 import com.ufu.bot.util.BotUtils;
@@ -546,7 +546,7 @@ public class Tester {
 		String titleParent = "Convert Iterator to ArrayList";
 		
 		
-		PitBotApp app = new PitBotApp();
+		PitBotApp2 app = new PitBotApp2();
 		Post answer = new Post();
 		answer.setId(28491752);
 		answer.setBody(bodyAnswer2);
@@ -557,7 +557,7 @@ public class Tester {
 		parent.setTitle(titleParent);
 		parent.setBody(bodyParent);
 		
-		app.storeInCache(parent);
+		//app.storeInCache(parent);
 		
 		//Bucket bucket = app.buildAnswerPostBucket(answer);
 		//System.out.println(bucket);
@@ -602,8 +602,8 @@ public class Tester {
 		//main.setProcessedBodyStemmedStopped("how it fits into the larger picture of an organization, explains IBM’s Jeff Jonas, distinguished");
 		main.setProcessedBodyStemmedStopped("anyone anywhere at no cost and with almost no restrictions whatsoevermay give copy it, it away you or re-use CHAPTER II. The Boys Escape Jim CHAPTER VIII. Sleeping in the Woods");
 		
-		PitBotApp app = new PitBotApp();
-		app.setMainBucket(main);
+		PitBotApp2 app = new PitBotApp2();
+		//app.setMainBucket(main);
 		
 		for(int i=0; i<fileNames.length; i++){
 			url = Resources.getResource(fileNames[i]);
@@ -615,7 +615,7 @@ public class Tester {
 		}
 		
 		
-		app.step8(buckets);
+		//app.step8(buckets);
 		
 	}
 	

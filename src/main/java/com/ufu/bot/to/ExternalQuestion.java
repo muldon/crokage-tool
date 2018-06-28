@@ -22,10 +22,6 @@ public class ExternalQuestion {
     @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="externalquestion_id_seq")
 	private Integer id;
 	
-	
-	@Column(name="surveyid")
-	private Integer surveyId;
-	
 	@Column(name="rawquery")	
 	private String rawQuery;
 
@@ -56,13 +52,7 @@ public class ExternalQuestion {
 		this.id = id;
 	}
 
-	public Integer getSurveyId() {
-		return surveyId;
-	}
-
-	public void setSurveyId(Integer surveyId) {
-		this.surveyId = surveyId;
-	}
+	
 
 	public String getGoogleQuery() {
 		return googleQuery;
@@ -90,12 +80,6 @@ public class ExternalQuestion {
 
 	
 
-	@Override
-	public String toString() {
-		return "ExternalQuestion [id=" + id + ", surveyId=" + surveyId + ", rawQuery=" + rawQuery + ", googleQuery="
-				+ googleQuery + ", classes=" + classes + ", useRack=" + useRack + ", obs=" + obs + ", url=" + url
-				+ ", externalId=" + externalId + ", relatedPosts=" + relatedPosts + "]";
-	}
 
 	public String getObs() {
 		return obs;
@@ -142,9 +126,15 @@ public class ExternalQuestion {
 
 	
 
-	public ExternalQuestion(Integer surveyId, String rawQuery, String googleQuery, String classes, Boolean useRack, String obs, String link,Integer externalId) {
+	@Override
+	public String toString() {
+		return "ExternalQuestion [id=" + id + ", rawQuery=" + rawQuery + ", googleQuery=" + googleQuery + ", classes="
+				+ classes + ", useRack=" + useRack + ", obs=" + obs + ", url=" + url + ", externalId=" + externalId
+				+ ", relatedPosts=" + relatedPosts + "]";
+	}
+
+	public ExternalQuestion(Integer externalId,String rawQuery, String googleQuery, String classes, Boolean useRack, String obs, String link) {
 		super();
-		this.surveyId = surveyId;
 		this.googleQuery = googleQuery;
 		this.classes = classes;
 		this.useRack = useRack;

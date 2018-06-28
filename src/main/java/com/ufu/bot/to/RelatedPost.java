@@ -9,6 +9,8 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import com.ufu.bot.to.PostType.PostTypeEnum;
+
 @XmlRootElement
 @Entity
 @Table(name = "relatedpost")
@@ -25,6 +27,8 @@ public class RelatedPost {
 	@Column(name="externalquestionid")
 	private Integer externalQuestionId;
 	
+	@Column(name="relationtypeid")
+	private Integer relationTypeId;
 	
 		
 	
@@ -34,10 +38,11 @@ public class RelatedPost {
 	
 
 
-	public RelatedPost(Integer postId, Integer externalQuestionId) {
+	public RelatedPost(Integer postId, Integer externalQuestionId, Integer relationTypeId) {
 		super();
 		this.postId = postId;
 		this.externalQuestionId = externalQuestionId;
+		this.relationTypeId = relationTypeId;
 	}
 
 
@@ -92,9 +97,13 @@ public class RelatedPost {
 
 
 
+
+
+
 	@Override
 	public String toString() {
-		return "RelatedPost [id=" + id + ", postId=" + postId + ", externalQuestionId=" + externalQuestionId + "]";
+		return "RelatedPost [id=" + id + ", postId=" + postId + ", externalQuestionId=" + externalQuestionId
+				+ ", relationTypeId=" + relationTypeId + "]";
 	}
 
 
@@ -106,6 +115,20 @@ public class RelatedPost {
 		int result = 1;
 		result = prime * result + ((id == null) ? 0 : id.hashCode());
 		return result;
+	}
+
+
+
+
+	public Integer getRelationTypeId() {
+		return relationTypeId;
+	}
+
+
+
+
+	public void setRelationTypeId(Integer relationTypeId) {
+		this.relationTypeId = relationTypeId;
 	}
 
 
@@ -127,12 +150,29 @@ public class RelatedPost {
 			return false;
 		return true;
 	}
-	
-	
+		
 	
 
+	public enum RelationTypeEnum {
+		FROM_GOOGLE_QUESTION (1), 
+	    RELATED_DUPE (2),
+	    RELATED_NOT_DUPE (3),	    
+		FROM_GOOGLE_ANSWER (4),
+		FROM_GOOGLE_QUESTION_OR_ANSWER (5),
+		LINKS_INSIDE_TEXTS (5);
+	   
+		private final Integer id;
+						
+		RelationTypeEnum(Integer id){
+			this.id = id;
+		}
 
-	
-	
+		public Integer getId() {
+			return id;
+		}
+		
+		
+					
+	}
     
 }

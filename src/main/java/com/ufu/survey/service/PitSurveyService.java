@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -23,7 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.ufu.bot.exception.PitBotException;
 import com.ufu.bot.tfidf.TfIdf;
 import com.ufu.bot.tfidf.ngram.NgramTfIdf;
 import com.ufu.bot.to.Bucket;
@@ -32,6 +30,7 @@ import com.ufu.bot.to.Evaluation;
 import com.ufu.bot.to.Experiment;
 import com.ufu.bot.to.ExternalQuestion;
 import com.ufu.bot.to.Post;
+import com.ufu.bot.to.Rank;
 import com.ufu.bot.to.SoThread;
 import com.ufu.bot.to.Survey;
 import com.ufu.bot.to.SurveyUser;
@@ -51,6 +50,9 @@ public class PitSurveyService extends AbstractService{
 	
 	@Value("${runRack}")
 	public Boolean runRack;  
+	
+	@Value("${phaseNumber}")
+	public Integer phaseNumber;  
 	
 	@Value("${internalSurveyRankListSize}")
 	public Integer internalSurveyRankListSize;  
@@ -101,7 +103,7 @@ public class PitSurveyService extends AbstractService{
 	
 	
 	
-	private List<Bucket> runSteps7toTheEnd(ExternalQuestion nextQuestion, boolean isInternalSurveyUser) throws Exception {
+	public List<Bucket> runSteps7toTheEnd(ExternalQuestion nextQuestion, Set<SoThread> allThreads) throws Exception {
 		/*
 		 * Step 7: Text Processing
 		 * 
@@ -110,7 +112,7 @@ public class PitSurveyService extends AbstractService{
 		long initTime; 
 		
 		initTime = System.currentTimeMillis();
-		Set<Bucket> buckets = step7(nextQuestion,isInternalSurveyUser,mainBucket);
+		Set<Bucket> buckets = step7(nextQuestion,allThreads,mainBucket);
 		botUtils.reportElapsedTime(initTime,"Step 7: Text Processing");
 		
 		/*
@@ -127,7 +129,14 @@ public class PitSurveyService extends AbstractService{
 		 * 
 		 */
 		initTime = System.currentTimeMillis();
-		List<Bucket> trimmedRank = step9(rankedBuckets,nextQuestion.getGoogleQuery(),new ArrayList<String>(Arrays.asList(nextQuestion.getClasses().split(" "))));
+		Integer maxRankSize=null;
+		if(phaseNumber.equals(1) || phaseNumber.equals(3)) {
+			maxRankSize = internalSurveyRankListSize;
+		}else if(phaseNumber.equals(4)) {
+			maxRankSize = externalSurveyRankListSize;
+		}
+		
+		List<Bucket> trimmedRank = step9(rankedBuckets,nextQuestion.getGoogleQuery(),new ArrayList<String>(Arrays.asList(nextQuestion.getClasses().split(" "))),maxRankSize);
 		botUtils.reportElapsedTime(initTime,"Step 9: Answer Generation");
 		
 		return trimmedRank;
@@ -142,9 +151,9 @@ public class PitSurveyService extends AbstractService{
 	 * @return A set of buckets
 	 * @throws Exception 
 	 */
-	private Set<Bucket> step7(ExternalQuestion nextQuestion, boolean isInternalSurveyUser, Bucket mainBucket) throws Exception {
+	private Set<Bucket> step7(ExternalQuestion nextQuestion, Set<SoThread> allThreads, Bucket mainBucket) throws Exception {
 		
-		List<String> apis = new ArrayList<String>(Arrays.asList(nextQuestion.getClasses().split(" ")));
+		/*
 		
 		Set<Integer> relatedPostsIdsSet;
 		List<Integer> relatedPostsIdsList;
@@ -169,7 +178,9 @@ public class PitSurveyService extends AbstractService{
 		logger.info("Number of posts that are answers and had their parent thread fetched: "+countPostIsAnAnswer);
 		
 		logger.info("Second total number of threads: "+allThreads.size()+" as a result of all discovered threads for this query: "+nextQuestion);
-				
+				*/
+		
+		List<String> apis = new ArrayList<String>(Arrays.asList(nextQuestion.getClasses().split(" ")));
 		
 		//Main bucket
 		String presentingBody = botUtils.buildPresentationBody(nextQuestion.getGoogleQuery(),true);
@@ -279,7 +290,7 @@ public class PitSurveyService extends AbstractService{
 	}
 
 
-	private List<Bucket> step9(List<Bucket> rankedBuckets,String googleQuery, List<String> rackApis) throws IOException {
+	private List<Bucket> step9(List<Bucket> rankedBuckets,String googleQuery, List<String> rackApis, Integer maxRankSize) throws IOException {
 		//showBucketsOrderByCosineDesc(bucketsList);
 		//showRankedList(rankedBuckets);
 		List<Bucket> trimmedRankedBuckets = new ArrayList<>();
@@ -291,7 +302,7 @@ public class PitSurveyService extends AbstractService{
 			//botUtils.buildOutPutFile(bucket,pos+1,googleQuery,rackApis);
 			trimmedRankedBuckets.add(bucket);
 			pos++;
-			if(pos==internalSurveyRankListSize){
+			if(pos==maxRankSize){
 				break;
 			}
 		}
@@ -310,10 +321,11 @@ public class PitSurveyService extends AbstractService{
 		bucket.setPostId(post.getId());
 		bucket.setPostScore(post.getScore());
 		bucket.setUserReputation(post.getUser()!=null? post.getUser().getReputation():null);
-				
-		Post parentPost = botUtils.getAllRetrievedPostsCache().get(post.getParentId());
-		if(parentPost==null) {
-			throw new PitBotException("Parent post not found... this does not make sense... ");
+		bucket.setRelationTypeId(post.getRelationTypeId());		
+		
+		Post parentPost = botUtils.getParentPostsCache().get(post.getParentId());
+		if(parentPost==null) { 
+			parentPost = postsRepository.findOne(post.getParentId());
 		}
 		
 		
@@ -485,7 +497,7 @@ public class PitSurveyService extends AbstractService{
 	/*
 	 * Answers have postTypeId = 2
 	 */
-	public List<Post> findAnswersByQuestionId(Integer questionId) {
+	public List<Post> findUpVotedAnswersByQuestionId(Integer questionId) {
 		//return postsRepository.findByParentIdAndPostTypeId(questionId,2,new Sort(Sort.Direction.ASC, "id"));
 		return postsRepository.findByParentId(questionId,new Sort(Sort.Direction.ASC, "id"));
 	}
@@ -496,10 +508,7 @@ public class PitSurveyService extends AbstractService{
 	}
 
 
-	public Set<Integer> recoverRelatedQuestionsIds(Set<Integer> allQuestionsIds) {
-		return genericRepository.findRelatedQuestionsIds(allQuestionsIds);
-	}
-
+	
 
 	public Set<Post> getAllPosts() {
 		Set<Post> set = Sets.newHashSet(postsRepository.findAll());
@@ -551,14 +560,16 @@ public class PitSurveyService extends AbstractService{
 		List<Integer> ratings = evaluation.getRatings();
 		
 		for(int i=0; i<postsIds.size(); i++) { //lists have the same size
-			Evaluation eval = new Evaluation(
+			Evaluation eval = new Evaluation();
+			/*eval.setrank
+			
 					evaluation.getExternalQuestionId(),
 					postsIds.get(i),
 					evaluation.getSurveyUserId(),
 					ratings.get(i),
 					getCurrentDate(),
 					SurveyUser.isInternalSurveyUser(evaluation.getSurveyUserId())
-					);
+					);*/
 			evaluationRepository.save(eval);
 		}
 		
@@ -649,8 +660,11 @@ public class PitSurveyService extends AbstractService{
 				}
 			}
 			nextQuestion = toTransfer.getTo();
-			List<Bucket> rankedBuckets = runSteps7toTheEnd(nextQuestion,isInternalSurveyUser);
-			toTransfer.setList4(rankedBuckets);
+			
+			List<Post> postsForQuestion = genericRepository.findRankedList(nextQuestion.getId(),isInternalSurveyUser);
+			
+			//List<Bucket> rankedBuckets = runSteps7toTheEnd(nextQuestion,isInternalSurveyUser);
+			toTransfer.setList4(postsForQuestion);
 		}
 		
 		

@@ -23,7 +23,9 @@ public interface GenericRepository {
 
 	public Set<Post> getPostsByFilters(String tagFilter);
 
-	public Set<Integer> findRelatedQuestionsIds(Set<Integer> allQuestionsIds);
+	public Set<Integer> findRelatedQuestionsIds(Set<Integer> allQuestionsIds, Integer linkTypeId);
+
+	public List<Post> findRankedList(Integer id, boolean isInternalSurveyUser);
 
 	
 	

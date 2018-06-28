@@ -23,12 +23,9 @@ public class Evaluation {
 	private Integer id;
 	
 	
-	@Column(name="externalquestionid")
-	private Integer externalQuestionId;
+	@Column(name="rankid")
+	private Integer rankId;
 
-	@Column(name="postid")	
-	private Integer postId;
-	
 	@Column(name="surveyuserid")	
 	private Integer surveyUserId;
 	
@@ -39,9 +36,6 @@ public class Evaluation {
 	private Timestamp ratingDate;
 	
 	
-	@Column(name="internalevaluation")	
-	private Boolean internalEvaluation;
-
 	@Transient
 	private List<Integer> ratings;
 	
@@ -59,25 +53,6 @@ public class Evaluation {
 		this.id = id;
 	}
 
-
-	public Integer getExternalQuestionId() {
-		return externalQuestionId;
-	}
-
-
-	public void setExternalQuestionId(Integer externalQuestionId) {
-		this.externalQuestionId = externalQuestionId;
-	}
-
-
-	public Integer getPostId() {
-		return postId;
-	}
-
-
-	public void setPostId(Integer postId) {
-		this.postId = postId;
-	}
 
 
 	public Integer getSurveyUserId() {
@@ -110,23 +85,7 @@ public class Evaluation {
 	}
 
 
-	public Boolean getInternalEvaluation() {
-		return internalEvaluation;
-	}
-
-
-	public void setInternalEvaluation(Boolean internalEvaluation) {
-		this.internalEvaluation = internalEvaluation;
-	}
-
-
-	@Override
-	public String toString() {
-		return "Evaluation [id=" + id + ", externalQuestionId=" + externalQuestionId + ", postId=" + postId
-				+ ", surveyUserId=" + surveyUserId + ", likertScale=" + likertScale + ", ratingDate=" + ratingDate
-				+ ", internalEvaluation=" + internalEvaluation + "]";
-	}
-
+	
 
 	@Override
 	public int hashCode() {
@@ -155,21 +114,6 @@ public class Evaluation {
 	}
 
 
-	public Evaluation(Integer externalQuestionId, Integer postId, Integer surveyUserId, Integer likertScale,
-			Timestamp ratingDate, Boolean internalEvaluation) {
-		super();
-		this.externalQuestionId = externalQuestionId;
-		this.postId = postId;
-		this.surveyUserId = surveyUserId;
-		this.likertScale = likertScale;
-		this.ratingDate = ratingDate;
-		this.internalEvaluation = internalEvaluation;
-	}
-
-
-	public Evaluation() {
-		super();
-	}
 
 
 	public List<Integer> getRatings() {
@@ -189,6 +133,37 @@ public class Evaluation {
 
 	public void setPostsIds(List<Integer> postsIds) {
 		this.postsIds = postsIds;
+	}
+
+
+	public Integer getRankId() {
+		return rankId;
+	}
+
+
+	public void setRankId(Integer rankId) {
+		this.rankId = rankId;
+	}
+
+
+	@Override
+	public String toString() {
+		return "Evaluation [id=" + id + ", rankId=" + rankId + ", surveyUserId=" + surveyUserId + ", likertScale="
+				+ likertScale + ", ratingDate=" + ratingDate + ", ratings=" + ratings + ", postsIds=" + postsIds + "]";
+	}
+
+
+	public Evaluation(Integer rankId, Integer surveyUserId, Integer likertScale, Timestamp ratingDate) {
+		super();
+		this.rankId = rankId;
+		this.surveyUserId = surveyUserId;
+		this.likertScale = likertScale;
+		this.ratingDate = ratingDate;
+	}
+
+
+	public Evaluation() {
+		super();
 	}
 
 	

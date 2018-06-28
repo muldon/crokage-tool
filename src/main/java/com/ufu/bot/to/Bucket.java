@@ -3,6 +3,7 @@ package com.ufu.bot.to;
 import java.util.List;
 import java.util.Set;
 
+import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
@@ -24,6 +25,8 @@ public class Bucket {
 	private Set<String> classesNames;
 	    
 	private Integer userReputation;
+	
+	private Integer relationTypeId;
 	
 	/*
 	 * Similarity values compared to main bucket
@@ -200,13 +203,16 @@ public class Bucket {
 
 
 
+
+
 	@Override
 	public String toString() {
 		return "Bucket [postId=" + postId + ", parentId=" + parentId + ", presentingBody=" + presentingBody
 				+ ", processedBodyStemmedStopped=" + processedBodyStemmedStopped + ", postScore=" + postScore
 				+ ", codes=" + codes + ", classesNames=" + classesNames + ", userReputation=" + userReputation
-				+ ", cosSim=" + cosSim + ", coverageScore=" + coverageScore + ", codeSizeScore=" + codeSizeScore + ", repScore="
-				+ repScore + ", upScore=" + upScore + ", composedScore=" + composedScore + "]";
+				+ ", relationTypeId=" + relationTypeId + ", cosSim=" + cosSim + ", coverageScore=" + coverageScore
+				+ ", codeSizeScore=" + codeSizeScore + ", repScore=" + repScore + ", upScore=" + upScore
+				+ ", composedScore=" + composedScore + "]";
 	}
 
 
@@ -267,6 +273,18 @@ public class Bucket {
 
 	public void setCodeSizeScore(Double codeSizeScore) {
 		this.codeSizeScore = codeSizeScore;
+	}
+
+
+
+	public Integer getRelationTypeId() {
+		return relationTypeId;
+	}
+
+
+
+	public void setRelationTypeId(Integer relationTypeId) {
+		this.relationTypeId = relationTypeId;
 	}
 
 

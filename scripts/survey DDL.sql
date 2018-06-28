@@ -1,21 +1,20 @@
-﻿
-
 DROP SEQUENCE surveyuser_id_seq;
 DROP SEQUENCE evaluation_id_seq;
 DROP SEQUENCE experiment_id_seq;
 DROP SEQUENCE externalquestion_id_seq;
 DROP SEQUENCE relatedpost_id_seq;
-DROP SEQUENCE survey_id_seq;
+--DROP SEQUENCE survey_id_seq;
+DROP SEQUENCE rank_id_seq;
 
 
 DROP TABLE result;
 DROP TABLE experiment;
 DROP TABLE evaluation;
-DROP TABLE surveyuser;
 DROP TABLE relatedpost;
+DROP TABLE rank;
 DROP TABLE externalquestion;
-DROP TABLE survey;
-
+--DROP TABLE survey;
+DROP TABLE surveyuser;
 
 CREATE SEQUENCE surveyuser_id_seq
   INCREMENT 1
@@ -29,6 +28,17 @@ ALTER TABLE surveyuser_id_seq
 
 
 CREATE SEQUENCE evaluation_id_seq
+  INCREMENT 1
+  MINVALUE 1
+  MAXVALUE 9223372036854775807
+  START 1
+  CACHE 1;
+ALTER TABLE evaluation_id_seq
+  OWNER TO postgres;
+
+
+
+CREATE SEQUENCE rank_id_seq
   INCREMENT 1
   MINVALUE 1
   MAXVALUE 9223372036854775807
@@ -91,39 +101,6 @@ ALTER TABLE result_id_seq
   OWNER TO postgres;
 
 
--- Sequence: survey_id_seq
-
-
-
-CREATE SEQUENCE survey_id_seq
-  INCREMENT 1
-  MINVALUE 1
-  MAXVALUE 9223372036854775807
-  START 3
-  CACHE 1;
-ALTER TABLE survey_id_seq
-  OWNER TO postgres;
-
-
--- Table: survey
-
-
-
-CREATE TABLE survey
-(
-  id integer NOT NULL,
-  name character varying(100),
-  description character varying(500),
-  active boolean,
-  CONSTRAINT survey_pk PRIMARY KEY (id)
-)
-WITH (
-  OIDS=FALSE
-);
-ALTER TABLE survey
-  OWNER TO postgres;
-
-
 -- Table: surveyuser
 
 
@@ -149,7 +126,6 @@ ALTER TABLE surveyuser
 CREATE TABLE externalquestion
 (
   id integer NOT NULL,
-  surveyid integer,
   googlequery text,
   classes character varying(100),
   userack boolean,
@@ -158,10 +134,7 @@ CREATE TABLE externalquestion
   url character varying(800),
   externalid integer,
   rawquery text,
-  CONSTRAINT externalquestion_pk PRIMARY KEY (id),
-  CONSTRAINT survey_fk FOREIGN KEY (surveyid)
-      REFERENCES survey (id) MATCH SIMPLE
-      ON UPDATE NO ACTION ON DELETE NO ACTION
+  CONSTRAINT externalquestion_pk PRIMARY KEY (id)  
 )
 WITH (
   OIDS=FALSE
@@ -179,6 +152,7 @@ CREATE TABLE relatedpost
   id integer NOT NULL,
   externalquestionid integer,
   postid integer,
+  relationtypeid integer,
   CONSTRAINT relatedpost_pk PRIMARY KEY (id),
   CONSTRAINT relatedpost_fk1 FOREIGN KEY (externalquestionid)
       REFERENCES externalquestion (id) MATCH SIMPLE
@@ -194,25 +168,44 @@ ALTER TABLE relatedpost
   OWNER TO postgres;
 
 
--- Table: evaluation
 
+
+CREATE TABLE rank
+(
+  id integer NOT NULL,
+  externalquestionid integer,
+  postid integer,
+  rankorder integer,
+  internalevaluation boolean,
+  CONSTRAINT rank_pk PRIMARY KEY (id),
+  CONSTRAINT rank_fk1 FOREIGN KEY (externalquestionid)
+      REFERENCES externalquestion (id) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION,
+  CONSTRAINT rank_fk2 FOREIGN KEY (postid)
+      REFERENCES postsmin (id) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION  
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE rank
+  OWNER TO postgres;
+
+
+
+-- Table: evaluation
 
 
 CREATE TABLE evaluation
 (
   id integer NOT NULL,
-  externalquestionid integer,
-  postid integer,
   surveyuserid integer,
   likertscale integer,
   ratingdate timestamp without time zone,
-  internalevaluation boolean,
+  rankid integer,
   CONSTRAINT evaluation_pk PRIMARY KEY (id),
-  CONSTRAINT evaluation_fk1 FOREIGN KEY (externalquestionid)
-      REFERENCES externalquestion (id) MATCH SIMPLE
-      ON UPDATE NO ACTION ON DELETE NO ACTION,
-  CONSTRAINT evaluation_fk2 FOREIGN KEY (postid)
-      REFERENCES postsmin (id) MATCH SIMPLE
+  CONSTRAINT evaluation_fk2 FOREIGN KEY (rankid)
+      REFERENCES rank (id) MATCH SIMPLE
       ON UPDATE NO ACTION ON DELETE NO ACTION,
   CONSTRAINT evaluation_fk3 FOREIGN KEY (surveyuserid)
       REFERENCES surveyuser (id) MATCH SIMPLE
@@ -223,7 +216,6 @@ WITH (
 );
 ALTER TABLE evaluation
   OWNER TO postgres;
-
 
 -- Table: experiment
 
@@ -282,10 +274,11 @@ ALTER TABLE result
 
 
 
-INSERT INTO survey(id,name, description, active) VALUES (1,'Internal Survey', 'This survey aims to evaluate default composer weights', true);
-INSERT INTO survey(id,name, description, active) VALUES (2,'External Survey', 'This survey aims to evaluate the approach', false);
+--INSERT INTO survey(id,name, description, active) VALUES (1,'Internal Survey', 'This survey aims to evaluate default composer weights', true);
+--INSERT INTO survey(id,name, description, active) VALUES (2,'External Survey', 'This survey aims to evaluate the approach', false);
 
 INSERT INTO surveyuser(id,nick, login) VALUES (1,'rodrigo', 'digao');
 INSERT INTO surveyuser(id,nick, login) VALUES (2,'klerisson', 'klerisson');
+
 
 

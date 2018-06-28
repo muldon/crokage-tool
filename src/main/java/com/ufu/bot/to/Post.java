@@ -101,6 +101,10 @@ public class Post {
 	
 	@Transient
 	private Evaluation evaluation;
+	
+	@Transient
+	private Integer relationTypeId;
+		
 
 	public Post() {
 	}
@@ -396,6 +400,14 @@ public class Post {
 
 	public void setEvaluation(Evaluation evaluation) {
 		this.evaluation = evaluation;
+	}
+
+	public Integer getRelationTypeId() {
+		return relationTypeId;
+	}
+
+	public void setRelationTypeId(Integer relationTypeId) {
+		this.relationTypeId = relationTypeId;
 	}
 
 	

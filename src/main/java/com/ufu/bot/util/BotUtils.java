@@ -73,7 +73,9 @@ public class BotUtils {
 	//private Set<Integer> allDuplicatedQuestionsIds;
 	//private static Set<PostLink> allPostLinks;
 	private static Map<Integer, Set<Integer>> allPostLinks;
-	private Map<Integer,Post> allRetrievedPostsCache;
+	private Map<Integer,Post> parentPostsCache;
+	private Map<Integer,Post> answerPostsCache;
+	
 
 	@Autowired
 	private CosineSimilarity cs1;
@@ -170,7 +172,9 @@ public class BotUtils {
 			minTokenSize = new Integer(prop.getProperty("minTokenSize"));
 			
 		}
-		allRetrievedPostsCache = new HashMap<>();
+		parentPostsCache = new HashMap<>();
+		parentPostsCache = new HashMap<Integer, Post>();
+		answerPostsCache = new HashMap<Integer, Post>();
 				
 	}
 	
@@ -996,7 +1000,7 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 					if(linkLine.startsWith("link:")) {
 						linkLine= linkLine.replace("link:", "").trim();
 						//System.out.println(linkLine);
-						ExternalQuestion externalQuestion = new ExternalQuestion(SurveyEnum.BUILDING_GROUND_TRUTH.getId(),queryLine,null,null,runRack,obs,linkLine,id);
+						ExternalQuestion externalQuestion = new ExternalQuestion(id,queryLine,null,null,runRack,obs,linkLine);
 						externalQuestionAnswers.add(externalQuestion);
 						id++;
 					}
@@ -1038,20 +1042,33 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 		
 	}
 	
-	public void storeInCache(Post post) {
-		if(!allRetrievedPostsCache.containsKey(post.getId())) {
-			allRetrievedPostsCache.put(post.getId(), post);
+	public void storeParentPostInCache(Post post) {
+		if(!parentPostsCache.containsKey(post.getId())) {
+			parentPostsCache.put(post.getId(), post);
 		}
 		
 	}
 
-	public Map<Integer, Post> getAllRetrievedPostsCache() {
-		return allRetrievedPostsCache;
+	public void storeAnswerPostInCache(Post post) {
+		if(!answerPostsCache.containsKey(post.getId())) {
+			answerPostsCache.put(post.getId(), post);
+		}
+		
 	}
 
-	public void setAllRetrievedPostsCache(Map<Integer, Post> allRetrievedPostsCache) {
-		this.allRetrievedPostsCache = allRetrievedPostsCache;
+	public Map<Integer, Post> getParentPostsCache() {
+		return parentPostsCache;
 	}
+
+
+	public Map<Integer, Post> getAnswerPostsCache() {
+		return answerPostsCache;
+	}
+
+
+	
+
+
 	
 	
 	

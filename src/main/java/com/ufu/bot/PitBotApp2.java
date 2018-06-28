@@ -39,6 +39,7 @@ import com.ufu.bot.to.Bucket;
 import com.ufu.bot.to.Comment;
 import com.ufu.bot.to.ExternalQuestion;
 import com.ufu.bot.to.Post;
+import com.ufu.bot.to.RelatedPost.RelationTypeEnum;
 import com.ufu.bot.to.SoThread;
 import com.ufu.bot.to.Survey.SurveyEnum;
 import com.ufu.bot.util.BotComposer;
@@ -72,8 +73,8 @@ public class PitBotApp2 {
 	public String obs;  
 	
 	
-	@Value("${pickUpOnlyTheFirstQuery}")
-	public Boolean pickUpOnlyTheFirstQuery;
+	@Value("${numberOfQueriesToTest}")
+	public Integer numberOfQueriesToTest;
 	
 	@Value("${runRack}")
 	public Boolean runRack;  
@@ -138,7 +139,7 @@ public class PitBotApp2 {
 	
 	
 	//protected Set<Post> postsByFilter;
-	private Bucket mainBucket;
+	//private Bucket mainBucket;
 	private List<ExternalQuestion> externalQuestions;
 	private Set<SoThread> augmentedThreads;
 	private String googleQuery;
@@ -164,7 +165,7 @@ public class PitBotApp2 {
 				+ "\n phaseNumber: "+phaseNumber
 				+ "\n pathFileEnvFlag: "+pathFileEnvFlag
 				+ "\n obs: "+obs
-				+ "\n pickUpOnlyTheFirstQuery: "+pickUpOnlyTheFirstQuery
+				+ "\n numberOfQueriesToTest: "+numberOfQueriesToTest
 				+ "\n shuffleListOfQueriesBeforeGoogleSearch: "+shuffleListOfQueriesBeforeGoogleSearch
 				+ "\n runRack: "+runRack
 				+ "\n numberOfRackClasses: "+numberOfRackClasses
@@ -212,10 +213,10 @@ public class PitBotApp2 {
 		step1();
 				
 		
-		if(pickUpOnlyTheFirstQuery) {
-			ExternalQuestion answerBotQuestion = externalQuestions.get(0);
-			externalQuestions = new ArrayList<>();
-			externalQuestions.add(answerBotQuestion);
+		if(numberOfQueriesToTest!=null) {
+			List<ExternalQuestion> newList = new ArrayList<ExternalQuestion>(externalQuestions.subList(0, numberOfQueriesToTest));
+			externalQuestions = new ArrayList<>(newList);
+			
 		}
 		
 		
@@ -229,20 +230,28 @@ public class PitBotApp2 {
 			}*/
 			
 			initializeVariables();
-			logger.info("Processing query: "+externalQuestion);
+			logger.info("\n\n\n\n\n\n\nProcessing new question: "+externalQuestion);
+			initTime = System.currentTimeMillis();
 			runSteps2to6(externalQuestion.getRawQuery()); 
+			botUtils.reportElapsedTime(initTime,"runSteps2to6");
 			
 			externalQuestion.setGoogleQuery(googleQuery);
 			externalQuestion.setUseRack(runRack);
 			externalQuestion.setClasses(String.join(", ", rackApis));
-			externalQuestion.setSurveyId(SurveyEnum.BUILDING_GROUND_TRUTH.getId());
-						
-			logger.info("saving external question and related ids...");
-			pitBotService.saveExternalQuestionAndRelatedIds(externalQuestion,botUtils.getAllRetrievedPostsCache());
+									
+			logger.info("saving external question and related ids for external question: "+externalQuestion.getExternalId());
+			pitBotService.saveExternalQuestionAndRelatedIds(externalQuestion,botUtils.getAnswerPostsCache());
 			count++;
 			if(count>100) {
 				break;
 			}
+			
+			initTime = System.currentTimeMillis();
+			List<Bucket> rankedList = pitSurveyService.runSteps7toTheEnd(externalQuestion,augmentedThreads);
+			botUtils.reportElapsedTime(initTime,"runSteps7toTheEnd");
+			logger.info("list of ranks generated, now saving ranks for question "+externalQuestion.getExternalId());
+			pitBotService.saveRanks(externalQuestion,rankedList,true);
+			
 		}
 	}
 	
@@ -271,9 +280,9 @@ public class PitBotApp2 {
 			 * RACK  
 			 *   *** Considering only the first query
 			 */
-			initTime = System.currentTimeMillis();
+			//initTime = System.currentTimeMillis();
 			rackApis = step2(query);
-			botUtils.reportElapsedTime(initTime,"step2 - RACK ");
+			//botUtils.reportElapsedTime(initTime,"step2 - RACK ");
 		}
 		
 		
@@ -290,9 +299,9 @@ public class PitBotApp2 {
 		 * Step 4: Query Serach
 		 * 
 		 */
-		initTime = System.currentTimeMillis();
+		//initTime = System.currentTimeMillis();
 		soPostsIds = step4(googleQuery);
-		botUtils.reportElapsedTime(initTime,"step4 - Google Search ");
+		//botUtils.reportElapsedTime(initTime,"step4 - Google Search ");
 		
 		}else { //static list for tests
 			soPostsIds = getStaticIdsForTests();
@@ -303,18 +312,18 @@ public class PitBotApp2 {
 		 * Step 5: Fetch Questions Content in SO
 		 * 
 		 */
-		initTime = System.currentTimeMillis();
+		//initTime = System.currentTimeMillis();
 		Set<SoThread> threads = step5(soPostsIds);
-		botUtils.reportElapsedTime(initTime,"step5 - Fetch Questions Content in SO ");
+		//botUtils.reportElapsedTime(initTime,"step5 - Fetch Questions Content in SO ");
 		
 		
 		/*
 		 * Step 6: Links Retrieval
 		 * 
 		 */
-		initTime = System.currentTimeMillis();
+		//initTime = System.currentTimeMillis();
 		augmentedThreads = step6(threads);
-		botUtils.reportElapsedTime(initTime,"step6 - Links Retrieval ");
+		//botUtils.reportElapsedTime(initTime,"step6 - Links Retrieval ");
 		
 		
 		
@@ -414,7 +423,7 @@ public class PitBotApp2 {
 	 * @return a list of threads, where each thread is a question with all their answers and comments.
 	 */
 	public Set<SoThread> step5(Set<Integer> soQuestionsIds) {
-		return pitBotService.assembleListOfThreads(soQuestionsIds);
+		return pitBotService.assembleListOfThreads(soQuestionsIds,RelationTypeEnum.FROM_GOOGLE_QUESTION_OR_ANSWER.getId());
 		
 	}
 
@@ -435,24 +444,33 @@ public class PitBotApp2 {
 		
 		/*
 		 * Verify if questions ids are in PostLinks table. If so, retrieve the related posts.
+		 * LinkTypeId - type of link (currently either 1, linked, or 3, dupe)
 		 */
-		
-		Set<Integer> allRelatedQuestionsIds = pitBotService.recoverRelatedQuestionsIds(allQuestionsIds);
+		Set<Integer> allRelatedDupesIds = pitBotService.recoverRelatedQuestionsIds(allQuestionsIds,3);
+		Set<Integer> otherRelatedIds = pitBotService.recoverRelatedQuestionsIds(allQuestionsIds,1);
 		
 		String relatedIdsStr = "";
-		for(Integer relatedId: allRelatedQuestionsIds) {
+		String otherRelatedIdsStr = "";
+		for(Integer relatedId: allRelatedDupesIds) {
 			relatedIdsStr+= relatedId+ " - ";
 		}
-		logger.info("Number of allRelatedQuestionsIds: "+allRelatedQuestionsIds.size()+ " \n List: "+relatedIdsStr);
+		for(Integer relatedId: otherRelatedIds) {
+			otherRelatedIdsStr+= relatedId+ " - ";
+		}
+		logger.info("Number of allRelatedDupesIds: "+allRelatedDupesIds.size()+ " \n List: "+relatedIdsStr);
+		logger.info("Number of otherRelatedIdsStr: "+otherRelatedIds.size()+ " \n List: "+otherRelatedIdsStr);
 				
-		allRelatedQuestionsIds.removeAll(allQuestionsIds);
-		logger.info("Number of remaing threads to assemble: "+allRelatedQuestionsIds.size());
+		allRelatedDupesIds.removeAll(allQuestionsIds);
+		otherRelatedIds.removeAll(allQuestionsIds);
+		logger.info("Number of remaing threads to assemble: dupes: "+allRelatedDupesIds.size() + " + others: "+otherRelatedIds.size());
 		
-		Set<SoThread> relatedThreads = pitBotService.assembleListOfThreads(allRelatedQuestionsIds);
+		Set<SoThread> relatedDupeThreads = pitBotService.assembleListOfThreads(allRelatedDupesIds,RelationTypeEnum.RELATED_DUPE.getId());
+		Set<SoThread> otherRelatedThreads = pitBotService.assembleListOfThreads(otherRelatedIds,RelationTypeEnum.RELATED_NOT_DUPE.getId());
 		
-		logger.info("Number of new threads: "+relatedThreads.size());
+		logger.info("Number of new threads: dupes: "+relatedDupeThreads.size()+ " + others: "+otherRelatedThreads.size());
 		
-		threads.addAll(relatedThreads);
+		threads.addAll(relatedDupeThreads);
+		threads.addAll(otherRelatedThreads);
 		
 		logger.info("First total number of threads: "+threads.size()+" obtained only by PostLinks table. Now fetching links inside texts to assemble new threads...");
 		
@@ -472,6 +490,7 @@ public class PitBotApp2 {
 			for(Post answer: answers) {
 				allPostsFromAllThreads.add(answer);
 				allCommentsFromAllThreads.addAll(answer.getComments());
+				
 			}
 		}
 		
@@ -496,7 +515,7 @@ public class PitBotApp2 {
 		
 		logger.info("Number of questions ids identified inside links: "+soQuestionsIdsInsideTexts.size());
 		
-		Set<SoThread> newThreadsAssembledFromLinks = pitBotService.assembleListOfThreads(soQuestionsIdsInsideTexts);
+		Set<SoThread> newThreadsAssembledFromLinks = pitBotService.assembleListOfThreads(soQuestionsIdsInsideTexts,RelationTypeEnum.LINKS_INSIDE_TEXTS.getId());
 		logger.info("Number of new Threads built from link's ids: "+newThreadsAssembledFromLinks.size());
 		
 		logger.info("Number of posts that are answers and had their parent thread fetched: "+pitBotService.getCountPostIsAnAnswer());
@@ -504,7 +523,8 @@ public class PitBotApp2 {
 		threads.addAll(newThreadsAssembledFromLinks);
 		logger.info("Second total number of threads: "+threads.size()+" as a result of all discovered threads...");
 		
-		logger.info("Total number of posts stored in cache: "+botUtils.getAllRetrievedPostsCache().size());
+		logger.info("Total number of parent posts stored in cache: "+botUtils.getParentPostsCache().size());
+		logger.info("Total number of answer posts stored in cache: "+botUtils.getAnswerPostsCache().size());
 		
 		return threads;
 	}
@@ -615,6 +635,7 @@ public class PitBotApp2 {
 		avgScore = 0d;
 		avgReputation = 0d;
 		rackApis = new ArrayList<>();
+		googleQuery="";
 	}
 
 
@@ -642,18 +663,6 @@ public class PitBotApp2 {
 	}    
 	
 	
-	
-
-	
-
-	public Bucket getMainBucket() {
-		return mainBucket;
-	}
-
-	public void setMainBucket(Bucket mainBucket) {
-		this.mainBucket = mainBucket;
-	}
-
 	
 	
 	/*private void performStemStop() throws Exception {

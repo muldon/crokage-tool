@@ -133,7 +133,7 @@ public class GenericRepositoryImpl implements GenericRepository {
 
 
 	@Override
-	public Set<Integer> findRelatedQuestionsIds(Set<Integer> allQuestionsIds) {
+	public Set<Integer> findRelatedQuestionsIds(Set<Integer> allQuestionsIds,Integer linkTypeId) {
 		Set<Integer> relatedQuestionsIds = new HashSet<>();
 		
 		String inCommand = "(";
@@ -145,9 +145,9 @@ public class GenericRepositoryImpl implements GenericRepository {
 		
 		//logger.info("In command: "+inCommand);
 		
-		String query = "select * from postlinksmin where linktypeid = 3 and postid in " + inCommand+  
+		String query = "select * from postlinksmin where linktypeid = "+linkTypeId+" and postid in " + inCommand+  
 				" union " + 
-				" select * from postlinksmin where linktypeid = 3 and relatedpostid in " + inCommand; 
+				" select * from postlinksmin where linktypeid = "+linkTypeId+" and relatedpostid in " + inCommand; 
 		
 		logger.info(query);
 		
@@ -159,6 +159,26 @@ public class GenericRepositoryImpl implements GenericRepository {
 		}
 		
 		return relatedQuestionsIds;
+	}
+
+
+
+
+
+	@Override
+	public List<Post> findRankedList(Integer externalQuestionId, boolean isInternalSurveyUser) {
+			
+		String sql = "select p.* " + 
+					"    from postsmin p, rank r" + 
+					"    where p.id = r.postid " + 
+					"    and r.externalquestionid = " + externalQuestionId+
+					"    and r.internalevaluation = " + isInternalSurveyUser+
+					"    order by r.rankorder";
+		
+		Query q = em.createNativeQuery(sql, Post.class);
+		return (List<Post>) q.getResultList();
+		
+		
 	}
 	
 	

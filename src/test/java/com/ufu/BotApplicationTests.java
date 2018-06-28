@@ -26,6 +26,7 @@ import com.ufu.bot.to.Evaluation;
 import com.ufu.bot.to.Experiment;
 import com.ufu.bot.to.ExternalQuestion;
 import com.ufu.bot.to.Post;
+import com.ufu.bot.to.Rank;
 import com.ufu.bot.to.RelatedPost;
 import com.ufu.bot.to.Result;
 import com.ufu.bot.to.SurveyUser;
@@ -118,7 +119,7 @@ public class BotApplicationTests extends AbstractService{
 	public void getAnswers() {
 		logger.info("\n\nTesting getAnswers....");
 		Integer postId = 910374;
-		List<Post> answers = pitBotService.findAnswersByQuestionId(postId);
+		List<Post> answers = pitBotService.findUpVotedAnswersByQuestionId(postId);
 		for (Post answer : answers) {
 			logger.info(answer.getBody());
 		}
@@ -145,7 +146,7 @@ public class BotApplicationTests extends AbstractService{
 		set.add(910374);
 		
 		
-		Set<Integer> allRelatedQuestionsIds = pitBotService.recoverRelatedQuestionsIds(set);
+		Set<Integer> allRelatedQuestionsIds = pitBotService.recoverRelatedQuestionsIds(set,1);
 		System.out.println(allRelatedQuestionsIds);
 
 	}
@@ -169,23 +170,31 @@ public class BotApplicationTests extends AbstractService{
 		
 	//@Test
 	public void testExternalQuestions() {
-		/*ExternalQuestion externalQuestion = new ExternalQuestion(1, "question", "answer");
+		ExternalQuestion externalQuestion = new ExternalQuestion(1,"queryLine","googlequery","classes",true,"obs","linkLine");
 		pitBotService.saveExternalQuestion(externalQuestion);
 		System.out.println(externalQuestion);
 		
 		List<ExternalQuestion> answerBotQuestions = pitBotService.getAllExternalQuestionsAnswerBot();
-		System.out.println(answerBotQuestions);*/
+		System.out.println(answerBotQuestions);
 	}
 	
 	//@Test
 	public void testRelatedQuestions() {
-		RelatedPost relatedPost = new RelatedPost(12125311,1);
+		RelatedPost relatedPost = new RelatedPost(12125311,1,1);
 		//pitBotService.saveRelatedPost(relatedPost);
 		System.out.println(relatedPost);
 		
 		
 		List<Post> relatedPosts = pitBotService.getRelatedPosts(1);
 		System.out.println(relatedPosts);
+	}
+	
+	//@Test
+	public void testRank() {
+		Rank rank = new Rank(1,12125311,1,true);
+		rankRepository.save(rank);
+		//System.out.println(relatedPost);
+				
 	}
 	
 	
@@ -206,11 +215,9 @@ public class BotApplicationTests extends AbstractService{
 	
 	//@Test
 	public void testEvaluation() {
-		Evaluation evaluation = new Evaluation(1,12125311,1,5,new Timestamp(Calendar.getInstance().getTimeInMillis()),true);
+		Evaluation evaluation = new Evaluation(1,1,5,new Timestamp(Calendar.getInstance().getTimeInMillis()));
 		pitBotService.saveEvaluation(evaluation);
 		System.out.println(evaluation);
-		
-		
 	}	
 	
 	//@Test
