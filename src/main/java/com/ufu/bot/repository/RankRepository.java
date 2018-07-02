@@ -10,6 +10,8 @@ import com.ufu.bot.to.Rank;
 
 public interface RankRepository extends CrudRepository<Rank, Integer> {
 
+	Rank findByExternalQuestionIdAndPostIdAndInternalEvaluation(Integer externalQuestionId, Integer postId, boolean isInternalSurveyUser);
+
 	
 
 	

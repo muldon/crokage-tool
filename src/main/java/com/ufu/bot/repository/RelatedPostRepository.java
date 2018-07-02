@@ -20,6 +20,8 @@ public interface RelatedPostRepository extends CrudRepository<RelatedPost, Integ
 			  + " from relatedpost r"
 			  + " where r.externalquestionid = ?1",nativeQuery=true)
 	List<Integer> findRelatedPostsIds(Integer externalQuestionId);
+
+	List<RelatedPost> findByExternalQuestionId(Integer externalQuestionId);
     
 	
 

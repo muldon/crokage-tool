@@ -42,6 +42,9 @@ public class Evaluation {
 	@Transient
 	private List<Integer> postsIds;
 	
+	@Transient
+	private Integer externalQuestionId;
+	
 	
 
 	public Integer getId() {
@@ -164,6 +167,16 @@ public class Evaluation {
 
 	public Evaluation() {
 		super();
+	}
+
+
+	public Integer getExternalQuestionId() {
+		return externalQuestionId;
+	}
+
+
+	public void setExternalQuestionId(Integer externalQuestionId) {
+		this.externalQuestionId = externalQuestionId;
 	}
 
 	

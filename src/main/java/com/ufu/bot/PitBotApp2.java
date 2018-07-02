@@ -188,13 +188,23 @@ public class PitBotApp2 {
 			break;
 			
 		case 3:
-			
+			initTime = System.currentTimeMillis();
+			runPhase3();
+			botUtils.reportElapsedTime(initTime," runPhase3 ");
 			break;
-		
 		case 4:
-			
+			initTime = System.currentTimeMillis();
+			runPhase4();
+			botUtils.reportElapsedTime(initTime," runPhase1 ");
 			break;
-
+		case 5:
+			runPhase5();
+			break;
+		case 6:
+			initTime = System.currentTimeMillis();
+			runPhase6();
+			botUtils.reportElapsedTime(initTime," runPhase6 ");
+			break;
 		default:
 			break;
 		}
@@ -205,6 +215,8 @@ public class PitBotApp2 {
 	
 	
 
+
+
 	private void runPhase1() throws Exception {
 		/*
 		 * Step 1: Question in Natural Language
@@ -213,7 +225,7 @@ public class PitBotApp2 {
 		step1();
 				
 		
-		if(numberOfQueriesToTest!=null) {
+		if(numberOfQueriesToTest!=null && numberOfQueriesToTest>0) {
 			List<ExternalQuestion> newList = new ArrayList<ExternalQuestion>(externalQuestions.subList(0, numberOfQueriesToTest));
 			externalQuestions = new ArrayList<>(newList);
 			
@@ -262,8 +274,38 @@ public class PitBotApp2 {
 		
 	}
 	
+
 	
 
+
+	private void runPhase3() throws Exception {
+		//load external questions and their related posts and store in cache
+		pitSurveyService.loadQuestionsAndRelatedPostsToCache();
+		pitSurveyService.runPhase3();
+	}
+
+
+
+
+
+	private void runPhase4() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void runPhase5() {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+
+	private void runPhase6() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	
 	private void step1() throws Exception {
 		
 		externalQuestions = botUtils.readExternalQuestionsAndAnswers(runRack,obs);

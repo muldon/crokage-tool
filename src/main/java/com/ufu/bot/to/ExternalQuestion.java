@@ -147,6 +147,14 @@ public class ExternalQuestion {
 	public ExternalQuestion() {
 		super();
 	}
+	
+	
+
+	public ExternalQuestion(Integer externalId,String rawQuery) {
+		super();
+		this.rawQuery = rawQuery;
+		this.externalId = externalId;
+	}
 
 	public Integer getExternalId() {
 		return externalId;

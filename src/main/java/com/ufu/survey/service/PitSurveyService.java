@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +32,7 @@ import com.ufu.bot.to.Experiment;
 import com.ufu.bot.to.ExternalQuestion;
 import com.ufu.bot.to.Post;
 import com.ufu.bot.to.Rank;
+import com.ufu.bot.to.RelatedPost;
 import com.ufu.bot.to.SoThread;
 import com.ufu.bot.to.Survey;
 import com.ufu.bot.to.SurveyUser;
@@ -70,8 +72,10 @@ public class PitSurveyService extends AbstractService{
 	
 	private List<ExternalQuestion> externalQuestionsWithRack;
 	private List<ExternalQuestion> externalQuestionsWithoutRack;
+	private List<ExternalQuestion> allExternalQuestions;
 	private Map<Integer,List<Integer>> withoutRackMap;
 	private Map<Integer,List<Integer>> withRackMap;
+	private Map<Integer,List<Integer>> allPostsIdsMap;
 	
 	public PitSurveyService() {
 		
@@ -85,9 +89,13 @@ public class PitSurveyService extends AbstractService{
 		 */
 		externalQuestionsWithRack = findByUseRack(true);
 		externalQuestionsWithoutRack = findByUseRack(false);
+		allExternalQuestions = new ArrayList<>(externalQuestionsWithRack);
+		allExternalQuestions.addAll(externalQuestionsWithoutRack);
 		
 		withoutRackMap = new HashMap<>();
 		withRackMap = new HashMap<>();
+		allPostsIdsMap = new HashMap<>();
+		
 		
 		for(ExternalQuestion externalQuestion: externalQuestionsWithRack) {
 			List<Integer> relatedPosts = findRelatedPostsIds(externalQuestion.getId());
@@ -95,9 +103,12 @@ public class PitSurveyService extends AbstractService{
 		}
 		
 		for(ExternalQuestion externalQuestion: externalQuestionsWithoutRack) {
+			//externalQuestion.setRawQuery(externalQuestion.getId()+ " - "+externalQuestion.getRawQuery()); //presentation
 			List<Integer> relatedPosts = findRelatedPostsIds(externalQuestion.getId());
 			withoutRackMap.put(externalQuestion.getExternalId(), relatedPosts);
 		}
+		allPostsIdsMap.putAll(withoutRackMap);
+		allPostsIdsMap.putAll(withRackMap);
 		
 	}
 	
@@ -152,33 +163,6 @@ public class PitSurveyService extends AbstractService{
 	 * @throws Exception 
 	 */
 	private Set<Bucket> step7(ExternalQuestion nextQuestion, Set<SoThread> allThreads, Bucket mainBucket) throws Exception {
-		
-		/*
-		
-		Set<Integer> relatedPostsIdsSet;
-		List<Integer> relatedPostsIdsList;
-		
-		if(isInternalSurveyUser) {
-			if(nextQuestion.getUseRack()) {
-				relatedPostsIdsList = withRackMap.get(nextQuestion.getExternalId());
-			}else {
-				relatedPostsIdsList = withoutRackMap.get(nextQuestion.getExternalId());
-			}
-		}else { //external survey
-			if(runRack) {
-				relatedPostsIdsList = withRackMap.get(nextQuestion.getExternalId());
-			}else {
-				relatedPostsIdsList = withoutRackMap.get(nextQuestion.getExternalId());
-			}
-		}
-		relatedPostsIdsSet = new HashSet<>(relatedPostsIdsList);
-		
-		Set<SoThread> allThreads = assembleListOfThreads(relatedPostsIdsSet);
-		
-		logger.info("Number of posts that are answers and had their parent thread fetched: "+countPostIsAnAnswer);
-		
-		logger.info("Second total number of threads: "+allThreads.size()+" as a result of all discovered threads for this query: "+nextQuestion);
-				*/
 		
 		List<String> apis = new ArrayList<String>(Arrays.asList(nextQuestion.getClasses().split(" ")));
 		
@@ -558,18 +542,11 @@ public class PitSurveyService extends AbstractService{
 	public void saveRatings(Evaluation evaluation) {
 		List<Integer> postsIds = evaluation.getPostsIds();
 		List<Integer> ratings = evaluation.getRatings();
+		boolean isInternalSurveyUser = SurveyUser.isInternalSurveyUser(evaluation.getSurveyUserId());
 		
 		for(int i=0; i<postsIds.size(); i++) { //lists have the same size
-			Evaluation eval = new Evaluation();
-			/*eval.setrank
-			
-					evaluation.getExternalQuestionId(),
-					postsIds.get(i),
-					evaluation.getSurveyUserId(),
-					ratings.get(i),
-					getCurrentDate(),
-					SurveyUser.isInternalSurveyUser(evaluation.getSurveyUserId())
-					);*/
+			Rank rank = rankRepository.findByExternalQuestionIdAndPostIdAndInternalEvaluation(evaluation.getExternalQuestionId(),postsIds.get(i),isInternalSurveyUser);
+			Evaluation eval = new Evaluation(rank.getId(),evaluation.getSurveyUserId(),ratings.get(i),getCurrentDate());
 			evaluationRepository.save(eval);
 		}
 		
@@ -635,7 +612,13 @@ public class PitSurveyService extends AbstractService{
 
 	@Transactional(readOnly = true)
 	public void loadQuestions(ToTransfer toTransfer, Boolean internalSurvey) {
-		toTransfer.setList(externalQuestionsWithRack);
+		
+		/*List<ExternalQuestion> list = externalQuestionsWithoutRack.stream()
+			.peek(e -> e.setRawQuery(e.getExternalId()+ " - "+e.getRawQuery()))
+			.collect(Collectors.toList());*/
+		/*List<ExternalQuestion> list = new ArrayList<>();
+		for(ExternalQuestion externalQuestion: ex)*/
+		toTransfer.setList(externalQuestionsWithoutRack);
 		
 	}
 
@@ -660,11 +643,11 @@ public class PitSurveyService extends AbstractService{
 				}
 			}
 			nextQuestion = toTransfer.getTo();
+			if(nextQuestion!=null) {
+				List<Post> postsForQuestion = genericRepository.findRankedList(nextQuestion.getId(),isInternalSurveyUser);
+				toTransfer.setList4(postsForQuestion);
+			}
 			
-			List<Post> postsForQuestion = genericRepository.findRankedList(nextQuestion.getId(),isInternalSurveyUser);
-			
-			//List<Bucket> rankedBuckets = runSteps7toTheEnd(nextQuestion,isInternalSurveyUser);
-			toTransfer.setList4(postsForQuestion);
 		}
 		
 		
@@ -695,5 +678,52 @@ public class PitSurveyService extends AbstractService{
 	private List<Integer> findRelatedPostsIds(Integer externalQuestionId) {
 		return relatedPostRepository.findRelatedPostsIds(externalQuestionId);
 	}
+
+	public List<ExternalQuestion> getAllExternalQuestions() {
+		return allExternalQuestions;
+	}
+
+	
+	public void runPhase3() throws Exception {
+		long initTime; 
+		long endTime;
+						
+		
+		int count =1;
+		for(ExternalQuestion externalQuestion: allExternalQuestions) {
+			//initializeVariables();
+			String questionStr = "Id: "+externalQuestion.getId()+ " - externalId: "+externalQuestion.getExternalId()+ " - Gquery: "+externalQuestion.getGoogleQuery();
+			logger.info("\n\n\n\n\n\n\n Processing question: "+questionStr);
+			
+			List<Post> answers = new ArrayList<>();
+			
+			List<RelatedPost> relatedPosts = relatedPostRepository.findByExternalQuestionId(externalQuestion.getId());
+			for(RelatedPost relatedPost: relatedPosts) {
+				Post answer = postsRepository.findOne(relatedPost.getPostId());
+				answer.setRelationTypeId(relatedPost.getRelationTypeId());
+				answers.add(answer);
+			}
+			
+			SoThread thread = new SoThread(null, answers);
+			Set<SoThread> threadListOneElement = new HashSet<>();
+			threadListOneElement.add(thread);
+			
+			initTime = System.currentTimeMillis();
+			List<Bucket> rankedList = runSteps7toTheEnd(externalQuestion,threadListOneElement);
+			botUtils.reportElapsedTime(initTime,"runSteps7toTheEnd for question: "+questionStr);
+			
+			
+			
+		}
+		
+	}
+
+	private Set<SoThread> assembleListOfThreads(Integer id) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	
+	
 	
 }

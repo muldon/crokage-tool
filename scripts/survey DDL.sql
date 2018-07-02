@@ -129,7 +129,6 @@ CREATE TABLE externalquestion
   googlequery text,
   classes character varying(100),
   userack boolean,
-  answerbotqueryid integer,
   obs character varying(400),
   url character varying(800),
   externalid integer,
