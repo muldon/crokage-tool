@@ -90,7 +90,7 @@ public class BotComposer {
 			}
 			composedScore = adjuster*composedScore;
 			
-			bucket.setComposedScore(BotUtils.redondear(composedScore,5));
+			bucket.setComposedScore(BotUtils.round(composedScore,5));
 		}
 		
 		Collections.sort(bucketsList, new Comparator<Bucket>() {
@@ -104,23 +104,23 @@ public class BotComposer {
 
 	public void calculateScores(Double avgReputation, Double avgScore,HashMap<String, Double> tfIdfMainBucket, HashMap<String, Double> tfIdfOtherBucket, Bucket mainBucket, Bucket postBucket) {
 		double cosine = cosineSimilarity(tfIdfMainBucket, tfIdfOtherBucket);
-		postBucket.setCosSim(BotUtils.redondear(cosine,4));
+		postBucket.setCosSim(BotUtils.round(cosine,4));
 		
 		double coverageScore = calculateCoverageScore(mainBucket.getClassesNames(),postBucket.getClassesNames());
-		postBucket.setCoverageScore(BotUtils.redondear(coverageScore,4));
+		postBucket.setCoverageScore(BotUtils.round(coverageScore,4));
 		
 		/*if(postBucket.getPostId().equals(1555349)) {
 			System.out.println("here");
 		}*/
 		
 		double codeScore = calculateCodeSizeScore(postBucket.getCodes());
-		postBucket.setCodeSizeScore(BotUtils.redondear(codeScore,4));
+		postBucket.setCodeSizeScore(BotUtils.round(codeScore,4));
 		
 		double repScore = calculateRepScore(postBucket.getUserReputation());
-		postBucket.setRepScore(BotUtils.redondear(repScore,4));
+		postBucket.setRepScore(BotUtils.round(repScore,4));
 		
 		double upScore = calculateUpScore(postBucket.getPostScore());
-		postBucket.setUpScore(BotUtils.redondear(upScore,4));
+		postBucket.setUpScore(BotUtils.round(upScore,4));
 	}
 	
 	

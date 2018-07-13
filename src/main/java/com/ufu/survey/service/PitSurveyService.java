@@ -141,9 +141,9 @@ public class PitSurveyService extends AbstractService{
 		 */
 		initTime = System.currentTimeMillis();
 		Integer maxRankSize=null;
-		if(phaseNumber.equals(1) || phaseNumber.equals(3)) {
+		if(phaseNumber.equals(1) || phaseNumber.equals(2) || phaseNumber.equals(4)) {
 			maxRankSize = internalSurveyRankListSize;
-		}else if(phaseNumber.equals(4)) {
+		}else if(phaseNumber.equals(7)) {
 			maxRankSize = externalSurveyRankListSize;
 		}
 		
@@ -165,7 +165,7 @@ public class PitSurveyService extends AbstractService{
 	private Set<Bucket> step7(ExternalQuestion nextQuestion, Set<SoThread> allThreads, Bucket mainBucket) throws Exception {
 		
 		List<String> apis = new ArrayList<String>(Arrays.asList(nextQuestion.getClasses().split(" ")));
-		
+		apis.remove("");
 		//Main bucket
 		String presentingBody = botUtils.buildPresentationBody(nextQuestion.getGoogleQuery(),true);
 		
@@ -199,7 +199,7 @@ public class PitSurveyService extends AbstractService{
 		mainBucket.setProcessedBodyStemmedStopped(processedBodyStopped);
 		
 		//logger.info("Main bucket: "+mainBucket);
-		logger.info("Main bucket: "+mainBucket.getProcessedBodyStemmedStopped()+ " - classes: "+mainBucket.getClassesNames());
+		//logger.info("Main bucket: "+mainBucket.getProcessedBodyStemmedStopped()+ " - classes: "+mainBucket.getClassesNames());
 		
 		//Remaining buckets
 		Set<Bucket> buckets = new LinkedHashSet<>();
@@ -208,6 +208,12 @@ public class PitSurveyService extends AbstractService{
 			
 			List<Post> answers = thread.getAnswers();
 			for(Post answer: answers) {
+				boolean containCode = BotUtils.containCode(answer.getBody());
+				if(!containCode) {
+					//logger.info("Disconsidering in step 7 answer without code: "+answer.getId()+ " - "+answer.getBody());
+					continue;
+				}
+				
 				Bucket bucket = buildAnswerPostBucket(answer);
 				buckets.add(bucket);
 				
@@ -235,7 +241,7 @@ public class PitSurveyService extends AbstractService{
 
 	
 
-	private List<Bucket> step8(Set<Bucket> buckets, Bucket mainBucket) {
+	public List<Bucket> step8(Set<Bucket> buckets, Bucket mainBucket) {
 		List<Bucket> bucketsList = new ArrayList<>(buckets);
 		
 		/*
@@ -257,7 +263,6 @@ public class PitSurveyService extends AbstractService{
 		HashMap<String, Double> tfIdfOtherBucket;
 		
 		int pos = 0;
-		
 		
 		for(Map<String, Double> tfsMap: tfs){
 			tfIdfOtherBucket = (HashMap)TfIdf.tfIdf(tfsMap, idfAll);
@@ -282,7 +287,7 @@ public class PitSurveyService extends AbstractService{
 		int pos=0;
 		for(Bucket bucket: rankedBuckets){
 			//logger.info("Rank: "+(pos+1)+ " total Score: "+bucket.getComposedScore() +" - cosine: "+bucket.getCosSim()+ " - coverageScore: "+bucket.getCoverageScore()+ " - codeSizeScore: "+bucket.getCodeSizeScore() +" - repScore: "+bucket.getRepScore()+ " - upScore: "+bucket.getUpScore()+ " - id: "+bucket.getPostId()+ " \n "+bucket.getPresentingBody());
-			logger.info("Rank: "+(pos+1)+ " total Score: "+bucket.getComposedScore() +" - cosine: "+bucket.getCosSim()+ " - coverageScore: "+bucket.getCoverageScore()+ " - codeSizeScore: "+bucket.getCodeSizeScore() +" - repScore: "+bucket.getRepScore()+ " - upScore: "+bucket.getUpScore()+ " - id: "+bucket.getPostId());
+			//logger.info("Rank: "+(pos+1)+ " total Score: "+bucket.getComposedScore() +" - cosine: "+bucket.getCosSim()+ " - coverageScore: "+bucket.getCoverageScore()+ " - codeSizeScore: "+bucket.getCodeSizeScore() +" - repScore: "+bucket.getRepScore()+ " - upScore: "+bucket.getUpScore()+ " - id: "+bucket.getPostId());
 			//botUtils.buildOutPutFile(bucket,pos+1,googleQuery,rackApis);
 			trimmedRankedBuckets.add(bucket);
 			pos++;
@@ -290,6 +295,7 @@ public class PitSurveyService extends AbstractService{
 				break;
 			}
 		}
+		rankedBuckets= null;
 		return trimmedRankedBuckets;
 		
 	}

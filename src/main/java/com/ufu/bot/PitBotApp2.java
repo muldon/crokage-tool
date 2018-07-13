@@ -149,7 +149,7 @@ public class PitBotApp2 {
 	private Double avgReputation;
 	
 	
-	int countRecoveredPostsFromLinks;
+	
 	
 	
 	@PostConstruct
@@ -180,7 +180,7 @@ public class PitBotApp2 {
 		switch (phaseNumber) {
 		case 1:
 			initTime = System.currentTimeMillis();
-			runPhase1();
+			runPhase1or4();
 			botUtils.reportElapsedTime(initTime," runPhase1 ");
 			break;
 		case 2:
@@ -194,7 +194,7 @@ public class PitBotApp2 {
 			break;
 		case 4:
 			initTime = System.currentTimeMillis();
-			runPhase4();
+			runPhase1or4();
 			botUtils.reportElapsedTime(initTime," runPhase1 ");
 			break;
 		case 5:
@@ -205,6 +205,16 @@ public class PitBotApp2 {
 			runPhase6();
 			botUtils.reportElapsedTime(initTime," runPhase6 ");
 			break;
+		case 7:
+			initTime = System.currentTimeMillis();
+			runPhase7();
+			botUtils.reportElapsedTime(initTime," runPhase6 ");
+			break;
+		case 8:
+			initTime = System.currentTimeMillis();
+			runPhase8();
+			botUtils.reportElapsedTime(initTime," runPhase6 ");
+			break;	
 		default:
 			break;
 		}
@@ -217,10 +227,10 @@ public class PitBotApp2 {
 
 
 
-	private void runPhase1() throws Exception {
+	private void runPhase1or4() throws Exception {
 		/*
 		 * Step 1: Question in Natural Language
-		 * Read queries from a text file and insert into a list
+		 * Read queries from a text file and insert into a list. Only 20%.
 		 */	
 		step1();
 				
@@ -288,10 +298,6 @@ public class PitBotApp2 {
 
 
 
-	private void runPhase4() {
-		// TODO Auto-generated method stub
-		
-	}
 
 	private void runPhase5() {
 		// TODO Auto-generated method stub
@@ -304,12 +310,21 @@ public class PitBotApp2 {
 		// TODO Auto-generated method stub
 		
 	}
+	
+	private void runPhase7() {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	private void runPhase8() {
+		// TODO Auto-generated method stub
+		
+	}
 
 	
 	private void step1() throws Exception {
 		
 		externalQuestions = botUtils.readExternalQuestionsAndAnswers(runRack,obs);
-			
 	
 	}
 
@@ -439,7 +454,7 @@ public class PitBotApp2 {
 			        //.site("https://stackoverflow.com")
 			SearchResult result = googleWebSearch.search(searchQuery,useProxy);
 			List<String> urls = result.getUrls();
-			identifyQuestionsIdsFromUrls(urls,soQuestionsIds);
+			BotUtils.identifyQuestionsIdsFromUrls(urls,soQuestionsIds);
 						
 		} catch (Exception e) {
 			System.out.println("Error ... "+e);
@@ -550,10 +565,10 @@ public class PitBotApp2 {
 		logger.info("Number of texts to extract links from: "+textsToVerify.size());
 		for(String text: textsToVerify) {
 			List<String> links = botUtils.getCodeValues(BotUtils.LINK_PATTERN, text);
-			identifyQuestionsIdsFromUrls(links, soQuestionsIdsInsideTexts);
+			BotUtils.identifyQuestionsIdsFromUrls(links, soQuestionsIdsInsideTexts);
 			
 		}
-		logger.info("Number of recovered questions from URLs: "+countRecoveredPostsFromLinks);
+		logger.info("Number of recovered questions from URLs: "+soQuestionsIdsInsideTexts.size());
 		
 		logger.info("Number of questions ids identified inside links: "+soQuestionsIdsInsideTexts.size());
 		
@@ -685,24 +700,7 @@ public class PitBotApp2 {
 
 
 	
-	private void identifyQuestionsIdsFromUrls(List<String> urls, Set<Integer> soQuestionsIds) {
-		for(String url: urls){
-			if(!url.contains("stackoverflow.com")) {
-				//logger.info("Discarting URL because its is not a SO url: "+url);
-				continue;
-			}
-			//String[] urlPart = url.split("\\/[[:digit:]].*\\/");
-			Pattern pattern = Pattern.compile("\\/([\\d]+)");
-			Matcher matcher = pattern.matcher(url);
-			if (matcher.find()) {
-				soQuestionsIds.add(new Integer(matcher.group(1)));
-				countRecoveredPostsFromLinks++;
-			}
-			//System.out.println(url);
-			
-		}
-		
-	}    
+	
 	
 	
 	

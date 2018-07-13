@@ -1,6 +1,7 @@
 package com.ufu.bot.util;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -118,6 +119,7 @@ public abstract class AbstractService {
 			botUtils.storeParentPostInCache(post);
 			
 			List<Post> answers = findUpVotedAnswersByQuestionId(post.getId());
+			List<Post> validAnswers = new ArrayList<Post>();
 			
 			for(Post answer: answers) {
 				if(answer.getScore()<1) {
@@ -126,6 +128,18 @@ public abstract class AbstractService {
 				if(answer.getOwnerUserId()!=null) {
 					answer.setUser(findUserById(answer.getOwnerUserId()));
 				}
+				boolean containCode = BotUtils.containCode(answer.getBody());
+				boolean containLink = BotUtils.testContainLinkToSo(answer.getBody());
+				if(!containCode) {
+					if(!containLink) {
+						logger.info("Disconsidering post without any post and without any link :"+answer.getId());
+						continue;    //disconsider posts without any code and without any link to another post
+					}else {
+						logger.info("Answer has no code, but has link and will be cut off later in step 7."+answer.getId());
+					}
+					
+				}
+				
 				List<Comment> answerComments = getCommentsByPostId(answer.getId());
 				setCommentsUsers(answerComments);
 				answer.setComments(answerComments);
@@ -139,12 +153,14 @@ public abstract class AbstractService {
 					answer.setRelationTypeId(relationTypeId);
 				}
 				botUtils.storeAnswerPostInCache(answer);
-				//allAnwersIds.add(answer.getId());
+				validAnswers.add(answer);
 			}
 			
+			if(!validAnswers.isEmpty()) {
+				SoThread soThread = new SoThread(post,validAnswers);
+				threads.add(soThread);
+			}
 			
-			SoThread soThread = new SoThread(post,answers);
-			threads.add(soThread);
 			
 		}
 		

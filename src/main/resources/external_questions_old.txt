@@ -1,13 +1,11 @@
 Questions whose answers must contain code.
 
 
-33 questions from: https://kodejava.org.  randomly considered from several categories, only odd pages.
+50 questions from: https://kodejava.org.  randomly considered from several categories, only odd pages.
 
-33 questions https://beginnersbook.com/2017/09/java-examples/
-
-33 questions from: www.java2s.com/Tutorial/Java/CatalogJava.htm. randomly considered from several categories.
+50 questions from: www.java2s.com/Tutorial/Java/CatalogJava.htm. randomly considered from several categories.
    
-
+Another one that could be used: https://beginnersbook.com/2017/09/java-examples/
 
 
 Excluded questions: 
@@ -190,342 +188,342 @@ query: How do I change number format symbols?
 link: https://kodejava.org/category/java/core-api/page/65/
 
 
-------------------site 2-------------------------------------------------------------------------------------------
-
-
 ----------------- No.34-----------------
-query: Java Program to Calculate average of numbers using Array
-link:  https://beginnersbook.com/2017/09/java-program-to-calculate-average-using-array
+query: How do I format a number as currency string?
+link: https://kodejava.org/category/java/core-api/page/67/
+
 
 
 ----------------- No.35-----------------
-query: Java Program to Check Even or Odd Number
-link:  https://beginnersbook.com/2014/02/java-program-to-check-even-or-odd-number
+query: How do I convert a Vector into an array?
+link: https://kodejava.org/category/java/core-api/page/69/
 
 
 ----------------- No.36-----------------
-query: Java Program to display first 100 prime numbers
-link:  https://beginnersbook.com/2014/01/java-program-to-display-first-n-or-first-100-prime-numbers
+query: How do I add elements into a Deque?
+link: https://kodejava.org/category/java/core-api/page/71/
+
 
 
 ----------------- No.37-----------------
-query: Java Program to check Prime Number
-link:  https://beginnersbook.com/2014/01/java-program-to-check-prime-number
+query: How do I read Vector object using Enumeration?
+link: https://kodejava.org/category/java/core-api/page/73/
 
 
 ----------------- No.38-----------------
-query: Java Program to check Leap Year
-link:  https://beginnersbook.com/2017/09/java-program-to-check-leap-year
+query: How do I create port scanner program?
+link: https://kodejava.org/category/java/core-api/page/75/
 
 
 ----------------- No.39-----------------
-query: Java Program to find ASCII value of a character
-link:  https://beginnersbook.com/2017/09/java-program-to-find-ascii-value-of-a-character
+query: How do I get peak live threads count?
+link: https://kodejava.org/category/java/core-api/page/77/
 
 
 ----------------- No.40-----------------
-query: Java Program to Multiply two Numbers
-link:  https://beginnersbook.com/2017/09/java-program-to-multiply-two-numbers
+query: How do I get system properties information?
+link: https://kodejava.org/category/java/core-api/page/79/
 
 
 ----------------- No.41-----------------
-query: Java Program to read number from Standard Input
-link:  https://beginnersbook.com/2017/09/java-program-to-read-integer-value-from-the-standard-input
+query: How do I remove some characters from a StringBuffer?
+link: https://kodejava.org/category/java/core-api/page/81/
 
 
 ----------------- No.42-----------------
-query: Java Program to Add two Numbers
-link:  https://beginnersbook.com/2017/09/java-program-to-add-two-numbers
+query: How do I trim the capacity of an ArrayList?
+link: https://kodejava.org/category/java/core-api/page/83/
 
 
 ----------------- No.43-----------------
-query: Java Program to convert decimal to hexadecimal
-link:  https://beginnersbook.com/2014/07/java-program-to-convert-decimal-to-hexadecimal
+query: How do I open a file using the default registered application?
+link: https://kodejava.org/category/java/core-api/page/85/
+
 
 
 ----------------- No.44-----------------
-query: Java Program to Convert Decimal to Binary
-link:  https://beginnersbook.com/2014/07/java-program-to-convert-decimal-to-binary
+query: How do I get printer or print service name?
+link: https://kodejava.org/category/java/core-api/page/87/
 
 
 ----------------- No.45-----------------
-query: Java Program to convert binary to Decimal
-link:  https://beginnersbook.com/2014/07/java-program-for-binary-to-decimal-conversion
+query: How do I raised a number to the power of n?
+link: https://kodejava.org/category/java/core-api/page/89/
 
 
 ----------------- No.46-----------------
-query: Java Program to Convert Decimal to Octal
-link:  https://beginnersbook.com/2014/07/java-program-for-decimal-to-octal-conversion
+query: How do I reread the content of a buffer?
+link: https://kodejava.org/category/java/core-api/page/91/
 
 
 ----------------- No.47-----------------
-query: Java Program to Get IP Address
-link:  https://beginnersbook.com/2014/07/java-program-to-get-ip-address
+query: How do I get the minimum or maximum value between two numbers?
+link: https://kodejava.org/category/java/core-api/page/93/
 
 
 ----------------- No.48-----------------
-query: Java Program to get Input From User
-link:  https://beginnersbook.com/2014/07/java-program-to-get-input-from-user
+query: How do I write data into Buffer using put method?
+link: https://kodejava.org/category/java/core-api/page/95/
 
 
 ----------------- No.49-----------------
-query: Java Program to find duplicate characters in a String
-link:  https://beginnersbook.com/2014/07/java-program-to-find-duplicate-characters-in-a-string
+query: How do I copy file using FileChannel class?
+link: https://kodejava.org/category/java/core-api/page/97/
 
 
 ----------------- No.50-----------------
-query: Java Program to generate Random Number
-link:  https://beginnersbook.com/2014/04/java-program-to-generate-random-number-example
+query: How do I sort string of numbers in ascending order?
+link: https://kodejava.org/category/java/core-api/page/99/
 
 
+------------------site 2----------------
 ----------------- No.51-----------------
-query: Java Program to print Floyd’s triangle
-link:  https://beginnersbook.com/2014/04/java-program-to-print-floyds-triangle-example
-
-
------------------ No.52-----------------
-query: Java Program to check Palindrome string using Recursion
-link:  https://beginnersbook.com/2014/01/java-program-to-check-palindrome-string-using-recursion
-
-
------------------ No.53-----------------
-query: Java Program to find Factorial of a number using Recursion
-link:  https://beginnersbook.com/2014/01/java-program-to-find-factorial-of-a-given-number-using-recursion
-
------------------ No.54-----------------
-query: Java Program to Add the elements of an Array
-link:  https://beginnersbook.com/2014/01/java-program-to-sum-the-elements-of-an-array
-
-
------------------ No.55-----------------
-query: Java Program to Calculate Area of Rectangle
-link:  https://beginnersbook.com/2014/01/java-program-to-calculate-area-of-rectangle
-
-
------------------ No.56-----------------
-query: Java Program to Calculate Area of Square
-link:  https://beginnersbook.com/2014/01/java-program-to-calculate-area-of-square
-
-
------------------ No.57-----------------
-query: Java Program to Calculate the area of Triangle
-link:  https://beginnersbook.com/2014/01/java-program-to-calculate-area-of-triangle
-
-
------------------ No.58-----------------
-query: Java Program for bubble Sort Ascending or Descending Order
-link:  https://beginnersbook.com/2014/07/java-program-for-bubble-sort-in-ascending-descending-order
-
-
------------------ No.59-----------------
-query: Java Program for Linear Search
-link:  https://beginnersbook.com/2014/04/java-program-for-linear-search-example
-
-
------------------ No.60-----------------
-query: Java Program for Binary Search
-link:  https://beginnersbook.com/2014/04/java-program-to-perform-binary-search
-
-
------------------ No.61-----------------
-query: Java Program to convert char Array to String
-link:  https://beginnersbook.com/2014/06/how-to-convert-a-char-array-to-a-string-in-java
-
-
------------------ No.62-----------------
-query: Java Program to check whether input character is vowel or consonant
-link:  https://beginnersbook.com/2017/09/java-program-to-check-vowel-and-consonant-using-switch-case
-
------------------ No.63-----------------
-query: Java Program to swap two numbers using bitwise operator
-link:  https://beginnersbook.com/2017/09/java-program-to-swap-two-numbers-using-bitwise-xor-operator
-
-
------------------ No.64-----------------
-query: Java Program to reverse words in a String
-link:  https://beginnersbook.com/2017/09/java-program-to-reverse-words-in-a-string
-
-
------------------ No.65-----------------
-query: Java Program to reverse an array
-link:  https://beginnersbook.com/2017/09/java-program-to-reverse-the-array
-
-
------------------ No.66-----------------
-query: Java Program to check Armstrong number
-link:  https://beginnersbook.com/2017/09/java-program-to-check-armstrong-number
-
-
-
-------------------site 3-----------------------------------------------------------------------------------------------
------------------ No.67-----------------
 query: To invoke an applet packaged as a JAR file
 link: http://www.java2s.com/Tutorial/Java/0020__Language/ToinvokeanappletpackagedasaJARfile.htm
 
------------------ No.68-----------------
+----------------- No.52-----------------
 query: Gets len characters from the middle of a String
 link: http://www.java2s.com/Tutorial/Java/0040__Data-Type/GetslencharactersfromthemiddleofaString.htm
 
+----------------- No.53-----------------
+query: Increment and Decrement: Demonstrate ++
+link: http://www.java2s.com/Tutorial/Java/0060__Operators/IncrementandDecrementDemonstrate.htm
 
------------------ No.69-----------------
+
+----------------- No.54-----------------
+query: Use a for-each style for loop
+link: http://www.java2s.com/Tutorial/Java/0080__Statement-Control/Useaforeachstyleforloop.htm
+
+----------------- No.55-----------------
+query: Use static import to bring sqrt() and pow() into view
+link: http://www.java2s.com/Tutorial/Java/0100__Class-Definition/Usestaticimporttobringsqrtandpowintoview.htm
+
+----------------- No.56-----------------
+query: Variables bound through ScriptEngine
+link: http://www.java2s.com/Tutorial/Java/0120__Development/VariablesboundthroughScriptEngine.htm
+
+----------------- No.57-----------------
 query: Loading a Class That Is Not on the Classpath
 link: http://www.java2s.com/Tutorial/Java/0125__Reflection/LoadingaClassThatIsNotontheClasspath.htm
 
-
------------------ No.70-----------------
+----------------- No.58-----------------
 query: Matching Line Boundaries in a Regular Expression
 link: http://www.java2s.com/Tutorial/Java/0130__Regular-Expressions/MatchingLineBoundariesinaRegularExpression.htm
 
+----------------- No.59-----------------
+query: Concurrent Modification Exception
+link: http://www.java2s.com/Tutorial/Java/0140__Collections/ConcurrentModificationException.htm
 
------------------ No.71-----------------
+----------------- No.60-----------------
 query: Stopping a Thread with interrupt()
 link:  http://www.java2s.com/Tutorial/Java/0160__Thread/StoppingaThreadwithinterrupt.htm
 
-
------------------ No.72-----------------
+----------------- No.61-----------------
 query: Write lines of text to file using a PrintWriter
 link: http://www.java2s.com/Tutorial/Java/0180__File/WritelinesoftexttofileusingaPrintWriter.htm
 
+----------------- No.62-----------------
+query: Using generic methods to print array of different types
+link: http://www.java2s.com/Tutorial/Java/0200__Generics/Usinggenericmethodstoprintarrayofdifferenttypes.htm
 
------------------ No.73-----------------
+----------------- No.63-----------------
+query: Getting Currency Symbols for Locale.US
+link: http://www.java2s.com/Tutorial/Java/0220__I18N/GettingCurrencySymbolsforLocaleUS.htm
+
+----------------- No.64-----------------
+query: Listening to Scrolling Events with a ChangeListener
+link: http://www.java2s.com/Tutorial/Java/0240__Swing/ListeningtoScrollingEventswithaChangeListener.htm
+
+----------------- No.65-----------------
 query: Listening to Component Events with a PropertyChangeListener
 link: http://www.java2s.com/Tutorial/Java/0260__Swing-Event/ListeningtoComponentEventswithaPropertyChangeListener.htm
 
-
------------------ No.74-----------------
+----------------- No.66-----------------
 query: Load an Image from a JAR file 
 link: http://www.java2s.com/Tutorial/Java/0261__2D-Graphics/LoadanImagefromaJARfile.htm
 
-
------------------ No.75-----------------
+----------------- No.67-----------------
 query: StyledText bulleted list example
 link: http://www.java2s.com/Tutorial/Java/0280__SWT/StyledTextbulletedlistexample.htm
 
+----------------- No.68-----------------
+query: Drawing multiple lines
+link: http://www.java2s.com/Tutorial/Java/0300__SWT-2D-Graphics/Drawingmultiplelines.htm
 
------------------ No.76-----------------
+----------------- No.69-----------------
 query: Converting Between a URL and a URI
 link: http://www.java2s.com/Tutorial/Java/0320__Network/ConvertingBetweenaURLandaURI.htm
 
-
------------------ No.77-----------------
+----------------- No.70-----------------
 query: Call a procedure with one IN/OUT parameter
 link:  http://www.java2s.com/Tutorial/Java/0340__Database/CallaprocedurewithoneINOUTparameter.htm
 
 
------------------ No.78-----------------
+----------------- No.71-----------------
 query: HSQL Delete With Parameter
 link: http://www.java2s.com/Tutorial/Java/0350__Hibernate/HSQLDeleteWithParameter.htm
 
+----------------- No.72-----------------
+query: Many To One Set Join Column Name
+link: http://www.java2s.com/Tutorial/Java/0355__JPA/ManyToOneSetJoinColumnName.htm
 
+----------------- No.73-----------------
+query: Get Form Button Value
+link: http://www.java2s.com/Tutorial/Java/0360__JSP/GetFormButtonValue.htm
 
------------------ No.79-----------------
+----------------- No.74-----------------
+query: Set Variable to Page Context
+link: http://www.java2s.com/Tutorial/Java/0380__JSTL/SetVariabletoPageContext.htm
+
+----------------- No.75-----------------
+query: Get Servlet OutputStream from Servlet Response
+link: http://www.java2s.com/Tutorial/Java/0400__Servlet/GetServletOutputStreamfromServletResponse.htm
+
+----------------- No.76-----------------
+query: Processing a SOAP Message
+link: http://www.java2s.com/Tutorial/Java/0410__Web-Services-SOA/ProcessingaSOAPMessage.htm
+
+----------------- No.77-----------------
+query: Use JDBC In EJB
+link: http://www.java2s.com/Tutorial/Java/0415__EJB3/UseJDBCInEJB.htm
+
+----------------- No.78-----------------
 query: Use Jdbc Template To Create Table
 link: http://www.java2s.com/Tutorial/Java/0417__Spring/UseJdbcTemplateToCreateTable.htm
 
-
-
------------------ No.80-----------------
+----------------- No.79-----------------
 query: Output to console with PdfWriter
 link: http://www.java2s.com/Tutorial/Java/0419__PDF/OutputtoconsolewithPdfWriter.htm
 
-
------------------ No.81-----------------
+----------------- No.80-----------------
 query: Get Attachment File Name
 link:  http://www.java2s.com/Tutorial/Java/0420__Email/GetAttachmentFileName.htm
 
-
------------------ No.82-----------------
+----------------- No.81-----------------
 query: Create Image from PNG image 
 link: http://www.java2s.com/Tutorial/Java/0430__J2ME/CreateImagefromPNGimage.htm
 
+----------------- No.82-----------------
+query: returns a NamingEnumeration of people
+link: http://www.java2s.com/Tutorial/Java/0440__J2EE-Application/returnsaNamingEnumerationofpeople.htm
 
 ----------------- No.83-----------------
 query: Writing a DOM Document to an XML File
 link: http://www.java2s.com/Tutorial/Java/0440__XML/WritingaDOMDocumenttoanXMLFile.htm
 
-
 ----------------- No.84-----------------
+query: HTTPS Server using the JSSE 
+link: http://www.java2s.com/Tutorial/Java/0490__Security/HTTPSServerusingtheJSSE.htm
+
+----------------- No.85-----------------
 query: Logging a Method Call
 link: http://www.java2s.com/Tutorial/Java/0480__Log/LoggingaMethodCall.htm
 
+----------------- No.86-----------------
+query: Date UTC Format
+link: http://www.java2s.com/Tutorial/Java/0500__Apache-Common/DateUTCFormat.htm
 
-
------------------ No.85-----------------
+----------------- No.87-----------------
 query: Ant task delete tree
 link: http://www.java2s.com/Tutorial/Java/0520__Ant/0100__File-Directory.htm
 
+----------------- No.88-----------------
+query: Use assertEquals in a test method
+link: http://www.java2s.com/Tutorial/Java/0540__JUnit/UseassertEqualsinatestmethod.htm
 
------------------ No.86-----------------
+----------------- No.89-----------------
+query: A simple static factory method
+link: http://www.java2s.com/Tutorial/Java/0460__Design-Pattern/Asimplestaticfactorymethod.htm
+
+----------------- No.90-----------------
 query: Subtract from one BigDecimal another BigDecimal
 link:  http://www.java2s.com/Tutorial/Java/0040__Data-Type/SubtractfromoneBigDecimalanotherBigDecimal.htm
 
-
------------------ No.87-----------------
+----------------- No.91-----------------
 query: Generating Random integer Numbers
 link: http://www.java2s.com/Tutorial/Java/0120__Development/GeneratingRandomintegerNumbers.htm
 
+----------------- No.92-----------------
+query: Handling an Assertion Error
+link: http://www.java2s.com/Tutorial/Java/0120__Development/HandlinganAssertionError.htm
 
------------------ No.88-----------------
+----------------- No.93-----------------
+query: Create a Matcher from Pattern 
+link: http://www.java2s.com/Tutorial/Java/0130__Regular-Expressions/CreateaMatcherfromPattern.htm
+
+----------------- No.94-----------------
 query: Find maximum element of ArrayList
 link: http://www.java2s.com/Tutorial/Java/0140__Collections/FindmaximumelementofArrayList.htm
 
+----------------- No.95-----------------
+query: Sort on many(more than one) fields
+link: http://www.java2s.com/Tutorial/Java/0140__Collections/Sortonmanymorethanonefields.htm
 
-
------------------ No.89-----------------
+----------------- No.96-----------------
 query: Get Synchronized Set from TreeSet
 link: http://www.java2s.com/Tutorial/Java/0140__Collections/GetSynchronizedSetfromTreeSet.htm
 
-
------------------ No.90-----------------
+----------------- No.97-----------------
 query: Use FileOutputStream to write the bytes to a file
 link: http://www.java2s.com/Tutorial/Java/0180__File/UseFileOutputStreamtowritethebytestoafile.htm
 
-
------------------ No.91-----------------
+----------------- No.98-----------------
 query: Builds a bracketed CSV list from the array
 link: http://www.java2s.com/Tutorial/Java/0180__File/BuildsabracketedCSVlistfromthearray.htm
 
-
------------------ No.92-----------------
+----------------- No.99-----------------
 query: Using JPanel as a canvas
 link: http://www.java2s.com/Tutorial/Java/0240__Swing/UsingJPanelasacanvas.htm
 
-
------------------ No.93-----------------
+----------------- No.100-----------------
 query: Limit JTextField input to a maximum length
 link:  http://www.java2s.com/Tutorial/Java/0260__Swing-Event/LimitJTextFieldinputtoamaximumlength.htm
 
-
------------------ No.94-----------------
+----------------- No.101-----------------
 query: Detect Proxy Settings for Internet Connection
 link: http://www.java2s.com/Tutorial/Java/0320__Network/DetectProxySettingsforInternetConnection.htm
 
+----------------- No.102-----------------
+query: Look up DataSource from InitialContext
+link: http://www.java2s.com/Tutorial/Java/0340__Database/LookupDataSourcefromInitialContext.htm
 
------------------ No.95-----------------
-query: Decompress a zip file using ZipFile
-link: http://www.java2s.com/Tutorial/Java/0180__File/DecompressazipfileusingZipFile.htm
+----------------- No.103-----------------
+query: HSQL Order By Ascending Order
+link: http://www.java2s.com/Tutorial/Java/0350__Hibernate/HSQLOrderByAscendingOrder.htm
 
+----------------- No.104-----------------
+query: Transient Field Not Persisted
+link: http://www.java2s.com/Tutorial/Java/0355__JPA/TransientFieldNotPersisted.htm
 
+----------------- No.105-----------------
+query: Perform Binary Search on ArrayList
+link: http://www.java2s.com/Tutorial/Java/0140__Collections/PerformBinarySearchonArrayList.htm
 
------------------ No.96-----------------
-query: Detect non-ASCII characters in string
-link: http://www.java2s.com/Tutorial/Java/0220__I18N/DetectnonASCIIcharactersinstring.htm
-
-
-
------------------ No.97-----------------
-query: Copy selected text from one text area to another
-link: http://www.java2s.com/Tutorial/Java/0240__Swing/Copyselectedtextfromonetextareatoanother.htm
-
-
------------------ No.98-----------------
+----------------- No.106-----------------
 query: Wrap FileWriter with BufferedWriter
 link: http://www.java2s.com/Tutorial/Java/0180__File/WrapFileWriterwithBufferedWriter.htm
 
+----------------- No.107-----------------
+query: Decompress a zip file using ZipFile
+link: http://www.java2s.com/Tutorial/Java/0180__File/DecompressazipfileusingZipFile.htm
+
+----------------- No.108-----------------
+query: Detect non-ASCII characters in string
+link: http://www.java2s.com/Tutorial/Java/0220__I18N/DetectnonASCIIcharactersinstring.htm
+
+----------------- No.109-----------------
+query: Copy selected text from one text area to another
+link: http://www.java2s.com/Tutorial/Java/0240__Swing/Copyselectedtextfromonetextareatoanother.htm
+
+----------------- No.110-----------------
+query: Create Socket by IP address and port number
+link:  http://www.java2s.com/Tutorial/Java/0320__Network/CreateSocketbyIPaddressandportnumber.htm
 
 
------------------ No.99-----------------
-query: HSQL Order By Ascending Order
-link: http://www.java2s.com/Tutorial/Java/0350__Hibernate/HSQLOrderByAscendingOrder.htm
+
+
+
+
+
 
 

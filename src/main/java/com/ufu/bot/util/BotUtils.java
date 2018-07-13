@@ -68,6 +68,7 @@ public class BotUtils {
 	private AttributeFactory factory;
 	private static StandardTokenizer standardTokenizer;
 	private Boolean configsInitialized = false;
+	private int countRecoveredPostsFromLinks=0;
 	private static long endTime;
 	private static Map<Integer, Set<Integer>> bucketDuplicatiosMap;
 	//private Set<Integer> allDuplicatedQuestionsIds;
@@ -77,6 +78,9 @@ public class BotUtils {
 	private Map<Integer,Post> answerPostsCache;
 	
 
+	@Value("${phaseNumber}")
+	public Integer phaseNumber; 
+	
 	@Autowired
 	private CosineSimilarity cs1;
 	
@@ -121,6 +125,8 @@ public class BotUtils {
 	public static final String CLASSES_CAMEL_CASE_REGEX_EXPRESSION = "\\b[A-Z][a-z]*([A-Z][a-z]*)*\\b";
 	
 	public static final String DOUBLE_QUOTES_REGEX_EXPRESSION = "\"(.*?)\"";
+	
+	public static final String NUMBERS_REGEX_EXPRESSION = "([\\d]+)";
 		
 	
 	public static final String keywords[] = { "abstract", "assert", "boolean",
@@ -179,7 +185,7 @@ public class BotUtils {
 	}
 	
 	
-	 public static double redondear(double pNumero, int pCantidadDecimales) {
+	 public static double round(double pNumero, int pCantidadDecimales) {
 	    // the function is call with the values Redondear(625.3f, 2)
 	    BigDecimal value = new BigDecimal(pNumero);
 	    value = value.setScale(pCantidadDecimales, RoundingMode.HALF_EVEN); // here the value is correct (625.30)
@@ -288,7 +294,7 @@ public class BotUtils {
 	}
 	
 
-	public List<String> getPreCodes(String presentingBody) {
+	public static List<String> getPreCodes(String presentingBody) {
 		//String codeContent = "";
 		List<String> codes = getCodeValues(PRE_CODE_PATTERN, presentingBody);
 		//int i=0;
@@ -301,7 +307,7 @@ public class BotUtils {
 		return codes;
 	}
 	
-	public List<String> getSimpleCodes(String presentingBody) {
+	public static List<String> getSimpleCodes(String presentingBody) {
 		//first remove pre codes
 		
 		presentingBody = presentingBody.replaceAll(PRE_CODE_REGEX_EXPRESSION, " ");
@@ -985,34 +991,61 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 		List<String> lines = IOUtils.readLines(new StringReader(fileContent));
 		
 		Iterator it = lines.iterator();
-		int id=1;
+		//int externalId=1;
+		Integer externalId=0;
 		
 		while(it.hasNext()){
-			String queryLine = (String)it.next();
-			if(queryLine.startsWith("query:")) {
-				queryLine= queryLine.replace("query:", "").trim();
-				//System.out.println(queryLine);
+			String numberLine = (String)it.next();
+			
+			if(numberLine.startsWith("----------------- No.")) {
+				Pattern pattern = Pattern.compile(BotUtils.NUMBERS_REGEX_EXPRESSION);
+				Matcher matcher = pattern.matcher(numberLine);
+				while (matcher.find()) {
+					externalId = new Integer(matcher.group(0));
+				}
 				
 				if(!it.hasNext()) {
-					logger.error("Error when reading link from query: "+queryLine);
-				}else {
-					String linkLine = (String)it.next();
-					if(linkLine.startsWith("link:")) {
-						linkLine= linkLine.replace("link:", "").trim();
-						//System.out.println(linkLine);
-						ExternalQuestion externalQuestion = new ExternalQuestion(id,queryLine,null,null,runRack,obs,linkLine);
-						externalQuestionAnswers.add(externalQuestion);
-						id++;
+					logger.error("Error when reading query from file: ");
+				}	
+				String queryLine = (String)it.next();
+			
+				if(queryLine.startsWith("query:")) {
+					queryLine= queryLine.replace("query:", "").trim();
+					//System.out.println(queryLine);
+					
+					if(!it.hasNext()) {
+						logger.error("Error when reading link from query: "+queryLine);
+					}else {
+						String linkLine = (String)it.next();
+						if(linkLine.startsWith("link:")) {
+							linkLine= linkLine.replace("link:", "").trim();
+							
+							if(phaseNumber==1) {  //1/3 of questions, 11 questions from each site 
+							
+								if(externalId<=11 || (externalId>=34 && externalId<=44) || (externalId>=67 && externalId<=77)) {
+									ExternalQuestion externalQuestion = new ExternalQuestion(externalId,queryLine,null,null,runRack,obs,linkLine);
+									externalQuestionAnswers.add(externalQuestion);
+								}
+								
+							}else if(phaseNumber==4) {  //80% of questions, 40% from each site
+								
+								if(externalId>11 && (externalId<34 || externalId>44) && (externalId<67 || externalId>77)) {
+									ExternalQuestion externalQuestion = new ExternalQuestion(externalId,queryLine,null,null,runRack,obs,linkLine);
+									externalQuestionAnswers.add(externalQuestion);
+								}
+							}
+							
+							//externalId++;
+						}
+						
 					}
 					
 				}
-				
-				
-				
 			}
-			
-			
 		}
+		
+		
+		
 		
 		/*for(int i=0; i<100; i++){
 			url = Resources.getResource(i+".txt");
@@ -1066,9 +1099,42 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 	}
 
 
+	public static boolean containCode(String another7Code) {
+		List<String> preCodes = getPreCodes(another7Code);
+		List<String> simpleCodes = getSimpleCodes(another7Code);
+		
+		return (!preCodes.isEmpty() || !simpleCodes.isEmpty()); 
+		
+	}
+
 	
 
+	public static boolean testContainLinkToSo(String text) {
+		Set<Integer> soQuestionsIdsInsideTexts = new HashSet<>();
+		List<String> links = getCodeValues(BotUtils.LINK_PATTERN, text);
+		identifyQuestionsIdsFromUrls(links, soQuestionsIdsInsideTexts);
+		return !soQuestionsIdsInsideTexts.isEmpty();
+	}
 
+
+	public static void identifyQuestionsIdsFromUrls(List<String> urls, Set<Integer> soQuestionsIds) {
+		for(String url: urls){
+			if(!url.contains("stackoverflow.com")) {
+				//logger.info("Discarting URL because its is not a SO url: "+url);
+				continue;
+			}
+			//String[] urlPart = url.split("\\/[[:digit:]].*\\/");
+			Pattern pattern = Pattern.compile("\\/([\\d]+)");
+			Matcher matcher = pattern.matcher(url);
+			if (matcher.find()) {
+				soQuestionsIds.add(new Integer(matcher.group(1)));
+				
+			}
+			//System.out.println(url);
+			
+		}
+		
+	}    
 	
 	
 	

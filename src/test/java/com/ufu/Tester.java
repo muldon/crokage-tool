@@ -4,10 +4,15 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.concurrent.ThreadLocalRandom;
@@ -22,11 +27,16 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import com.google.common.base.Charsets;
+import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 import com.ufu.bot.PitBotApp2;
+import com.ufu.bot.tfidf.TfIdf;
+import com.ufu.bot.tfidf.ngram.NgramTfIdf;
 import com.ufu.bot.to.Bucket;
 import com.ufu.bot.to.Post;
+import com.ufu.bot.util.BotComposer;
 import com.ufu.bot.util.BotUtils;
+import com.ufu.survey.service.PitSurveyService;
 
 public class Tester {
 
@@ -461,7 +471,7 @@ public class Tester {
 		
 		//testGetClassesNames();
 		String input = "How to Convert Iterator to ArrayList? a two man he He is the what";
-		String removed = botUtils.removeStopWords(input);
+		//String removed = botUtils.removeStopWords(input);
 		//System.out.println(removed);
 		
 		//testStep8();
@@ -481,10 +491,42 @@ public class Tester {
 		
 		//testReadAnswerBotQuestions();
 		
-		testRandom();
+		//testRandom();
+		
+		
+		//testContainCode(text2);
+		//testContainLinkToSo(linkBlockquoteCode);
+		//testRemoveEmptyElementFromList();
+		testFindExternalQuestionNumber();
 	}
 	
 	
+
+	private void testRemoveEmptyElementFromList() {
+		List<String> strs = new ArrayList<>();
+		strs.add("");
+		strs.remove("");
+		System.out.println(strs);
+	}
+
+
+
+	private void testContainLinkToSo(String text) {
+		boolean contain = BotUtils.testContainLinkToSo(text);
+		System.out.println(contain);
+		
+	}
+
+
+
+	private void testContainCode(String another7Code) {
+		// TODO Auto-generated method stub
+		boolean containCode = BotUtils.containCode(another7Code);
+		System.out.println(containCode);
+		
+	}
+
+
 
 	private void testRandom() {
 		for(int i=0; i<20; i++) {
@@ -594,15 +636,17 @@ public class Tester {
 		URL url;
 		String text1,text2,text3,text4,text5,text6,text7,text8,text9,text10;
 		
+		//String[] fileNames = {"ds_2012"};
 		String[] fileNames = {"ds_2012","ds_2013","ds_2014","ds_2015","ds_CDS","ds_IBM","hp-cs.txt","hp-dh.txt","huck-finn.txt","les-mis.txt","50-shades.txt"};
 		
 		Set<Bucket> buckets = new LinkedHashSet<>();
 		Bucket main = new Bucket();
 		main.setPostId(0);
 		//main.setProcessedBodyStemmedStopped("how it fits into the larger picture of an organization, explains IBM’s Jeff Jonas, distinguished");
-		main.setProcessedBodyStemmedStopped("anyone anywhere at no cost and with almost no restrictions whatsoevermay give copy it, it away you or re-use CHAPTER II. The Boys Escape Jim CHAPTER VIII. Sleeping in the Woods");
+		main.setProcessedBodyStemmedStopped("data analyst may look only at data from a single source scientist represents an evolution from the business");
 		
-		PitBotApp2 app = new PitBotApp2();
+		//PitBotApp2 app = new PitBotApp2();
+		PitSurveyService pitSurveyService = new PitSurveyService();
 		//app.setMainBucket(main);
 		
 		for(int i=0; i<fileNames.length; i++){
@@ -615,9 +659,65 @@ public class Tester {
 		}
 		
 		
-		//app.step8(buckets);
+		List<Bucket> rankedBuckets = step8(buckets,main);
+		showBucketsOrderByCosineDesc(rankedBuckets);
+	}
+	
+	
+	public List<Bucket> step8(Set<Bucket> buckets, Bucket mainBucket) {
+		List<Bucket> bucketsList = new ArrayList<>(buckets);
+		
+		/*
+		 * Calculate tfidf for all terms
+		 */
+		List<String> bucketsTexts = new ArrayList<>();
+		bucketsTexts.add(mainBucket.getProcessedBodyStemmedStopped());
+		for(Bucket bucket: buckets){
+			bucketsTexts.add(bucket.getProcessedBodyStemmedStopped());
+		}
+		
+		List<Collection<String>> documents =  Lists.newArrayList(NgramTfIdf.ngramDocumentTerms(Lists.newArrayList(1,2,3), bucketsTexts));
+		List<Map<String, Double>> tfs = Lists.newArrayList(TfIdf.tfs(documents));
+		Map<String, Double> idfAll = TfIdf.idfFromTfs(tfs);
+		
+		Map<String,Double> tfsMainBucket = tfs.remove(0);
+		HashMap<String, Double> tfIdfMainBucket = (HashMap)TfIdf.tfIdf(tfsMainBucket, idfAll);
+		//buckets.remove(buckets.iterator().next());
+		HashMap<String, Double> tfIdfOtherBucket;
+		
+		int pos = 0;
+		
+		for(Map<String, Double> tfsMap: tfs){
+			tfIdfOtherBucket = (HashMap)TfIdf.tfIdf(tfsMap, idfAll);
+			Bucket postBucket = bucketsList.get(pos);
+			double cosine = BotComposer.cosineSimilarity(tfIdfMainBucket, tfIdfOtherBucket);
+			postBucket.setCosSim(BotUtils.round(cosine,4));
+			pos++;
+		}
+				
+		
+       return bucketsList;
+	}
+
+	
+	
+	private void showBucketsOrderByCosineDesc(List<Bucket> bucketsList) {
+		Collections.sort(bucketsList, new Comparator<Bucket>() {
+		    public int compare(Bucket o1, Bucket o2) {
+		        return o2.getCosSim().compareTo(o1.getCosSim());
+		    }
+		});
+		int pos=1;
+		for(Bucket bucket: bucketsList){
+			System.out.print("Rank: "+(pos)+ " cosine: "+bucket.getCosSim()+" id: "+bucket.getPostId()+ " -\n "+bucket.getPresentingBody());
+			pos++;
+			if(pos>10){
+				break;
+			}
+		}
 		
 	}
+	
 	
 	
 	private void readAnswerBotQuestionsAndAnswers() throws IOException {
@@ -787,5 +887,19 @@ public class Tester {
 		}
 		
 	}    
+	
+	
+	private void testFindExternalQuestionNumber() {
+		
+		String regex = "([\\d]+)";
+		
+		Pattern pattern = Pattern.compile(regex);
+		Matcher matcher = pattern.matcher("----------------- No.812 -----------------");
+		while (matcher.find()) {
+			System.out.println(matcher.group(0));
+		}
+		
+
+	}
 	
 }
