@@ -35,6 +35,9 @@ public class Evaluation {
 	@Column(name="ratingdate")
 	private Timestamp ratingDate;
 	
+	@Column(name="phase")	
+	private Integer phase;
+	
 	
 	@Transient
 	private List<Integer> ratings;
@@ -156,12 +159,13 @@ public class Evaluation {
 	}
 
 
-	public Evaluation(Integer rankId, Integer surveyUserId, Integer likertScale, Timestamp ratingDate) {
+	public Evaluation(Integer rankId, Integer surveyUserId, Integer likertScale, Timestamp ratingDate, Integer phase) {
 		super();
 		this.rankId = rankId;
 		this.surveyUserId = surveyUserId;
 		this.likertScale = likertScale;
 		this.ratingDate = ratingDate;
+		this.phase = phase;
 	}
 
 
@@ -177,6 +181,16 @@ public class Evaluation {
 
 	public void setExternalQuestionId(Integer externalQuestionId) {
 		this.externalQuestionId = externalQuestionId;
+	}
+
+
+	public Integer getPhase() {
+		return phase;
+	}
+
+
+	public void setPhase(Integer phase) {
+		this.phase = phase;
 	}
 
 	

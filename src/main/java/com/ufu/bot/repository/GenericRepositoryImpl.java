@@ -166,13 +166,14 @@ public class GenericRepositoryImpl implements GenericRepository {
 
 
 	@Override
-	public List<Post> findRankedList(Integer externalQuestionId, boolean isInternalSurveyUser) {
+	public List<Post> findRankedList(Integer externalQuestionId, Boolean internalevaluation) {
 			
 		String sql = "select p.* " + 
-					"    from postsmin p, rank r" + 
-					"    where p.id = r.postid " + 
-					"    and r.externalquestionid = " + externalQuestionId+
-					"    and r.internalevaluation = " + isInternalSurveyUser+
+					"    from postsmin p, relatedpost rp, rank r" + 
+					"    where p.id = rp.postid " +
+					"	 and rp.id = r.relatedpostid	" +
+					"    and rp.externalquestionid = " + externalQuestionId+
+					"    and r.internalevaluation = " + internalevaluation+
 					"    order by r.rankorder";
 		
 		Query q = em.createNativeQuery(sql, Post.class);

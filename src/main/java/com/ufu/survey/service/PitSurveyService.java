@@ -270,22 +270,23 @@ public class PitSurveyService extends AbstractService{
 			botComposer.calculateScores(avgReputation, avgScore, tfIdfMainBucket, tfIdfOtherBucket, mainBucket, postBucket);
 			pos++;
 		}
-		
-		
-       
-       botComposer.rankList(bucketsList);
+		       
 		
        return bucketsList;
 	}
 
 
-	private List<Bucket> step9(List<Bucket> rankedBuckets,String googleQuery, List<String> rackApis, Integer maxRankSize) throws IOException {
+	private List<Bucket> step9(List<Bucket> bucketsList,String googleQuery, List<String> rackApis, Integer maxRankSize) throws IOException {
 		//showBucketsOrderByCosineDesc(bucketsList);
 		//showRankedList(rankedBuckets);
+
+	    botComposer.rankList(bucketsList);
+	    
+	    //now the buckets are ranked
 		List<Bucket> trimmedRankedBuckets = new ArrayList<>();
 		
 		int pos=0;
-		for(Bucket bucket: rankedBuckets){
+		for(Bucket bucket: bucketsList){
 			//logger.info("Rank: "+(pos+1)+ " total Score: "+bucket.getComposedScore() +" - cosine: "+bucket.getCosSim()+ " - coverageScore: "+bucket.getCoverageScore()+ " - codeSizeScore: "+bucket.getCodeSizeScore() +" - repScore: "+bucket.getRepScore()+ " - upScore: "+bucket.getUpScore()+ " - id: "+bucket.getPostId()+ " \n "+bucket.getPresentingBody());
 			//logger.info("Rank: "+(pos+1)+ " total Score: "+bucket.getComposedScore() +" - cosine: "+bucket.getCosSim()+ " - coverageScore: "+bucket.getCoverageScore()+ " - codeSizeScore: "+bucket.getCodeSizeScore() +" - repScore: "+bucket.getRepScore()+ " - upScore: "+bucket.getUpScore()+ " - id: "+bucket.getPostId());
 			//botUtils.buildOutPutFile(bucket,pos+1,googleQuery,rackApis);
@@ -295,7 +296,7 @@ public class PitSurveyService extends AbstractService{
 				break;
 			}
 		}
-		rankedBuckets= null;
+		bucketsList= null;
 		return trimmedRankedBuckets;
 		
 	}
@@ -551,8 +552,9 @@ public class PitSurveyService extends AbstractService{
 		boolean isInternalSurveyUser = SurveyUser.isInternalSurveyUser(evaluation.getSurveyUserId());
 		
 		for(int i=0; i<postsIds.size(); i++) { //lists have the same size
-			Rank rank = rankRepository.findByExternalQuestionIdAndPostIdAndInternalEvaluation(evaluation.getExternalQuestionId(),postsIds.get(i),isInternalSurveyUser);
-			Evaluation eval = new Evaluation(rank.getId(),evaluation.getSurveyUserId(),ratings.get(i),getCurrentDate());
+			RelatedPost relatedPost = relatedPostRepository.findByExternalQuestionIdAndPostId(evaluation.getExternalQuestionId(),postsIds.get(i));
+			Rank rank = rankRepository.findByRelatedPostIdAndInternalEvaluation(relatedPost.getId(),isInternalSurveyUser);
+			Evaluation eval = new Evaluation(rank.getId(),evaluation.getSurveyUserId(),ratings.get(i),getCurrentDate(),phaseNumber);
 			evaluationRepository.save(eval);
 		}
 		
@@ -724,10 +726,6 @@ public class PitSurveyService extends AbstractService{
 		
 	}
 
-	private Set<SoThread> assembleListOfThreads(Integer id) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 	
 	
 	

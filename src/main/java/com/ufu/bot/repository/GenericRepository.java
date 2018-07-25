@@ -25,7 +25,7 @@ public interface GenericRepository {
 
 	public Set<Integer> findRelatedQuestionsIds(Set<Integer> allQuestionsIds, Integer linkTypeId);
 
-	public List<Post> findRankedList(Integer id, boolean isInternalSurveyUser);
+	public List<Post> findRankedList(Integer id, Boolean internalevaluation);
 
 	
 	

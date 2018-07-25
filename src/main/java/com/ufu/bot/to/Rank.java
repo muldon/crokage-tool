@@ -1,8 +1,5 @@
 package com.ufu.bot.to;
 
-import java.sql.Timestamp;
-import java.util.List;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -10,7 +7,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
@@ -22,14 +18,13 @@ public class Rank {
     @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="rank_id_seq")
 	private Integer id;
 		
-	@Column(name="externalquestionid")
-	private Integer externalQuestionId;
-
-	@Column(name="postid")	
-	private Integer postId;
-	
 	@Column(name="rankorder")	
 	private Integer rankOrder;
+	
+	
+	@Column(name="relatedpostid")	
+	private Integer relatedPostId;
+	
 	
 	@Column(name="internalevaluation")	
 	private Boolean internalEvaluation;
@@ -44,28 +39,17 @@ public class Rank {
 		this.id = id;
 	}
 
-
-	public Integer getExternalQuestionId() {
-		return externalQuestionId;
-	}
-
-
-	public void setExternalQuestionId(Integer externalQuestionId) {
-		this.externalQuestionId = externalQuestionId;
-	}
-
-
-	public Integer getPostId() {
-		return postId;
-	}
-
-
-	public void setPostId(Integer postId) {
-		this.postId = postId;
-	}
-
-
 	
+
+
+	public Integer getRelatedPostId() {
+		return relatedPostId;
+	}
+
+
+	public void setRelatedPostId(Integer relatedPostId) {
+		this.relatedPostId = relatedPostId;
+	}
 
 
 	@Override
@@ -105,6 +89,20 @@ public class Rank {
 	}
 
 
+
+	public Rank() {
+		super();
+	}
+
+
+	public Rank(Integer relatedPostId, Integer rankOrder, Boolean internalEvaluation) {
+		super();
+		this.rankOrder = rankOrder;
+		this.relatedPostId = relatedPostId;
+		this.internalEvaluation = internalEvaluation;
+	}
+
+
 	public Boolean getInternalEvaluation() {
 		return internalEvaluation;
 	}
@@ -112,27 +110,6 @@ public class Rank {
 
 	public void setInternalEvaluation(Boolean internalEvaluation) {
 		this.internalEvaluation = internalEvaluation;
-	}
-
-
-	@Override
-	public String toString() {
-		return "Rank [id=" + id + ", externalQuestionId=" + externalQuestionId + ", postId=" + postId + ", rankOrder="
-				+ rankOrder + ", internalEvaluation=" + internalEvaluation + "]";
-	}
-
-
-	public Rank(Integer externalQuestionId, Integer postId, Integer rankOrder, Boolean internalEvaluation) {
-		super();
-		this.externalQuestionId = externalQuestionId;
-		this.postId = postId;
-		this.rankOrder = rankOrder;
-		this.internalEvaluation = internalEvaluation;
-	}
-
-
-	public Rank() {
-		super();
 	}
 
 

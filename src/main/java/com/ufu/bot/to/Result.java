@@ -28,8 +28,8 @@ public class Result {
 	@Column(name="minlikertscale")
 	private Integer minLikertScale;
 
-	@Column(name="internalevaluation")
-	private Boolean internalEvaluation;
+	@Column(name="evaluationphase")	
+	private Integer evaluationPhase;
 	
 	@Column(name="recallrate1")
 	private Double recallRate1;
@@ -67,13 +67,6 @@ public class Result {
 	}
 
 	
-	public Boolean getInternalEvaluation() {
-		return internalEvaluation;
-	}
-
-	public void setInternalEvaluation(Boolean internalEvaluation) {
-		this.internalEvaluation = internalEvaluation;
-	}
 
 	public Double getRecallRate1() {
 		return recallRate1;
@@ -135,17 +128,17 @@ public class Result {
 	@Override
 	public String toString() {
 		return "Result [id=" + id + ", experimentId=" + experimentId + ", obs=" + obs + ", likertScale=" + minLikertScale
-				+ ", internalEvaluation=" + internalEvaluation + ", recallRate1=" + recallRate1 + ", recallRate5="
+				+ ", evaluationPhase=" + evaluationPhase + ", recallRate1=" + recallRate1 + ", recallRate5="
 				+ recallRate5 + ", recallRate10=" + recallRate10 + ", mrr=" + mrr + "]";
 	}
 
-	public Result(Integer experimentId, String obs, Integer minLikertScale, Boolean internalEvaluation, Double recallRate1,
+	public Result(Integer experimentId, String obs, Integer minLikertScale, Integer evaluationPhase, Double recallRate1,
 			Double recallRate5, Double recallRate10, Double mrr) {
 		super();
 		this.experimentId = experimentId;
 		this.obs = obs;
 		this.minLikertScale = minLikertScale;
-		this.internalEvaluation = internalEvaluation;
+		this.evaluationPhase = evaluationPhase;
 		this.recallRate1 = recallRate1;
 		this.recallRate5 = recallRate5;
 		this.recallRate10 = recallRate10;
@@ -162,6 +155,14 @@ public class Result {
 
 	public void setMinLikertScale(Integer minLikertScale) {
 		this.minLikertScale = minLikertScale;
+	}
+
+	public Integer getEvaluationPhase() {
+		return evaluationPhase;
+	}
+
+	public void setEvaluationPhase(Integer evaluationPhase) {
+		this.evaluationPhase = evaluationPhase;
 	}
 	
 	

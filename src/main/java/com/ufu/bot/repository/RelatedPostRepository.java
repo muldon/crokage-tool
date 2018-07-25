@@ -22,6 +22,8 @@ public interface RelatedPostRepository extends CrudRepository<RelatedPost, Integ
 	List<Integer> findRelatedPostsIds(Integer externalQuestionId);
 
 	List<RelatedPost> findByExternalQuestionId(Integer externalQuestionId);
+
+	RelatedPost findByExternalQuestionIdAndPostId(Integer externalQuestionId, Integer postId);
     
 	
 

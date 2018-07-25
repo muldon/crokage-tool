@@ -1,20 +1,20 @@
-DROP SEQUENCE surveyuser_id_seq;
-DROP SEQUENCE evaluation_id_seq;
-DROP SEQUENCE experiment_id_seq;
-DROP SEQUENCE externalquestion_id_seq;
-DROP SEQUENCE relatedpost_id_seq;
+﻿DROP SEQUENCE IF EXISTS  surveyuser_id_seq;
+DROP SEQUENCE IF EXISTS  evaluation_id_seq;
+DROP SEQUENCE IF EXISTS  experiment_id_seq;
+DROP SEQUENCE IF EXISTS  externalquestion_id_seq;
+DROP SEQUENCE IF EXISTS  relatedpost_id_seq;
 --DROP SEQUENCE survey_id_seq;
-DROP SEQUENCE rank_id_seq;
+DROP SEQUENCE IF EXISTS  rank_id_seq;
 
 
-DROP TABLE result;
-DROP TABLE experiment;
-DROP TABLE evaluation;
-DROP TABLE relatedpost;
-DROP TABLE rank;
-DROP TABLE externalquestion;
---DROP TABLE survey;
-DROP TABLE surveyuser;
+DROP TABLE IF EXISTS  result;
+DROP TABLE IF EXISTS  experiment;
+DROP TABLE IF EXISTS  evaluation;
+DROP TABLE IF EXISTS  rank;
+DROP TABLE IF EXISTS  relatedpost;
+DROP TABLE IF EXISTS  externalquestion;
+--DROP TABLE IF EXISTS  survey;
+DROP TABLE IF EXISTS  surveyuser;
 
 CREATE SEQUENCE surveyuser_id_seq
   INCREMENT 1
@@ -89,7 +89,7 @@ ALTER TABLE relatedpost_id_seq
 
 -- Sequence: result_id_seq
 
-DROP SEQUENCE result_id_seq;
+DROP SEQUENCE IF EXISTS result_id_seq;
 
 CREATE SEQUENCE result_id_seq
   INCREMENT 1
@@ -168,21 +168,16 @@ ALTER TABLE relatedpost
 
 
 
-
 CREATE TABLE rank
 (
   id integer NOT NULL,
-  externalquestionid integer,
-  postid integer,
   rankorder integer,
   internalevaluation boolean,
+  relatedpostid integer,
   CONSTRAINT rank_pk PRIMARY KEY (id),
-  CONSTRAINT rank_fk1 FOREIGN KEY (externalquestionid)
-      REFERENCES externalquestion (id) MATCH SIMPLE
-      ON UPDATE NO ACTION ON DELETE NO ACTION,
-  CONSTRAINT rank_fk2 FOREIGN KEY (postid)
-      REFERENCES postsmin (id) MATCH SIMPLE
-      ON UPDATE NO ACTION ON DELETE NO ACTION  
+  CONSTRAINT rank_fk1 FOREIGN KEY (relatedpostid)
+      REFERENCES relatedpost (id) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE NO ACTION
 )
 WITH (
   OIDS=FALSE
@@ -202,6 +197,7 @@ CREATE TABLE evaluation
   likertscale integer,
   ratingdate timestamp without time zone,
   rankid integer,
+  phase integer,
   CONSTRAINT evaluation_pk PRIMARY KEY (id),
   CONSTRAINT evaluation_fk2 FOREIGN KEY (rankid)
       REFERENCES rank (id) MATCH SIMPLE
@@ -259,7 +255,7 @@ CREATE TABLE result
   mrr numeric(4,3),
   minlikertscale integer,
   obs character varying(200),
-  internalevaluation boolean,
+  evaluationphase integer,
   CONSTRAINT result_pk PRIMARY KEY (id),
   CONSTRAINT result_fk1 FOREIGN KEY (experimentid)
       REFERENCES experiment (id) MATCH SIMPLE

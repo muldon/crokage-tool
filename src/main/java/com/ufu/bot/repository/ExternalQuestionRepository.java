@@ -47,11 +47,13 @@ public interface ExternalQuestionRepository extends CrudRepository<ExternalQuest
     
 	
 	@Query(value="select * " + 
-			" from externalquestion eq" + 
-			" where eq.id not in " + 
-			" (select r.externalquestionid" + 
-			"  from evaluation e, rank r" + 
-			"  where r.id = e.rankid "
+			" from externalquestion eq" 
+			+ " where eq.id not in "  
+			+ " (select rp.externalquestionid"  
+			+ "  from evaluation e, rank r, relatedpost rp"  
+			+ "  where e.id = rp.externalquestionid "
+			+ " and rp.id = r.relatedpostid "
+			+ " and e.rankid = r.id "
 			+ " and e.surveyuserid = ?1)" + 
 			" order by externalid  " + 
 			" limit 2",nativeQuery=true)

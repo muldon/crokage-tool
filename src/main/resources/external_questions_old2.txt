@@ -1,7 +1,7 @@
 Questions whose answers must contain code.
 
 
-33 questions from: https://kodejava.org.  1 a cada 7. Dentro da pag, random. 
+33 questions from: https://kodejava.org.  randomly considered from several categories, only odd pages.
 
 33 questions https://beginnersbook.com/2017/09/java-examples/
 
@@ -21,183 +21,173 @@ except too broad queries like "Ensure that they are equal" where it is not possi
 
 
 
--1-8-15-22-29-36-43-50-57-64-71-78-85-92-99-106-113-120-127-134-141-148-155-162-169-176-183-190-197-204-211-218-225-232-239
+
 ----------------- No.1 -----------------
 query: How do I convert number into Roman Numerals?
-link: https://kodejava.org/category/java/core-api/page/1/
+link: https://kodejava.org/category/java/core-api/
 
 
 ----------------- No.2 -----------------
-query: How do I create a generic Set?
-link: https://kodejava.org/category/java/core-api/page/8/
+query: How do I load file from resource directory?
+link: https://kodejava.org/category/java/core-api/page/3/
 
 
 ----------------- No.3 -----------------
+query: How do I implement equals() and hashCode() method using java.util.Objects?
+link: https://kodejava.org/category/java/core-api/page/5/
+
+
+----------------- No.4 -----------------
+query: How do I create a generic Map object?
+link: https://kodejava.org/category/java/core-api/page/7/
+
+
+----------------- No.5 -----------------
+query: How do I create a generic collections?
+link: https://kodejava.org/category/java/core-api/page/9/
+
+
+----------------- No.6 -----------------
+query: How to get random key-value pair from Hashtable?
+link: https://kodejava.org/category/java/core-api/page/11/
+
+
+----------------- No.7 -----------------
+query: How do I move a file in JDK 7?
+link: https://kodejava.org/category/java/core-api/page/13/
+
+
+----------------- No.8 -----------------
 query: How to split a string by a number of characters?
 link: https://kodejava.org/category/java/core-api/page/15/
 
 
------------------ No.4 -----------------
-query: How do I write a text file in JDK 7?
-link: https://kodejava.org/category/java/core-api/page/22/
-
-
------------------ No.5 -----------------
-query: How do I draw a line in Java 2D?
-link: https://kodejava.org/category/java/core-api/page/29/
-
-
-
------------------ No.6 -----------------
-query: How do I get the state of a thread?
-link: https://kodejava.org/category/java/core-api/page/36/
-
-
-
------------------ No.7 -----------------
-query: How do I pause the current thread?
-link: https://kodejava.org/category/java/core-api/page/43/
-
-
-
------------------ No.8 -----------------
-query: How do I use the “this” keyword in Java?
-link: https://kodejava.org/category/java/core-api/page/50/
-
-
 ----------------- No.9 -----------------
-query: How do I extend classes in Java?
-link: https://kodejava.org/category/java/core-api/page/57/
-
+query: How to use underscore in numeric literals?
+link: https://kodejava.org/category/java/core-api/page/17/
 
 
 ----------------- No.10 -----------------
-query: How do I get a formatted date for a specific pattern and locale?
-link: https://kodejava.org/category/java/core-api/page/64/
-
+query: How do I pick a random value from an enum?
+link: https://kodejava.org/category/java/core-api/page/19/
 
 
 ----------------- No.11 -----------------
-query: How do I remove elements from Deque?
-link: https://kodejava.org/category/java/core-api/page/71/
-
+query: How do I validate input when using Scanner?
+link: https://kodejava.org/category/java/core-api/page/21/
 
 
 ----------------- No.12 -----------------
-query: How do I get current number of live threads?
-link: https://kodejava.org/category/java/core-api/page/78/
-
+query: How do I set file last modified time?
+link: https://kodejava.org/category/java/core-api/page/23/
 
 
 ----------------- No.13 -----------------
-query: How do I open a file using the default registered application?
-link: https://kodejava.org/category/java/core-api/page/85/
+query: How do I draw a string in Java 2D?
+link: https://kodejava.org/category/java/core-api/page/25/
 
 
 ----------------- No.14 -----------------
-query: How do I convert angle from radians to degrees?
-link: https://kodejava.org/category/java/core-api/page/92/
+query: How do I draw an ellipse in Java 2D?
+link: https://kodejava.org/category/java/core-api/page/27/
 
 
 
 ----------------- No.15 -----------------
-query: How do I sort string of numbers in ascending order?
-link: https://kodejava.org/category/java/core-api/page/99/
+query: How do I draw a rectangle in Java 2D?
+link: https://kodejava.org/category/java/core-api/page/29/
 
 
 ----------------- No.16 -----------------
-query: How do I add item at the beginning or the end of LinkedList?
-link: https://kodejava.org/category/java/core-api/page/106/
+query: How do I create array of unique values from another array?
+link: https://kodejava.org/category/java/core-api/page/31/
 
 
 ----------------- No.17 -----------------
-query: How do I use the if-then-else statement?
-link: https://kodejava.org/category/java/core-api/page/113/
+query: How do I use multi-catch statement?
+link: https://kodejava.org/category/java/core-api/page/33/
 
 
 ----------------- No.18 -----------------
-query: How do I get the last element of SortedSet?
-link: https://kodejava.org/category/java/core-api/page/120/
+query: How do I get number of active thread in current thread?
+link: https://kodejava.org/category/java/core-api/page/35/
 
 
 ----------------- No.19 -----------------
-query: How do I format a message that contains date information?
-link: https://kodejava.org/category/java/core-api/page/127/
+query: How do I get print service attribute set?
+link: https://kodejava.org/category/java/core-api/page/37/
 
 
 
 ----------------- No.20 -----------------
-query: How do I clone an object?
-link: https://kodejava.org/category/java/core-api/page/134/
+query: How do I create a thread synchronized block?
+link: https://kodejava.org/category/java/core-api/page/39/
 
 
 ----------------- No.21 -----------------
-query: How do I use Override annotation?
-link: https://kodejava.org/category/java/core-api/page/141/
-
+query: How do I check if a thread is alive?
+link: https://kodejava.org/category/java/core-api/page/41/
 
 
 ----------------- No.22 -----------------
-query: How do I do bitwise exclusive OR operation?
-link: https://kodejava.org/category/java/core-api/page/148/
-
+query: How do I pause the current thread?
+link: https://kodejava.org/category/java/core-api/page/43/
 
 
 ----------------- No.23 -----------------
-query: How do I get the name of a class?
-link: https://kodejava.org/category/java/core-api/page/155/
+query: How do I use the boolean negation (!) operator in Java?
+link: https://kodejava.org/category/java/core-api/page/45/
 
 
 ----------------- No.24 -----------------
-query: How do I read system property as an integer?
-link: https://kodejava.org/category/java/core-api/page/162/
+query: How do I use the equality operator in Java?
+link: https://kodejava.org/category/java/core-api/page/47/
 
 
 ----------------- No.25 -----------------
-query: How do I create a directories recursively?
-link: https://kodejava.org/category/java/core-api/page/169/
+query: How do I calculate exponential function?
+link: https://kodejava.org/category/java/core-api/page/49/
 
 
 ----------------- No.26 -----------------
-query: How do I reverse a string by word?
-link: https://kodejava.org/category/java/core-api/page/176/
+query: How do I invoke superclass constructor?
+link: https://kodejava.org/category/java/core-api/page/51/
 
 
 ----------------- No.27 -----------------
-query: How do I add leading zeros to a number?
-link: https://kodejava.org/category/java/core-api/page/183/
+query: How do I declare and initialize local variable?
+link: https://kodejava.org/category/java/core-api/page/53/
 
 
 ----------------- No.28 -----------------
-query: How do I format a date into dd/MM/yyyy?
-link: https://kodejava.org/category/java/core-api/page/190/
+query: How do I overload methods in Java?
+link: https://kodejava.org/category/java/core-api/page/55/
 
 
 ----------------- No.29 -----------------
-query: How do I append data to a text file?
-link: https://kodejava.org/category/java/core-api/page/197/
-
+query: How do I extend classes in Java?
+link: https://kodejava.org/category/java/core-api/page/57/
 
 
 ----------------- No.30 -----------------
-query: How do I check if a year is a leap year?
-link: https://kodejava.org/category/java/core-api/page/204/
+query: How do I convert raw IP address to String?
+link: https://kodejava.org/category/java/core-api/page/59/
 
 
 ----------------- No.31-----------------
-query: How do I get the content of a directory?
-link: https://kodejava.org/category/java/core-api/page/211/
+query: How do I breaks a paragraph into sentences?
+link: https://kodejava.org/category/java/core-api/page/61/
 
 
 
 ----------------- No.32-----------------
-query: How do I delete a file in Java?
-link: https://kodejava.org/category/java/core-api/page/218/
+query: How do I sort an array of string data using RuleBasedCollator class?
+link: https://kodejava.org/category/java/core-api/page/63/
 
 
 ----------------- No.33-----------------
-query: How do I copy some items of an array into another array?
-link: https://kodejava.org/category/java/core-api/page/225/
+query: How do I change number format symbols?
+link: https://kodejava.org/category/java/core-api/page/65/
 
 
 ------------------site 2-------------------------------------------------------------------------------------------
@@ -352,8 +342,8 @@ link:  https://beginnersbook.com/2017/09/java-program-to-swap-two-numbers-using-
 
 
 ----------------- No.64-----------------
-query: Java Program to Convert char to String and String to Char
-link:  https://beginnersbook.com/2014/06/how-to-convert-char-to-string-and-a-string-to-char-in-java/
+query: Java Program to reverse words in a String
+link:  https://beginnersbook.com/2017/09/java-program-to-reverse-words-in-a-string
 
 
 ----------------- No.65-----------------
@@ -371,197 +361,171 @@ link:  https://beginnersbook.com/2017/09/java-program-to-check-armstrong-number
 ----------------- No.67-----------------
 query: To invoke an applet packaged as a JAR file
 link: http://www.java2s.com/Tutorial/Java/0020__Language/ToinvokeanappletpackagedasaJARfile.htm
-1
 
 ----------------- No.68-----------------
 query: Gets len characters from the middle of a String
 link: http://www.java2s.com/Tutorial/Java/0040__Data-Type/GetslencharactersfromthemiddleofaString.htm
-2
-
 
 
 ----------------- No.69-----------------
-query: The op= Operators
-link: http://www.java2s.com/Tutorial/Java/0060__Operators/TheopOperators.htm
-3
+query: Loading a Class That Is Not on the Classpath
+link: http://www.java2s.com/Tutorial/Java/0125__Reflection/LoadingaClassThatIsNotontheClasspath.htm
 
 
 ----------------- No.70-----------------
-query: Using 'final' with method arguments
-link:  http://www.java2s.com/Tutorial/Java/0100__Class-Definition/Usingfinalwithmethodarguments.htm
-5
+query: Matching Line Boundaries in a Regular Expression
+link: http://www.java2s.com/Tutorial/Java/0130__Regular-Expressions/MatchingLineBoundariesinaRegularExpression.htm
 
 
 ----------------- No.71-----------------
-query: Throwing an Exception from a Method
-link:  http://www.java2s.com/Tutorial/Java/0120__Development/ThrowinganExceptionfromaMethod.htm
-6
+query: Stopping a Thread with interrupt()
+link:  http://www.java2s.com/Tutorial/Java/0160__Thread/StoppingaThreadwithinterrupt.htm
+
 
 ----------------- No.72-----------------
-query: Loading a Class That Is Not on the Classpath
-link: http://www.java2s.com/Tutorial/Java/0125__Reflection/LoadingaClassThatIsNotontheClasspath.htm
-7
+query: Write lines of text to file using a PrintWriter
+link: http://www.java2s.com/Tutorial/Java/0180__File/WritelinesoftexttofileusingaPrintWriter.htm
 
 
 ----------------- No.73-----------------
-query: Matching Line Boundaries in a Regular Expression
-link: http://www.java2s.com/Tutorial/Java/0130__Regular-Expressions/MatchingLineBoundariesinaRegularExpression.htm
-8
+query: Listening to Component Events with a PropertyChangeListener
+link: http://www.java2s.com/Tutorial/Java/0260__Swing-Event/ListeningtoComponentEventswithaPropertyChangeListener.htm
 
 
 ----------------- No.74-----------------
-query: Find maximum element of ArrayList
-link: http://www.java2s.com/Tutorial/Java/0140__Collections/FindmaximumelementofArrayList.htm
-9
+query: Load an Image from a JAR file 
+link: http://www.java2s.com/Tutorial/Java/0261__2D-Graphics/LoadanImagefromaJARfile.htm
 
 
 ----------------- No.75-----------------
-query: Stopping a Thread with interrupt()
-link:  http://www.java2s.com/Tutorial/Java/0160__Thread/StoppingaThreadwithinterrupt.htm
-10
+query: StyledText bulleted list example
+link: http://www.java2s.com/Tutorial/Java/0280__SWT/StyledTextbulletedlistexample.htm
 
 
 ----------------- No.76-----------------
-query: Write lines of text to file using a PrintWriter
-link: http://www.java2s.com/Tutorial/Java/0180__File/WritelinesoftexttofileusingaPrintWriter.htm
-11
-
+query: Converting Between a URL and a URI
+link: http://www.java2s.com/Tutorial/Java/0320__Network/ConvertingBetweenaURLandaURI.htm
 
 
 ----------------- No.77-----------------
-query: Generic Interfaces
-link:  http://www.java2s.com/Tutorial/Java/0200__Generics/GenericInterfaces.htm
-12
+query: Call a procedure with one IN/OUT parameter
+link:  http://www.java2s.com/Tutorial/Java/0340__Database/CallaprocedurewithoneINOUTparameter.htm
 
 
 ----------------- No.78-----------------
-query: Internationalized Resource Identifiers
-link:  http://www.java2s.com/Tutorial/Java/0220__I18N/InternationalizedResourceIdentifiers.htm
-13
+query: HSQL Delete With Parameter
+link: http://www.java2s.com/Tutorial/Java/0350__Hibernate/HSQLDeleteWithParameter.htm
+
 
 
 ----------------- No.79-----------------
-query: Creating a JButton
-link:  http://www.java2s.com/Tutorial/Java/0240__Swing/CreatingaJButton.htm
-14
+query: Use Jdbc Template To Create Table
+link: http://www.java2s.com/Tutorial/Java/0417__Spring/UseJdbcTemplateToCreateTable.htm
 
 
 
 ----------------- No.80-----------------
-query: Listening to Component Events with a PropertyChangeListener
-link: http://www.java2s.com/Tutorial/Java/0260__Swing-Event/ListeningtoComponentEventswithaPropertyChangeListener.htm
-15
+query: Output to console with PdfWriter
+link: http://www.java2s.com/Tutorial/Java/0419__PDF/OutputtoconsolewithPdfWriter.htm
+
 
 ----------------- No.81-----------------
-query: Load an Image from a JAR file 
-link: http://www.java2s.com/Tutorial/Java/0261__2D-Graphics/LoadanImagefromaJARfile.htm
-16
+query: Get Attachment File Name
+link:  http://www.java2s.com/Tutorial/Java/0420__Email/GetAttachmentFileName.htm
 
 
 ----------------- No.82-----------------
-query: StyledText bulleted list example
-link: http://www.java2s.com/Tutorial/Java/0280__SWT/StyledTextbulletedlistexample.htm
-17
+query: Create Image from PNG image 
+link: http://www.java2s.com/Tutorial/Java/0430__J2ME/CreateImagefromPNGimage.htm
+
 
 ----------------- No.83-----------------
-query: Converting Between a URL and a URI
-link: http://www.java2s.com/Tutorial/Java/0320__Network/ConvertingBetweenaURLandaURI.htm
-19
+query: Writing a DOM Document to an XML File
+link: http://www.java2s.com/Tutorial/Java/0440__XML/WritingaDOMDocumenttoanXMLFile.htm
 
 
 ----------------- No.84-----------------
-query: Call a procedure with one IN/OUT parameter
-link:  http://www.java2s.com/Tutorial/Java/0340__Database/CallaprocedurewithoneINOUTparameter.htm
-20
+query: Logging a Method Call
+link: http://www.java2s.com/Tutorial/Java/0480__Log/LoggingaMethodCall.htm
+
+
 
 ----------------- No.85-----------------
-query: HSQL Delete With Parameter
-link: http://www.java2s.com/Tutorial/Java/0350__Hibernate/HSQLDeleteWithParameter.htm
-21
+query: Ant task delete tree
+link: http://www.java2s.com/Tutorial/Java/0520__Ant/0100__File-Directory.htm
 
 
 ----------------- No.86-----------------
-query: Using jsp getProperty to get value from java bean
-link:  http://www.java2s.com/Tutorial/Java/0360__JSP/UsingjspgetPropertytogetvaluefromjavabean.htm
-23
+query: Subtract from one BigDecimal another BigDecimal
+link:  http://www.java2s.com/Tutorial/Java/0040__Data-Type/SubtractfromoneBigDecimalanotherBigDecimal.htm
 
 
 ----------------- No.87-----------------
-query: JSTL ForEach Loop
-link:  http://www.java2s.com/Tutorial/Java/0380__JSTL/JSTLForEachLoop.htm
-24
+query: Generating Random integer Numbers
+link: http://www.java2s.com/Tutorial/Java/0120__Development/GeneratingRandomintegerNumbers.htm
 
 
 ----------------- No.88-----------------
-query: Get Servlet Context InitParameter
-link:  http://www.java2s.com/Tutorial/Java/0400__Servlet/GetServletContextInitParameter.htm
-25
+query: Find maximum element of ArrayList
+link: http://www.java2s.com/Tutorial/Java/0140__Collections/FindmaximumelementofArrayList.htm
+
 
 
 ----------------- No.89-----------------
-query: Generate DSA key pair
-link:  http://www.java2s.com/Tutorial/Java/0410__Web-Services-SOA/GenerateDSAkeypair.htm
-26
-
+query: Get Synchronized Set from TreeSet
+link: http://www.java2s.com/Tutorial/Java/0140__Collections/GetSynchronizedSetfromTreeSet.htm
 
 
 ----------------- No.90-----------------
-query: Use Jdbc Template To Create Table
-link: http://www.java2s.com/Tutorial/Java/0417__Spring/UseJdbcTemplateToCreateTable.htm
-28
+query: Use FileOutputStream to write the bytes to a file
+link: http://www.java2s.com/Tutorial/Java/0180__File/UseFileOutputStreamtowritethebytestoafile.htm
 
 
 ----------------- No.91-----------------
-query: Output to console with PdfWriter
-link: http://www.java2s.com/Tutorial/Java/0419__PDF/OutputtoconsolewithPdfWriter.htm
-29
+query: Builds a bracketed CSV list from the array
+link: http://www.java2s.com/Tutorial/Java/0180__File/BuildsabracketedCSVlistfromthearray.htm
+
 
 ----------------- No.92-----------------
-query: Get Attachment File Name
-link:  http://www.java2s.com/Tutorial/Java/0420__Email/GetAttachmentFileName.htm
-30
+query: Using JPanel as a canvas
+link: http://www.java2s.com/Tutorial/Java/0240__Swing/UsingJPanelasacanvas.htm
+
 
 ----------------- No.93-----------------
-query: Create Image from PNG image 
-link: http://www.java2s.com/Tutorial/Java/0430__J2ME/CreateImagefromPNGimage.htm
-31
+query: Limit JTextField input to a maximum length
+link:  http://www.java2s.com/Tutorial/Java/0260__Swing-Event/LimitJTextFieldinputtoamaximumlength.htm
+
 
 ----------------- No.94-----------------
-query: Writing a DOM Document to an XML File
-link: http://www.java2s.com/Tutorial/Java/0440__XML/WritingaDOMDocumenttoanXMLFile.htm
-33
-
+query: Detect Proxy Settings for Internet Connection
+link: http://www.java2s.com/Tutorial/Java/0320__Network/DetectProxySettingsforInternetConnection.htm
 
 
 ----------------- No.95-----------------
-query: Logging a Method Call
-link: http://www.java2s.com/Tutorial/Java/0480__Log/LoggingaMethodCall.htm
-35
+query: Decompress a zip file using ZipFile
+link: http://www.java2s.com/Tutorial/Java/0180__File/DecompressazipfileusingZipFile.htm
+
 
 
 ----------------- No.96-----------------
-query: SSL Client Demo
-link:  http://www.java2s.com/Tutorial/Java/0490__Security/SSLClientDemo.htm
-36
+query: Detect non-ASCII characters in string
+link: http://www.java2s.com/Tutorial/Java/0220__I18N/DetectnonASCIIcharactersinstring.htm
+
 
 
 ----------------- No.97-----------------
-query: StringUtils.reverse
-link:  http://www.java2s.com/Tutorial/Java/0500__Apache-Common/StringUtilsreverse.htm
-37
-
+query: Copy selected text from one text area to another
+link: http://www.java2s.com/Tutorial/Java/0240__Swing/Copyselectedtextfromonetextareatoanother.htm
 
 
 ----------------- No.98-----------------
-query: Ant task delete tree
-link: http://www.java2s.com/Tutorial/Java/0520__Ant/0100__File-Directory.htm
-38
+query: Wrap FileWriter with BufferedWriter
+link: http://www.java2s.com/Tutorial/Java/0180__File/WrapFileWriterwithBufferedWriter.htm
+
 
 
 ----------------- No.99-----------------
-query: JUnit Test Composition
-link: http://www.java2s.com/Tutorial/Java/0540__JUnit/JUnitTestComposition.htm
-39
-
+query: HSQL Order By Ascending Order
+link: http://www.java2s.com/Tutorial/Java/0350__Hibernate/HSQLOrderByAscendingOrder.htm
 
 
