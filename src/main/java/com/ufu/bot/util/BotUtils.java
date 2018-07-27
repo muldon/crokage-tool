@@ -1020,22 +1020,31 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 						if(linkLine.startsWith("link:")) {
 							linkLine= linkLine.replace("link:", "").trim();
 							
-							if(phaseNumber==1) {  //1/3 of questions, 11 questions from each site 
+							if(phaseNumber==1 || phaseNumber==2) {  //1/3 of questions, first lot
 							
 								if(externalId<=11 || (externalId>=34 && externalId<=44) || (externalId>=67 && externalId<=77)) {
 									ExternalQuestion externalQuestion = new ExternalQuestion(externalId,queryLine,null,null,runRack,obs,linkLine);
 									externalQuestionAnswers.add(externalQuestion);
 								}
 								
-							}else if(phaseNumber==4) {  //80% of questions, 40% from each site
+							}else if(phaseNumber==4 || phaseNumber==5) {  //1/3 of questions, second lot
 								
-								if(externalId>11 && (externalId<34 || externalId>44) && (externalId<67 || externalId>77)) {
+								if((externalId>=12 && externalId<=22) || (externalId>=45 && externalId<=55) || (externalId>=78 && externalId<=88)) {
+									ExternalQuestion externalQuestion = new ExternalQuestion(externalId,queryLine,null,null,runRack,obs,linkLine);
+									externalQuestionAnswers.add(externalQuestion);
+								}
+							}else if(phaseNumber==7 || phaseNumber==8) {  //1/3 of questions, third lot
+								
+								if((externalId>=23 && externalId<=33) || (externalId>=56 && externalId<=66) || (externalId>=89 && externalId<=99)) {
 									ExternalQuestion externalQuestion = new ExternalQuestion(externalId,queryLine,null,null,runRack,obs,linkLine);
 									externalQuestionAnswers.add(externalQuestion);
 								}
 							}
 							
+							//phase 10 to define yet... external survey... 
 							//externalId++;
+							
+							
 						}
 						
 					}

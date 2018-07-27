@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
+import com.ufu.bot.to.ExternalQuestion;
 import com.ufu.bot.to.Post;
 import com.ufu.bot.to.PostLink;
 import com.ufu.bot.util.BotUtils;
@@ -179,6 +180,33 @@ public class GenericRepositoryImpl implements GenericRepository {
 		Query q = em.createNativeQuery(sql, Post.class);
 		return (List<Post>) q.getResultList();
 		
+		
+	}
+
+
+
+
+
+	@Override
+	public List<ExternalQuestion> findNextExternalQuestionInternalSurveyUser(Integer userId, Integer phaseNumber) {
+		String sql = "select * " + 
+				" from externalquestion eq" 
+				+ " where eq.id not in "  
+				+ " (select rp.externalquestionid"  
+				+ "  from evaluation e, rank r, relatedpost rp"  
+				+ "  where e.rankid = r.id "
+				+ " and r.relatedpostid = rp.id "
+				+ " and e.surveyuserid = "+userId  
+				+ " ) order by externalid  "
+				+ " limit 2";  
+				
+		/*if(bringTwoQuestions) {
+			sql+= " limit 2";
+		}*/
+				
+	
+		Query q = em.createNativeQuery(sql, ExternalQuestion.class);
+		return (List<ExternalQuestion>) q.getResultList();
 		
 	}
 	

@@ -54,20 +54,21 @@ public class BotComposer {
 	
 	public void rankList(List<Bucket> bucketsList) {
 		
-		logger.info("Ranking with weights: "+
+	/*	logger.info("Ranking with weights: "+
 				"\n alphaCosSim = "+alphaCosSim +
 				"\n betaCoverageScore = "+betaCoverageScore +
 				"\n gamaCodeSizeScore = "+gamaCodeSizeScore +
 				"\n deltaRepScore = "+deltaRepScore +
 				"\n epsilonUpScore = "+epsilonUpScore+
 				//relation weights
+				" \n and ajuster weights of: "+
 				"\n relationTypeFromGoogleQuestion = "+relationTypeFromGoogleQuestion +
 				"\n relationTypeFromGoogleAnswer = "+relationTypeFromGoogleAnswer +
 				"\n relationTypeRelatedNotDupe = "+relationTypeRelatedNotDupe +
 				"\n relationTypeLinksInsideTexts = "+relationTypeLinksInsideTexts +
 				"\n relationTypeRelatedDupe = "+relationTypeRelatedDupe 
 				);
-		
+		*/
 		
 		for(Bucket bucket: bucketsList){
 			double composedScore =  alphaCosSim 	  * bucket.getCosSim() 

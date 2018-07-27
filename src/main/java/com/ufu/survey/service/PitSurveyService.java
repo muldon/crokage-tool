@@ -553,8 +553,10 @@ public class PitSurveyService extends AbstractService{
 		
 		for(int i=0; i<postsIds.size(); i++) { //lists have the same size
 			RelatedPost relatedPost = relatedPostRepository.findByExternalQuestionIdAndPostId(evaluation.getExternalQuestionId(),postsIds.get(i));
-			Rank rank = rankRepository.findByRelatedPostIdAndInternalEvaluation(relatedPost.getId(),isInternalSurveyUser);
-			Evaluation eval = new Evaluation(rank.getId(),evaluation.getSurveyUserId(),ratings.get(i),getCurrentDate(),phaseNumber);
+			//Rank rank = rankRepository.findByRelatedPostIdAndInternalEvaluation(relatedPost.getId(),isInternalSurveyUser);
+			int previousPhase = phaseNumber -1; 
+			Rank rank = rankRepository.findByRelatedPostIdAndPhase(relatedPost.getId(),previousPhase);
+			Evaluation eval = new Evaluation(rank.getId(),evaluation.getSurveyUserId(),ratings.get(i),getCurrentDate());
 			evaluationRepository.save(eval);
 		}
 		
@@ -617,6 +619,11 @@ public class PitSurveyService extends AbstractService{
 		}
 	}*/
 
+	public void loadExternalQuestions() throws IOException {
+		externalQuestionsWithoutRack = botUtils.readExternalQuestionsAndAnswers(false, "");
+		
+	}
+
 
 	@Transactional(readOnly = true)
 	public void loadQuestions(ToTransfer toTransfer, Boolean internalSurvey) {
@@ -634,10 +641,20 @@ public class PitSurveyService extends AbstractService{
 	public void loadNextQuestion(ToTransfer<ExternalQuestion> toTransfer, Integer userId) throws Exception {
 		List<ExternalQuestion> nextExternalQuestions;
 		ExternalQuestion nextQuestion;
+		Integer previousPhase = phaseNumber - 1; //ranks were stored always the previous phase
+		boolean bringTwoQuestions = false;
+		if(phaseNumber==8) {
+			bringTwoQuestions = true;
+		}
 		
 		boolean isInternalSurveyUser = SurveyUser.isInternalSurveyUser(userId);
 		if(isInternalSurveyUser) {
-			nextExternalQuestions = externalQuestionRepository.findNextExternalQuestionInternalSurveyUser(userId);
+			nextExternalQuestions = genericRepository.findNextExternalQuestionInternalSurveyUser(userId,previousPhase);
+			if(!bringTwoQuestions && nextExternalQuestions.size()==2) {
+				ExternalQuestion first = nextExternalQuestions.remove(0);
+				nextExternalQuestions.clear();
+				nextExternalQuestions.add(first);
+			}
 			if(nextExternalQuestions.isEmpty()) {
 				toTransfer.setInfoMessage("Você completou o survey interno.");
 			}else if(nextExternalQuestions.size()==1) {
@@ -692,7 +709,7 @@ public class PitSurveyService extends AbstractService{
 	}
 
 	
-	public void runPhase3() throws Exception {
+	public void runPhase3Old() throws Exception {
 		long initTime; 
 		long endTime;
 						
@@ -721,11 +738,11 @@ public class PitSurveyService extends AbstractService{
 			botUtils.reportElapsedTime(initTime,"runSteps7toTheEnd for question: "+questionStr);
 			
 			
-			
 		}
 		
 	}
 
+	
 	
 	
 	

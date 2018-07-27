@@ -29,6 +29,8 @@ public class Rank {
 	@Column(name="internalevaluation")	
 	private Boolean internalEvaluation;
 		
+	@Column(name="phase")	
+	private Integer phase;
 
 	public Integer getId() {
 		return id;
@@ -95,11 +97,12 @@ public class Rank {
 	}
 
 
-	public Rank(Integer relatedPostId, Integer rankOrder, Boolean internalEvaluation) {
+	public Rank(Integer relatedPostId, Integer rankOrder, Boolean internalEvaluation,Integer phase) {
 		super();
 		this.rankOrder = rankOrder;
 		this.relatedPostId = relatedPostId;
 		this.internalEvaluation = internalEvaluation;
+		this.phase = phase;
 	}
 
 
@@ -113,7 +116,16 @@ public class Rank {
 	}
 
 
-	
+
+	public Integer getPhase() {
+		return phase;
+	}
+
+
+	public void setPhase(Integer phase) {
+		this.phase = phase;
+	}
+
 	
 	
 	

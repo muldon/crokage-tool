@@ -259,11 +259,11 @@ public class PitBotService extends AbstractService{
 
 
 
-	public void saveRanks(ExternalQuestion externalQuestion, List<Bucket> rankedList, Boolean internalEvaluation) {
+	public void saveRanks(ExternalQuestion externalQuestion, List<Bucket> rankedList, Boolean internalEvaluation, Integer phaseNumber) {
 		int order=1;
 		for(Bucket bucket: rankedList) {
 			RelatedPost relatedPost = relatedPostRepository.findByExternalQuestionIdAndPostId(externalQuestion.getId(),bucket.getPostId());
-			Rank rank=new Rank(relatedPost.getId(),order,internalEvaluation);
+			Rank rank=new Rank(relatedPost.getId(),order,internalEvaluation,phaseNumber);
 			rankRepository.save(rank);
 			order++;
 		}

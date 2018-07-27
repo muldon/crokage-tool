@@ -114,6 +114,36 @@ public class PitBotApp2 {
 	public String tagFilter;  //null for all
 */	
 	
+	@Value("${alphaCosSim}")
+	public Double alphaCosSim; 
+	
+	@Value("${betaCoverageScore}")
+	public Double betaCoverageScore; 
+	
+	@Value("${gamaCodeSizeScore}")
+	public Double gamaCodeSizeScore; 
+	
+	@Value("${deltaRepScore}")
+	public Double deltaRepScore; 
+	
+	@Value("${epsilonUpScore}")
+	public Double epsilonUpScore; 
+	
+	@Value("${relationType_FROM_GOOGLE_QUESTION}")
+	public Double relationTypeFromGoogleQuestion; 
+	
+	@Value("${relationType_FROM_GOOGLE_ANSWER}")
+	public Double relationTypeFromGoogleAnswer; 
+	
+	@Value("${relationType_RELATED_NOT_DUPE}")
+	public Double relationTypeRelatedNotDupe; 
+	
+	@Value("${relationType_LINKS_INSIDE_TEXTS}")
+	public Double relationTypeLinksInsideTexts; 
+	
+	@Value("${relationType_RELATED_DUPE}")
+	public Double relationTypeRelatedDupe; 
+	
 	/*
 	 * Path to a file which contains a FLAG indicating if the environment is test or production. This file (environmentFlag.properties) contains only one line with a boolean value (useProxy = true|false)
 	 * If useProxy = true, the proxy is not applied for the google search engine. Otherwise, proxy is set.   
@@ -176,15 +206,16 @@ public class PitBotApp2 {
 				+ "\n internalSurveyRankListSize: "+internalSurveyRankListSize
 				+ "\n externalSurveyRankListSize: "+externalSurveyRankListSize
 				+ "\n");
+				
 		
 		switch (phaseNumber) {
 		case 1:
 			initTime = System.currentTimeMillis();
-			runPhase1or4();
+			runPhase1or4or7();
 			botUtils.reportElapsedTime(initTime," runPhase1 ");
 			break;
 		case 2:
-			runPhase2();
+			runPhase2or5or8();
 			break;
 			
 		case 3:
@@ -194,11 +225,11 @@ public class PitBotApp2 {
 			break;
 		case 4:
 			initTime = System.currentTimeMillis();
-			runPhase1or4();
+			runPhase1or4or7();
 			botUtils.reportElapsedTime(initTime," runPhase1 ");
 			break;
 		case 5:
-			runPhase5();
+			runPhase2or5or8();
 			break;
 		case 6:
 			initTime = System.currentTimeMillis();
@@ -207,14 +238,12 @@ public class PitBotApp2 {
 			break;
 		case 7:
 			initTime = System.currentTimeMillis();
-			runPhase7();
-			botUtils.reportElapsedTime(initTime," runPhase6 ");
+			runPhase1or4or7();
+			botUtils.reportElapsedTime(initTime," runPhase1 ");
 			break;
 		case 8:
-			initTime = System.currentTimeMillis();
-			runPhase8();
-			botUtils.reportElapsedTime(initTime," runPhase6 ");
-			break;	
+			runPhase2or5or8();
+			break;
 		default:
 			break;
 		}
@@ -227,7 +256,9 @@ public class PitBotApp2 {
 
 
 
-	private void runPhase1or4() throws Exception {
+	private void runPhase1or4or7() throws Exception {
+		logWeights();
+		
 		/*
 		 * Step 1: Question in Natural Language
 		 * Read queries from a text file and insert into a list. Only 20%.
@@ -264,7 +295,7 @@ public class PitBotApp2 {
 			logger.info("saving external question and related ids for external question: "+externalQuestion.getExternalId());
 			pitBotService.saveExternalQuestionAndRelatedIds(externalQuestion,botUtils.getAnswerPostsCache());
 			count++;
-			if(count>100) {
+			if(count>99) {
 				break;
 			}
 			
@@ -272,30 +303,54 @@ public class PitBotApp2 {
 			List<Bucket> rankedList = pitSurveyService.runSteps7toTheEnd(externalQuestion,augmentedThreads);
 			botUtils.reportElapsedTime(initTime,"runSteps7toTheEnd");
 			logger.info("list of ranks generated, now saving ranks for question "+externalQuestion.getExternalId());
-			pitBotService.saveRanks(externalQuestion,rankedList,true);
+			pitBotService.saveRanks(externalQuestion,rankedList,true,phaseNumber);
 			
 		}
 	}
 	
 	
-	private void runPhase2() {
+	private void logWeights() {
+		logger.info("Ranking with weights: "+
+				"\n alphaCosSim = "+alphaCosSim +
+				"\n betaCoverageScore = "+betaCoverageScore +
+				"\n gamaCodeSizeScore = "+gamaCodeSizeScore +
+				"\n deltaRepScore = "+deltaRepScore +
+				"\n epsilonUpScore = "+epsilonUpScore+
+				//relation weights
+				" \n and ajuster weights of: "+
+				"\n relationTypeFromGoogleQuestion = "+relationTypeFromGoogleQuestion +
+				"\n relationTypeFromGoogleAnswer = "+relationTypeFromGoogleAnswer +
+				"\n relationTypeRelatedNotDupe = "+relationTypeRelatedNotDupe +
+				"\n relationTypeLinksInsideTexts = "+relationTypeLinksInsideTexts +
+				"\n relationTypeRelatedDupe = "+relationTypeRelatedDupe 
+				);
+	}
+
+
+
+
+
+	private void runPhase2or5or8() throws IOException {
 		//load external questions and their related posts and store in cache
-		pitSurveyService.loadQuestionsAndRelatedPostsToCache();
-		
+		//pitSurveyService.loadQuestionsAndRelatedPostsToCache();
+		pitSurveyService.loadExternalQuestions();
 	}
 	
 
 	
+
+
+	private void runPhase3Old() throws Exception {
+		//load external questions and their related posts and store in cache
+		pitSurveyService.loadQuestionsAndRelatedPostsToCache();
+		pitSurveyService.runPhase3Old();
+	}
 
 
 	private void runPhase3() throws Exception {
-		//load external questions and their related posts and store in cache
-		pitSurveyService.loadQuestionsAndRelatedPostsToCache();
-		pitSurveyService.runPhase3();
+		
+		
 	}
-
-
-
 
 
 
@@ -316,10 +371,6 @@ public class PitBotApp2 {
 		
 	}
 	
-	private void runPhase8() {
-		// TODO Auto-generated method stub
-		
-	}
 
 	
 	private void step1() throws Exception {

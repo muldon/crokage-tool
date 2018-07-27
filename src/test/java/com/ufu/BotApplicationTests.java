@@ -192,7 +192,7 @@ public class BotApplicationTests extends AbstractService{
 	//@Test
 	public void testRank() {
 		
-		Rank rank = new Rank(1,1,true);
+		Rank rank = new Rank(1,1,true,1);
 		rankRepository.save(rank);
 		//System.out.println(relatedPost);
 				
@@ -216,7 +216,7 @@ public class BotApplicationTests extends AbstractService{
 	
 	//@Test
 	public void testEvaluation() {
-		Evaluation evaluation = new Evaluation(1,1,5,new Timestamp(Calendar.getInstance().getTimeInMillis()),1);
+		Evaluation evaluation = new Evaluation(1,1,5,new Timestamp(Calendar.getInstance().getTimeInMillis()));
 		pitBotService.saveEvaluation(evaluation);
 		System.out.println(evaluation);
 	}	

@@ -46,17 +46,17 @@ public interface ExternalQuestionRepository extends CrudRepository<ExternalQuest
 	List<ExternalQuestion> findNextExternalQuestionInternalSurveyUser(Integer userId);*/
     
 	
-	@Query(value="select * " + 
+	/*@Query(value="select * " + 
 			" from externalquestion eq" 
 			+ " where eq.id not in "  
 			+ " (select rp.externalquestionid"  
 			+ "  from evaluation e, rank r, relatedpost rp"  
-			+ "  where e.id = rp.externalquestionid "
-			+ " and rp.id = r.relatedpostid "
-			+ " and e.rankid = r.id "
-			+ " and e.surveyuserid = ?1)" + 
-			" order by externalid  " + 
-			" limit 2",nativeQuery=true)
-	List<ExternalQuestion> findNextExternalQuestionInternalSurveyUser(Integer userId);
+			+ "  where e.rankid = r.id "
+			+ " and r.relatedpostid = rp.id "
+			+ " and e.surveyuserid = ?1"  
+			+ " and r.phase = ?2)" 
+			+ " order by externalid  "  
+			+ " limit 2",nativeQuery=true)
+	List<ExternalQuestion> findNextExternalQuestionInternalSurveyUser(Integer userId, Integer phaseNumber, boolean bringTwoQuestions);*/
 	
 }
