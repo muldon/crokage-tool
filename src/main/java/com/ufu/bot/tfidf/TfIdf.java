@@ -103,7 +103,7 @@ public class TfIdf {
      * @return sequence of map of terms to their term frequencies
      */
     public static <TERM> Iterable<Map<TERM, Double>> tfs(Iterable<Collection<TERM>> documents) {
-        return tfs(documents, TfType.NATURAL);
+        return tfs(documents, TfType.LOGARITHM);
     }
 
     /**

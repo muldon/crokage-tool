@@ -47,7 +47,15 @@ public class Evaluation {
 	@Transient
 	private Integer externalQuestionId;
 	
+	@Transient
+	private Integer postId;
 	
+	@Transient
+	private Integer likertScaleUser1;
+	
+	@Transient
+	private Integer likertScaleUser2;
+
 
 	public Integer getId() {
 		return id;
@@ -183,15 +191,38 @@ public class Evaluation {
 	}
 
 
-	
+	public Integer getPostId() {
+		return postId;
+	}
+
+
+	public void setPostId(Integer postId) {
+		this.postId = postId;
+	}
+
+
+	public Integer getLikertScaleUser1() {
+		return likertScaleUser1;
+	}
+
+
+	public void setLikertScaleUser1(Integer likertScaleUser1) {
+		this.likertScaleUser1 = likertScaleUser1;
+	}
+
+
+	public Integer getLikertScaleUser2() {
+		return likertScaleUser2;
+	}
+
+
+	public void setLikertScaleUser2(Integer likertScaleUser2) {
+		this.likertScaleUser2 = likertScaleUser2;
+	}
 
 
 	
-	
-	
 
-	
-	
 	
 	
 	

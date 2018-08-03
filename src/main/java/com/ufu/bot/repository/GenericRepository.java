@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.ufu.bot.to.Evaluation;
 import com.ufu.bot.to.ExternalQuestion;
 import com.ufu.bot.to.Post;
 
@@ -29,6 +30,10 @@ public interface GenericRepository {
 	public List<Post> findRankedList(Integer id, Boolean internalevaluation);
 
 	List<ExternalQuestion> findNextExternalQuestionInternalSurveyUser(Integer userId, Integer phaseNumber);
+
+	public List<Evaluation> getEvaluationByPhaseAndRelatedPost(Integer externalQuestionId, Integer phaseNumber);
+
+	public List<ExternalQuestion> getExternalQuestionsByPhase(Integer phaseNumber);
 	
 
 	

@@ -132,7 +132,7 @@ public abstract class AbstractService {
 				boolean containLink = BotUtils.testContainLinkToSo(answer.getBody());
 				if(!containCode) {
 					if(!containLink) {
-						logger.info("Disconsidering post without any post and without any link :"+answer.getId());
+						logger.info("Disconsidering post without any code and without any link :"+answer.getId());
 						continue;    //disconsider posts without any code and without any link to another post
 					}else {
 						logger.info("Answer has no code, but has link and will be cut off later in step 7."+answer.getId());

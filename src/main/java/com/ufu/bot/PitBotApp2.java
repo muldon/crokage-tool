@@ -1,48 +1,53 @@
 package com.ufu.bot;
 
+import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.google.common.collect.Lists;
 import com.ufu.bot.exception.PitBotException;
 import com.ufu.bot.googleSearch.GoogleWebSearch;
 import com.ufu.bot.googleSearch.SearchQuery;
 import com.ufu.bot.googleSearch.SearchResult;
 import com.ufu.bot.service.PitBotService;
-import com.ufu.bot.tfidf.TfIdf;
-import com.ufu.bot.tfidf.ngram.NgramTfIdf;
 import com.ufu.bot.to.Bucket;
 import com.ufu.bot.to.Comment;
+import com.ufu.bot.to.Evaluation;
 import com.ufu.bot.to.ExternalQuestion;
 import com.ufu.bot.to.Post;
 import com.ufu.bot.to.RelatedPost.RelationTypeEnum;
 import com.ufu.bot.to.SoThread;
-import com.ufu.bot.to.Survey.SurveyEnum;
-import com.ufu.bot.util.BotComposer;
 import com.ufu.bot.util.BotUtils;
 import com.ufu.survey.service.PitSurveyService;
 
@@ -68,6 +73,10 @@ public class PitBotApp2 {
 		
 	@Value("${phaseNumber}")
 	public Integer phaseNumber;  
+	
+	@Value("${phaseSection}")
+	public Integer phaseSection;  
+		
 	
 	@Value("${obs}")
 	public String obs;  
@@ -193,6 +202,7 @@ public class PitBotApp2 {
 				
 		logger.info("\nConsidering parameters: \n"
 				+ "\n phaseNumber: "+phaseNumber
+				+ "\n phaseSection: "+phaseSection
 				+ "\n pathFileEnvFlag: "+pathFileEnvFlag
 				+ "\n obs: "+obs
 				+ "\n numberOfQueriesToTest: "+numberOfQueriesToTest
@@ -261,7 +271,7 @@ public class PitBotApp2 {
 		
 		/*
 		 * Step 1: Question in Natural Language
-		 * Read queries from a text file and insert into a list. Only 20%.
+		 * Read queries from a text file and insert into a list. Only 1/3.
 		 */	
 		step1();
 				
@@ -272,15 +282,8 @@ public class PitBotApp2 {
 			
 		}
 		
-		
 		int count =1;
 		for(ExternalQuestion externalQuestion: externalQuestions) {
-			/*
-			 * Start with only the first 50s
-			 */
-			/*if(externalQuestion.getUrl().contains("kodejava")) {
-				continue;
-			}*/
 			
 			initializeVariables();
 			logger.info("\n\n\n\n\n\n\nProcessing new question: "+externalQuestion);
@@ -348,9 +351,146 @@ public class PitBotApp2 {
 
 
 	private void runPhase3() throws Exception {
+		String fileName = "Phase2AfterAgreement";
+		String fileNameMatrixKappaBeforeAgreement = "Phase2MatrixForKappaBeforeAgreement.csv";
+		String fileNameMatrixKappaAfterAgreement = "Phase2MatrixForKappaAfterAgreement.csv";
+		
+		Integer likertsResearcher1BeforeAgreementColumn = 1;
+		Integer likertsResearcher2BeforeAgreementColumn = 2;
+		Integer likertsResearcher1AfterAgreementColumn = 3;
+		Integer likertsResearcher2AfterAgreementColumn = 4;
+				
+		if(phaseSection==1) { //Build excel with evaluations. Agreement phase. 
+			BufferedWriter bw =null;
+			List<ExternalQuestion> externalQuestions = pitBotService.getExternalQuestionsByPhase(1);
+			buildCsvPhaseSection1(bw,fileName,externalQuestions);
+			
+		}else if(phaseSection==2) { //Use previous xlsx spreedShed to build a matrix of values for the scales - before agreement 
+			List<Evaluation> evaluationsWithBothUsersScales = new ArrayList<>();
+			readXlsxToEvaluationList(evaluationsWithBothUsersScales,fileName,likertsResearcher1BeforeAgreementColumn,likertsResearcher2BeforeAgreementColumn);
+			buildMatrixForKappa(evaluationsWithBothUsersScales,fileNameMatrixKappaBeforeAgreement); 
+		
+		}else if(phaseSection==3) { //Use previous xlsx spreedShed to build a matrix of values for the scales - after agreement
+			List<Evaluation> evaluationsWithBothUsersScales = new ArrayList<>();
+			readXlsxToEvaluationList(evaluationsWithBothUsersScales,fileName,likertsResearcher1AfterAgreementColumn,likertsResearcher2AfterAgreementColumn);
+			buildMatrixForKappa(evaluationsWithBothUsersScales,fileNameMatrixKappaAfterAgreement);
+		
+		}else if(phaseSection==4) {//Discover the best adjuster weights. Use the previous analyzed posts to discover what is the influence of the post origin the post quality. Set adjuster weights.
+			List<Evaluation> evaluationsWithBothUsersScales = new ArrayList<>();
+			readXlsxToEvaluationList(evaluationsWithBothUsersScales,fileName,likertsResearcher1AfterAgreementColumn,likertsResearcher2AfterAgreementColumn);
+			System.out.println(evaluationsWithBothUsersScales);			
+		}
 		
 		
 	}
+
+
+
+	
+
+
+
+
+	private void readXlsxToEvaluationList(List<Evaluation> evaluationsWithBothUsersScales, String fileName, Integer firstColumn, Integer secondColumn) {
+		try {
+
+			FileInputStream excelFile = new FileInputStream(new File(fileName + ".xlsx"));
+			Workbook workbook = new XSSFWorkbook(excelFile);
+			Sheet datatypeSheet = workbook.getSheetAt(0);
+			Iterator<Row> iterator = datatypeSheet.iterator();
+	
+			while (iterator.hasNext()) {
+
+				Row currentRow = iterator.next();
+				Cell currentCellColumnA = currentRow.getCell(firstColumn);
+				Cell currentCellColumnB = currentRow.getCell(firstColumn);
+				Cell currentCellColumnC = currentRow.getCell(secondColumn);
+				--terminar.. coluna a pode ter id do post tb ..
+				if(currentCellColumnA!=null && currentCellColumnA.getCellTypeEnum() == CellType.STRING) {
+					
+					String currentAValue = currentCellColumnB.getStringCellValue();
+					String parts[] = currentAValue.split("\\|");
+					String externalQuestionIdStr = parts[0].replaceAll("\\D+","");
+					Integer externalQuestionId = new Integer(externalQuestionIdStr);
+					
+					if (currentCellColumnB != null && currentCellColumnB.getCellTypeEnum() == CellType.NUMERIC
+						&& currentCellColumnC != null && currentCellColumnC.getCellTypeEnum() == CellType.NUMERIC) {
+						
+						Integer currentBValue = (int) (currentCellColumnB.getNumericCellValue());
+						Integer currentCValue = (int) (currentCellColumnC.getNumericCellValue());
+						//System.out.println("Scales: " + currentBValue + " - " + currentCValue);
+	
+						Evaluation eval = new Evaluation();
+						eval.setExternalQuestionId(externalQuestionId);
+						eval.setLikertScaleUser1(currentBValue);
+						eval.setLikertScaleUser2(currentCValue);
+						evaluationsWithBothUsersScales.add(eval);
+					}
+				
+				}
+			}
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		
+	}
+
+
+
+
+
+	private void buildCsvPhaseSection1(BufferedWriter bw,String fileName,List<ExternalQuestion> externalQuestions) throws IOException {
+		try {
+		
+			bw = new BufferedWriter(new FileWriter(fileName+".csv"));
+			bw.write(";Researcher1;Researcher2;Researcher1 agreement;Researcher2 agreement\n\n");
+			
+			for(ExternalQuestion externalQuestion:externalQuestions){
+									
+				bw.write("id:("+externalQuestion.getId()+") | Refid: "+ externalQuestion.getExternalId()+ " - "+ externalQuestion.getRawQuery());
+				bw.write("\n"+externalQuestion.getUrl()+"\n\n");
+				List<Evaluation> evaluations = pitBotService.getEvaluationByPhaseAndRelatedPost(externalQuestion.getId(),1);
+				
+				Iterator<Evaluation> it = evaluations.iterator();
+				
+				while (it.hasNext()) {
+					Evaluation eval1 = it.next();
+					String link = "https://stackoverflow.com/questions/"+eval1.getPostId()+"/ ";
+					bw.write(link);	
+					if(it.hasNext()) {
+						Evaluation eval2 = it.next();
+						if(eval1.getPostId().equals(eval2.getPostId())) {
+							bw.write(";"+eval1.getLikertScale()+";"+eval2.getLikertScale());
+							if(Math.abs(eval1.getLikertScale()-eval2.getLikertScale())>1) { //if the difference is high, review... 
+								bw.write(";xxx;xxx");
+							}else {
+								bw.write(";"+eval1.getLikertScale()+";"+eval2.getLikertScale());
+							}
+							bw.write("\n");
+							
+						}else {
+							bw.write("; ---- waiting---- \n");
+						}
+						
+					}
+					
+				}
+					
+				bw.write("\n\n");
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			bw.close();
+		}
+		
+	}
+
+
 
 
 
@@ -412,7 +552,7 @@ public class PitBotApp2 {
 		//botUtils.reportElapsedTime(initTime,"step4 - Google Search ");
 		
 		}else { //static list for tests
-			soPostsIds = getStaticIdsForTests();
+			soPostsIds = botUtils.getStaticIdsForTests();
 		}
 		
 		
@@ -784,24 +924,53 @@ public class PitBotApp2 {
 		tmpList = null;
 	}*/
 
-	private Set<Integer> getStaticIdsForTests() {
-		HashSet<Integer> soPostsIds = new LinkedHashSet<>();
-		soPostsIds.add(10117026);
-		soPostsIds.add(6416706);
-		soPostsIds.add(10117051);
-		soPostsIds.add(35593309);
-		soPostsIds.add(11018325);
-		soPostsIds.add(23329173);
-		soPostsIds.add(40064173);
-		soPostsIds.add(46107706);
-		soPostsIds.add(8174964);
-		soPostsIds.add(9740830);
+	
+	private void buildMatrixForKappa(List<Evaluation> evaluationsWithBothUsersScales, String fileNameGeneratedMatrix) throws IOException {
+		BufferedWriter bw =null;
+		try {
 		
-		for(Integer id:soPostsIds) {
-			logger.info("id: "+id);
+			bw = new BufferedWriter(new FileWriter(fileNameGeneratedMatrix));
+			bw.write(";;1;2;3;4;5");
+			
+			//Matrix map
+			int[] cells[] = new int[5][5];
+			
+			for(int i=0; i<5; i++) {
+				bw.write("\n;"+(i+1)+";");
+				for(int j=0; j<5; j++) {
+					//System.out.println(cells[i][j]);
+					cells[i][j] = getCellNumber(i+1,j+1,evaluationsWithBothUsersScales);
+					//System.out.println("cell "+i+"-"+j+"= "+cells[i][j]);
+					bw.write(cells[i][j]+";");
+				}
+			}
+			
+			
+			
+		
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			bw.close();
 		}
 		
-		return soPostsIds;
+	}
+
+
+
+
+
+	private int getCellNumber(int i, int j, List<Evaluation> allEvaluations) {
+		int sum=0;
+		for(Evaluation evaluation: allEvaluations) {
+			if(evaluation.getLikertScaleUser1()==i && evaluation.getLikertScaleUser2()==j) {
+				sum+=1;				
+			}
+			
+			
+		}
+		
+		return sum;
 	}
 
 

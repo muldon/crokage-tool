@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -27,12 +28,15 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import com.google.common.base.Charsets;
+import com.google.common.base.Splitter;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 import com.ufu.bot.PitBotApp2;
 import com.ufu.bot.tfidf.TfIdf;
 import com.ufu.bot.tfidf.ngram.NgramTfIdf;
 import com.ufu.bot.to.Bucket;
+import com.ufu.bot.to.Evaluation;
 import com.ufu.bot.to.Post;
 import com.ufu.bot.util.BotComposer;
 import com.ufu.bot.util.BotUtils;
@@ -497,8 +501,68 @@ public class Tester {
 		//testContainCode(text2);
 		//testContainLinkToSo(linkBlockquoteCode);
 		//testRemoveEmptyElementFromList();
-		testFindExternalQuestionNumber();
+		//testFindExternalQuestionNumber();
+		//testStep8();
+		
+		//System.out.println(decToRoman(89));
+		String s = "1234567890abcdef";
+		//System.out.println(java.util.Arrays.toString(s.split("(?<=\\G..)")));
+		
+		
+		Iterable<String> pieces = Splitter.fixedLength(3).split(s);
+		//System.out.println(pieces);
+		
+		Iterable<String> result = Splitter.fixedLength(4).split("how are you?");
+		String[] parts = Iterables.toArray(result, String.class);
+		
+		//System.out.println(parts);
+		
+		
+		//System.out.println(Arrays.toString("Thequickbrownfoxjumps".split("(?<=\\G.{4})")));
+		
+		String[] array = "Thequickbrownfoxjumps".split("(?<=\\G.{7})");
+		//System.out.println();
+		
+		//FileUtils.writeStringToFile(new File("test.txt"), "Hello File");
+		
+		
+		/*
+		try (PrintWriter out = new PrintWriter("filename.txt")) {
+		    out.println("aa");
+		}*/
+		
+		/*String thisMoment = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mmX")
+                .withZone(ZoneOffset.UTC)
+                .format(Instant.now());
+		System.out.println(thisMoment);
+		*/
+		
+		/*BigInteger prime = BigInteger.valueOf(0);
+		for (int i = 0; i < 100; i++) {
+		    prime = prime.nextProbablePrime();
+		    System.out.println(prime.intValue());
+		}*/
+		
+		/*boolean isLeapyear = new GregorianCalendar().isLeapYear(2011);
+		System.out.println(isLeapyear);*/
+		
+
+/*
+		int orig = 20;
+		int res = Integer.parseInt(""+orig, 16);
+		System.out.println(res);*/
+		
+		
+		//String upToNCharacters = s.substring(3, Math.min(s.length(), 5));
+		//System.out.println(upToNCharacters);
+		
+		//testMatrix();
+		//testMatrix();
+		String str1 = "Id:(1111) || Refid: 1 - How do I convert number into Roman Numerals?";
+		System.out.println(getIdFromStr(str1));
 	}
+	
+	
 	
 	
 
@@ -643,7 +707,10 @@ public class Tester {
 		Bucket main = new Bucket();
 		main.setPostId(0);
 		//main.setProcessedBodyStemmedStopped("how it fits into the larger picture of an organization, explains IBM’s Jeff Jonas, distinguished");
-		main.setProcessedBodyStemmedStopped("data analyst may look only at data from a single source scientist represents an evolution from the business");
+		main.setProcessedBodyStemmedStopped("A data scientist represents an evolution from the business or data analyst role. The formal training is similar, with a solid foundation typically in computer science and applications, modeling, statistics, analytics and math. What sets the data scientist apart is strong business acumen, coupled with the ability to communicate findings to both business and IT leaders in a way that can influence how an organization approaches a business challenge. Good data scientists will not just address business problems, they will pick the right problems that have the most value to the organization.\n" + 
+				"The data scientist role has been described as “part analyst, part artist.” Anjul Bhambhri, vice president of big data products at IBM, says, “A data scientist is somebody who is inquisitive, who can stare at data and spot trends. It's almost like a Renaissance individual who really wants to learn and bring change to an organization.\"\n" + 
+				"Whereas a traditional data analyst may look only at data from a single source – a CRM system, for example – a data scientist will most likely explore and examine data from multiple disparate sources. The data scientist will sift through all incoming data with the goal of discovering a previously hidden insight, which in turn can provide a competitive advantage or address a pressing business problem. A data scientist does not simply collect and report on data, but also looks at it from many angles, determines what it means, then recommends ways to apply the data.\n" + 
+				"Data scientists");
 		
 		//PitBotApp2 app = new PitBotApp2();
 		PitSurveyService pitSurveyService = new PitSurveyService();
@@ -659,12 +726,12 @@ public class Tester {
 		}
 		
 		
-		List<Bucket> rankedBuckets = step8(buckets,main);
+		List<Bucket> rankedBuckets = step8OnlyTfIdf(buckets,main);
 		showBucketsOrderByCosineDesc(rankedBuckets);
 	}
 	
 	
-	public List<Bucket> step8(Set<Bucket> buckets, Bucket mainBucket) {
+	public List<Bucket> step8OnlyTfIdf(Set<Bucket> buckets, Bucket mainBucket) {
 		List<Bucket> bucketsList = new ArrayList<>(buckets);
 		
 		/*
@@ -827,7 +894,7 @@ public class Tester {
 		}*/
 		
 		//remove comments
-		System.out.println(code1);
+		//System.out.println(code1);
 		code1 = code1.replaceAll( "//.*|(\"(?:\\\\[^\"]|\\\\\"|.)*?\")|(?s)/\\*.*?\\*/", "$1 " );
 		//System.out.println(code1);
 		
@@ -848,9 +915,37 @@ public class Tester {
 		}*/
 		
 		
+	
+		
+	}
+
+
+	private String getIdFromStr(String str) {
+		String parts[] = str.split("\\|");
+		String s = parts[0].replaceAll("\\D+","");
+		return s;
+	}
+
+
+
+
+
+	private void testMatrix() {
+		//Matrix map
+		int[] cells[] = new int[5][5];
+		
+		for(int i=0; i<5; i++) {
+			for(int j=0; j<5; j++) {
+				System.out.println(cells[i][j]);
+			}
+		}
+		
 		
 		
 	}
+
+
+
 
 
 	private String step3(List<String> apis, String query) {
@@ -901,5 +996,29 @@ public class Tester {
 		
 
 	}
+	
+	
+	enum Roman{
+	    i(1),iv(4),v(5), ix(9), x(10);
+	    int weight;
+
+	    private Roman(int weight) {
+	        this.weight = weight;
+	    }
+	};
+	
+	
+	static String decToRoman(int dec){
+	    String roman="";
+	    Roman[] values=Roman.values();
+	    for (int i = values.length-1; i>=0; i--) {
+	       while(dec>=values[i].weight){
+	           roman+=values[i];
+	           dec=dec-values[i].weight;
+	       }            
+	    }
+	    return roman;
+	}
+
 	
 }

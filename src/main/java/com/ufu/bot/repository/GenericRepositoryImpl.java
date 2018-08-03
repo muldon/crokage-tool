@@ -1,5 +1,6 @@
 package com.ufu.bot.repository;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -15,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
+import com.ufu.bot.to.Evaluation;
 import com.ufu.bot.to.ExternalQuestion;
 import com.ufu.bot.to.Post;
 import com.ufu.bot.to.PostLink;
@@ -208,6 +210,52 @@ public class GenericRepositoryImpl implements GenericRepository {
 		Query q = em.createNativeQuery(sql, ExternalQuestion.class);
 		return (List<ExternalQuestion>) q.getResultList();
 		
+	}
+
+
+
+
+
+	@Override
+	public List<Evaluation> getEvaluationByPhaseAndRelatedPost(Integer externalQuestionId, Integer phaseNumber) {
+		String sql = " select rp.postid, e.surveyuserid, e.likertscale" + 
+				" from relatedpost rp, rank r, evaluation e" + 
+				" where rp.id=r.relatedpostid" + 
+				" and e.rankid = r.id" + 
+				" and rp.externalquestionid = " + externalQuestionId+
+				" and r.phase=" + phaseNumber+ 
+				" order by rp.postid, e.surveyuserid";  
+			
+		Query q = em.createNativeQuery(sql);
+		
+		List<Object[]> rows = q.getResultList();
+		List<Evaluation> result = new ArrayList<>(rows.size());
+		for (Object[] row : rows) {
+			Evaluation evaluation = new Evaluation();
+			evaluation.setPostId((Integer) row[0]);
+			evaluation.setSurveyUserId((Integer) row[1]);
+			evaluation.setLikertScale((Integer) row[2]);
+			result.add(evaluation);			
+		}
+		
+		return result;
+	}
+
+
+
+
+
+	@Override
+	public List<ExternalQuestion> getExternalQuestionsByPhase(Integer phaseNumber) {
+		String sql = " select distinct(e.*)" + 
+				" from externalquestion e, relatedpost rp, rank r" + 
+				" where e.id = rp.externalquestionid " + 
+				" and r.relatedpostid = rp.id" + 
+				" and r.phase = " +phaseNumber+ 
+				" order by e.id ";  
+			
+		Query q = em.createNativeQuery(sql, ExternalQuestion.class);
+		return (List<ExternalQuestion>) q.getResultList();
 	}
 	
 	

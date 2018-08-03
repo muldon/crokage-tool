@@ -15,6 +15,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -1020,7 +1021,7 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 						if(linkLine.startsWith("link:")) {
 							linkLine= linkLine.replace("link:", "").trim();
 							
-							if(phaseNumber==1 || phaseNumber==2) {  //1/3 of questions, first lot
+							if(phaseNumber==1 || phaseNumber==2 || phaseNumber==3) {  //1/3 of questions, first lot
 							
 								if(externalId<=11 || (externalId>=34 && externalId<=44) || (externalId>=67 && externalId<=77)) {
 									ExternalQuestion externalQuestion = new ExternalQuestion(externalId,queryLine,null,null,runRack,obs,linkLine);
@@ -1079,10 +1080,7 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 		
 	}
 	
-	public void buildOutPutFile(Bucket bucket, int pos, String googleQuery, List<String> rackApis) {
-		
-		
-	}
+	
 	
 	public void storeParentPostInCache(Post post) {
 		if(!parentPostsCache.containsKey(post.getId())) {
@@ -1143,7 +1141,30 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 			
 		}
 		
-	}    
+	}
+
+
+	public Set<Integer> getStaticIdsForTests() {
+		HashSet<Integer> soPostsIds = new LinkedHashSet<>();
+		soPostsIds.add(10117026);
+		soPostsIds.add(6416706);
+		soPostsIds.add(10117051);
+		soPostsIds.add(35593309);
+		soPostsIds.add(11018325);
+		soPostsIds.add(23329173);
+		soPostsIds.add(40064173);
+		soPostsIds.add(46107706);
+		soPostsIds.add(8174964);
+		soPostsIds.add(9740830);
+		
+		for(Integer id:soPostsIds) {
+			logger.info("id: "+id);
+		}
+		
+		return soPostsIds;
+	}
+
+	
 	
 	
 	

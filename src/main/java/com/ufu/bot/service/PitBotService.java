@@ -1,5 +1,6 @@
 package com.ufu.bot.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -268,6 +269,31 @@ public class PitBotService extends AbstractService{
 			order++;
 		}
 		
+	}
+
+
+
+
+	@Transactional(readOnly = true)
+	public List<Evaluation> getEvaluationByPhaseAndRelatedPost(Integer externalQuestionId, Integer phaseNumber) {
+		List evaluationsObjects = genericRepository.getEvaluationByPhaseAndRelatedPost(externalQuestionId,phaseNumber);
+		return (List<Evaluation>)evaluationsObjects;
+		
+		
+		/*List<Evaluation> evaluations = new ArrayList<>();
+		for(Object evalObj: evaluationsObjects) {
+			Evaluation evaluation = new Evaluation();
+			evaluation.setPostId(evalObj.);
+		}
+		*/
+		
+		//return evaluations;
+	}
+
+
+	@Transactional(readOnly = true)
+	public List<ExternalQuestion> getExternalQuestionsByPhase(Integer phaseNumber) {
+		return genericRepository.getExternalQuestionsByPhase(phaseNumber);
 	}
 
 	
