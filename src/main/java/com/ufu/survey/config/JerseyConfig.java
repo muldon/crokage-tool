@@ -16,8 +16,6 @@
 
 package com.ufu.survey.config;
 
-import javax.ws.rs.ApplicationPath;
-
 import org.glassfish.jersey.server.ResourceConfig;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.stereotype.Component;
@@ -30,7 +28,7 @@ public class JerseyConfig extends ResourceConfig {
 
 	
 	public JerseyConfig() {
-		
+		register(JerseyConfig.class);
 		packages("com.ufu.survey.config");
 		//packages("com.ufu.survey.interceptor");
 		packages("com.ufu.survey.resources");

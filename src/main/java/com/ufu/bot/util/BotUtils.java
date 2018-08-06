@@ -985,7 +985,7 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 		
 		URL url;
 		String fileContent="";
-				
+		logger.info("...reading external questions");		
 		url = Resources.getResource("external_questions.txt");
 		fileContent = Resources.toString(url, Charsets.UTF_8);
 		

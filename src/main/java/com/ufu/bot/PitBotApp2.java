@@ -405,7 +405,7 @@ public class PitBotApp2 {
 				Cell currentCellColumnA = currentRow.getCell(firstColumn);
 				Cell currentCellColumnB = currentRow.getCell(firstColumn);
 				Cell currentCellColumnC = currentRow.getCell(secondColumn);
-				--terminar.. coluna a pode ter id do post tb ..
+				//--terminar.. coluna a pode ter id do post tb a age..
 				if(currentCellColumnA!=null && currentCellColumnA.getCellTypeEnum() == CellType.STRING) {
 					
 					String currentAValue = currentCellColumnB.getStringCellValue();
