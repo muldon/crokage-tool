@@ -154,12 +154,12 @@ public class RelatedPost {
 	
 
 	public enum RelationTypeEnum {
-		FROM_GOOGLE_QUESTION (1), 
-	    RELATED_DUPE (2),
-	    RELATED_NOT_DUPE (3),	    
-		FROM_GOOGLE_ANSWER (4),
-		FROM_GOOGLE_QUESTION_OR_ANSWER (5),
-		LINKS_INSIDE_TEXTS (5);
+		FROM_GOOGLE_QUESTION_T1 (1), 
+	    RELATED_DUPE_T2 (2),
+	    RELATED_NOT_DUPE_T3 (3),	    
+		FROM_GOOGLE_ANSWER_T4 (4),
+		FROM_GOOGLE_QUESTION_OR_ANSWER_T5 (5),
+		LINKS_INSIDE_TEXTS_T6 (5);
 	   
 		private final Integer id;
 						

@@ -56,6 +56,9 @@ public class Evaluation {
 	@Transient
 	private Integer likertScaleUser2;
 
+	@Transient
+	private Integer relatedTypeId;
+	
 
 	public Integer getId() {
 		return id;
@@ -218,6 +221,16 @@ public class Evaluation {
 
 	public void setLikertScaleUser2(Integer likertScaleUser2) {
 		this.likertScaleUser2 = likertScaleUser2;
+	}
+
+
+	public Integer getRelatedTypeId() {
+		return relatedTypeId;
+	}
+
+
+	public void setRelatedTypeId(Integer relatedTypeId) {
+		this.relatedTypeId = relatedTypeId;
 	}
 
 

@@ -297,5 +297,19 @@ public class PitBotService extends AbstractService{
 	}
 
 	
+	@Transactional(readOnly = true)
+	public RelatedPost getRelatedPostByExternalQuestionIdAndPostId(Integer externalQuestionId, Integer postId) {
+		return relatedPostRepository.findByExternalQuestionIdAndPostId(externalQuestionId,postId);
+	}
+
+
+
+
+
+	public Rank getRankByRelatedPostIdAndPhase(Integer relatedPostId, Integer phase) {
+		return rankRepository.findByRelatedPostIdAndPhase(relatedPostId,phase);
+	}
+	
+	
 	
 }

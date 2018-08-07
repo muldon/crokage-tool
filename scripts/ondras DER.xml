@@ -112,9 +112,6 @@
 <row name="ratingdate" null="1" autoincrement="0">
 <datatype>DATE</datatype>
 <default>NULL</default></row>
-<row name="phase" null="1" autoincrement="0">
-<datatype>INTEGER</datatype>
-<default>NULL</default></row>
 <key type="PRIMARY" name="">
 <part>id</part>
 </key>
@@ -131,7 +128,7 @@
 <datatype>INTEGER</datatype>
 <default>NULL</default><relation table="postmin" row="id" />
 </row>
-<row name="relationType" null="1" autoincrement="0">
+<row name="relationtypeid" null="1" autoincrement="0">
 <datatype>INTEGER</datatype>
 <default>NULL</default></row>
 <key type="PRIMARY" name="">
@@ -218,6 +215,9 @@
 <datatype>INTEGER</datatype>
 <default>NULL</default></row>
 <row name="internalevaluation" null="1" autoincrement="0">
+<datatype>INTEGER</datatype>
+<default>NULL</default></row>
+<row name="phase" null="1" autoincrement="0">
 <datatype>INTEGER</datatype>
 <default>NULL</default></row>
 <key type="PRIMARY" name="">

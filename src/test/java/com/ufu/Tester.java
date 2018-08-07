@@ -2,18 +2,19 @@ package com.ufu;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.math.BigInteger;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.concurrent.ThreadLocalRandom;
@@ -36,7 +37,6 @@ import com.ufu.bot.PitBotApp2;
 import com.ufu.bot.tfidf.TfIdf;
 import com.ufu.bot.tfidf.ngram.NgramTfIdf;
 import com.ufu.bot.to.Bucket;
-import com.ufu.bot.to.Evaluation;
 import com.ufu.bot.to.Post;
 import com.ufu.bot.util.BotComposer;
 import com.ufu.bot.util.BotUtils;
@@ -504,13 +504,13 @@ public class Tester {
 		//testFindExternalQuestionNumber();
 		//testStep8();
 		
-		//System.out.println(decToRoman(89));
+		System.out.println(decToRoman(89));
 		String s = "1234567890abcdef";
-		//System.out.println(java.util.Arrays.toString(s.split("(?<=\\G..)")));
+		//System.out.println(java.util.Arrays.toString(s.split("(?<=\\G.....)")));
 		
 		
-		Iterable<String> pieces = Splitter.fixedLength(3).split(s);
-		//System.out.println(pieces);
+		Iterable<String> pieces = Splitter.fixedLength(4).split(s);
+		System.out.println(pieces);
 		
 		Iterable<String> result = Splitter.fixedLength(4).split("how are you?");
 		String[] parts = Iterables.toArray(result, String.class);
@@ -559,7 +559,35 @@ public class Tester {
 		//testMatrix();
 		//testMatrix();
 		String str1 = "Id:(1111) || Refid: 1 - How do I convert number into Roman Numerals?";
-		System.out.println(getIdFromStr(str1));
+		//System.out.println(getIdFromStr(str1));
+		/*Scanner inputt = new Scanner(System.in);
+		int option = inputt.nextInt();
+		inputt.nextLine();  // Consume newline left-over
+		String str2 = inputt.nextLine();
+		System.out.println(str2);*/
+		
+		/*
+		BigInteger reallyBig = new BigInteger("1");
+		BigInteger notSoBig = new BigInteger("2");
+		reallyBig = reallyBig.add(notSoBig);
+		System.out.println(reallyBig);
+		*/
+		
+		Integer a10 = 10;
+
+		int orig = 20;
+		int res = Integer.parseInt(""+orig, 16);
+		System.out.println(res);
+		
+		//System.out.println(Integer.toHexString(20));
+		//Integer.parseInt(""+20, 16);
+		//System.out.println(Integer.toBinaryString(a10));
+		
+		int na = 3;
+		int nb= 4;
+		double mean = (3+4)/(double)2;
+		
+		System.out.println(BotUtils.round(mean,2));
 	}
 	
 	

@@ -1,0 +1,11 @@
+After building the csv file to perform the agreement, this are some steps to automactally detect links:
+
+
+    Edit▸Find & Replace
+    Search For: http.*|file:.*
+    Replace With: =HYPERLINK("&")
+    Other Options: check Regular expressions (also Current selection if necessary)
+    Replace All
+
+now save as xlsx
+

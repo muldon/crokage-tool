@@ -1137,9 +1137,24 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 				soQuestionsIds.add(new Integer(matcher.group(1)));
 				
 			}
-			//System.out.println(url);
 			
 		}
+		
+	}
+	
+	
+	public static Integer identifyQuestionIdFromUrl(String url) {
+		if(!url.contains("stackoverflow.com")) {
+			//logger.info("Discarting URL because its is not a SO url: "+url);
+			return null;
+		}
+		//String[] urlPart = url.split("\\/[[:digit:]].*\\/");
+		Pattern pattern = Pattern.compile("\\/([\\d]+)");
+		Matcher matcher = pattern.matcher(url);
+		if (matcher.find()) {
+			return new Integer(matcher.group(1));
+		}
+		return null;
 		
 	}
 

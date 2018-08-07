@@ -78,13 +78,13 @@ public class BotComposer {
 					              + epsilonUpScore    * bucket.getUpScore(); 
 			double adjuster;
 			
-			if(bucket.getRelationTypeId().equals(RelationTypeEnum.FROM_GOOGLE_QUESTION.getId())) {
+			if(bucket.getRelationTypeId().equals(RelationTypeEnum.FROM_GOOGLE_QUESTION_T1.getId())) {
 				adjuster = relationTypeFromGoogleQuestion;
-			}else if(bucket.getRelationTypeId().equals(RelationTypeEnum.FROM_GOOGLE_ANSWER.getId())) {
+			}else if(bucket.getRelationTypeId().equals(RelationTypeEnum.FROM_GOOGLE_ANSWER_T4.getId())) {
 				adjuster = relationTypeFromGoogleAnswer;
-			}else if(bucket.getRelationTypeId().equals(RelationTypeEnum.RELATED_DUPE.getId())) {
+			}else if(bucket.getRelationTypeId().equals(RelationTypeEnum.RELATED_DUPE_T2.getId())) {
 				adjuster = relationTypeRelatedDupe;
-			}else if(bucket.getRelationTypeId().equals(RelationTypeEnum.RELATED_NOT_DUPE.getId())) {
+			}else if(bucket.getRelationTypeId().equals(RelationTypeEnum.RELATED_NOT_DUPE_T3.getId())) {
 				adjuster = relationTypeRelatedNotDupe;
 			}else {
 				adjuster = relationTypeLinksInsideTexts;

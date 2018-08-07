@@ -46,6 +46,8 @@ import com.ufu.bot.to.Comment;
 import com.ufu.bot.to.Evaluation;
 import com.ufu.bot.to.ExternalQuestion;
 import com.ufu.bot.to.Post;
+import com.ufu.bot.to.Rank;
+import com.ufu.bot.to.RelatedPost;
 import com.ufu.bot.to.RelatedPost.RelationTypeEnum;
 import com.ufu.bot.to.SoThread;
 import com.ufu.bot.util.BotUtils;
@@ -354,6 +356,7 @@ public class PitBotApp2 {
 		String fileName = "Phase2AfterAgreement";
 		String fileNameMatrixKappaBeforeAgreement = "Phase2MatrixForKappaBeforeAgreement.csv";
 		String fileNameMatrixKappaAfterAgreement = "Phase2MatrixForKappaAfterAgreement.csv";
+		String reportCGFileName = "Phase2CGReport.csv";
 		
 		Integer likertsResearcher1BeforeAgreementColumn = 1;
 		Integer likertsResearcher2BeforeAgreementColumn = 2;
@@ -361,9 +364,8 @@ public class PitBotApp2 {
 		Integer likertsResearcher2AfterAgreementColumn = 4;
 				
 		if(phaseSection==1) { //Build excel with evaluations. Agreement phase. 
-			BufferedWriter bw =null;
 			List<ExternalQuestion> externalQuestions = pitBotService.getExternalQuestionsByPhase(1);
-			buildCsvPhaseSection1(bw,fileName,externalQuestions);
+			buildCsvPhaseSection1(fileName,externalQuestions);
 			
 		}else if(phaseSection==2) { //Use previous xlsx spreedShed to build a matrix of values for the scales - before agreement 
 			List<Evaluation> evaluationsWithBothUsersScales = new ArrayList<>();
@@ -378,7 +380,9 @@ public class PitBotApp2 {
 		}else if(phaseSection==4) {//Discover the best adjuster weights. Use the previous analyzed posts to discover what is the influence of the post origin the post quality. Set adjuster weights.
 			List<Evaluation> evaluationsWithBothUsersScales = new ArrayList<>();
 			readXlsxToEvaluationList(evaluationsWithBothUsersScales,fileName,likertsResearcher1AfterAgreementColumn,likertsResearcher2AfterAgreementColumn);
-			System.out.println(evaluationsWithBothUsersScales);			
+			//System.out.println(evaluationsWithBothUsersScales);	
+			buildReportAdjustmentWeights(evaluationsWithBothUsersScales,reportCGFileName);
+			
 		}
 		
 		
@@ -391,6 +395,79 @@ public class PitBotApp2 {
 
 
 
+	private void buildReportAdjustmentWeights(List<Evaluation> evaluationsWithBothUsersScales, String reportCGFileName) throws IOException {
+		BufferedWriter bw =null;
+		try {
+			
+			List<Evaluation> fromGQuestion = new ArrayList<>();
+			List<Evaluation> relatedDupe = new ArrayList<>();
+			List<Evaluation> relatedNotDupe = new ArrayList<>();
+			List<Evaluation> fromGAnswer = new ArrayList<>();
+			
+			Double fromGQuestionCG  = 0d,  idealFromGQuestionCG 	= 0d,  ncgT1 = 0d;
+			Double relatedDupeCG    = 0d,  idealRelatedDupeCG 		= 0d,  ncgT2 = 0d;
+			Double relatedNotDupeCG = 0d,  idealRelatedNotDupeCG 	= 0d,  ncgT3 = 0d;
+			Double fromGAnswerCG    = 0d,  idealFromGAnswerCG 		= 0d,  ncgT4 = 0d;
+			
+			for(Evaluation evaluation:evaluationsWithBothUsersScales){
+				RelatedPost relatedPost = pitBotService.getRelatedPostByExternalQuestionIdAndPostId(evaluation.getExternalQuestionId(), evaluation.getPostId());					
+				//Rank rank = pitBotService.getRankByRelatedPostIdAndPhase(relatedPost.getId(),1);
+				//System.out.println(relatedPost.getRelationTypeId());
+				Integer relatedTypeId = relatedPost.getRelationTypeId();
+				//evaluation.setRelatedTypeId(relatedTypeId);
+				double meanFull = (evaluation.getLikertScaleUser1()+evaluation.getLikertScaleUser2())/(double)2;
+				double meanLikert = BotUtils.round(meanFull,2);
+				
+				
+				
+				if(relatedTypeId.equals(RelationTypeEnum.FROM_GOOGLE_QUESTION_T1.getId())) {
+					fromGQuestion.add(evaluation);
+					fromGQuestionCG+= meanLikert;
+					idealFromGQuestionCG += 5;
+					
+				}else if(relatedTypeId.equals(RelationTypeEnum.RELATED_DUPE_T2.getId())) {
+					relatedDupe.add(evaluation);
+					relatedDupeCG+= meanLikert;
+					idealRelatedDupeCG += 5;
+					
+				}else if(relatedTypeId.equals(RelationTypeEnum.RELATED_NOT_DUPE_T3.getId())) {
+					relatedNotDupe.add(evaluation);
+					relatedNotDupeCG+= meanLikert;
+					idealRelatedNotDupeCG += 5;
+					
+				}else if(relatedTypeId.equals(RelationTypeEnum.FROM_GOOGLE_ANSWER_T4.getId())) {
+					fromGAnswer.add(evaluation);
+					fromGAnswerCG+= meanLikert;
+					idealFromGAnswerCG += 5;
+				}
+				
+			}
+			ncgT1 = BotUtils.round((fromGQuestionCG/idealFromGQuestionCG),2);
+			ncgT2 = BotUtils.round((relatedDupeCG/idealRelatedDupeCG),2);
+			ncgT3 = BotUtils.round((relatedNotDupeCG/idealRelatedNotDupeCG),2);
+			ncgT4 = BotUtils.round((fromGAnswerCG/idealFromGAnswerCG),2);
+			
+			bw = new BufferedWriter(new FileWriter(reportCGFileName));
+			bw.write("Post Origin;Count;CG;Ideal CG;NCG\n\n");
+			bw.write("From Google Question;"+fromGQuestion.size()+";"+fromGQuestionCG+";"+idealFromGQuestionCG+";"+ncgT1+"\n");
+			bw.write("Related Dupe;"+relatedDupe.size()+";"+relatedDupeCG+";"+idealRelatedDupeCG+";"+ncgT2+"\n");
+			bw.write("Related Not Dupe;"+relatedNotDupe.size()+";"+relatedNotDupeCG+";"+idealRelatedNotDupeCG+";"+ncgT3+"\n");
+			bw.write("From Google Answer;"+fromGAnswer.size()+";"+fromGAnswerCG+";"+idealFromGAnswerCG+";"+ncgT4+"\n");
+			
+			bw.write("\nTotal;"+evaluationsWithBothUsersScales.size()+"\n");
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			bw.close();
+		}
+		
+	}
+
+
+
+
+
 	private void readXlsxToEvaluationList(List<Evaluation> evaluationsWithBothUsersScales, String fileName, Integer firstColumn, Integer secondColumn) {
 		try {
 
@@ -398,20 +475,23 @@ public class PitBotApp2 {
 			Workbook workbook = new XSSFWorkbook(excelFile);
 			Sheet datatypeSheet = workbook.getSheetAt(0);
 			Iterator<Row> iterator = datatypeSheet.iterator();
-	
+			Integer externalQuestionId=null;
 			while (iterator.hasNext()) {
 
 				Row currentRow = iterator.next();
-				Cell currentCellColumnA = currentRow.getCell(firstColumn);
+				Cell currentCellColumnA = currentRow.getCell(0);
 				Cell currentCellColumnB = currentRow.getCell(firstColumn);
 				Cell currentCellColumnC = currentRow.getCell(secondColumn);
-				//--terminar.. coluna a pode ter id do post tb a age..
-				if(currentCellColumnA!=null && currentCellColumnA.getCellTypeEnum() == CellType.STRING) {
+				
+				if(currentCellColumnA!=null) {
 					
-					String currentAValue = currentCellColumnB.getStringCellValue();
-					String parts[] = currentAValue.split("\\|");
-					String externalQuestionIdStr = parts[0].replaceAll("\\D+","");
-					Integer externalQuestionId = new Integer(externalQuestionIdStr);
+					String currentAValue = currentCellColumnA.getStringCellValue();
+					Integer postId = botUtils.identifyQuestionIdFromUrl(currentAValue);
+					if(currentAValue.contains("id:")) {
+						String parts[] = currentAValue.split("\\|");
+						String externalQuestionIdStr = parts[0].replaceAll("\\D+","");
+						externalQuestionId = new Integer(externalQuestionIdStr);
+					}
 					
 					if (currentCellColumnB != null && currentCellColumnB.getCellTypeEnum() == CellType.NUMERIC
 						&& currentCellColumnC != null && currentCellColumnC.getCellTypeEnum() == CellType.NUMERIC) {
@@ -424,6 +504,7 @@ public class PitBotApp2 {
 						eval.setExternalQuestionId(externalQuestionId);
 						eval.setLikertScaleUser1(currentBValue);
 						eval.setLikertScaleUser2(currentCValue);
+						eval.setPostId(postId);
 						evaluationsWithBothUsersScales.add(eval);
 					}
 				
@@ -442,9 +523,9 @@ public class PitBotApp2 {
 
 
 
-	private void buildCsvPhaseSection1(BufferedWriter bw,String fileName,List<ExternalQuestion> externalQuestions) throws IOException {
+	private void buildCsvPhaseSection1(String fileName,List<ExternalQuestion> externalQuestions) throws IOException {
+		BufferedWriter bw =null;
 		try {
-		
 			bw = new BufferedWriter(new FileWriter(fileName+".csv"));
 			bw.write(";Researcher1;Researcher2;Researcher1 agreement;Researcher2 agreement\n\n");
 			
@@ -671,7 +752,7 @@ public class PitBotApp2 {
 	 * @return a list of threads, where each thread is a question with all their answers and comments.
 	 */
 	public Set<SoThread> step5(Set<Integer> soQuestionsIds) {
-		return pitBotService.assembleListOfThreads(soQuestionsIds,RelationTypeEnum.FROM_GOOGLE_QUESTION_OR_ANSWER.getId());
+		return pitBotService.assembleListOfThreads(soQuestionsIds,RelationTypeEnum.FROM_GOOGLE_QUESTION_OR_ANSWER_T5.getId());
 		
 	}
 
@@ -712,8 +793,8 @@ public class PitBotApp2 {
 		otherRelatedIds.removeAll(allQuestionsIds);
 		logger.info("Number of remaing threads to assemble: dupes: "+allRelatedDupesIds.size() + " + others: "+otherRelatedIds.size());
 		
-		Set<SoThread> relatedDupeThreads = pitBotService.assembleListOfThreads(allRelatedDupesIds,RelationTypeEnum.RELATED_DUPE.getId());
-		Set<SoThread> otherRelatedThreads = pitBotService.assembleListOfThreads(otherRelatedIds,RelationTypeEnum.RELATED_NOT_DUPE.getId());
+		Set<SoThread> relatedDupeThreads = pitBotService.assembleListOfThreads(allRelatedDupesIds,RelationTypeEnum.RELATED_DUPE_T2.getId());
+		Set<SoThread> otherRelatedThreads = pitBotService.assembleListOfThreads(otherRelatedIds,RelationTypeEnum.RELATED_NOT_DUPE_T3.getId());
 		
 		logger.info("Number of new threads: dupes: "+relatedDupeThreads.size()+ " + others: "+otherRelatedThreads.size());
 		
@@ -763,7 +844,7 @@ public class PitBotApp2 {
 		
 		logger.info("Number of questions ids identified inside links: "+soQuestionsIdsInsideTexts.size());
 		
-		Set<SoThread> newThreadsAssembledFromLinks = pitBotService.assembleListOfThreads(soQuestionsIdsInsideTexts,RelationTypeEnum.LINKS_INSIDE_TEXTS.getId());
+		Set<SoThread> newThreadsAssembledFromLinks = pitBotService.assembleListOfThreads(soQuestionsIdsInsideTexts,RelationTypeEnum.LINKS_INSIDE_TEXTS_T6.getId());
 		logger.info("Number of new Threads built from link's ids: "+newThreadsAssembledFromLinks.size());
 		
 		logger.info("Number of posts that are answers and had their parent thread fetched: "+pitBotService.getCountPostIsAnAnswer());

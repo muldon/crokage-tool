@@ -174,6 +174,7 @@ CREATE TABLE rank
   rankorder integer,
   internalevaluation boolean,
   relatedpostid integer,
+  phase integer,
   CONSTRAINT rank_pk PRIMARY KEY (id),
   CONSTRAINT rank_fk1 FOREIGN KEY (relatedpostid)
       REFERENCES relatedpost (id) MATCH SIMPLE
@@ -197,7 +198,6 @@ CREATE TABLE evaluation
   likertscale integer,
   ratingdate timestamp without time zone,
   rankid integer,
-  phase integer,
   CONSTRAINT evaluation_pk PRIMARY KEY (id),
   CONSTRAINT evaluation_fk2 FOREIGN KEY (rankid)
       REFERENCES rank (id) MATCH SIMPLE

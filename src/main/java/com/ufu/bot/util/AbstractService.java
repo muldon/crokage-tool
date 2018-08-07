@@ -143,11 +143,11 @@ public abstract class AbstractService {
 				List<Comment> answerComments = getCommentsByPostId(answer.getId());
 				setCommentsUsers(answerComments);
 				answer.setComments(answerComments);
-				if(relationTypeId.equals(RelationTypeEnum.FROM_GOOGLE_QUESTION_OR_ANSWER.getId())) {
+				if(relationTypeId.equals(RelationTypeEnum.FROM_GOOGLE_QUESTION_OR_ANSWER_T5.getId())) {
 					if(postIsQuestion) {
-						answer.setRelationTypeId(RelationTypeEnum.FROM_GOOGLE_QUESTION.getId());
+						answer.setRelationTypeId(RelationTypeEnum.FROM_GOOGLE_QUESTION_T1.getId());
 					}else {
-						answer.setRelationTypeId(RelationTypeEnum.FROM_GOOGLE_ANSWER.getId());
+						answer.setRelationTypeId(RelationTypeEnum.FROM_GOOGLE_ANSWER_T4.getId());
 					}
 				}else {
 					answer.setRelationTypeId(relationTypeId);
