@@ -10,6 +10,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -185,7 +186,7 @@ public class BotApplicationTests extends AbstractService{
 		System.out.println(relatedPost);
 		
 		
-		List<Post> relatedPosts = pitBotService.getRelatedPosts(1);
+		List<Post> relatedPosts = pitBotService.getPostsByExternalQuestionId(1);
 		System.out.println(relatedPosts);
 	}
 	
@@ -238,5 +239,23 @@ public class BotApplicationTests extends AbstractService{
 		
 		
 	}	
+	
+	
+	@Test
+	public void simulateUserEvaluation() {
+		//List<Evaluation> allEvaluations = (List<Evaluation>)evaluationRepository.findByPhaseUser(4,1);
+		List<Evaluation> allEvaluations = pitBotService.getEvaluationsByPhaseAndUser(4,1);
+		for(Evaluation evaluation: allEvaluations) {
+			Evaluation clone = new Evaluation();
+			BeanUtils.copyProperties(evaluation, clone);
+			clone.setId(null);
+			clone.setSurveyUserId(2);
+			pitBotService.saveEvaluation(clone);
+		}
+		
+		
+	}	
+	
+	
 
 }

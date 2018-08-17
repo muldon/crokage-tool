@@ -40,8 +40,8 @@ public class ExternalQuestion {
 	@Column(name="externalid")	
 	private Integer externalId;
 	
-	@Transient
-	private Map<Integer,List<Post>> relatedPosts;
+	//@Transient
+	//private Map<Integer,List<Post>> relatedPosts;
 		
 
 	public Integer getId() {
@@ -130,7 +130,7 @@ public class ExternalQuestion {
 	public String toString() {
 		return "ExternalQuestion [id=" + id + ", rawQuery=" + rawQuery + ", googleQuery=" + googleQuery + ", classes="
 				+ classes + ", useRack=" + useRack + ", obs=" + obs + ", url=" + url + ", externalId=" + externalId
-				+ ", relatedPosts=" + relatedPosts + "]";
+				+ "]";
 	}
 
 	public ExternalQuestion(Integer externalId,String rawQuery, String googleQuery, String classes, Boolean useRack, String obs, String link) {
@@ -172,13 +172,13 @@ public class ExternalQuestion {
 		this.rawQuery = rawQuery;
 	}
 
-	public Map<Integer, List<Post>> getRelatedPosts() {
+	/*public Map<Integer, List<Post>> getRelatedPosts() {
 		return relatedPosts;
 	}
 
 	public void setRelatedPosts(Map<Integer, List<Post>> relatedPosts) {
 		this.relatedPosts = relatedPosts;
-	}
+	}*/
 
 	
 

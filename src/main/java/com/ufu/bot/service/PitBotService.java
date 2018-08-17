@@ -163,7 +163,7 @@ public class PitBotService extends AbstractService{
 
 
 	@Transactional(readOnly = true)
-	public List<Post> getRelatedPosts(Integer externalQuestionId) {
+	public List<Post> getPostsByExternalQuestionId(Integer externalQuestionId) {
 		return relatedPostRepository.findRelatedPosts(externalQuestionId);
 	}
 
@@ -305,9 +305,41 @@ public class PitBotService extends AbstractService{
 
 
 
-
+	@Transactional(readOnly = true)
 	public Rank getRankByRelatedPostIdAndPhase(Integer relatedPostId, Integer phase) {
 		return rankRepository.findByRelatedPostIdAndPhase(relatedPostId,phase);
+	}
+
+
+
+
+	@Transactional(readOnly = true)
+	public Rank getRankByRelatedPostIdAndInternalEvaluation(Integer relatedPostId, boolean internalEvaluation) {
+		return rankRepository.findByRelatedPostIdAndInternalEvaluation(relatedPostId,internalEvaluation);
+	}
+
+
+
+
+	@Transactional(readOnly = true)
+	public List<RelatedPost> getRelatedPostsByExternalQuestionId(Integer externalQuestionId) {
+		return relatedPostRepository.findByExternalQuestionId(externalQuestionId);
+	}
+
+
+
+
+	@Transactional(readOnly = true)
+	public List<Evaluation> getEvaluationsByPhaseAndUser(int phase, int user) {
+		return evaluationRepository.findByPhaseUser(phase, user);
+	}
+
+
+
+
+
+	public ExternalQuestion getExternalQuestionById(Integer externalQuestionId) {
+		return externalQuestionRepository.findOne(externalQuestionId);
 	}
 	
 	

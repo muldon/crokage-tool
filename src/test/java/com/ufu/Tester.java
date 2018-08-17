@@ -5,6 +5,7 @@ import java.io.StringReader;
 import java.math.BigInteger;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -14,9 +15,10 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.StringTokenizer;
+import java.util.TreeSet;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -30,8 +32,10 @@ import org.json.simple.parser.ParseException;
 
 import com.google.common.base.Charsets;
 import com.google.common.base.Splitter;
+import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Multiset;
 import com.google.common.io.Resources;
 import com.ufu.bot.PitBotApp2;
 import com.ufu.bot.tfidf.TfIdf;
@@ -587,11 +591,111 @@ public class Tester {
 		int nb= 4;
 		double mean = (3+4)/(double)2;
 		
-		System.out.println(BotUtils.round(mean,2));
+		//System.out.println(BotUtils.round(mean,2));
+		
+		//Thread[] threads = Thread.getThreads();
+		
+		//System.out.println(java.lang.Thread.activeCount());
+		Thread.getAllStackTraces().keySet().forEach((t) -> System.out.println(t.getName() + "\nIs Daemon " + t.isDaemon() + "\nIs Alive " + t.isAlive()));
+		
+		
+		ArrayList<String> numbers = new ArrayList<>();
+		numbers.add("2");
+		numbers.add("5");
+		numbers.add("9");
+		numbers.add("1");
+		numbers.add("10");
+		
+		/*Collections.sort(numbers);
+		System.out.println(numbers);*/
+		
+		
+		SortedSet<String> set = new TreeSet<>();
+        set.add("One");
+        set.add("Two");
+        set.add("Three");
+        set.add("Four");
+        set.add("Five");
+
+        System.out.println(set.last());
+        // SortedSet orders the items it contains. After that we get the last
+        // item from the set using last() method. The last item will be "Two".
+        //String lastElement = set();
+        Iterator<String> it = set.iterator();
+        String value = null;
+
+        while (it.hasNext()) {
+            value = it.next();
+        }
+        System.out.println(value);
+        
+        final Iterator itr = set.iterator();
+        Object lastElement = itr.next();
+        while(itr.hasNext()) {
+            lastElement = itr.next();
+        }
+        System.out.println(lastElement);
+        
+        String octal = "10";
+        int resulta= Integer.parseInt(octal,8);
+        //System.out.println(resulta);
+        /*Integer a11 = (Integer)BeanUtils.cloneBean(a10);
+        System.out.println(a11);*/
+        
+        //System.out.println(Integer.toString(10,8));
+        
+        
+        Multiset<String> wordsMultiset = HashMultiset.create();
+        wordsMultiset.addAll(Arrays.asList("String: BeginnersBook.com"));
+        for(Multiset.Entry<String> entry:wordsMultiset.entrySet()){
+             System.out.println(entry.getElement()+" - "+entry.getCount());
+        }
+        
+              
+		
+		
+		for(int i = 0; i < 9; i++) {
+		    for(int j = 9; j > 0; j--)
+		        System.out.print(i < j ? " " : "*");
+		
+		    System.out.println();
+		}
+
+		 // True (odd length)
+        System.out.println(isPalindrome("asdfghgfdsa"));
+
+        // True (even length)
+        System.out.println(isPalindrome("asdfggfdsa"));
+
+        // False
+        System.out.println(isPalindrome("not palindrome"));
+
+        // True (but very forgiving :)
+        System.out.println(isPalindromeForgiving("madam I'm Adam"));
+        
+        System.out.println(fact(1));
+        System.out.println(fact(2));
+        System.out.println(fact(3));
+        System.out.println(fact(4));
+        
+
 	}
 	
 	
-	
+	 public static boolean isPalindrome(String s) {
+	        return s.length() <= 1 ||
+	            (s.charAt(0) == s.charAt(s.length() - 1) &&
+	             isPalindrome(s.substring(1, s.length() - 1)));
+	    }
+
+
+	    public static boolean isPalindromeForgiving(String s) {
+	        return isPalindrome(s.toLowerCase().replaceAll("[\\s\\pP]", ""));
+	    }
+
+	    public static BigInteger fact(int a) {
+	        return a == 1 ? BigInteger.ONE : BigInteger.valueOf(a).multiply(fact(a - 1));
+	    }
 	
 
 	private void testRemoveEmptyElementFromList() {

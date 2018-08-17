@@ -62,6 +62,8 @@ public class PitSurveyService extends AbstractService{
 	@Value("${externalSurveyRankListSize}")
 	public Integer externalSurveyRankListSize;  
 	
+	@Value("${metricsGenerationRankListSize}")
+	public Integer metricsGenerationRankListSize;  
 		
 	private Double avgScore;
 	private Double avgReputation;
@@ -113,8 +115,8 @@ public class PitSurveyService extends AbstractService{
 	}
 	
 	
-	
-	public List<Bucket> runSteps7toTheEnd(ExternalQuestion nextQuestion, Set<SoThread> allThreads) throws Exception {
+	@Transactional(readOnly = true)
+	public List<Bucket> runSteps7and8(ExternalQuestion externalQuestion, Set<SoThread> allThreads) throws Exception {
 		/*
 		 * Step 7: Text Processing
 		 * 
@@ -123,7 +125,7 @@ public class PitSurveyService extends AbstractService{
 		long initTime; 
 		
 		initTime = System.currentTimeMillis();
-		Set<Bucket> buckets = step7(nextQuestion,allThreads,mainBucket);
+		Set<Bucket> buckets = step7(externalQuestion,allThreads,mainBucket);
 		botUtils.reportElapsedTime(initTime,"Step 7: Text Processing");
 		
 		/*
@@ -131,26 +133,30 @@ public class PitSurveyService extends AbstractService{
 		 * 
 		 */
 		initTime = System.currentTimeMillis();
-		List<Bucket> rankedBuckets = step8(buckets,mainBucket);
+		List<Bucket> scoredBucketList = step8(buckets,mainBucket);
 		botUtils.reportElapsedTime(initTime,"Step 8: Relevance Calculation");
 		
-		
+		return scoredBucketList;
 		/*
 		 * Step 9: Answer Generation
 		 * 
-		 */
+		 
 		initTime = System.currentTimeMillis();
 		Integer maxRankSize=null;
 		if(phaseNumber.equals(1) || phaseNumber.equals(2) || phaseNumber.equals(4)) {
 			maxRankSize = internalSurveyRankListSize;
+		}else if(phaseNumber.equals(6)) {
+			maxRankSize = metricsGenerationRankListSize;
 		}else if(phaseNumber.equals(7)) {
 			maxRankSize = externalSurveyRankListSize;
 		}
 		
-		List<Bucket> trimmedRank = step9(rankedBuckets,nextQuestion.getGoogleQuery(),new ArrayList<String>(Arrays.asList(nextQuestion.getClasses().split(" "))),maxRankSize);
+		List<Bucket> trimmedRank = step9(rankedBuckets,externalQuestion.getGoogleQuery(),new ArrayList<String>(Arrays.asList(externalQuestion.getClasses().split(" "))),maxRankSize);
 		botUtils.reportElapsedTime(initTime,"Step 9: Answer Generation");
 		
-		return trimmedRank;
+		return trimmedRank;*/
+		
+		
 	}
 	
 	
@@ -240,7 +246,7 @@ public class PitSurveyService extends AbstractService{
 
 
 	
-
+	@Transactional(readOnly = true)
 	public List<Bucket> step8(Set<Bucket> buckets, Bucket mainBucket) {
 		List<Bucket> bucketsList = new ArrayList<>(buckets);
 		
@@ -275,17 +281,22 @@ public class PitSurveyService extends AbstractService{
        return bucketsList;
 	}
 
-
-	private List<Bucket> step9(List<Bucket> bucketsList,String googleQuery, List<String> rackApis, Integer maxRankSize) throws IOException {
+	
+	/*
+	 * Step 9: Rank List
+	 * 
+	*/ 
+	@Transactional(readOnly = true)
+	public List<Bucket> step9(List<Bucket> bucketsList, Integer maxRankSize) throws IOException {
 		//showBucketsOrderByCosineDesc(bucketsList);
 		//showRankedList(rankedBuckets);
 
 	    botComposer.rankList(bucketsList);
 	    
 	    //now the buckets are ranked
-		List<Bucket> trimmedRankedBuckets = new ArrayList<>();
+		//List<Bucket> trimmedRankedBuckets = new ArrayList<>();
 		
-		int pos=0;
+		/*int pos=0;
 		for(Bucket bucket: bucketsList){
 			//logger.info("Rank: "+(pos+1)+ " total Score: "+bucket.getComposedScore() +" - cosine: "+bucket.getCosSim()+ " - coverageScore: "+bucket.getCoverageScore()+ " - codeSizeScore: "+bucket.getCodeSizeScore() +" - repScore: "+bucket.getRepScore()+ " - upScore: "+bucket.getUpScore()+ " - id: "+bucket.getPostId()+ " \n "+bucket.getPresentingBody());
 			//logger.info("Rank: "+(pos+1)+ " total Score: "+bucket.getComposedScore() +" - cosine: "+bucket.getCosSim()+ " - coverageScore: "+bucket.getCoverageScore()+ " - codeSizeScore: "+bucket.getCodeSizeScore() +" - repScore: "+bucket.getRepScore()+ " - upScore: "+bucket.getUpScore()+ " - id: "+bucket.getPostId());
@@ -296,8 +307,13 @@ public class PitSurveyService extends AbstractService{
 				break;
 			}
 		}
-		bucketsList= null;
-		return trimmedRankedBuckets;
+		bucketsList= null;*/
+		if(maxRankSize>bucketsList.size()) {
+			maxRankSize = bucketsList.size();
+		}
+		//trimmedRankedBuckets.addAll(bucketsList.subList(0, maxRankSize-1));
+		//return trimmedRankedBuckets;
+		return bucketsList.subList(0, maxRankSize);
 		
 	}
 
@@ -708,7 +724,7 @@ public class PitSurveyService extends AbstractService{
 		return allExternalQuestions;
 	}
 
-	
+	/*
 	public void runPhase3Old() throws Exception {
 		long initTime; 
 		long endTime;
@@ -741,7 +757,7 @@ public class PitSurveyService extends AbstractService{
 		}
 		
 	}
-
+*/
 	
 	
 	

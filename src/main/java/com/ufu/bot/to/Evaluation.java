@@ -59,7 +59,14 @@ public class Evaluation {
 	@Transient
 	private Integer relatedTypeId;
 	
-
+	@Transient
+	private Rank rank;
+	
+	@Transient
+	private Double meanLikert;
+	
+	
+	
 	public Integer getId() {
 		return id;
 	}
@@ -231,6 +238,26 @@ public class Evaluation {
 
 	public void setRelatedTypeId(Integer relatedTypeId) {
 		this.relatedTypeId = relatedTypeId;
+	}
+
+
+	public Rank getRank() {
+		return rank;
+	}
+
+
+	public void setRank(Rank rank) {
+		this.rank = rank;
+	}
+
+
+	public Double getMeanLikert() {
+		return meanLikert;
+	}
+
+
+	public void setMeanLikert(Double meanLikert) {
+		this.meanLikert = meanLikert;
 	}
 
 

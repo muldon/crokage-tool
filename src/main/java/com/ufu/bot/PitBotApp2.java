@@ -10,12 +10,10 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -36,6 +34,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 import com.ufu.bot.exception.PitBotException;
 import com.ufu.bot.googleSearch.GoogleWebSearch;
 import com.ufu.bot.googleSearch.SearchQuery;
@@ -46,7 +46,6 @@ import com.ufu.bot.to.Comment;
 import com.ufu.bot.to.Evaluation;
 import com.ufu.bot.to.ExternalQuestion;
 import com.ufu.bot.to.Post;
-import com.ufu.bot.to.Rank;
 import com.ufu.bot.to.RelatedPost;
 import com.ufu.bot.to.RelatedPost.RelationTypeEnum;
 import com.ufu.bot.to.SoThread;
@@ -106,6 +105,10 @@ public class PitBotApp2 {
 	
 	@Value("${externalSurveyRankListSize}")
 	public Integer externalSurveyRankListSize;  
+	
+	@Value("${metricsGenerationRankListSize}")
+	public Integer metricsGenerationRankListSize;  
+	
 	
 	/*@Value("${APIKEY}")
 	public String apiKey;
@@ -188,7 +191,7 @@ public class PitBotApp2 {
 	
 	private Double avgScore;
 	private Double avgReputation;
-	
+	private int goldSetRelevantAnswers;
 	
 	
 	
@@ -217,6 +220,7 @@ public class PitBotApp2 {
 				+ "\n minTokenSize: "+minTokenSize
 				+ "\n internalSurveyRankListSize: "+internalSurveyRankListSize
 				+ "\n externalSurveyRankListSize: "+externalSurveyRankListSize
+				+ "\n metricsGenerationRankListSize (or k): "+metricsGenerationRankListSize
 				+ "\n");
 				
 		
@@ -232,7 +236,7 @@ public class PitBotApp2 {
 			
 		case 3:
 			initTime = System.currentTimeMillis();
-			runPhase3();
+			runPhase3or6();
 			botUtils.reportElapsedTime(initTime," runPhase3 ");
 			break;
 		case 4:
@@ -245,7 +249,7 @@ public class PitBotApp2 {
 			break;
 		case 6:
 			initTime = System.currentTimeMillis();
-			runPhase6();
+			runPhase3or6();
 			botUtils.reportElapsedTime(initTime," runPhase6 ");
 			break;
 		case 7:
@@ -305,15 +309,34 @@ public class PitBotApp2 {
 			}
 			
 			initTime = System.currentTimeMillis();
-			List<Bucket> rankedList = pitSurveyService.runSteps7toTheEnd(externalQuestion,augmentedThreads);
-			botUtils.reportElapsedTime(initTime,"runSteps7toTheEnd");
+			List<Bucket> scoredBucketList = pitSurveyService.runSteps7and8(externalQuestion,augmentedThreads);
+			
+			Integer maxRankSize = getMaxRankSize();
+			List<Bucket> trimmedRankedList = pitSurveyService.step9(scoredBucketList,maxRankSize);
+			
 			logger.info("list of ranks generated, now saving ranks for question "+externalQuestion.getExternalId());
-			pitBotService.saveRanks(externalQuestion,rankedList,true,phaseNumber);
+			pitBotService.saveRanks(externalQuestion,trimmedRankedList,true,phaseNumber);
 			
 		}
 	}
 	
 	
+	private Integer getMaxRankSize() {
+		Integer maxRankSize=null;
+		if(phaseNumber.equals(1) || phaseNumber.equals(2) || phaseNumber.equals(4)) {
+			maxRankSize = internalSurveyRankListSize;
+		}else if(phaseNumber.equals(6)) {
+			maxRankSize = metricsGenerationRankListSize;
+		}else if(phaseNumber.equals(7)) {
+			maxRankSize = externalSurveyRankListSize;
+		}
+		return maxRankSize;
+	}
+
+
+
+
+
 	private void logWeights() {
 		logger.info("Ranking with weights: "+
 				"\n alphaCosSim = "+alphaCosSim +
@@ -342,21 +365,23 @@ public class PitBotApp2 {
 	}
 	
 
-	
+	/*
 
 
 	private void runPhase3Old() throws Exception {
 		//load external questions and their related posts and store in cache
 		pitSurveyService.loadQuestionsAndRelatedPostsToCache();
 		pitSurveyService.runPhase3Old();
-	}
+	}*/
 
 
-	private void runPhase3() throws Exception {
-		String fileName = "Phase2AfterAgreement";
-		String fileNameMatrixKappaBeforeAgreement = "Phase2MatrixForKappaBeforeAgreement.csv";
-		String fileNameMatrixKappaAfterAgreement = "Phase2MatrixForKappaAfterAgreement.csv";
-		String reportCGFileName = "Phase2CGReport.csv";
+	private void runPhase3or6() throws Exception {
+		
+		int referencePhaseNumber = phaseNumber - 2;  //this reference number can be 1 or 4. 
+		String fileName = "Phase"+referencePhaseNumber+"AfterAgreement";
+		String fileNameMatrixKappaBeforeAgreement = "Phase"+referencePhaseNumber+"MatrixForKappaBeforeAgreement.csv";
+		String fileNameMatrixKappaAfterAgreement = "Phase"+referencePhaseNumber+"MatrixForKappaAfterAgreement.csv";
+		String reportCGFileName = "Phase"+referencePhaseNumber+"CGReport.csv";
 		
 		Integer likertsResearcher1BeforeAgreementColumn = 1;
 		Integer likertsResearcher2BeforeAgreementColumn = 2;
@@ -364,8 +389,8 @@ public class PitBotApp2 {
 		Integer likertsResearcher2AfterAgreementColumn = 4;
 				
 		if(phaseSection==1) { //Build excel with evaluations. Agreement phase. 
-			List<ExternalQuestion> externalQuestions = pitBotService.getExternalQuestionsByPhase(1);
-			buildCsvPhaseSection1(fileName,externalQuestions);
+			List<ExternalQuestion> externalQuestions = pitBotService.getExternalQuestionsByPhase(referencePhaseNumber);
+			buildCsvPhaseSection1(fileName,externalQuestions,referencePhaseNumber);
 			
 		}else if(phaseSection==2) { //Use previous xlsx spreedShed to build a matrix of values for the scales - before agreement 
 			List<Evaluation> evaluationsWithBothUsersScales = new ArrayList<>();
@@ -380,8 +405,13 @@ public class PitBotApp2 {
 		}else if(phaseSection==4) {//Discover the best adjuster weights. Use the previous analyzed posts to discover what is the influence of the post origin the post quality. Set adjuster weights.
 			List<Evaluation> evaluationsWithBothUsersScales = new ArrayList<>();
 			readXlsxToEvaluationList(evaluationsWithBothUsersScales,fileName,likertsResearcher1AfterAgreementColumn,likertsResearcher2AfterAgreementColumn);
-			//System.out.println(evaluationsWithBothUsersScales);	
-			buildReportAdjustmentWeights(evaluationsWithBothUsersScales,reportCGFileName);
+			
+			if(phaseNumber==3) {
+				buildReportAdjustmentWeights(evaluationsWithBothUsersScales,reportCGFileName);
+			}else if(phaseNumber==6) {
+				generateComposerWeights(evaluationsWithBothUsersScales,reportCGFileName);
+			}
+			
 			
 		}
 		
@@ -390,7 +420,178 @@ public class PitBotApp2 {
 
 
 
+	private void generateComposerWeights(List<Evaluation> evaluationsWithBothUsersScales, String reportCGFileName) throws IOException {
+		//BufferedWriter bw =null;
+		try {
+			
+			int assessed = 0;
+			List<Evaluation> goldSetEvaluations = new ArrayList<>();
+			Set<ExternalQuestion> externalQuestionsWithGoldSet = new HashSet();
+			
+			for(Evaluation evaluation:evaluationsWithBothUsersScales){
+				/*RelatedPost relatedPost = pitBotService.getRelatedPostByExternalQuestionIdAndPostId(evaluation.getExternalQuestionId(), evaluation.getPostId());					
+				Rank rank = pitBotService.getRankByRelatedPostIdAndInternalEvaluation(relatedPost.getId(),true);
+				evaluation.setRank(rank);
+				if(rank==null) {
+					logger.error("Rank can not be null: relatedPostId: "+relatedPost.getId());
+				}*/
+				
+				int likert1 = evaluation.getLikertScaleUser1();
+				int likert2 = evaluation.getLikertScaleUser2();
+				int diff = Math.abs(likert1 - likert2);
+				if(diff>1) {
+					continue;
+				}
+				assessed++;
+				
+				double meanFull = (likert1+likert2)/(double)2;
+				double meanLikert = BotUtils.round(meanFull,2);
+				
+				evaluation.setMeanLikert(meanLikert);
+				
+				
+				if(meanLikert>4) {
+					goldSetEvaluations.add(evaluation);
+					externalQuestionsWithGoldSet.add(pitBotService.getExternalQuestionById(evaluation.getExternalQuestionId()));
+				}
+				
+				
+				//ranks.put(rank.getId(), rank);
+			}
+			logger.info("\nTotal evaluations: "+evaluationsWithBothUsersScales.size()
+				+ "\nConsidered with likert difference <=1: "+assessed	
+				+ "\nRelevant answers (mean likert > 4): "+goldSetEvaluations.size()
+				+ "\nExternal questions with gold set: "+externalQuestionsWithGoldSet.size()
+					);
+			
+			
+			
+			/*
+			 * Considering only questions from phase 4 at first
+			 */
+			/*int referencePhase = 4;
+			
+			List<ExternalQuestion> externalQuestionsPhaseRef = pitBotService.getExternalQuestionsByPhase(referencePhase);
+			List<ExternalQuestion> externalQuestionsPhaseGoldSet = new ArrayList<>();
+			for(Evaluation goldEvaluation: goldSetEvaluations) {
+				
+				for(ExternalQuestion externalQuestionPhase: externalQuestionsPhaseRef) {
+					if(goldEvaluation.getExternalQuestionId().equals(externalQuestionPhase.getId())){ 
+					   
+						
+					}
+				}
+				
+				
+			}*/
+			
+			externalQuestionsWithGoldSet = ImmutableSet.copyOf(Iterables.limit(externalQuestionsWithGoldSet, 1));
+			
+			int hitK = 0;
+			double rrank_sum = 0;
+			double precision_sum = 0;
+			double preck_sum = 0;
+			double recall_sum = 0;
+			double fmeasure_sum = 0;
+			Integer maxRankSize = getMaxRankSize(); //or k
+			/*
+			 * The value of k is maxRankSize
+			 */
+			
+			for(ExternalQuestion externalQuestion: externalQuestionsWithGoldSet) {
+				//initializeVariables();
+				String questionStr = "Id: "+externalQuestion.getId()+ " - externalId: "+externalQuestion.getExternalId()+ " - Gquery: "+externalQuestion.getGoogleQuery();
+				logger.info("\n\n\n\n\n\n\n Recovering related posts to question id: "+questionStr);
+				
+				List<Post> answers = new ArrayList<>();
+				
+				List<RelatedPost> relatedPosts = pitBotService.getRelatedPostsByExternalQuestionId(externalQuestion.getId());
+						
+				for(RelatedPost relatedPost: relatedPosts) {
+					Post answer = pitBotService.findPostById(relatedPost.getPostId());
+					answer.setRelationTypeId(relatedPost.getRelationTypeId());
+					answers.add(answer);
+				}
+				
+				SoThread thread = new SoThread(null, answers);
+				Set<SoThread> threadListOneElement = new HashSet<>();
+				threadListOneElement.add(thread);
+				
+				
+				List<Bucket> scoredBucketList = pitSurveyService.runSteps7and8(externalQuestion,threadListOneElement);
+				
+				//bootstrap here
+				List<Bucket> trimmedRankedList = pitSurveyService.step9(scoredBucketList,maxRankSize);
+				hitK += isRelevantPostFound(trimmedRankedList,goldSetEvaluations,externalQuestion.getId());
+				
+				
+				//end bootstrap here
+			}
+			
+			logger.info("Hit@" + maxRankSize + ": " + (double) hitK / externalQuestionsWithGoldSet.size() 
+					+ "");
+			/*bw = new BufferedWriter(new FileWriter(reportCGFileName));
+			bw.write("Post Origin;Count;CG;Ideal CG;NCG\n\n");
+			
+			bw.write("\nTotal;"+assessed+"\n");*/
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			//bw.close();
+		}
+		
+		
+		
+	}
+
+
+
+
+	private int isRelevantPostFound(List<Bucket> trimmedRankedList, List<Evaluation> goldSetEvaluations, Integer externalQuestionId) {
+		int found = 0;
+		int rank = 0;
+		outer: for(Bucket bucket: trimmedRankedList) {
+			rank++;
+			for(Evaluation evaluation: goldSetEvaluations) {
+				if(evaluation.getExternalQuestionId().equals(externalQuestionId) && evaluation.getPostId().equals(bucket.getPostId())) {
+					found = 1;
+					logger.info("hit on rank: "+rank);
+					break outer;
+				}
+			}
+		}
+		
+		return found;
+	}
+
 	
+	private double getRecallK(List<Bucket> trimmedRankedList, List<Evaluation> goldSetEvaluations, Integer externalQuestionId) {
+		double found = 0;
+		int rank = 0;
+		outer: for(Bucket bucket: trimmedRankedList) {
+			rank++;
+			/*if(isFoundPost(bucket,goldSetEvaluations)) {
+				found++;
+			}*/
+		}
+		
+		return found / goldSetEvaluations.size();
+	}
+
+
+
+/*
+	private void calculateMetrics(List<Bucket> trimmedRankedList, List<Evaluation> goldSetEvaluationsWithMeanLikerts, Integer externalQuestionId) {
+		int rankCount = 0;
+		for(Bucket bucket: trimmedRankedList) {
+			rankCount++;
+			
+		}
+		
+		
+	}*/
+
 
 
 
@@ -409,13 +610,21 @@ public class PitBotApp2 {
 			Double relatedNotDupeCG = 0d,  idealRelatedNotDupeCG 	= 0d,  ncgT3 = 0d;
 			Double fromGAnswerCG    = 0d,  idealFromGAnswerCG 		= 0d,  ncgT4 = 0d;
 			
+			int assessed = 0;
 			for(Evaluation evaluation:evaluationsWithBothUsersScales){
 				RelatedPost relatedPost = pitBotService.getRelatedPostByExternalQuestionIdAndPostId(evaluation.getExternalQuestionId(), evaluation.getPostId());					
 				//Rank rank = pitBotService.getRankByRelatedPostIdAndPhase(relatedPost.getId(),1);
 				//System.out.println(relatedPost.getRelationTypeId());
 				Integer relatedTypeId = relatedPost.getRelationTypeId();
 				//evaluation.setRelatedTypeId(relatedTypeId);
-				double meanFull = (evaluation.getLikertScaleUser1()+evaluation.getLikertScaleUser2())/(double)2;
+				int likert1 = evaluation.getLikertScaleUser1();
+				int likert2 = evaluation.getLikertScaleUser2();
+				int diff = Math.abs(likert1 - likert2);
+				if(diff>1) {
+					continue;
+				}
+				assessed++;
+				double meanFull = (likert1+likert2)/(double)2;
 				double meanLikert = BotUtils.round(meanFull,2);
 				
 				
@@ -454,7 +663,7 @@ public class PitBotApp2 {
 			bw.write("Related Not Dupe;"+relatedNotDupe.size()+";"+relatedNotDupeCG+";"+idealRelatedNotDupeCG+";"+ncgT3+"\n");
 			bw.write("From Google Answer;"+fromGAnswer.size()+";"+fromGAnswerCG+";"+idealFromGAnswerCG+";"+ncgT4+"\n");
 			
-			bw.write("\nTotal;"+evaluationsWithBothUsersScales.size()+"\n");
+			bw.write("\nTotal;"+assessed+"\n");
 			
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -523,7 +732,7 @@ public class PitBotApp2 {
 
 
 
-	private void buildCsvPhaseSection1(String fileName,List<ExternalQuestion> externalQuestions) throws IOException {
+	private void buildCsvPhaseSection1(String fileName,List<ExternalQuestion> externalQuestions, int referencePhaseNumber) throws IOException {
 		BufferedWriter bw =null;
 		try {
 			bw = new BufferedWriter(new FileWriter(fileName+".csv"));
@@ -533,7 +742,7 @@ public class PitBotApp2 {
 									
 				bw.write("id:("+externalQuestion.getId()+") | Refid: "+ externalQuestion.getExternalId()+ " - "+ externalQuestion.getRawQuery());
 				bw.write("\n"+externalQuestion.getUrl()+"\n\n");
-				List<Evaluation> evaluations = pitBotService.getEvaluationByPhaseAndRelatedPost(externalQuestion.getId(),1);
+				List<Evaluation> evaluations = pitBotService.getEvaluationByPhaseAndRelatedPost(externalQuestion.getId(),referencePhaseNumber);
 				
 				Iterator<Evaluation> it = evaluations.iterator();
 				
@@ -583,7 +792,7 @@ public class PitBotApp2 {
 
 
 	private void runPhase6() {
-		// TODO Auto-generated method stub
+		
 		
 	}
 	

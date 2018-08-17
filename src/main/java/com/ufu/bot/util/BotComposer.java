@@ -69,9 +69,10 @@ public class BotComposer {
 				"\n relationTypeRelatedDupe = "+relationTypeRelatedDupe 
 				);
 		*/
+		//int count = 0;
 		
 		for(Bucket bucket: bucketsList){
-			double composedScore =  alphaCosSim 	  * bucket.getCosSim() 
+			double factorsScore =  alphaCosSim 	  * bucket.getCosSim() 
 					              + betaCoverageScore * bucket.getCoverageScore() 
 					              + gamaCodeSizeScore * bucket.getCodeSizeScore() 
 					              + deltaRepScore 	  * bucket.getRepScore()
@@ -89,10 +90,16 @@ public class BotComposer {
 			}else {
 				adjuster = relationTypeLinksInsideTexts;
 			}
-			composedScore = adjuster*composedScore;
+			double composedScore = adjuster*factorsScore;
 			
+			
+			/*if(count<50) {
+				logger.info("Composed score = "+composedScore+ " - adjuster: "+adjuster+ " - factorsScore: "+factorsScore);
+			}
+			count++;*/
 			bucket.setComposedScore(BotUtils.round(composedScore,5));
 		}
+		
 		
 		Collections.sort(bucketsList, new Comparator<Bucket>() {
 		    public int compare(Bucket o1, Bucket o2) {
