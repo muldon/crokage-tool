@@ -1179,6 +1179,16 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 		return soPostsIds;
 	}
 
+
+	public void addMapCacheCount(Map<Integer, Integer> map, Integer id) {
+		if(map.get(id)==null) {
+			map.put(id, 1);
+		}else{
+			int actualCount = map.get(id);
+			map.put(id, actualCount+1);
+		}
+	}
+
 	
 	
 	

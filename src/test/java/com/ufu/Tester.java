@@ -678,7 +678,13 @@ public class Tester {
         System.out.println(fact(3));
         System.out.println(fact(4));
         
+        Map<Integer,Integer> map = new HashMap<>();
+        
+        botUtils.addMapCacheCount(map, 1);
+        botUtils.addMapCacheCount(map, 1);
+        botUtils.addMapCacheCount(map, 2);
 
+        System.out.println(map);
 	}
 	
 	

@@ -10,10 +10,12 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -422,6 +424,9 @@ public class PitBotApp2 {
 
 	private void generateComposerWeights(List<Evaluation> evaluationsWithBothUsersScales, String reportCGFileName) throws IOException {
 		//BufferedWriter bw =null;
+		Map<Integer,Integer> externalQuestionOracleCounter = new HashMap<>();
+		
+		
 		try {
 			
 			int assessed = 0;
@@ -449,10 +454,11 @@ public class PitBotApp2 {
 				
 				evaluation.setMeanLikert(meanLikert);
 				
-				
-				if(meanLikert>4) {
+				if(meanLikert>=4) {
 					goldSetEvaluations.add(evaluation);
 					externalQuestionsWithGoldSet.add(pitBotService.getExternalQuestionById(evaluation.getExternalQuestionId()));
+					botUtils.addMapCacheCount(externalQuestionOracleCounter,evaluation.getExternalQuestionId());
+					
 				}
 				
 				
@@ -485,7 +491,7 @@ public class PitBotApp2 {
 				
 			}*/
 			
-			externalQuestionsWithGoldSet = ImmutableSet.copyOf(Iterables.limit(externalQuestionsWithGoldSet, 1));
+			externalQuestionsWithGoldSet = ImmutableSet.copyOf(Iterables.limit(externalQuestionsWithGoldSet, 5));
 			
 			int hitK = 0;
 			double rrank_sum = 0;
@@ -506,7 +512,7 @@ public class PitBotApp2 {
 				List<Post> answers = new ArrayList<>();
 				
 				List<RelatedPost> relatedPosts = pitBotService.getRelatedPostsByExternalQuestionId(externalQuestion.getId());
-						
+				logger.info("Posts found for this query: "+relatedPosts.size());	
 				for(RelatedPost relatedPost: relatedPosts) {
 					Post answer = pitBotService.findPostById(relatedPost.getPostId());
 					answer.setRelationTypeId(relatedPost.getRelationTypeId());
@@ -519,17 +525,22 @@ public class PitBotApp2 {
 				
 				
 				List<Bucket> scoredBucketList = pitSurveyService.runSteps7and8(externalQuestion,threadListOneElement);
+				int goldSetSize = externalQuestionOracleCounter.get(externalQuestion.getId());
 				
 				//bootstrap here
 				List<Bucket> trimmedRankedList = pitSurveyService.step9(scoredBucketList,maxRankSize);
 				hitK += isRelevantPostFound(trimmedRankedList,goldSetEvaluations,externalQuestion.getId());
-				
-				
+				double recall = getRecallK(trimmedRankedList,goldSetEvaluations,externalQuestion.getId(),goldSetSize);
+				recall_sum += recall;
+				double rrank = getRRank(trimmedRankedList,goldSetEvaluations,externalQuestion.getId());
+				rrank_sum += rrank;
 				//end bootstrap here
 			}
 			
-			logger.info("Hit@" + maxRankSize + ": " + (double) hitK / externalQuestionsWithGoldSet.size() 
-					+ "");
+			logger.info("\nHit@" + maxRankSize + ": " + BotUtils.round((double) hitK / externalQuestionsWithGoldSet.size(),4) 
+						+ "\nMR@" + maxRankSize + ": " + BotUtils.round(recall_sum / externalQuestionsWithGoldSet.size(),4)
+						+ "\nMRR@" + maxRankSize + ": " + BotUtils.round(rrank_sum / externalQuestionsWithGoldSet.size(),4)
+						+ "");
 			/*bw = new BufferedWriter(new FileWriter(reportCGFileName));
 			bw.write("Post Origin;Count;CG;Ideal CG;NCG\n\n");
 			
@@ -544,6 +555,46 @@ public class PitBotApp2 {
 		
 		
 	}
+
+
+
+
+	private double getRRank(List<Bucket> trimmedRankedList, List<Evaluation> goldSetEvaluations, Integer externalQuestionId) {
+		double rrank = 0;
+		int count=0;
+		outer: for(Bucket bucket: trimmedRankedList) {
+			count++;
+			for(Evaluation evaluation: goldSetEvaluations) {
+				if(evaluation.getExternalQuestionId().equals(externalQuestionId) && evaluation.getPostId().equals(bucket.getPostId())) {
+					rrank = 1.0 / (count);
+					break outer;
+				}
+			}
+		}
+		
+		return rrank;
+	}
+
+
+
+
+
+	private double getRecallK(List<Bucket> trimmedRankedList, List<Evaluation> goldSetEvaluations, Integer externalQuestionId, int goldSetSize) {
+		double found = 0;
+		int rank = 0;
+		for(Bucket bucket: trimmedRankedList) {
+			rank++;
+			for(Evaluation evaluation: goldSetEvaluations) {
+				if(evaluation.getExternalQuestionId().equals(externalQuestionId) && evaluation.getPostId().equals(bucket.getPostId())) {
+					found++;
+					logger.info("hit on rank: "+rank);
+				}
+			}
+		}
+		
+		return found/goldSetSize;
+	}
+
 
 
 
