@@ -77,6 +77,7 @@ public class BotUtils {
 	private static Map<Integer, Set<Integer>> allPostLinks;
 	private Map<Integer,Post> parentPostsCache;
 	private Map<Integer,Post> answerPostsCache;
+	private static DCG_TYPE dcgType = DCG_TYPE.COMB;
 	
 
 	@Value("${phaseNumber}")
@@ -1190,7 +1191,61 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 	}
 
 	
+	public static double computeDCG(final double rel, final int rank) {
+		double dcg = 0.0;
+		switch (dcgType) {
+		case LIN:
+			dcg = rel;
+            if (rank > 1) {
+            	dcg = rel/ (Math.log(rank) / Math.log(2));
+            }
+			break;
+
+		case EXP:
+			dcg = (Math.pow(2.0, rel) - 1.0) / ((Math.log(rank + 1) / Math.log(2)));
+			break;
+				
+		case COMB:
+			dcg = rel/ (Math.log(rank+1) / Math.log(2));
+			break;
+		}
 	
+		
+		return round(dcg, 4);
+	}
+	
+	public static double calculateIDCG(final int itemRelevance,int n) {
+		double idcg = 0;
+		// if can get relevance for every item should replace the relevance score at this point, else
+		// every item in the ideal case has relevance of 1
+		//int itemRelevance = 1;
+		
+		for (int i = 1; i <= n; i++){
+			idcg += computeDCG(itemRelevance, i);
+		}
+		idcg = round(idcg, 4);
+		
+		return idcg;
+	}
+	
+	
+	public static enum DCG_TYPE {
+
+        /**
+         * Linear.
+         */
+        LIN,
+        /**
+         * Exponential.
+         */
+        EXP,
+        /*
+         * Implemented
+         */
+        COMB;
+		
+		
+	}
 	
 	
 }

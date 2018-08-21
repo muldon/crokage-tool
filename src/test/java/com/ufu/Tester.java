@@ -684,7 +684,70 @@ public class Tester {
         botUtils.addMapCacheCount(map, 1);
         botUtils.addMapCacheCount(map, 2);
 
-        System.out.println(map);
+        //System.out.println(map);
+        
+        System.out.println(BotUtils.computeDCG(5, 1));
+        System.out.println(BotUtils.computeDCG(5, 2));
+        System.out.println(BotUtils.computeDCG(5, 3));
+        System.out.println(BotUtils.computeDCG(5, 4));
+        System.out.println(BotUtils.computeDCG(5, 5));
+        System.out.println(BotUtils.computeDCG(5, 6));
+        System.out.println(BotUtils.computeDCG(5, 7));
+        
+        
+        System.out.println(BotUtils.calculateIDCG(5,3));
+        System.out.println(BotUtils.calculateIDCG(5,4));
+        
+        
+        
+       /* System.out.println(BotUtils.computeDCG(3, 1));
+        System.out.println(BotUtils.computeDCG(3, 2));
+        System.out.println(BotUtils.calculateIDCG(3,2));
+        double idcg = BotUtils.calculateIDCG(5,15);
+        System.out.println(idcg);
+        
+        System.out.println(BotUtils.computeDCG(1, 2));
+        System.out.println(BotUtils.computeDCG(1, 3));*/
+        
+        //Thread.getAllStackTraces().keySet().forEach((t) -> System.out.println(t.getName() + "\nIs Daemon " + t.isDaemon() + "\nIs Alive " + t.isAlive()));
+/*        Math.toDegrees(Math.PI);
+        
+        URL whatismyip = new URL("http://checkip.amazonaws.com");
+        BufferedReader in = new BufferedReader(new InputStreamReader(
+                        whatismyip.openStream()));
+
+        String ip = in.readLine(); //you get the IP as a String
+        System.out.println(ip);*/
+        
+
+
+		/*String stringToMatch = "abccdefef";
+		Pattern p = Pattern.compile("(\\w)\\1+");
+		Matcher m = p.matcher(stringToMatch);
+		if (m.find())
+		{
+		    System.out.println("Duplicate character " + m.group(1));
+		}
+		*/
+        /*Map map2 = "The quick brown fox jumped over the lazy dog."
+        .chars()
+        .mapToObj(i -> (char) i)
+        .collect(Collectors.groupingBy(Object::toString, Collectors.counting()));
+        System.out.println(map);*/
+        
+        /*CharBag bag = CharAdapter.adapt("The quick brown fox jumped over the lazy dog.").toBag();
+
+        System.out.println(bag.occurrencesOf('a'));
+        
+        for (int i=1; i<10; i += 2)
+        {
+            for (int j=0; j<i; j++)
+            {
+                System.out.print(j);
+            }
+            System.out.println("");
+        }*/
+        
 	}
 	
 	

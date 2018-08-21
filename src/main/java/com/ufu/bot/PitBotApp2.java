@@ -8,6 +8,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -380,10 +381,10 @@ public class PitBotApp2 {
 	private void runPhase3or6() throws Exception {
 		
 		int referencePhaseNumber = phaseNumber - 2;  //this reference number can be 1 or 4. 
-		String fileName = "Phase"+referencePhaseNumber+"AfterAgreement";
-		String fileNameMatrixKappaBeforeAgreement = "Phase"+referencePhaseNumber+"MatrixForKappaBeforeAgreement.csv";
-		String fileNameMatrixKappaAfterAgreement = "Phase"+referencePhaseNumber+"MatrixForKappaAfterAgreement.csv";
-		String reportCGFileName = "Phase"+referencePhaseNumber+"CGReport.csv";
+		String fileName = "Phase"+(phaseNumber-1)+"AfterAgreement";
+		String fileNameMatrixKappaBeforeAgreement = "Phase"+(phaseNumber-1)+"MatrixForKappaBeforeAgreement.csv";
+		String fileNameMatrixKappaAfterAgreement = "Phase"+(phaseNumber-1)+"MatrixForKappaAfterAgreement.csv";
+		String reportCGFileName = "Phase"+(phaseNumber-1)+"CGReport.csv";
 		
 		Integer likertsResearcher1BeforeAgreementColumn = 1;
 		Integer likertsResearcher2BeforeAgreementColumn = 2;
@@ -404,25 +405,175 @@ public class PitBotApp2 {
 			readXlsxToEvaluationList(evaluationsWithBothUsersScales,fileName,likertsResearcher1AfterAgreementColumn,likertsResearcher2AfterAgreementColumn);
 			buildMatrixForKappa(evaluationsWithBothUsersScales,fileNameMatrixKappaAfterAgreement);
 		
-		}else if(phaseSection==4) {//Discover the best adjuster weights. Use the previous analyzed posts to discover what is the influence of the post origin the post quality. Set adjuster weights.
-			List<Evaluation> evaluationsWithBothUsersScales = new ArrayList<>();
-			readXlsxToEvaluationList(evaluationsWithBothUsersScales,fileName,likertsResearcher1AfterAgreementColumn,likertsResearcher2AfterAgreementColumn);
-			
-			if(phaseNumber==3) {
-				buildReportAdjustmentWeights(evaluationsWithBothUsersScales,reportCGFileName);
-			}else if(phaseNumber==6) {
-				generateComposerWeights(evaluationsWithBothUsersScales,reportCGFileName);
-			}
-			
-			
 		}
 		
+		else if(phaseNumber==3 && phaseSection==4) {//Discover the best adjuster weights. Use the previous analyzed posts to discover what is the influence of the post origin the post quality. Set adjuster weights.
+			List<Evaluation> evaluationsWithBothUsersScales = new ArrayList<>();
+			readXlsxToEvaluationList(evaluationsWithBothUsersScales,fileName,likertsResearcher1AfterAgreementColumn,likertsResearcher2AfterAgreementColumn);
+			buildReportAdjustmentWeights(evaluationsWithBothUsersScales,reportCGFileName);
+			
+		
+		}else if(phaseNumber==6) {
+			String previousAgreementPhase = "Phase2AfterAgreement";
+			List<Evaluation> phase2EvaluationsWithBothUsersScales = new ArrayList<>();
+			readXlsxToEvaluationList(phase2EvaluationsWithBothUsersScales,previousAgreementPhase,likertsResearcher1AfterAgreementColumn,likertsResearcher2AfterAgreementColumn);
+			
+			List<Evaluation> phase5EvaluationsWithBothUsersScales = new ArrayList<>();
+			readXlsxToEvaluationList(phase5EvaluationsWithBothUsersScales,fileName,likertsResearcher1AfterAgreementColumn,likertsResearcher2AfterAgreementColumn);
+			
+			
+			if(phaseSection==4) {
+				generateMetricsForEvaluations(phase5EvaluationsWithBothUsersScales);
+				generateMetricsForEvaluations(phase2EvaluationsWithBothUsersScales);
+				
+			
+			}else if(phaseSection==5) {
+				generateComposerWeights(phase5EvaluationsWithBothUsersScales);
+			}
+		}
+			
+		
+	}
+
+
+	private void generateComposerWeights(List<Evaluation> phase5EvaluationsWithBothUsersScales) {
+		// TODO Auto-generated method stub
 		
 	}
 
 
 
-	private void generateComposerWeights(List<Evaluation> evaluationsWithBothUsersScales, String reportCGFileName) throws IOException {
+
+	private void generateMetricsForEvaluations(List<Evaluation> evaluationsWithBothUsersScales) throws IOException {
+		//BufferedWriter bw =null;
+		Map<Integer,Integer> externalQuestionOracleCounter = new HashMap<>();
+		
+		try {
+			
+			int assessed = 0;
+			Set<ExternalQuestion> consideredExternalQuestions = new HashSet();
+			List<Evaluation> consideredEvaluations = new ArrayList<>();
+			
+			for(Evaluation evaluation:evaluationsWithBothUsersScales){
+				int likert1 = evaluation.getLikertScaleUser1();
+				int likert2 = evaluation.getLikertScaleUser2();
+				int diff = Math.abs(likert1 - likert2);
+				if(diff>1) {
+					continue;
+				}
+				assessed++;
+				consideredExternalQuestions.add(pitBotService.getExternalQuestionById(evaluation.getExternalQuestionId()));
+				
+				double meanFull = (likert1+likert2)/(double)2;
+				double meanLikert = BotUtils.round(meanFull,2);
+				
+				evaluation.setMeanLikert(meanLikert);
+				consideredEvaluations.add(evaluation);
+			}
+			logger.info("\nTotal evaluations: "+evaluationsWithBothUsersScales.size()
+				+ "\nConsidered with likert difference <=1: "+assessed	
+				+ "\nConsidered external questions having evaluations with difference <=1: "+consideredExternalQuestions.size()
+					);
+			
+			
+			
+			Integer maxRankSize = getMaxRankSize(); //or k
+			/*
+			 * The value of k is maxRankSize
+			 */
+			
+			/*
+			 * 5 likert scales, k as cutoff
+			 */
+			double idcg = BotUtils.calculateIDCG(5,maxRankSize);
+			double ndcg = 0;
+			//bootstrap here
+			double all_ndcgs[] = new double[consideredExternalQuestions.size()];
+			int index =0;
+			 
+			for(ExternalQuestion externalQuestion: consideredExternalQuestions) {
+				//initializeVariables();
+				String questionStr = "Id: "+externalQuestion.getId()+ " - externalId: "+externalQuestion.getExternalId()+ " - Gquery: "+externalQuestion.getGoogleQuery();
+				logger.info("\n\n\n\n\n\n\n Recovering related posts to question id: "+questionStr);
+				
+				List<Post> answers = new ArrayList<>();
+				
+				List<RelatedPost> relatedPosts = pitBotService.getRelatedPostsByExternalQuestionId(externalQuestion.getId());
+				logger.info("Posts found for this query: "+relatedPosts.size());	
+				for(RelatedPost relatedPost: relatedPosts) {
+					Post answer = pitBotService.findPostById(relatedPost.getPostId());
+					answer.setRelationTypeId(relatedPost.getRelationTypeId());
+					answers.add(answer);
+				}
+				
+				SoThread thread = new SoThread(null, answers);
+				Set<SoThread> threadListOneElement = new HashSet<>();
+				threadListOneElement.add(thread);
+				
+				
+				List<Bucket> scoredBucketList = pitSurveyService.runSteps7and8(externalQuestion,threadListOneElement);
+				
+				
+				List<Bucket> trimmedRankedList = pitSurveyService.step9(scoredBucketList,maxRankSize);
+				double dcg = computeDCG(trimmedRankedList,consideredEvaluations,externalQuestion.getId());
+				ndcg = BotUtils.round(dcg / idcg , 4);
+				all_ndcgs[index] = ndcg;
+				
+				index++;
+				//testar ...
+				
+			}
+			
+			double averageNdcgs = Arrays.stream(all_ndcgs).average().orElse(Double.NaN); 
+			logger.info("Average ndcg: "+averageNdcgs);
+			
+			
+			/*logger.info("\nHit@" + maxRankSize + ": " + BotUtils.round((double) hitK / externalQuestionsWithGoldSet.size(),4) 
+						+ "\nMR@" + maxRankSize + ": " + BotUtils.round(recall_sum / externalQuestionsWithGoldSet.size(),4)
+						+ "\nMRR@" + maxRankSize + ": " + BotUtils.round(rrank_sum / externalQuestionsWithGoldSet.size(),4)
+						+ "\nMAP@" + maxRankSize + ": " + BotUtils.round(preck_sum / externalQuestionsWithGoldSet.size(),4)
+						+ "");*/
+			
+			//end bootstrap here
+			
+			/*bw = new BufferedWriter(new FileWriter(reportCGFileName));
+			bw.write("Post Origin;Count;CG;Ideal CG;NCG\n\n");
+			
+			bw.write("\nTotal;"+assessed+"\n");*/
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			//bw.close();
+		}
+		
+		
+		
+	}
+	
+
+	private double computeDCG(List<Bucket> trimmedRankedList, List<Evaluation> consideredEvaluations, Integer externalQuestionId) {
+		double dcg = 0;
+		int rank = 0;
+		for(Bucket bucket: trimmedRankedList) {
+			rank++;
+			for(Evaluation evaluation: consideredEvaluations) {
+				if(evaluation.getExternalQuestionId().equals(externalQuestionId) && evaluation.getPostId().equals(bucket.getPostId())) {
+					dcg += BotUtils.computeDCG(evaluation.getMeanLikert(),rank );
+					break;					
+				}
+			}
+			
+		}
+				
+		return dcg;
+	}
+
+
+
+
+
+	private void generateComposerWeightsOld(List<Evaluation> evaluationsWithBothUsersScales, String reportCGFileName) throws IOException {
 		//BufferedWriter bw =null;
 		Map<Integer,Integer> externalQuestionOracleCounter = new HashMap<>();
 		
@@ -530,16 +681,21 @@ public class PitBotApp2 {
 				//bootstrap here
 				List<Bucket> trimmedRankedList = pitSurveyService.step9(scoredBucketList,maxRankSize);
 				hitK += isRelevantPostFound(trimmedRankedList,goldSetEvaluations,externalQuestion.getId());
-				double recall = getRecallK(trimmedRankedList,goldSetEvaluations,externalQuestion.getId(),goldSetSize);
+				double recall = 0;
+				recall = getRecallK(trimmedRankedList,goldSetEvaluations,externalQuestion.getId(),goldSetSize);
 				recall_sum += recall;
 				double rrank = getRRank(trimmedRankedList,goldSetEvaluations,externalQuestion.getId());
 				rrank_sum += rrank;
+				double preck = getAvgPrecisionK(trimmedRankedList,goldSetEvaluations,externalQuestion.getId());
+				preck_sum += preck;
+				
 				//end bootstrap here
 			}
 			
 			logger.info("\nHit@" + maxRankSize + ": " + BotUtils.round((double) hitK / externalQuestionsWithGoldSet.size(),4) 
 						+ "\nMR@" + maxRankSize + ": " + BotUtils.round(recall_sum / externalQuestionsWithGoldSet.size(),4)
 						+ "\nMRR@" + maxRankSize + ": " + BotUtils.round(rrank_sum / externalQuestionsWithGoldSet.size(),4)
+						+ "\nMAP@" + maxRankSize + ": " + BotUtils.round(preck_sum / externalQuestionsWithGoldSet.size(),4)
 						+ "");
 			/*bw = new BufferedWriter(new FileWriter(reportCGFileName));
 			bw.write("Post Origin;Count;CG;Ideal CG;NCG\n\n");
@@ -555,6 +711,31 @@ public class PitBotApp2 {
 		
 		
 	}
+
+
+
+
+	private double getAvgPrecisionK(List<Bucket> trimmedRankedList, List<Evaluation> goldSetEvaluations, Integer externalQuestionId) {
+		int count=0;
+		double found = 0;
+		double linePrec = 0;
+		for(Bucket bucket: trimmedRankedList) {
+			count++;
+			for(Evaluation evaluation: goldSetEvaluations) {
+				if(evaluation.getExternalQuestionId().equals(externalQuestionId) && evaluation.getPostId().equals(bucket.getPostId())) {
+					found++;
+					linePrec += (found / count);
+				}
+			}
+		}
+		
+		if (found == 0) {
+			return 0;
+		}
+		
+		return linePrec / found;
+	}
+
 
 
 
@@ -677,8 +858,6 @@ public class PitBotApp2 {
 				assessed++;
 				double meanFull = (likert1+likert2)/(double)2;
 				double meanLikert = BotUtils.round(meanFull,2);
-				
-				
 				
 				if(relatedTypeId.equals(RelationTypeEnum.FROM_GOOGLE_QUESTION_T1.getId())) {
 					fromGQuestion.add(evaluation);
