@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -12,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.ufu.bot.tfidf.VectorSpaceModel;
 import com.ufu.bot.to.Bucket;
 import com.ufu.bot.to.RelatedPost.RelationTypeEnum;
 
@@ -117,10 +117,6 @@ public class BotComposer {
 		double coverageScore = calculateCoverageScore(mainBucket.getClassesNames(),postBucket.getClassesNames());
 		postBucket.setCoverageScore(BotUtils.round(coverageScore,4));
 		
-		/*if(postBucket.getPostId().equals(1555349)) {
-			System.out.println("here");
-		}*/
-		
 		double codeScore = calculateCodeSizeScore(postBucket.getCodes());
 		postBucket.setCodeSizeScore(BotUtils.round(codeScore,4));
 		
@@ -129,6 +125,10 @@ public class BotComposer {
 		
 		double upScore = calculateUpScore(postBucket.getPostScore());
 		postBucket.setUpScore(BotUtils.round(upScore,4));
+		
+		/*if(postBucket.getPostId().equals(1323480)) {
+			System.out.println("here");
+		}*/
 	}
 	
 	
@@ -304,15 +304,16 @@ public class BotComposer {
 
 
 	public double calculateCoverageScore(Set<String> mainBucketClassesNames, Set<String> postBucketlassesNames) {
+		Set<String> intersection = new HashSet<String>(mainBucketClassesNames);
+		
 		float pSetSize = postBucketlassesNames.size();
 		if(pSetSize==0f) {
 			return 0d;
 		}
 		
-		mainBucketClassesNames.retainAll(postBucketlassesNames);
-		
-		
-		int mSetIntersectionPsetSize = mainBucketClassesNames.size();
+		intersection.retainAll(postBucketlassesNames);
+				
+		int mSetIntersectionPsetSize = intersection.size();
 		
 		
 		double coverageScore = mSetIntersectionPsetSize / pSetSize;

@@ -27,13 +27,17 @@ public interface GenericRepository {
 
 	public Set<Integer> findRelatedQuestionsIds(Set<Integer> allQuestionsIds, Integer linkTypeId);
 
-	public List<Post> findRankedList(Integer id, Boolean internalevaluation);
+	public List<Post> findRankedList(Integer id, int userId, int phaseNum);
 
 	List<ExternalQuestion> findNextExternalQuestionInternalSurveyUser(Integer userId, Integer phaseNumber);
 
 	public List<Evaluation> getEvaluationByPhaseAndRelatedPost(Integer externalQuestionId, Integer phaseNumber);
 
 	public List<ExternalQuestion> getExternalQuestionsByPhase(Integer phaseNumber);
+
+	public List<Post> findRankedPosts(Integer id, Integer userId, int phaseNum);
+
+	public List<Post> findRankedEvaluatedPosts(Integer id, Integer userId, int phaseNum);
 	
 
 	

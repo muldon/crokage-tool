@@ -34,6 +34,8 @@ public interface ExternalQuestionRepository extends CrudRepository<ExternalQuest
 	
 	List<ExternalQuestion> findByUseRack(boolean userack);
 
+	ExternalQuestion findByFileReferenceId(Integer fileReferenceId);
+
 	/*@Query(value="select * " + 
 				" from externalquestion eq" + 
 				" where eq.surveyid = 1" + 

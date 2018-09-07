@@ -169,10 +169,15 @@ public class Evaluation {
 	}
 
 
+	
+
 	@Override
 	public String toString() {
-		return "Evaluation [id=" + id + ", rankId=" + rankId + ", surveyUserId=" + surveyUserId + ", likertScale="
-				+ likertScale + ", ratingDate=" + ratingDate + ", ratings=" + ratings + ", postsIds=" + postsIds + "]";
+		return "Evaluation [id=" + id + ", postId=" + postId + ", meanLikert=" + meanLikert + ", externalQuestionId="
+				+ externalQuestionId + ", surveyUserId=" + surveyUserId + ", rankId=" + rankId + ", likertScale="
+				+ likertScale + ", ratingDate=" + ratingDate + ", ratings=" + ratings + ", postsIds=" + postsIds
+				+ ", likertScaleUser1=" + likertScaleUser1 + ", likertScaleUser2=" + likertScaleUser2
+				+ ", relatedTypeId=" + relatedTypeId + ", rank=" + rank + "]";
 	}
 
 

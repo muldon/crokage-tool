@@ -37,6 +37,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multiset;
 import com.google.common.io.Resources;
+import com.google.common.math.BigIntegerMath;
 import com.ufu.bot.PitBotApp2;
 import com.ufu.bot.tfidf.TfIdf;
 import com.ufu.bot.tfidf.ngram.NgramTfIdf;
@@ -747,7 +748,8 @@ public class Tester {
             }
             System.out.println("");
         }*/
-        
+        BigInteger factorial = BigIntegerMath.factorial(3);
+        System.out.println(factorial);
 	}
 	
 	

@@ -202,22 +202,40 @@ public class PitBotService extends AbstractService{
 		
 	}
 
-	public void saveExternalQuestionAndRelatedIds(ExternalQuestion externalQuestion, Map<Integer, Post> answerPostsCache) {
+	public ExternalQuestion saveExternalQuestionAndRelatedIds(ExternalQuestion externalQuestion, Map<Integer, Post> answerPostsCache) {
 		Set<Integer> answerPostsIds = answerPostsCache.keySet();
 		
 		/*
-		 * Save the external question
+		 * Save the external question if it is not already saved
 		 */
-		externalQuestion= externalQuestionRepository.save(externalQuestion);
+		ExternalQuestion externalQuestionInDb = externalQuestionRepository.findByFileReferenceId(externalQuestion.getFileReferenceId());
+		if(externalQuestionInDb==null) {
+			logger.info("Question not found, saving new ");
+			externalQuestion= externalQuestionRepository.save(externalQuestion);
+		}else {
+			logger.info("Question found ok");
+			externalQuestion = externalQuestionInDb;
+		}
+		
 		
 		/*
 		 * save all related posts (only answers)
 		 */
+		int newRelatedPosts = 0;
+		int alreadyPresentInDb = 0;
 		for(Integer answerPostId: answerPostsIds) {
-			RelatedPost relatedPost = new RelatedPost(answerPostId,externalQuestion.getId(),answerPostsCache.get(answerPostId).getRelationTypeId());
-			relatedPostRepository.save(relatedPost);
+			RelatedPost relatedPostInDb = relatedPostRepository.findByExternalQuestionIdAndPostId(externalQuestion.getId(), answerPostId);
+			if(relatedPostInDb==null) {
+				newRelatedPosts++;
+				RelatedPost relatedPost = new RelatedPost(answerPostId,externalQuestion.getId(),answerPostsCache.get(answerPostId).getRelationTypeId());
+				relatedPostRepository.save(relatedPost);
+			}else {
+				alreadyPresentInDb++;
+			}
 		}
-		
+		logger.info("New relatedposts found for externalQuestion "+externalQuestion.getId()+ " :"+newRelatedPosts);
+		logger.info("Already present relatedposts for externalQuestion "+externalQuestion.getId()+ " :"+alreadyPresentInDb);
+		return externalQuestion;
 	}
 
 
@@ -337,9 +355,31 @@ public class PitBotService extends AbstractService{
 
 
 
-
+	@Transactional(readOnly = true)
 	public ExternalQuestion getExternalQuestionById(Integer externalQuestionId) {
 		return externalQuestionRepository.findOne(externalQuestionId);
+	}
+
+
+
+
+	@Transactional(readOnly = true)
+	public List<Rank> getRanksByPhase(int phase) {
+		return rankRepository.findByPhase(phase);
+	}
+
+
+	@Transactional(readOnly = true)
+	public List<Evaluation> getEvaluationsByRankId(Integer rankId) {
+		return evaluationRepository.findByRankId(rankId);
+	}
+
+
+
+
+
+	public List<RelatedPost> getRelatedPostsByExternalQuestionIdAndPhase(Integer externalQuestionId, int phase) {
+		return relatedPostRepository.findRelatedPostsByExternalQuestionIdAndPhase(externalQuestionId,phase);
 	}
 	
 	

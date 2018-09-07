@@ -83,6 +83,9 @@ public class BotUtils {
 	@Value("${phaseNumber}")
 	public Integer phaseNumber; 
 	
+	@Value("${section}")
+	public Integer section;  
+	
 	@Autowired
 	private CosineSimilarity cs1;
 	
@@ -264,10 +267,14 @@ public class BotUtils {
 	
 	
 	public void reportElapsedTime(long initTime, String processName) {
+		Integer phaseExceptions[] = {6};
+		if(!Arrays.asList(phaseExceptions).contains(phaseNumber)) {
+			endTime = System.currentTimeMillis();
+			String duration = DurationFormatUtils.formatDuration(endTime-initTime, "HH:mm:ss,SSS");
+			logger.info("Elapsed time: "+duration+ " of the execution of  "+processName);
+			
+		}
 		
-		endTime = System.currentTimeMillis();
-		String duration = DurationFormatUtils.formatDuration(endTime-initTime, "HH:mm:ss,SSS");
-		logger.info("Elapsed time: "+duration+ " of the execution of  "+processName);
 		
 	}
 	
@@ -994,7 +1001,7 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 		
 		Iterator it = lines.iterator();
 		//int externalId=1;
-		Integer externalId=0;
+		Integer fileReferenceId=0;
 		
 		while(it.hasNext()){
 			String numberLine = (String)it.next();
@@ -1003,7 +1010,7 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 				Pattern pattern = Pattern.compile(BotUtils.NUMBERS_REGEX_EXPRESSION);
 				Matcher matcher = pattern.matcher(numberLine);
 				while (matcher.find()) {
-					externalId = new Integer(matcher.group(0));
+					fileReferenceId = new Integer(matcher.group(0));
 				}
 				
 				if(!it.hasNext()) {
@@ -1022,23 +1029,23 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 						if(linkLine.startsWith("link:")) {
 							linkLine= linkLine.replace("link:", "").trim();
 							
-							if(phaseNumber==1 || phaseNumber==2 || phaseNumber==3) {  //1/3 of questions, first lot
+							if( (phaseNumber==1 && section==11) || (phaseNumber==2 && section==11) || phaseNumber==3) {  //1/3 of questions, first lot
 							
-								if(externalId<=11 || (externalId>=34 && externalId<=44) || (externalId>=67 && externalId<=77)) {
-									ExternalQuestion externalQuestion = new ExternalQuestion(externalId,queryLine,null,null,runRack,obs,linkLine);
+								if(fileReferenceId<=11 || (fileReferenceId>=34 && fileReferenceId<=44) || (fileReferenceId>=67 && fileReferenceId<=77)) {
+									ExternalQuestion externalQuestion = new ExternalQuestion(fileReferenceId,queryLine,null,null,runRack,obs,linkLine);
 									externalQuestionAnswers.add(externalQuestion);
 								}
 								
-							}else if(phaseNumber==4 || phaseNumber==5) {  //1/3 of questions, second lot
+							}else if( (phaseNumber==1 && section==12) || (phaseNumber==2 && section==12) || phaseNumber==4 || phaseNumber==5) {  //1/3 of questions, second lot
 								
-								if((externalId>=12 && externalId<=22) || (externalId>=45 && externalId<=55) || (externalId>=78 && externalId<=88)) {
-									ExternalQuestion externalQuestion = new ExternalQuestion(externalId,queryLine,null,null,runRack,obs,linkLine);
+								if((fileReferenceId>=12 && fileReferenceId<=22) || (fileReferenceId>=45 && fileReferenceId<=55) || (fileReferenceId>=78 && fileReferenceId<=88)) {
+									ExternalQuestion externalQuestion = new ExternalQuestion(fileReferenceId,queryLine,null,null,runRack,obs,linkLine);
 									externalQuestionAnswers.add(externalQuestion);
 								}
 							}else if(phaseNumber==7 || phaseNumber==8) {  //1/3 of questions, third lot
 								
-								if((externalId>=23 && externalId<=33) || (externalId>=56 && externalId<=66) || (externalId>=89 && externalId<=99)) {
-									ExternalQuestion externalQuestion = new ExternalQuestion(externalId,queryLine,null,null,runRack,obs,linkLine);
+								if((fileReferenceId>=23 && fileReferenceId<=33) || (fileReferenceId>=56 && fileReferenceId<=66) || (fileReferenceId>=89 && fileReferenceId<=99)) { //third lot
+									ExternalQuestion externalQuestion = new ExternalQuestion(fileReferenceId,queryLine,null,null,runRack,obs,linkLine);
 									externalQuestionAnswers.add(externalQuestion);
 								}
 							}
@@ -1194,34 +1201,36 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 	public static double computeDCG(final double rel, final int rank) {
 		double dcg = 0.0;
 		switch (dcgType) {
+
+		case COMB:
+			dcg = rel / (Math.log(rank + 1) / Math.log(2));
+			break;
+
 		case LIN:
 			dcg = rel;
-            if (rank > 1) {
-            	dcg = rel/ (Math.log(rank) / Math.log(2));
-            }
+			if (rank > 1) {
+				dcg = rel / (Math.log(rank) / Math.log(2));
+			}
 			break;
 
 		case EXP:
 			dcg = (Math.pow(2.0, rel) - 1.0) / ((Math.log(rank + 1) / Math.log(2)));
 			break;
-				
-		case COMB:
-			dcg = rel/ (Math.log(rank+1) / Math.log(2));
-			break;
+
 		}
 	
 		
 		return round(dcg, 4);
 	}
 	
-	public static double calculateIDCG(final int itemRelevance,int n) {
+	public static double calculateIDCG(final int maxRelevance,int maxRank) {
 		double idcg = 0;
 		// if can get relevance for every item should replace the relevance score at this point, else
 		// every item in the ideal case has relevance of 1
 		//int itemRelevance = 1;
 		
-		for (int i = 1; i <= n; i++){
-			idcg += computeDCG(itemRelevance, i);
+		for (int posRank = 1; posRank <= maxRank; posRank++){
+			idcg += computeDCG(maxRelevance, posRank);
 		}
 		idcg = round(idcg, 4);
 		

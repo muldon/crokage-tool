@@ -169,15 +169,24 @@ public class GenericRepositoryImpl implements GenericRepository {
 
 
 	@Override
-	public List<Post> findRankedList(Integer externalQuestionId, Boolean internalevaluation) {
+	public List<Post> findRankedList(Integer externalQuestionId, int userId, int phaseNum) {
 			
-		String sql = "select p.* " + 
-					"    from postsmin p, relatedpost rp, rank r" + 
-					"    where p.id = rp.postid " +
-					"	 and rp.id = r.relatedpostid	" +
-					"    and rp.externalquestionid = " + externalQuestionId+
-					"    and r.internalevaluation = " + internalevaluation+
-					"    order by r.rankorder";
+		String sql = "select p.*  " + 
+				"  from postsmin p, relatedpost rp, rank r  " + 
+				"  where p.id = rp.postid  " + 
+				"  and rp.id = r.relatedpostid	 " + 
+				"  and rp.externalquestionid =  " + externalQuestionId+
+				"  and r.phase =  " + phaseNum+
+				"  and r.id not in (" + 
+				"  select r2.id" + 
+				"	  from relatedpost rp2, rank r2, evaluation e2" + 
+				"      where rp2.id = r2.relatedpostid	 " + 
+				"      and r2.id = e2.rankid" + 
+				"	  and rp2.externalquestionid = " + externalQuestionId+
+				"     and r2.phase =  " + phaseNum+
+				"	  and e2.surveyuserid = " +userId+ 
+				"  )" + 
+				"  order by r.rankorder";
 		
 		Query q = em.createNativeQuery(sql, Post.class);
 		return (List<Post>) q.getResultList();
@@ -186,6 +195,39 @@ public class GenericRepositoryImpl implements GenericRepository {
 	}
 
 
+
+	@Override
+	public List<Post> findRankedPosts(Integer externalQuestionId, Integer userId, int phaseNum) {
+		
+		String sql = "select p.*  " + 
+				"  from postsmin p, relatedpost rp, rank r  " + 
+				"  where p.id = rp.postid  " + 
+				"  and rp.id = r.relatedpostid	 " + 
+				"  and rp.externalquestionid =  " + externalQuestionId+
+				"  and r.phase =  " + phaseNum+
+				"  order by r.rankorder";
+		
+		Query q = em.createNativeQuery(sql, Post.class);
+		return (List<Post>) q.getResultList();
+	}
+	
+
+	@Override
+	public List<Post> findRankedEvaluatedPosts(Integer externalQuestionId, Integer userId, int phaseNum) {
+		String sql = "  select p.*" + 
+				"	  from postsmin p,relatedpost rp2, rank r2, evaluation e2" + 
+				"     where rp2.id = r2.relatedpostid	 " + 
+				"	  and p.id = rp2.postid	" +	
+				"     and r2.id = e2.rankid" + 
+				"	  and rp2.externalquestionid = " + externalQuestionId+
+				"     and r2.phase =  " + phaseNum+
+				"	  and e2.surveyuserid = " +userId;
+				
+		
+		Query q = em.createNativeQuery(sql, Post.class);
+		return (List<Post>) q.getResultList();
+	}
+	
 
 
 
@@ -257,9 +299,15 @@ public class GenericRepositoryImpl implements GenericRepository {
 		Query q = em.createNativeQuery(sql, ExternalQuestion.class);
 		return (List<ExternalQuestion>) q.getResultList();
 	}
-	
-	
-	
+
+
+
+
+
+
+
+
+
 	
 	
 	

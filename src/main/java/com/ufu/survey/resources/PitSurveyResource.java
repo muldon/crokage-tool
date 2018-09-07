@@ -74,16 +74,16 @@ public class PitSurveyResource extends SuperResource {
 	
 	
 	@GET
-	@Path("/loadQuestions/{internalSurvey}")
+	@Path("/loadQuestions/{id}/{internalSurvey}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public ToTransfer loadQuestions(@PathParam("internalSurvey") Boolean internalSurvey)
+	public ToTransfer loadQuestions(@PathParam("id") Integer userId,@PathParam("internalSurvey") Boolean internalSurvey)
 	{
 		String errorMessage = null;
 		String infoMessage = null;
 		ToTransfer toTransfer = new ToTransfer<ExternalQuestion>();
 		
 		try {
-			pitSurveyService.loadQuestions(toTransfer,internalSurvey);
+			pitSurveyService.loadQuestions(toTransfer,internalSurvey,userId);
 						
 		} catch (Exception e) {
 			errorMessage = "Error when loadQuestions.";

@@ -56,6 +56,9 @@ public class PitSurveyService extends AbstractService{
 	@Value("${phaseNumber}")
 	public Integer phaseNumber;  
 	
+	@Value("${section}")
+	public Integer section;  
+	
 	@Value("${internalSurveyRankListSize}")
 	public Integer internalSurveyRankListSize;  
 	
@@ -78,17 +81,18 @@ public class PitSurveyService extends AbstractService{
 	private Map<Integer,List<Integer>> withoutRackMap;
 	private Map<Integer,List<Integer>> withRackMap;
 	private Map<Integer,List<Integer>> allPostsIdsMap;
+	private Map<Integer,List<ExternalQuestion>> nextQuestionUserMap;
 	
 	public PitSurveyService() {
-		
+		nextQuestionUserMap = new HashMap<>();
 	}
-	
+	/*
 	@Transactional(readOnly = true)
 	public void loadQuestionsAndRelatedPostsToCache() {
-		/*
-		 * Build a cache with external questions and their related posts for each perspective.
-		 * This cache will serve each request for nextQuestion in the survey 
-		 */
+		
+		 // Build a cache with external questions and their related posts for each perspective.
+		 // This cache will serve each request for nextQuestion in the survey 
+		 
 		externalQuestionsWithRack = findByUseRack(true);
 		externalQuestionsWithoutRack = findByUseRack(false);
 		allExternalQuestions = new ArrayList<>(externalQuestionsWithRack);
@@ -97,22 +101,22 @@ public class PitSurveyService extends AbstractService{
 		withoutRackMap = new HashMap<>();
 		withRackMap = new HashMap<>();
 		allPostsIdsMap = new HashMap<>();
-		
+		nextQuestionUserMap = new HashMap<>();
 		
 		for(ExternalQuestion externalQuestion: externalQuestionsWithRack) {
 			List<Integer> relatedPosts = findRelatedPostsIds(externalQuestion.getId());
-			withRackMap.put(externalQuestion.getExternalId(), relatedPosts);
+			withRackMap.put(externalQuestion.getFileReferenceId(), relatedPosts);
 		}
 		
 		for(ExternalQuestion externalQuestion: externalQuestionsWithoutRack) {
 			//externalQuestion.setRawQuery(externalQuestion.getId()+ " - "+externalQuestion.getRawQuery()); //presentation
 			List<Integer> relatedPosts = findRelatedPostsIds(externalQuestion.getId());
-			withoutRackMap.put(externalQuestion.getExternalId(), relatedPosts);
+			withoutRackMap.put(externalQuestion.getFileReferenceId(), relatedPosts);
 		}
 		allPostsIdsMap.putAll(withoutRackMap);
 		allPostsIdsMap.putAll(withRackMap);
 		
-	}
+	}*/
 	
 	
 	@Transactional(readOnly = true)
@@ -327,7 +331,11 @@ public class PitSurveyService extends AbstractService{
 		bucket.setParentId(post.getParentId());
 		bucket.setPostId(post.getId());
 		bucket.setPostScore(post.getScore());
-		bucket.setUserReputation(post.getUser()!=null? post.getUser().getReputation():null);
+		if(post.getOwnerUserId()!=null) {
+			User user = usersRepository.findOne(post.getOwnerUserId());
+			bucket.setUserReputation(user.getReputation());
+		}
+				
 		bucket.setRelationTypeId(post.getRelationTypeId());		
 		
 		Post parentPost = botUtils.getParentPostsCache().get(post.getParentId());
@@ -566,16 +574,19 @@ public class PitSurveyService extends AbstractService{
 		List<Integer> postsIds = evaluation.getPostsIds();
 		List<Integer> ratings = evaluation.getRatings();
 		boolean isInternalSurveyUser = SurveyUser.isInternalSurveyUser(evaluation.getSurveyUserId());
+		int phaseNum = 0;
+		if(phaseNumber==1 || phaseNumber==2 || phaseNumber==4) {
+			phaseNum = section;
+		}
 		
 		for(int i=0; i<postsIds.size(); i++) { //lists have the same size
 			RelatedPost relatedPost = relatedPostRepository.findByExternalQuestionIdAndPostId(evaluation.getExternalQuestionId(),postsIds.get(i));
 			//Rank rank = rankRepository.findByRelatedPostIdAndInternalEvaluation(relatedPost.getId(),isInternalSurveyUser);
-			int previousPhase = phaseNumber -1; 
-			Rank rank = rankRepository.findByRelatedPostIdAndPhase(relatedPost.getId(),previousPhase);
+			Rank rank = rankRepository.findByRelatedPostIdAndPhase(relatedPost.getId(),phaseNum);
 			Evaluation eval = new Evaluation(rank.getId(),evaluation.getSurveyUserId(),ratings.get(i),getCurrentDate());
 			evaluationRepository.save(eval);
 		}
-		
+		nextQuestionUserMap.get(evaluation.getSurveyUserId()).remove(0); 
 		
 	}
 
@@ -642,30 +653,74 @@ public class PitSurveyService extends AbstractService{
 
 
 	@Transactional(readOnly = true)
-	public void loadQuestions(ToTransfer toTransfer, Boolean internalSurvey) {
+	public void loadQuestions(ToTransfer toTransfer, Boolean internalSurvey, Integer userId) {
 		
 		/*List<ExternalQuestion> list = externalQuestionsWithoutRack.stream()
-			.peek(e -> e.setRawQuery(e.getExternalId()+ " - "+e.getRawQuery()))
+			.peek(e -> e.setRawQuery(e.getFileReferenceId()+ " - "+e.getRawQuery()))
 			.collect(Collectors.toList());*/
 		/*List<ExternalQuestion> list = new ArrayList<>();
 		for(ExternalQuestion externalQuestion: ex)*/
+		int phaseNum = 0;
+		if(phaseNumber==1 || phaseNumber==2 || phaseNumber==4) {
+			phaseNum = section;
+		}
+		ExternalQuestion nextExternalQuestion = null;
 		toTransfer.setList(externalQuestionsWithoutRack);
+		
+		List<ExternalQuestion> nextQuestinsUser = new ArrayList<>();
+		
+		for(ExternalQuestion externalQuestion: externalQuestionsWithoutRack) {
+			//how many evaluations for this user ?
+			externalQuestion = externalQuestionRepository.findByFileReferenceId(externalQuestion.getFileReferenceId());
+			List<Evaluation> evaluations = evaluationRepository.getEvaluationsByUserExternalQuestionPhase(phaseNum,userId,externalQuestion.getId());
+			if(evaluations.size()<internalSurveyRankListSize) {
+				
+				//checking if there is this number of posts to assess yet
+				List<Post> postsForQuestion = genericRepository.findRankedPosts(externalQuestion.getId(),userId,phaseNum);
+				List<Post> postsAlreadyEvaluated = genericRepository.findRankedEvaluatedPosts(externalQuestion.getId(),userId,phaseNum);
+				List<Post> remaining = new ArrayList<>(postsForQuestion); 
+				remaining.removeAll(postsAlreadyEvaluated);
+				if(!remaining.isEmpty()) { 
+					nextQuestinsUser.add(externalQuestion);
+				}
+				postsForQuestion = null;
+				postsAlreadyEvaluated = null;
+				remaining = null;
+			}
+		}
+		
+		logger.info("loadQuestions ok");
+		nextQuestionUserMap.put(userId, nextQuestinsUser);
 		
 	}
 
-
+	@Transactional(readOnly = true)
 	public void loadNextQuestion(ToTransfer<ExternalQuestion> toTransfer, Integer userId) throws Exception {
-		List<ExternalQuestion> nextExternalQuestions;
-		ExternalQuestion nextQuestion;
-		Integer previousPhase = phaseNumber - 1; //ranks were stored always the previous phase
+		
+		//for(Externa)
+		
+		/*List<ExternalQuestion> nextExternalQuestions;
+		
+		Integer previousPhase=0;
+		if(phaseNumber==2) {
+			previousPhase = section;
+		}else if(phaseNumber==4) {
+			previousPhase = 40;
+		}
+		
 		boolean bringTwoQuestions = false;
 		if(phaseNumber==8) {
 			bringTwoQuestions = true;
+		}*/
+		ExternalQuestion nextQuestion=null;
+		int phaseNum = 0;
+		if(phaseNumber==1 || phaseNumber==2 || phaseNumber==4) {
+			phaseNum = section;
 		}
 		
 		boolean isInternalSurveyUser = SurveyUser.isInternalSurveyUser(userId);
 		if(isInternalSurveyUser) {
-			nextExternalQuestions = genericRepository.findNextExternalQuestionInternalSurveyUser(userId,previousPhase);
+			/*nextExternalQuestions = genericRepository.findNextExternalQuestionInternalSurveyUser(userId,previousPhase);
 			if(!bringTwoQuestions && nextExternalQuestions.size()==2) {
 				ExternalQuestion first = nextExternalQuestions.remove(0);
 				nextExternalQuestions.clear();
@@ -683,9 +738,25 @@ public class PitSurveyService extends AbstractService{
 					toTransfer.setTo(nextExternalQuestions.get(1));
 				}
 			}
-			nextQuestion = toTransfer.getTo();
+			nextQuestion = toTransfer.getTo();*/
+			List<ExternalQuestion> nextQuestinsUser = nextQuestionUserMap.get(userId); 
+			if(!nextQuestinsUser.isEmpty()) {
+				nextQuestion = nextQuestinsUser.get(0);
+			}
+			
+			  
+			toTransfer.setTo(nextQuestion);
+			if(nextQuestion==null) {
+				toTransfer.setInfoMessage("Você completou o survey interno.");
+			}
+			
 			if(nextQuestion!=null) {
-				List<Post> postsForQuestion = genericRepository.findRankedList(nextQuestion.getId(),isInternalSurveyUser);
+				//List<Post> postsForQuestion = genericRepository.findRankedList(nextQuestion.getId(),userId,phaseNum);
+				
+				List<Post> postsForQuestion = genericRepository.findRankedPosts(nextQuestion.getId(),userId,phaseNum);
+				List<Post> postsAlreadyEvaluated = genericRepository.findRankedEvaluatedPosts(nextQuestion.getId(),userId,phaseNum);
+				
+				postsForQuestion.removeAll(postsAlreadyEvaluated);
 				toTransfer.setList4(postsForQuestion);
 			}
 			
@@ -733,7 +804,7 @@ public class PitSurveyService extends AbstractService{
 		int count =1;
 		for(ExternalQuestion externalQuestion: allExternalQuestions) {
 			//initializeVariables();
-			String questionStr = "Id: "+externalQuestion.getId()+ " - externalId: "+externalQuestion.getExternalId()+ " - Gquery: "+externalQuestion.getGoogleQuery();
+			String questionStr = "Id: "+externalQuestion.getId()+ " - externalId: "+externalQuestion.getFileReferenceId()+ " - Gquery: "+externalQuestion.getGoogleQuery();
 			logger.info("\n\n\n\n\n\n\n Processing question: "+questionStr);
 			
 			List<Post> answers = new ArrayList<>();

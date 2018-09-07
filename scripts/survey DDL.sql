@@ -131,7 +131,7 @@ CREATE TABLE externalquestion
   userack boolean,
   obs character varying(400),
   url character varying(800),
-  externalid integer,
+  filereferenceid integer,
   rawquery text,
   CONSTRAINT externalquestion_pk PRIMARY KEY (id)  
 )

@@ -77,7 +77,7 @@ public abstract class AbstractService {
 	protected int countExcludedPosts;
 	protected int countPostIsAnAnswer;
 	
-	protected Timestamp getCurrentDate(){
+	public Timestamp getCurrentDate(){
 		Timestamp ts_now = new Timestamp(Calendar.getInstance().getTimeInMillis());
 		return ts_now;
 	}

@@ -1,4 +1,4 @@
-﻿--level 1
+--level 1
 delete from evaluation;
 
 DROP SEQUENCE evaluation_id_seq;

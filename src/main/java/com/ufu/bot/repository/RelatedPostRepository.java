@@ -24,6 +24,13 @@ public interface RelatedPostRepository extends CrudRepository<RelatedPost, Integ
 	List<RelatedPost> findByExternalQuestionId(Integer externalQuestionId);
 
 	RelatedPost findByExternalQuestionIdAndPostId(Integer externalQuestionId, Integer postId);
+
+	@Query(value=" select rp.*" + 
+			" from relatedpost rp, rank r" + 
+			" where rp.id=r.relatedpostid" + 
+			" and rp.externalquestionid = ?1" + 
+			" and r.phase = ?2",nativeQuery=true)
+	List<RelatedPost> findRelatedPostsByExternalQuestionIdAndPhase(Integer externalQuestionId, int phase);
     
 	
 

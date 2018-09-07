@@ -37,8 +37,8 @@ public class ExternalQuestion {
 	
 	private String url;
 	
-	@Column(name="externalid")	
-	private Integer externalId;
+	@Column(name="filereferenceid")	
+	private Integer fileReferenceId;
 	
 	//@Transient
 	//private Map<Integer,List<Post>> relatedPosts;
@@ -129,18 +129,18 @@ public class ExternalQuestion {
 	@Override
 	public String toString() {
 		return "ExternalQuestion [id=" + id + ", rawQuery=" + rawQuery + ", googleQuery=" + googleQuery + ", classes="
-				+ classes + ", useRack=" + useRack + ", obs=" + obs + ", url=" + url + ", externalId=" + externalId
+				+ classes + ", useRack=" + useRack + ", obs=" + obs + ", url=" + url + ", fileReferenceId=" + fileReferenceId
 				+ "]";
 	}
 
-	public ExternalQuestion(Integer externalId,String rawQuery, String googleQuery, String classes, Boolean useRack, String obs, String link) {
+	public ExternalQuestion(Integer fileReferenceId,String rawQuery, String googleQuery, String classes, Boolean useRack, String obs, String link) {
 		super();
 		this.googleQuery = googleQuery;
 		this.classes = classes;
 		this.useRack = useRack;
 		this.obs =obs;
 		this.url=link;
-		this.externalId=externalId;
+		this.fileReferenceId=fileReferenceId;
 		this.rawQuery=rawQuery;
 	}
 
@@ -150,18 +150,20 @@ public class ExternalQuestion {
 	
 	
 
-	public ExternalQuestion(Integer externalId,String rawQuery) {
+	public ExternalQuestion(Integer fileReferenceId,String rawQuery) {
 		super();
 		this.rawQuery = rawQuery;
-		this.externalId = externalId;
+		this.fileReferenceId = fileReferenceId;
 	}
 
-	public Integer getExternalId() {
-		return externalId;
+	
+
+	public Integer getFileReferenceId() {
+		return fileReferenceId;
 	}
 
-	public void setExternalId(Integer externalId) {
-		this.externalId = externalId;
+	public void setFileReferenceId(Integer fileReferenceId) {
+		this.fileReferenceId = fileReferenceId;
 	}
 
 	public String getRawQuery() {
