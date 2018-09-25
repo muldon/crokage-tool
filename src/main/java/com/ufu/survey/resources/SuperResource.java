@@ -16,8 +16,7 @@ public class SuperResource
 	protected PitSurveyUtils pitSurveyUtils;
 	@Autowired
 	protected PitSurveyService pitSurveyService;
-	@Autowired
-	
+		
 	
 			
 	protected Timestamp getCurrentDate(){

@@ -1,6 +1,11 @@
 package com.ufu.bot.util;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -39,6 +44,12 @@ import org.apache.lucene.analysis.en.PorterStemFilter;
 import org.apache.lucene.analysis.standard.StandardTokenizer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.util.AttributeFactory;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellType;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,8 +58,10 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
+import com.ufu.bot.PitBotApp2;
 import com.ufu.bot.repository.GenericRepository;
 import com.ufu.bot.to.Bucket;
+import com.ufu.bot.to.Evaluation;
 import com.ufu.bot.to.ExternalQuestion;
 import com.ufu.bot.to.Feature;
 import com.ufu.bot.to.Post;
@@ -174,7 +187,7 @@ public class BotUtils {
 			stopWords = EnglishAnalyzer.getDefaultStopSet();
 			
 			standardTokenizer.close();
-			loadTagSynonyms();
+			//loadTagSynonyms();
 		}
 		
 		if(minTokenSize==null) {
@@ -1198,6 +1211,90 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 	}
 
 	
+	public void readXlsxToEvaluationList(List<Evaluation> evaluationsWithBothUsersScales, String fileName, Integer firstColumn, Integer secondColumn) {
+		try {
+	
+			FileInputStream excelFile = new FileInputStream(new File(fileName + ".xlsx"));
+			Workbook workbook = new XSSFWorkbook(excelFile);
+			Sheet datatypeSheet = workbook.getSheetAt(0);
+			Iterator<Row> iterator = datatypeSheet.iterator();
+			Integer externalQuestionId=null;
+			while (iterator.hasNext()) {
+	
+				Row currentRow = iterator.next();
+				Cell currentCellColumnA = currentRow.getCell(0);
+				Cell currentCellColumnB = currentRow.getCell(firstColumn);
+				Cell currentCellColumnC = currentRow.getCell(secondColumn);
+				
+				if(currentCellColumnA!=null) {
+					
+					String currentAValue = currentCellColumnA.getStringCellValue();
+					Integer postId = identifyQuestionIdFromUrl(currentAValue);
+					if(currentAValue.contains("id:")) {
+						String parts[] = currentAValue.split("\\|");
+						String externalQuestionIdStr = parts[0].replaceAll("\\D+","");
+						externalQuestionId = new Integer(externalQuestionIdStr);
+					}
+					
+					if (currentCellColumnB != null && currentCellColumnB.getCellTypeEnum() == CellType.NUMERIC
+						&& currentCellColumnC != null && currentCellColumnC.getCellTypeEnum() == CellType.NUMERIC) {
+						
+						Integer currentBValue = (int) (currentCellColumnB.getNumericCellValue());
+						Integer currentCValue = (int) (currentCellColumnC.getNumericCellValue());
+						//System.out.println("Scales: " + currentBValue + " - " + currentCValue);
+	
+						Evaluation eval = new Evaluation();
+						eval.setExternalQuestionId(externalQuestionId);
+						eval.setLikertScaleUser1(currentBValue);
+						eval.setLikertScaleUser2(currentCValue);
+						eval.setPostId(postId);
+						evaluationsWithBothUsersScales.add(eval);
+					}
+				
+				}
+			}
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		
+	}
+
+
+	public void buildMatrixForKappa(PitBotApp2 pitBotApp2, List<Evaluation> evaluationsWithBothUsersScales, String fileNameGeneratedMatrix) throws IOException {
+		BufferedWriter bw =null;
+		try {
+		
+			bw = new BufferedWriter(new FileWriter(fileNameGeneratedMatrix));
+			bw.write(";;1;2;3;4;5");
+			
+			//Matrix map
+			int[] cells[] = new int[5][5];
+			
+			for(int i=0; i<5; i++) {
+				bw.write("\n;"+(i+1)+";");
+				for(int j=0; j<5; j++) {
+					//System.out.println(cells[i][j]);
+					cells[i][j] = pitBotApp2.getCellNumber(i+1,j+1,evaluationsWithBothUsersScales);
+					//System.out.println("cell "+i+"-"+j+"= "+cells[i][j]);
+					bw.write(cells[i][j]+";");
+				}
+			}
+			
+			
+			
+		
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			bw.close();
+		}
+		
+	}
+
+
 	public static double computeDCG(final double rel, final int rank) {
 		double dcg = 0.0;
 		switch (dcgType) {

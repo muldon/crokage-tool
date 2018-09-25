@@ -33,6 +33,8 @@ import com.ufu.bot.to.Result;
 import com.ufu.bot.to.SurveyUser;
 import com.ufu.bot.to.User;
 import com.ufu.bot.util.AbstractService;
+import com.ufu.crokage.util.CrokageUtils;
+import com.ufu.crokage.util.TextNormalizer;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -42,6 +44,9 @@ public class BotApplicationTests extends AbstractService{
 	
 	@Autowired
 	protected PitBotService pitBotService;
+	
+	@Autowired
+	protected CrokageUtils crokageUtils;
 	
 	//@Test
 	public void contextLoads() {
@@ -105,7 +110,7 @@ public class BotApplicationTests extends AbstractService{
 	
 	//@Test
 	public void getComments() {
-		logger.info("\n\nTesting getComments....");
+		logger.info("Testing getComments....");
 		Integer postId = 910522;
 		List<Comment> comments = pitBotService.getCommentsByPostId(postId);
 		for (Comment comment : comments) {
@@ -118,7 +123,7 @@ public class BotApplicationTests extends AbstractService{
 	
 	//@Test
 	public void getAnswers() {
-		logger.info("\n\nTesting getAnswers....");
+		logger.info("Testing getAnswers....");
 		Integer postId = 910374;
 		List<Post> answers = pitBotService.findUpVotedAnswersByQuestionId(postId);
 		for (Post answer : answers) {
@@ -131,7 +136,7 @@ public class BotApplicationTests extends AbstractService{
 	
 	//@Test
 	public void getUser() {
-		logger.info("\n\nTesting getUser....");
+		logger.info("Testing getUser....");
 		Integer userId = 112532;
 		User user = pitBotService.findUserById(userId);
 		System.out.println(user);
@@ -141,7 +146,7 @@ public class BotApplicationTests extends AbstractService{
 	
 	//@Test
 	public void getRelatedQuestionsIds() {
-		logger.info("\n\nTesting getRelatedQuestionsIds....");
+		logger.info("Testing getRelatedQuestionsIds....");
 		
 		Set<Integer> set = new HashSet<>();
 		set.add(910374);
@@ -153,10 +158,33 @@ public class BotApplicationTests extends AbstractService{
 	}
 	
 	
+	
+	//@Test
+	public void testGetClassesFromCodes() throws Exception {
+		logger.info("testStemStop....");
+		Integer questionId = 10839155;
+		
+		Post post = pitBotService.findPostById(questionId);
+		String body = post.getBody();
+		
+		Set<String> classes = crokageUtils.cleanCode(body);
+		System.out.println(classes);
+		//System.out.println(code);
+		
+		/*System.out.println(TextNormalizer.isCamelCase("Camel01C")); 
+		System.out.println(TextNormalizer.isCamelCase("camelC"));
+		System.out.println(TextNormalizer.isCamelCase("Camel"));
+		System.out.println(TextNormalizer.isCamelCase("CamelCase"));
+		System.out.println(TextNormalizer.isCamelCase("camel"));
+		System.out.println(TextNormalizer.isCamelCase("Graphics2D"));*/
+		
+
+	}
+	
 
 	//@Test
 	public void testStemStop() throws Exception {
-		logger.info("\n\ntestStemStop....");
+		logger.info("testStemStop....");
 		Integer questionId = 910522;
 		
 		Post post = pitBotService.findPostById(questionId);

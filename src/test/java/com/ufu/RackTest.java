@@ -13,7 +13,7 @@ public class RackTest {
 		//CodeTokenProvider ctProvider = new CodeTokenProvider(query,TOPK);
 		CodeTokenProvider ctProvider = new CodeTokenProvider(query);
 		List<String> apis = ctProvider.recommendRelevantAPIs();
-		System.out.println(apis.stream().limit(5).collect(Collectors.toList()));
+		System.out.println(apis.stream().limit(10).collect(Collectors.toList()));
 		
 	}
 }

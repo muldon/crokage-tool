@@ -1,9 +1,7 @@
 package com.ufu.bot;
 
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,12 +23,6 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -203,7 +195,7 @@ public class PitBotApp2 {
 	
 	
 	
-	@PostConstruct
+	//@PostConstruct
 	public void init() throws Exception {
 		
 		logger.info("Initializing app...");
@@ -480,19 +472,19 @@ public class PitBotApp2 {
 			
 		}else if(section==2) { //Use previous xlsx spreedShed to build a matrix of values for the scales - before agreement 
 			List<Evaluation> evaluationsWithBothUsersScales = new ArrayList<>();
-			readXlsxToEvaluationList(evaluationsWithBothUsersScales,fileName,likertsResearcher1BeforeAgreementColumn,likertsResearcher2BeforeAgreementColumn);
-			buildMatrixForKappa(evaluationsWithBothUsersScales,fileNameMatrixKappaBeforeAgreement); 
+			botUtils.readXlsxToEvaluationList(evaluationsWithBothUsersScales,fileName,likertsResearcher1BeforeAgreementColumn,likertsResearcher2BeforeAgreementColumn);
+			botUtils.buildMatrixForKappa(this, evaluationsWithBothUsersScales,fileNameMatrixKappaBeforeAgreement); 
 		
 		}else if(section==3) { //Use previous xlsx spreedShed to build a matrix of values for the scales - after agreement
 			List<Evaluation> evaluationsWithBothUsersScales = new ArrayList<>();
-			readXlsxToEvaluationList(evaluationsWithBothUsersScales,fileName,likertsResearcher1AfterAgreementColumn,likertsResearcher2AfterAgreementColumn);
-			buildMatrixForKappa(evaluationsWithBothUsersScales,fileNameMatrixKappaAfterAgreement);
+			botUtils.readXlsxToEvaluationList(evaluationsWithBothUsersScales,fileName,likertsResearcher1AfterAgreementColumn,likertsResearcher2AfterAgreementColumn);
+			botUtils.buildMatrixForKappa(this, evaluationsWithBothUsersScales,fileNameMatrixKappaAfterAgreement);
 		
 		}
 		
 		else if(phaseNumber==3 && section==4) {//Discover the best adjuster weights. Use the previous analyzed posts to discover what is the influence of the post origin the post quality. Set adjuster weights.
 			List<Evaluation> evaluationsWithBothUsersScales = new ArrayList<>();
-			readXlsxToEvaluationList(evaluationsWithBothUsersScales,fileName,likertsResearcher1AfterAgreementColumn,likertsResearcher2AfterAgreementColumn);
+			botUtils.readXlsxToEvaluationList(evaluationsWithBothUsersScales,fileName,likertsResearcher1AfterAgreementColumn,likertsResearcher2AfterAgreementColumn);
 			buildReportAdjustmentWeights(evaluationsWithBothUsersScales,reportCGFileName);
 			
 		
@@ -503,10 +495,10 @@ public class PitBotApp2 {
 			
 			
 			List<Evaluation> phase2AfterAgreementEvaluationsList = new ArrayList<>();
-			readXlsxToEvaluationList(phase2AfterAgreementEvaluationsList,Phase2AfterAgreement,likertsResearcher1AfterAgreementColumn,likertsResearcher2AfterAgreementColumn);
+			botUtils.readXlsxToEvaluationList(phase2AfterAgreementEvaluationsList,Phase2AfterAgreement,likertsResearcher1AfterAgreementColumn,likertsResearcher2AfterAgreementColumn);
 			
 			List<Evaluation> phase5AfterAgreementEvaluationsList = new ArrayList<>();
-			readXlsxToEvaluationList(phase5AfterAgreementEvaluationsList,Phase5AfterAgreement,likertsResearcher1AfterAgreementColumn,likertsResearcher2AfterAgreementColumn);
+			botUtils.readXlsxToEvaluationList(phase5AfterAgreementEvaluationsList,Phase5AfterAgreement,likertsResearcher1AfterAgreementColumn,likertsResearcher2AfterAgreementColumn);
 			
 			if(section==4) {
 				//in phase 5 we only pick 10 answers for each question. Filter only those 10 first ranked answers. (phase 42 - lot 2)
@@ -1065,61 +1057,6 @@ public class PitBotApp2 {
 
 
 
-	private void readXlsxToEvaluationList(List<Evaluation> evaluationsWithBothUsersScales, String fileName, Integer firstColumn, Integer secondColumn) {
-		try {
-
-			FileInputStream excelFile = new FileInputStream(new File(fileName + ".xlsx"));
-			Workbook workbook = new XSSFWorkbook(excelFile);
-			Sheet datatypeSheet = workbook.getSheetAt(0);
-			Iterator<Row> iterator = datatypeSheet.iterator();
-			Integer externalQuestionId=null;
-			while (iterator.hasNext()) {
-
-				Row currentRow = iterator.next();
-				Cell currentCellColumnA = currentRow.getCell(0);
-				Cell currentCellColumnB = currentRow.getCell(firstColumn);
-				Cell currentCellColumnC = currentRow.getCell(secondColumn);
-				
-				if(currentCellColumnA!=null) {
-					
-					String currentAValue = currentCellColumnA.getStringCellValue();
-					Integer postId = botUtils.identifyQuestionIdFromUrl(currentAValue);
-					if(currentAValue.contains("id:")) {
-						String parts[] = currentAValue.split("\\|");
-						String externalQuestionIdStr = parts[0].replaceAll("\\D+","");
-						externalQuestionId = new Integer(externalQuestionIdStr);
-					}
-					
-					if (currentCellColumnB != null && currentCellColumnB.getCellTypeEnum() == CellType.NUMERIC
-						&& currentCellColumnC != null && currentCellColumnC.getCellTypeEnum() == CellType.NUMERIC) {
-						
-						Integer currentBValue = (int) (currentCellColumnB.getNumericCellValue());
-						Integer currentCValue = (int) (currentCellColumnC.getNumericCellValue());
-						//System.out.println("Scales: " + currentBValue + " - " + currentCValue);
-	
-						Evaluation eval = new Evaluation();
-						eval.setExternalQuestionId(externalQuestionId);
-						eval.setLikertScaleUser1(currentBValue);
-						eval.setLikertScaleUser2(currentCValue);
-						eval.setPostId(postId);
-						evaluationsWithBothUsersScales.add(eval);
-					}
-				
-				}
-			}
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		
-		
-	}
-
-
-
-
-
 	private void buildCsvPhaseSection1(String fileName,List<ExternalQuestion> externalQuestions, int referencePhaseNumber) throws IOException {
 		BufferedWriter bw =null;
 		try {
@@ -1584,42 +1521,7 @@ public class PitBotApp2 {
 	}*/
 
 	
-	private void buildMatrixForKappa(List<Evaluation> evaluationsWithBothUsersScales, String fileNameGeneratedMatrix) throws IOException {
-		BufferedWriter bw =null;
-		try {
-		
-			bw = new BufferedWriter(new FileWriter(fileNameGeneratedMatrix));
-			bw.write(";;1;2;3;4;5");
-			
-			//Matrix map
-			int[] cells[] = new int[5][5];
-			
-			for(int i=0; i<5; i++) {
-				bw.write("\n;"+(i+1)+";");
-				for(int j=0; j<5; j++) {
-					//System.out.println(cells[i][j]);
-					cells[i][j] = getCellNumber(i+1,j+1,evaluationsWithBothUsersScales);
-					//System.out.println("cell "+i+"-"+j+"= "+cells[i][j]);
-					bw.write(cells[i][j]+";");
-				}
-			}
-			
-			
-			
-		
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			bw.close();
-		}
-		
-	}
-
-
-
-
-
-	private int getCellNumber(int i, int j, List<Evaluation> allEvaluations) {
+	public int getCellNumber(int i, int j, List<Evaluation> allEvaluations) {
 		int sum=0;
 		for(Evaluation evaluation: allEvaluations) {
 			if(evaluation.getLikertScaleUser1()==i && evaluation.getLikertScaleUser2()==j) {
