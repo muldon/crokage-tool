@@ -1352,6 +1352,16 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 		return normClasses;
 		
 	}
+
+
+	public static String loadStream(InputStream s) throws Exception {
+		BufferedReader br = new BufferedReader(new InputStreamReader(s));
+		StringBuilder sb = new StringBuilder();
+		String line;
+		while ((line = br.readLine()) != null)
+			sb.append(line).append("\n");
+		return sb.toString();
+	}
 	
 
 	

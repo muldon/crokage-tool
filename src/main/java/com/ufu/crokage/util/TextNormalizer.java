@@ -26,7 +26,7 @@ public class TextNormalizer {
 	public Set<String> normalizeSimpleCodeDiscardSmall() {
 		//remove comments
 		content = content.replaceAll("(?:/\\*(?:[^*]|(?:\\*+[^*/]))*\\*+/)|(?://.*)","");
-		
+				
 		//remove exceptions
 		content = content.replaceAll("([\\w\\.]*Exception)","");
 		

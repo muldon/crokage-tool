@@ -1,8 +1,11 @@
 package com.ufu;
 
-import com.ufu.crokage.util.TextNormalizer;
+import java.util.ArrayList;
+import java.util.List;
 
-import code.search.bda.scorecalc.CodeSearchBDAReformulator;
+import com.ufu.crokage.config.CrokageStaticData;
+import com.ufu.crokage.util.CrokageUtils;
+import com.ufu.crokage.util.TextNormalizer;
 
 public class Nlp2ApiTester {
 	public static void main(String[] args) {
@@ -10,8 +13,41 @@ public class Nlp2ApiTester {
 		searchQuery = new TextNormalizer(searchQuery).normalizeTextLight();
 		int TOPK = 10;
 		int caseNo = 31;
-		String suggested = new CodeSearchBDAReformulator(caseNo, searchQuery, TOPK, "both").provideRelevantAPIs();
-		System.out.println(suggested);
+		//String suggested = new CodeSearchBDAReformulator(caseNo, searchQuery, TOPK, "both").provideRelevantAPIs();
+		//System.out.println(suggested);
+		
+		
+		try {
+			String jarPath = CrokageStaticData.CROKAGE_HOME;
+			//String command = "java -jar "+jarPath+ "/myNlp2Api.jar "+ "-K 10 -task reformulate -query How do I send an HTML email?";
+			List<String> command = new ArrayList<String>();
+		    
+		    command.add("java");
+		    command.add("-jar");
+		    command.add(jarPath+"/myNlp2Api.jar");
+		    command.add("-K");
+		    command.add("10");
+		    command.add("-task");
+		    command.add("reformulate");
+		    command.add("-query");
+		    command.add("How do I send an HTML email?");
+			
+			ProcessBuilder pb = new ProcessBuilder(command);
+			Process p = pb.start();
+			p.waitFor();
+			String output = CrokageUtils.loadStream(p.getInputStream());
+			String error = CrokageUtils.loadStream(p.getErrorStream());
+			int rc = p.waitFor();
+			System.out.println("Process ended with rc=" + rc);
+			System.out.println("\nStandard Output:\n");
+			System.out.println(output);
+			String apis[] = output.replaceAll("\n", " ").split(" ");
+			System.out.println(apis);
+			System.out.println("\nStandard Error:\n");
+			System.out.println(error);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		
 	}
 }
