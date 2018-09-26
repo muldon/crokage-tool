@@ -3,19 +3,9 @@ package com.ufu;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.apache.commons.exec.CommandLine;
-import org.apache.commons.exec.DefaultExecutor;
-
-import com.google.common.base.Charsets;
-import com.ufu.crokage.config.CrokageStaticData;
-import com.ufu.crokage.to.QueryApis;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 
 
@@ -135,7 +125,7 @@ public class SimpleTester {
 			
 			
 			
-			String ar= "Integer.parseInt";
+			/*String ar= "Integer.parseInt";
 			String ar2 = "Collections.checkedCollection";
 			String ar3 = "Files.readAllLines";
 			
@@ -153,7 +143,18 @@ public class SimpleTester {
 			
 			String str = "id:(1) | Refid: 1 - How do I convert number into Roman Numerals?";
 			String parts[] = str.split(" - ");
-			System.out.println(parts[1].trim());
+			System.out.println(parts[1].trim());*/
+			
+			
+			Set<String> set = new LinkedHashSet<>();
+			set.add("1");
+			set.add("2");
+			set.add("3");
+			set.add("1");
+			set.add("2");
+			set.add("2");
+			set.add("2");
+			System.out.println(set);
 		        
 		} catch (Exception e) {
 			System.out.println(e);
