@@ -36,6 +36,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Charsets;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Iterables;
 import com.ufu.bot.googleSearch.GoogleWebSearch;
 import com.ufu.bot.service.CrokageService;
 import com.ufu.bot.to.Bucket;
@@ -279,14 +281,15 @@ public class CrokageApp {
 				logger.warn("The number of retrieved APIs for query is lower than the number of rack classes set as parameter. Ajusting the parameter to -->" + rankedApis.size() + " apis");
 				k = rankedApis.size();
 			}
-			rankedApis = rankedApis.subList(0, k);
+			
+			
+			//rankedApis = rankedApis.subList(0, k);
+			
+			//Set<Integer> rankedApisSet = ImmutableSet.copyOf(Iterables.limit(set, 20));
 			
 			Set<String> rankedApisSet = new LinkedHashSet<String>(rankedApis);
-			Set<String> generatedClasses = new LinkedHashSet<>();
-			for(String api: rankedApisSet) {
-				generatedClasses.add(api); 
-			}
-			queriesApis.put(query.trim(), generatedClasses);
+			rankedApisSet = ImmutableSet.copyOf(Iterables.limit(rankedApisSet, k));
+			queriesApis.put(query.trim(), rankedApisSet);
 			
 			logger.info("discovered classes for query: "+query+ " ->  " + queriesApis.get(query.trim()));
 		}
@@ -350,17 +353,20 @@ public class CrokageApp {
 				logger.warn("The number of retrieved APIs from BIKER is lower than the number of rack classes set as parameter. Ajusting the parameter to -->" + rankedApis.size() + " apis, returned by BIKER for this query.");
 				k = rankedApis.size();
 			}
-			rankedApis = rankedApis.subList(0, k);
-			Set<String> rankedApisSet = new LinkedHashSet<String>(rankedApis);
+			
+			//rankedApis = rankedApis.subList(0, k);
+			Set<String> rankedApisSetWithMethods = new LinkedHashSet<String>(rankedApis);
 			
 			if(bikerOnlyClasses) {
-				Set<String> bikerClasses = new LinkedHashSet<>();
-				for(String api: rankedApisSet) {
-					bikerClasses.add(api.split("\\.")[0]); 
+				Set<String> rankedApisSetClassesOnly = new LinkedHashSet<String>();
+				for(String api: rankedApisSetWithMethods) {
+					rankedApisSetClassesOnly.add(api.split("\\.")[0]);
 				}
-				bikerQueriesApis.put(parts[0].trim(), bikerClasses);
+				
+				rankedApisSetClassesOnly = ImmutableSet.copyOf(Iterables.limit(rankedApisSetClassesOnly, k));
+				bikerQueriesApis.put(parts[0].trim(), rankedApisSetClassesOnly);
 			}else {
-				bikerQueriesApis.put(parts[0].trim(), rankedApisSet);
+				bikerQueriesApis.put(parts[0].trim(), rankedApisSetWithMethods);
 			}
 			
 			logger.info("Biker - discovered classes for query: "+parts[0]+ " ->  " + bikerQueriesApis.get(parts[0].trim()));
@@ -405,17 +411,36 @@ public class CrokageApp {
 	}
 
 	private void generateMetricsForApiExtractors() throws Exception {
-		if(subAction.equals("all")) {
+		//subAction is transformed to lowercase
+		if(subAction.contains("rack")) {
 			rackQueriesApis = extractAPIsFromRACK();
+		}
+		if(subAction.contains("biker")) {
 			bikerQueriesApis = extractAPIsFromBIKER();
+		}
+		if(subAction.contains("nlp2api")) {
 			nlp2ApiQueriesApis = extractAPIsFromNLP2Api();
+		}
+		
+		/*
+		if(subAction.contains("|")) { 
+			
+			if(subAction.contains("rack")) {
+				rackQueriesApis = extractAPIsFromRACK();
+			}
+			if(subAction.contains("biker")) {
+				bikerQueriesApis = extractAPIsFromBIKER();
+			}
+			if(subAction.contains("nlp2api")) {
+				nlp2ApiQueriesApis = extractAPIsFromNLP2Api();
+			}
 		}else if(subAction.equals("biker")) {
 			bikerQueriesApis = extractAPIsFromBIKER();
 		}else if(subAction.equals("rack")) {
 			rackQueriesApis = extractAPIsFromRACK();
 		}else {
 			nlp2ApiQueriesApis = extractAPIsFromNLP2Api();
-		}
+		}*/
 		
 		Map<String, Set<String>> goldSetQueriesApis = getGoldSetQueriesApis();
 		Map<String, Set<String>> recommendedApis = getRecommendedApis();
@@ -620,37 +645,258 @@ public class CrokageApp {
 	
 	private Map<String, Set<String>> getRecommendedApis() {
 		Map<String, Set<String>> recommendedApis = new LinkedHashMap<>();
+		Set<String> queries = null; //are the same for all 
 		
-		if(rackQueriesApis!=null && bikerQueriesApis!=null && nlp2ApiQueriesApis!=null) { //all approaches
-			Set<String> queries = rackQueriesApis.keySet();
+		int numApproaches = 0;
+		if(rackQueriesApis!=null) {
+			numApproaches++;
+			queries = rackQueriesApis.keySet();
+		}
+		if(bikerQueriesApis!=null) {
+			numApproaches++;
+			queries = bikerQueriesApis.keySet();
+		}
+		if(nlp2ApiQueriesApis!=null) {
+			numApproaches++;
+			queries = nlp2ApiQueriesApis.keySet();
+		}
+				
+		if(numApproaches>1){ 
+			String apisArrOrder[] = subAction.split("\\|");
 			List<String> queriesList = new ArrayList<>(queries);
+			String bikerApi = null;
+			String nlp2ApiApi = null;
+			String rackApi = null;
 			
-			for(String currentQuery: queriesList) {
+			outer: for(String currentQuery: queriesList) {
 				Set<String> recommendedApisSet = new LinkedHashSet<>();
-				Set<String> bikerApisSet = bikerQueriesApis.get(currentQuery);
-				Set<String> rackApisSet = rackQueriesApis.get(currentQuery);
-				Set<String> nlpApisSet = nlp2ApiQueriesApis.get(currentQuery);
+				Set<String> bikerApisSet = null;
+				Set<String> rackApisSet = null;
+				Set<String> nlpApisSet = null;
 				
-				Iterator<String> bikerIt = bikerApisSet.iterator();
-				Iterator<String> rackIt = rackApisSet.iterator();
-				Iterator<String> nlpIt = nlpApisSet.iterator();
+				Iterator<String> bikerIt = null;
+				Iterator<String> rackIt = null;
+				Iterator<String> nlpIt = null;
 				
-				for(int i=0; i<numberOfAPIClasses; i++) { //collect the ith API from each approach at a time
+				
+				if(rackQueriesApis!=null) {
+					rackApisSet = rackQueriesApis.get(currentQuery);
+					rackIt = rackApisSet.iterator();
+				}
+				if(bikerQueriesApis!=null) {
+					bikerApisSet = bikerQueriesApis.get(currentQuery);
+					bikerIt = bikerApisSet.iterator();
+				}
+				if(nlp2ApiQueriesApis!=null) {
+					nlpApisSet = nlp2ApiQueriesApis.get(currentQuery);
+					nlpIt = nlpApisSet.iterator();
+				}
+				
+				bikerApi = "";
+				nlp2ApiApi = "";
+				rackApi = "";
+				
+				
+				int i=1;
+				String chosenApi = null;
+				
+				while(true) { 
+					//collect the ith API from each approach and merge
+					chosenApi = null;
+					boolean stop = true;
 					
-					if(bikerIt.hasNext()) {
-						recommendedApisSet.add(bikerIt.next());
+					if(bikerIt!=null && bikerIt.hasNext()) {
+						bikerApi = bikerIt.next();
+						stop = false;
 					}
-					if(nlpIt.hasNext()) {
-						recommendedApisSet.add(nlpIt.next());
+					
+					if(nlpIt!=null && nlpIt.hasNext()) {
+						nlp2ApiApi= nlpIt.next();
+						stop = false;
 					}
-					if(rackIt.hasNext()) {
-						recommendedApisSet.add(rackIt.next());
+					if(rackIt!=null && rackIt.hasNext()) {
+						rackApi = rackIt.next();
+						stop = false;
 					}
+					
+					if(stop) { //recommenders were not able to produce enough apis
+						break;
+					}
+					
+					//uses the order of the apis to merge the recommendation
+					if(numApproaches==3) {
+						if(bikerApi.equals(nlp2ApiApi) || bikerApi.equals(rackApi)) { //if 2 are equal, choose it, else one of each until numberOfAPIClasses
+							chosenApi = bikerApi;
+							recommendedApisSet.add(chosenApi);
+							if(recommendedApisSet.size()==numberOfAPIClasses) {
+								break;
+							}
+							i++;
+							
+						} else if(nlp2ApiApi.equals(rackApi)) {
+							chosenApi = nlp2ApiApi;
+							recommendedApisSet.add(chosenApi);
+							if(recommendedApisSet.size()==numberOfAPIClasses) {
+								break;
+							}
+							i++;
+						} else {  //all different, follows the order
+							
+							
+						}
+						
+					} 
+					//two approaches or three approaches: rack+biker(+nlp), rack+nlp(+biker), biker+rack(+nlp), biker+nlp(+rack), nlp+rack(+biker), nlp+biker(+rack)
+					if(apisArrOrder[0].equals("rack") && apisArrOrder[1].equals("biker")) {
+						
+						recommendedApisSet.add(rackApi);
+						i++;
+						if(recommendedApisSet.size()==numberOfAPIClasses) {
+							break;
+						}
+						
+						
+						recommendedApisSet.add(bikerApi);
+						i++;
+						if(recommendedApisSet.size()==numberOfAPIClasses) {
+							break;
+						}
+							
+						if(apisArrOrder.length>2) {
+							recommendedApisSet.add(nlp2ApiApi);
+							i++;
+							if(recommendedApisSet.size()==numberOfAPIClasses) {
+								break;
+							}
+						}
+						
+					}else if(apisArrOrder[0].equals("rack") && apisArrOrder[1].equals("nlp2api")) {
+						
+						recommendedApisSet.add(rackApi);
+						i++;
+						if(recommendedApisSet.size()==numberOfAPIClasses) {
+							break;
+						}
+						
+						
+						recommendedApisSet.add(nlp2ApiApi);
+						i++;
+						if(recommendedApisSet.size()==numberOfAPIClasses) {
+							break;
+						}
+						
+						
+						if(apisArrOrder.length>2) {
+							recommendedApisSet.add(bikerApi);
+							i++;
+							if(recommendedApisSet.size()==numberOfAPIClasses) {
+								break;
+							}
+						}
+						
+					}else if(apisArrOrder[0].equals("biker") && apisArrOrder[1].equals("rack")) {
+						
+						recommendedApisSet.add(bikerApi);
+						i++;
+						if(recommendedApisSet.size()==numberOfAPIClasses) {
+							break;
+						}
+						
+						
+						recommendedApisSet.add(rackApi);
+						i++;
+						if(recommendedApisSet.size()==numberOfAPIClasses) {
+							break;
+						}
+						
+						//nlp
+						if(apisArrOrder.length>2) {
+							recommendedApisSet.add(nlp2ApiApi);
+							i++;
+							if(recommendedApisSet.size()==numberOfAPIClasses) {
+								break;
+							}
+						}
+						
+						
+					}else if(apisArrOrder[0].equals("biker") && apisArrOrder[1].equals("nlp2api")) {
+						
+						recommendedApisSet.add(bikerApi);
+						i++;
+						if(recommendedApisSet.size()==numberOfAPIClasses) {
+							break;
+						}
+						
+						
+						recommendedApisSet.add(nlp2ApiApi);
+						i++;
+						if(recommendedApisSet.size()==numberOfAPIClasses) {
+							break;
+						}
+						
+						
+						
+						if(apisArrOrder.length>2) {
+							recommendedApisSet.add(rackApi);
+							i++;
+							if(recommendedApisSet.size()==numberOfAPIClasses) {
+								break;
+							}
+						}
+						
+					}else if(apisArrOrder[0].equals("nlp2api") && apisArrOrder[1].equals("rack")) {
+						
+						recommendedApisSet.add(nlp2ApiApi);
+						i++;
+						if(recommendedApisSet.size()==numberOfAPIClasses) {
+							break;
+						}
+						
+						
+						recommendedApisSet.add(rackApi);
+						i++;
+						if(recommendedApisSet.size()==numberOfAPIClasses) {
+							break;
+						}
+						
+						
+						
+						if(apisArrOrder.length>2) {
+							recommendedApisSet.add(bikerApi);
+							i++;
+							if(recommendedApisSet.size()==numberOfAPIClasses) {
+								break;
+							}
+						}
+						
+					}else if(apisArrOrder[0].equals("nlp2api") && apisArrOrder[1].equals("biker")) {
+						recommendedApisSet.add(nlp2ApiApi);
+						i++;
+						if(recommendedApisSet.size()==numberOfAPIClasses) {
+							break;
+						}
+						
+						recommendedApisSet.add(bikerApi);
+						i++;
+						if(recommendedApisSet.size()==numberOfAPIClasses) {
+							break;
+						}
+						
+						
+						if(apisArrOrder.length>2) {
+							recommendedApisSet.add(rackApi);
+							i++;
+							if(recommendedApisSet.size()==numberOfAPIClasses) {
+								break;
+							}
+						}
+						
+					}
+			
 				}
 				recommendedApis.put(currentQuery, recommendedApisSet);
 				
 			}
-			
 			
 		}else if(rackQueriesApis!=null) {
 			recommendedApis.putAll(rackQueriesApis);

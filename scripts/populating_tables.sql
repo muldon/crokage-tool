@@ -1,4 +1,4 @@
-﻿delete from processedposts;
+--delete from processedposts;
 delete from usersmin;
 delete from postsmin;
 delete from postlinksmin;

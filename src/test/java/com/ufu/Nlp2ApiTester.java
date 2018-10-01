@@ -30,7 +30,7 @@ public class Nlp2ApiTester {
 		    command.add("-task");
 		    command.add("reformulate");
 		    command.add("-query");
-		    command.add("How do I send an HTML email?");
+		    command.add("How to round a number to n decimal places in Java");
 			
 			ProcessBuilder pb = new ProcessBuilder(command);
 			Process p = pb.start();

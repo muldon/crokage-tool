@@ -154,7 +154,12 @@ public class SimpleTester {
 			set.add("2");
 			set.add("2");
 			set.add("2");
-			System.out.println(set);
+			//System.out.println(set);
+			
+			
+			String apis = "RACK|BICKER|NLP2Api";
+			String apisArrOrder[] = apis.split("\\|");
+			System.out.println(apisArrOrder);
 		        
 		} catch (Exception e) {
 			System.out.println(e);
