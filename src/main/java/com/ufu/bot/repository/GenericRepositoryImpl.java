@@ -304,6 +304,26 @@ public class GenericRepositoryImpl implements GenericRepository {
 
 
 
+	@Override
+	public List<Post> getAnswersWithCode(String startDate) {
+		
+		String sql = " select * "
+				+ " from postsmin po"  
+				+ " where po.body like '%<pre><code>%' "
+				+ " and po.posttypeid = 2 ";
+		
+		if(!StringUtils.isBlank(startDate)) {
+			sql += " and po.creationdate > '" + startDate + "'";
+		}
+			
+		Query q = em.createNativeQuery(sql, Post.class);
+		return (List<Post>) q.getResultList();
+	}
+
+
+
+
+
 
 
 

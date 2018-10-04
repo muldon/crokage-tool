@@ -3,6 +3,7 @@ package com.ufu.crokage.util;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 public class TextNormalizer {
@@ -24,6 +25,15 @@ public class TextNormalizer {
 	}
 
 	public Set<String> normalizeSimpleCodeDiscardSmall() {
+		//remove public static void main(String[] args) {
+		content = content.replaceAll("public static void main\\(String\\[\\] args\\)", " ");
+		
+		//remove stacktraces
+		content = content.replaceAll("(?m)^.*?Exception.*(?:\\R+^\\s*at .*)+", " ");
+		
+		//print code
+		content = content.replaceAll("System.out.println", "");
+				
 		//remove comments
 		content = content.replaceAll("(?:/\\*(?:[^*]|(?:\\*+[^*/]))*\\*+/)|(?://.*)","");
 				
@@ -42,6 +52,7 @@ public class TextNormalizer {
 		//remove annotations
 		content = content.replaceAll("@(\\w+)", "");
 		
+		
 		String[] words = this.content.split("\\p{Punct}+|\\s+");
 		ArrayList<String> wordList = new ArrayList<>(Arrays.asList(words));
 		// decomposing the camel cases
@@ -54,7 +65,7 @@ public class TextNormalizer {
 		// discard stop words
 		StopWordManager stopManager = new StopWordManager(true);
 		//Set<String> validTokens = stopManager.getRefinedSentence(modified);
-		Set<String> validTokens = new HashSet<>();
+		Set<String> validTokens = new LinkedHashSet<>();
 		ArrayList<String> tokens = MiscUtility.str2List(modified);
 		for (String token : tokens) {
 			if (!stopManager.isAStopWord(token)) {

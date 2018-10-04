@@ -352,8 +352,6 @@ How do I create a rolling log files?
 RollingFileAppender TimeBasedRollingPolicy RollingFile PatternLayout FixedWindowRollingPolicy Logger File SizeBasedTriggeringPolicy DailyRoller DailyRollingFile
 How do I import Java package in script?
 Script Java HelloWorldRestApplication String JavaScript ComponentScan ScriptEngine ExecutionResponse Recompilation System
-How do I retrieve available schemas in database?
-DbExtractor Database ProductCategoryDatabaseRetrieve DatabaseHandler DBManagement ExtractorThread Schemas Retrieve DatabaseMetaData SQLiteDatabase
 How do I send email using Gmail via SSL?
 InternetAddress MimeMessage MessagingException SendEmail PasswordAuthentication Transport Email Mail String EmailException
 How to Use Semaphore?
@@ -542,8 +540,6 @@ Read file data from database using JDBC
 DriverManager PropertyPlaceholderConfigurer Driver OracleDatasource String Connection MySQLRdbHelper PreparedStatement DbConnectionRoutingDataSource DatabaseError
 How do I calculate difference between two dates?
 LocalDate SimpleDateFormat ChronoUnit Period Calendar DateTime LocalDateTime ZonedDateTime Calculate GregorianDate
-Avoid concurrent execution of a time-consuming task without blocking
-ThreadPoolExecutor Callable Runnable RejectedExecutionHandler LinkedBlockingQueue TimeUnit Thread String BlockingQueue RunnableFuture
 Create a timer for every time this int changes
 Timer IntTreeNode TimerTask String Integer Time TimerRunning MyTimeTask Cipher TimerClass
 Limit the number of concurrent evaluation in parallel streams

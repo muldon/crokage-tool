@@ -151,7 +151,6 @@ public class BotApplicationTests extends AbstractService{
 		Set<Integer> set = new HashSet<>();
 		set.add(910374);
 		
-		
 		Set<Integer> allRelatedQuestionsIds = pitBotService.recoverRelatedQuestionsIds(set,1);
 		System.out.println(allRelatedQuestionsIds);
 
@@ -159,16 +158,19 @@ public class BotApplicationTests extends AbstractService{
 	
 	
 	
-	//@Test
+	@Test
 	public void testGetClassesFromCodes() throws Exception {
 		logger.info("testStemStop....");
-		Integer questionId = 10839155;
+		Integer questionId = 50660614;
 		
 		Post post = pitBotService.findPostById(questionId);
 		String body = post.getBody();
 		
-		Set<String> classes = crokageUtils.cleanCode(body);
-		System.out.println(classes);
+		//Set<String> classes = crokageUtils.extractClassesFromCode(body);
+		//System.out.println(classes);
+		
+		System.out.println(CrokageUtils.cleanCode(body));
+		
 		//System.out.println(code);
 		
 		/*System.out.println(TextNormalizer.isCamelCase("Camel01C")); 
@@ -269,7 +271,7 @@ public class BotApplicationTests extends AbstractService{
 	}	
 	
 	
-	@Test
+	//@Test
 	public void simulateUserEvaluation() {
 		//List<Evaluation> allEvaluations = (List<Evaluation>)evaluationRepository.findByPhaseUser(4,1);
 		List<Evaluation> allEvaluations = pitBotService.getEvaluationsByPhaseAndUser(4,1);
@@ -283,6 +285,24 @@ public class BotApplicationTests extends AbstractService{
 		
 		
 	}	
+	
+	
+	/*@Test
+	public void postsWithCode() {
+		//List<Evaluation> allEvaluations = (List<Evaluation>)evaluationRepository.findByPhaseUser(4,1);
+		List<Post> allEvaluations = pitBotService.getEvaluationsByPhaseAndUser(4,1);
+		for(Evaluation evaluation: allEvaluations) {
+			Evaluation clone = new Evaluation();
+			BeanUtils.copyProperties(evaluation, clone);
+			clone.setId(null);
+			clone.setSurveyUserId(2);
+			pitBotService.saveEvaluation(clone);
+		}
+		
+		
+	}	*/
+	
+	
 	
 	
 

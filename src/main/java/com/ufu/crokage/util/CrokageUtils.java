@@ -9,12 +9,15 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.io.StringReader;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -50,6 +53,9 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,13 +66,9 @@ import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import com.ufu.bot.PitBotApp2;
 import com.ufu.bot.repository.GenericRepository;
-import com.ufu.bot.to.Bucket;
 import com.ufu.bot.to.Evaluation;
 import com.ufu.bot.to.ExternalQuestion;
 import com.ufu.bot.to.Post;
-import com.ufu.bot.to.RelatedPost;
-import com.ufu.bot.to.SoThread;
-import com.ufu.bot.util.BotUtils;
 import com.ufu.bot.util.CosineSimilarity;
 import com.ufu.crokage.to.UserEvaluation;
 
@@ -1347,9 +1349,20 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 	
 	
 
-	public Set<String> cleanCode(String content) {
-		Set<String> normClasses = BodyCleaner.extractCode(content);
+	public Set<String> extractClassesFromCode(String content) {
+		Set<String> normClasses = BodyCleaner.extractClassesFromCode(content);
 		return normClasses;
+		
+	}
+
+
+	public void reduceSet(Map<Integer, Set<String>> goldSetQueriesApis, int k) {
+		Set<Integer> keys = goldSetQueriesApis.keySet();
+		for(Integer key: keys) {
+			Set<String> goldSetApis = goldSetQueriesApis.get(key);
+			setLimit(goldSetApis, k);
+		}
+		
 		
 	}
 
@@ -1362,7 +1375,56 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 			sb.append(line).append("\n");
 		return sb.toString();
 	}
+
+
+	public static void setLimit(Set<String> set, int k) {
+		List<String> items = new ArrayList<String>();
+	    items.addAll(set);
+	    set.clear();
+	    int trim = k>items.size() ? items.size() : k;
+	    set.addAll(items.subList(0,trim));
+		items = null;
+	}
+
+
+	public static String cleanCode(String body) {
+		
+		//volta simbolos de marcacao HTML para estado original 
+		body = translateHTMLSimbols(body);		
+		
+		Document doc = Jsoup.parse(body);
+		Elements elems = doc.select("code,pre");
+		String codeText = elems.text();
+		
+		body = removeHtmlTags(codeText);
+		
+		return body;
+	}
 	
 
+	public static Timestamp getCurrentDate(){
+		Timestamp ts_now = new Timestamp(Calendar.getInstance().getTimeInMillis());
+		return ts_now;
+	}
+
+
+	public static void printBigMapIntoFile(Map<String, Set<Integer>> bigMapApisIds,	String filePath) throws FileNotFoundException {
+		String lines = "";
+		Set<Entry<String, Set<Integer>>> entries = bigMapApisIds.entrySet();
+		for(Entry<String, Set<Integer>> entry: entries) {
+			lines += entry.getKey()+ ":\t";
+			Set<Integer> answerIds = entry.getValue();
+			for(Integer id: answerIds) {
+				lines+= id+ " ";
+			}
+			lines+="\n";
+		}
+		lines+="end@";
+		lines=lines.replace("\nend@", "");
+		try (PrintWriter out = new PrintWriter(filePath)) {
+		    out.println(lines);
+		}
+	}
+	
 	
 }

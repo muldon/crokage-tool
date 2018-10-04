@@ -14,3 +14,17 @@ order by id desc
 limit 1000
 
  
+--posts contendo codigo java
+select *
+--select count(id) 
+from postsmin po
+where po.body like '%<pre><code>%'
+and po.creationdate > '2018-06-01' 
+and po.posttypeid = 2
+--and po.parentid is not null
+--order by id desc
+--limit 10
+
+
+ 
+  

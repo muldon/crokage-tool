@@ -309,7 +309,7 @@ File	InputStream	Applet	Document	AccessController	IOException	Class	DataSource	O
 set	orient	print	job	
 Printable	Configuration	Preview	SwingUtilities	Object	File	ArrayList	HashPrintRequestAttributeSet	JFrame	Set	
 determin	format	imag	
-BufferedImage	ImageIO	File	Bitmap	A 	Object	Bold	IOException	Image	Class	
+BufferedImage	ImageIO	File	Bitmap	AÂ 	Object	Bold	IOException	Image	Class	
 compress	jpeg	file	
 ImageIO	Create	Image	File	ByteArrayOutputStream	InputStream	Iterator	IOException	FileOutputStream	FileInputStream	
 audio	file	properti	
@@ -352,8 +352,6 @@ creat	log	file
 File	Logger	PatternLayout	FileAppender	IOException	ConversionPattern	ArrayList	FileOutputStream	Object	InputStream	
 import	java	packag	script	
 File	Class	HashMap	Foo	Object	InputStream	Java	Utility	Import	IOException	
-retriev	schema	databas	
-Connection	ResultSet	Class	DriverManager	HBaseAdmin	DatabaseMetaData	Object	ArrayList	Statement	XMLSchema	
 send	email	gmail	ssl	
 Properties	InternetAddress	Session	MimeMessage	Message	MessagingException	RecipientType	Content	IOException	Authenticator	
 semaphor	
@@ -542,8 +540,6 @@ read	file	data	databas	jdbc
 Connection	File	Class	DriverManager	Driver	IOException	ResultSet	InputStream	ArrayList	Object	
 calcul	differ	date	
 Calendar	Period	DateTime	SimpleDateFormat	PeriodFormatterBuilder	ArrayList	Days	Object	ParseException	BigInteger	
-avoid	execut	time	task	block	
-Executors	ExecutorService	TimeUnit	Callable	Object	ScheduledExecutorService	IOException	ArrayList	Class	AsyncTask	
 creat	timer	time	int	
 Timer	ActionEvent	ArrayList	ActionListener	Color	Object	Calendar	HashMap	AbstractFormatter	Arrays	
 limit	number	evalu	stream	

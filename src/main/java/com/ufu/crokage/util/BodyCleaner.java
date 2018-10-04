@@ -1,14 +1,10 @@
 package com.ufu.crokage.util;
 
-import java.io.File;
-import java.util.ArrayList;
 import java.util.Set;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
-
-import config.StaticData;
 
 
 public class BodyCleaner {
@@ -17,11 +13,11 @@ public class BodyCleaner {
 	String normFolderText;
 	String normFolderCode;
 
-	public BodyCleaner() {
+	/*public BodyCleaner() {
 		this.orgFolder = StaticData.EXP_HOME + "/dataset/answer";
 		this.normFolderCode = StaticData.EXP_HOME + "/dataset/answer-norm-code";
 		this.normFolderText = StaticData.EXP_HOME + "/dataset/answer-norm-text";
-	}
+	}*/
 
 	protected void saveBodyText(String outFile, String content) {
 		ContentWriter.writeContent(outFile, content);
@@ -31,7 +27,7 @@ public class BodyCleaner {
 		ContentWriter.writeContent(outFile, content);
 	}
 
-	protected static Set<String> extractCode(String postHTML) {
+	protected static Set<String> extractClassesFromCode(String postHTML) {
 		Document doc = Jsoup.parse(postHTML);
 		Elements elems = doc.select("code,pre");
 		String codeText = elems.text();

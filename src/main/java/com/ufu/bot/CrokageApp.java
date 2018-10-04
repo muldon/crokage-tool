@@ -20,7 +20,6 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -36,18 +35,15 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Charsets;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Iterables;
 import com.ufu.bot.googleSearch.GoogleWebSearch;
 import com.ufu.bot.service.CrokageService;
 import com.ufu.bot.to.Bucket;
 import com.ufu.bot.to.Post;
 import com.ufu.bot.util.BotUtils;
 import com.ufu.crokage.config.CrokageStaticData;
+import com.ufu.crokage.to.MetricResult;
 import com.ufu.crokage.to.UserEvaluation;
 import com.ufu.crokage.util.CrokageUtils;
-
-import core.CodeTokenProvider;
 
 @Component
 public class CrokageApp {
@@ -110,9 +106,11 @@ public class CrokageApp {
 	private long endTime;
 	private Set<String> extractedAPIs;
 	private List<String> queries;
-	private Map<String,Set<String>> rackQueriesApis;
-	private Map<String,Set<String>> bikerQueriesApis;
-	private Map<String,Set<String>> nlp2ApiQueriesApis;
+	private Map<Integer,Set<String>> rackQueriesApis;
+	//private Map<String,Set<String>> rackReformulatedQueriesApis;  // because output from rack is reformulated. This map contains the real output.
+	private Map<Integer,Set<String>> bikerQueriesApis;
+	private Map<Integer,Set<String>> nlp2ApiQueriesApis;
+	private Map<String,Set<Integer>> bigMapApisIds;
 
 	@PostConstruct
 	public void init() throws Exception {
@@ -141,8 +139,20 @@ public class CrokageApp {
 
 		switch (action) {
 		
+		case "runApproach":
+			runApproach();
+			break;
+		
+		case "loadInvertedIndexFile":
+			loadInvertedIndexFile();
+			break;
+		
+		case "generateInvertedIndexFileFromSOPosts":
+			generateInvertedIndexFileFromSOPosts();
+			break;
+		
 		case "generateMetricsForApiExtractors":
-			generateMetricsForApiExtractors();
+			generateMetricsForApiExtractors(null);
 			break;	
 		
 		case "generateInputQueriesFromExcelGroudTruth":
@@ -165,8 +175,6 @@ public class CrokageApp {
 			loadExcelGroundTruthQuestionsAndLikerts();
 			break;
 			
-		
-			
 		case "generateInputQueriesFromNLP2ApiGroudTruth":
 			generateInputQueriesFromNLP2ApiGroudTruth();
 			break;		
@@ -178,28 +186,103 @@ public class CrokageApp {
 	}
 
 	
+	private void runApproach() throws Exception {
+		//load the inverted index
+		loadInvertedIndexFile();
+		loadQueriesApisForApproaches();
+		Map<Integer, Set<String>> recommendedApis = getRecommendedApis();
+		System.out.println(recommendedApis);
+	}
 
-	
+
+
+	private void loadInvertedIndexFile() throws IOException {
+		if(bigMapApisIds==null) {
+			bigMapApisIds = new HashMap<>();
+			List<String> apisAndSOIds = Files.readAllLines(Paths.get(CrokageStaticData.BIG_MAP_INVERTED_INDEX_APIS_FILE_PATH), Charsets.UTF_8);
+			for(String line: apisAndSOIds) {
+				String[] parts = line.split(":\t");
+				String api = parts[0];
+				String[] ids = null;
+				try {
+					ids = parts[1].split(" ");
+				} catch (Exception e) {
+					System.out.println();
+				}
+				
+				HashSet<Integer> idsSet = new HashSet<>();
+				for(String id:ids) {
+					idsSet.add(Integer.parseInt(id));
+				}
+				bigMapApisIds.put(api, idsSet);
+			}
+		}
+		//System.out.println(bigMapApisIds);
+	}
+
+
+
+	private void generateInvertedIndexFileFromSOPosts() throws FileNotFoundException {
+		//get posts containing code. Date parameter is optional for tests purpose.
+		//String startDate = "2018-06-01"; //1495 results
+		String startDate = null;
+		List<Post> postsWithPreCode =  crokageService.getAnswersWithCode(startDate);
+		
+		Map<String,Set<Integer>> bigMapApisIds = new HashMap<>();
+		
+		for(Post answer:postsWithPreCode) {
+			
+			/*if(answer.getId().equals(50662268)) {
+				System.out.println();
+			}*/
+			
+			//extract apis from answer. For each api, add the api in a map, together with the other references for that post
+			Set<String> codeSet=null;
+			try {
+				codeSet = crokageUtils.extractClassesFromCode(answer.getBody());
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
+			//ArrayList<String> codeClasses = new ArrayList(codeSet);
+			if(codeSet.isEmpty()) {
+				continue;
+			}
+			
+			for(String api: codeSet) {
+				if(bigMapApisIds.get(api)==null){
+					HashSet<Integer> idsSet = new LinkedHashSet<>();
+					idsSet.add(answer.getId());
+					bigMapApisIds.put(api, idsSet);
+				
+				}else {
+					/*if(api.equals("MainActivity")) {
+						System.out.println();
+					}*/
+					Set<Integer> currentApis = bigMapApisIds.get(api);
+					currentApis.add(answer.getId());
+				}
+				
+			}
+			
+		}
+		
+		CrokageUtils.printBigMapIntoFile(bigMapApisIds,CrokageStaticData.BIG_MAP_INVERTED_INDEX_APIS_FILE_PATH);
+		
+	}
+
 
 	private void generateInputQueriesFromNLP2ApiGroudTruth() throws Exception {
-		List<String> inputQueries = new ArrayList<>();
-		Map<String,Set<String>> nlp2ApiQueriesApis = getQueriesAndApisFromFile(CrokageStaticData.NLP2API_GOLD_SET_FILE);
-				
-		Set<Entry<String, Set<String>>> entries = nlp2ApiQueriesApis.entrySet();
-		for(Entry<String, Set<String>> entry: entries) {
-			inputQueries.add(entry.getKey());
-		}
+		List<String> inputQueries = getQueriesFromFile(CrokageStaticData.NLP2API_GOLD_SET_FILE);
+		
 		Path queriesFile = Paths.get(CrokageStaticData.INPUT_QUERIES_FILE_NLP2API);
 		Files.write(queriesFile, inputQueries, Charset.forName("UTF-8"));
-		
 		
 	}
 
 
 
-
-
-	private Map<String, Set<String>> extractAPIsFromNLP2Api() throws Exception {
+	private Map<Integer, Set<String>> extractAPIsFromNLP2Api() throws Exception {
 		
 		try {
 			
@@ -208,17 +291,17 @@ public class CrokageApp {
 			}
 			
 			//queries = queries.subList(0, 5);
+			//First generate inputQueries file in a format NLP2Api understand
+			FileWriter fw = new FileWriter(CrokageStaticData.NLP2API_INPUT_QUERIES_FILE);
+			for (String query: queries) {
+				fw.write(query+"\n--\n"); //specific format to NLP2API understand
+				
+			}
+		 	fw.close();
+			
 			
 			if(callNLP2ApiProcess) {
-				//First generate inputQueries file in a format NLP2Api understand
-				FileWriter fw = new FileWriter(CrokageStaticData.NLP2API_INPUT_QUERIES_FILE);
-				for (String query: queries) {
-					fw.write(query+"\n--\n"); //specific format to NLP2API understand
 					
-				}
-			 	fw.close();
-				
-				
 		 		//call jar with parameters
 			 	//java -jar /home/rodrigo/projects/bot/myNlp2Api.jar -K 10 -task reformulate -queryFile /home/rodrigo/projects/NLP2API-Replication-Package/NL-Query+GroundTruth.txt -outputFile /home/rodrigo/projects/NLP2API-Replication-Package/nlp2apiQueriesOutput.txt
 				
@@ -256,11 +339,141 @@ public class CrokageApp {
 		}
 		
 
-		Map<String,Set<String>> nlp2ApiQueriesApis = getQueriesAndApisFromFile(CrokageStaticData.NLP2API_OUTPUT_QUERIES_FILE);
+		Map<Integer,Set<String>> nlp2ApiQueriesApis = getQueriesAndApisFromFileMayContainDupes(CrokageStaticData.NLP2API_OUTPUT_QUERIES_FILE);
 		return nlp2ApiQueriesApis;
 		
 	}
 	
+	private Map<Integer, Set<String>> extractAPIsFromRACK() throws Exception {
+			
+		if(queries==null) {
+			queries = readInputQueries();
+		}
+		
+		//queries = queries.subList(0, 5);
+		
+		try {	
+			
+			//First generate inputQueries file in a format NLP2Api understand
+			FileWriter fw = new FileWriter(CrokageStaticData.RACK_INPUT_QUERIES_FILE);
+			for (String query: queries) {
+				fw.write(query+"\n--\n"); //specific format to NLP2API understand
+				
+			}
+		 	fw.close();
+			
+			if(callRACKApiProcess) {
+			 	//call jar with parameters
+			 	
+			 	String jarPath = CrokageStaticData.CROKAGE_HOME;
+			 	List<String> command = new ArrayList<String>();
+			    
+			 	
+			 	//old version
+			 	/*command.add("java");
+			    command.add("-jar");
+			    command.add(jarPath+"/rack-execOld.jar");
+			    command.add("-K");
+			    command.add(""+numberOfAPIClasses);
+			    command.add("-task");
+			    command.add("suggestAPI");
+			    command.add("-queryFile");
+			    command.add(CrokageStaticData.RACK_INPUT_QUERIES_FILE);
+			    command.add("-resultFile");
+			    command.add(CrokageStaticData.RACK_OUTPUT_QUERIES_FILE);*/
+			 	
+			 	
+			 	//new version
+			 	command.add("java");
+			    command.add("-jar");
+			    command.add(jarPath+"/rack-exec.jar");
+			    command.add("-K");
+			    command.add(""+numberOfAPIClasses);
+			    command.add("-task");
+			    command.add("suggestAPI");
+			    command.add("-queryFile");
+			    command.add(CrokageStaticData.RACK_INPUT_QUERIES_FILE);
+			    command.add("-resultFile");
+			    command.add(CrokageStaticData.RACK_OUTPUT_QUERIES_FILE);
+				
+				ProcessBuilder pb = new ProcessBuilder(command);
+				Process p = pb.start();
+				p.waitFor();
+				String output = CrokageUtils.loadStream(p.getInputStream());
+				String error = CrokageUtils.loadStream(p.getErrorStream());
+				int rc = p.waitFor();
+				System.out.println("Process ended with rc=" + rc);
+				System.out.println("\nStandard Output:\n");
+				System.out.println(output);
+				String apis[] = output.replaceAll("\n", " ").split(" ");
+				System.out.println(apis);
+				System.out.println("\nStandard Error:\n");
+				System.out.println(error);
+		 	}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		/*//the real queries
+		Map<String,Set<String>> rawApiQueriesApis = getQueriesAndApisFromFile(CrokageStaticData.RACK_INPUT_QUERIES_FILE);
+				
+		Map<Integer,Set<String>> reformulatedApiQueriesApis = getQueriesAndApisFromFileMayContainDupes(CrokageStaticData.RACK_OUTPUT_QUERIES_FILE);
+		
+		//Merge not reformulated queries with the generated APIs
+		
+		//Map<String,Set<String>> merged = new LinkedHashMap<>();
+		
+		Set<Entry<String, Set<String>>> rawEntries = rawApiQueriesApis.entrySet();
+		Set<Entry<Integer, Set<String>>> reformulatedEntries = reformulatedApiQueriesApis.entrySet();
+		
+		Iterator rawIt = rawEntries.iterator();
+		Iterator reformulatedIt = reformulatedEntries.iterator();
+		
+		while(reformulatedIt.hasNext() && rawIt.hasNext()) {
+			Entry<Integer, Set<String>> reformulatedEntry = (Entry<Integer, Set<String>>)reformulatedIt.next();
+			Entry<String, Set<String>> rawEntry = (Entry<String, Set<String>>)rawIt.next();
+			
+			String query = rawEntry.getKey();
+			Set<String> apis = reformulatedEntry.getValue();
+			
+			if(query.contains("How do I retrieve available schemas in database")) {
+				System.out.println();
+			}
+			
+			rawEntry.setValue(apis);
+		}*/
+		Map<Integer,Set<String>> reformulatedApiQueriesApis = getQueriesAndApisFromFileMayContainDupes(CrokageStaticData.RACK_OUTPUT_QUERIES_FILE);
+		
+		return reformulatedApiQueriesApis;
+		
+	}
+	
+	
+	
+	private List<String> getQueriesFromFile(String fileName) throws IOException {
+		List<String> queries = new ArrayList<>();
+		// reading output from generated file
+		List<String> queriesAndApis = Files.readAllLines(Paths.get(fileName), Charsets.UTF_8);
+		Iterator<String> it = queriesAndApis.iterator();
+		
+		while(it.hasNext()) {
+			String query = "";
+			if(it.hasNext()) {
+				query = it.next();
+				queries.add(query);
+				if(it.hasNext()) {
+					it.next(); //APIs are in even lines
+				}
+			}
+			
+		}
+		
+		
+		return queries;
+	}
+	
+	
+	@Deprecated
 	private Map<String, Set<String>> getQueriesAndApisFromFile(String fileName) throws IOException {
 		Map<String,Set<String>> queriesApis = new LinkedHashMap<>();
 		// reading output from generated file
@@ -272,13 +485,69 @@ public class CrokageApp {
 			String queryApis = "";
 			if(it.hasNext()) {
 				query = it.next();
-				queryApis = it.next(); //APIs are in even lines
+				if(it.hasNext()) {
+					queryApis = it.next(); //APIs are in even lines
+				}
 			}
+			
+			/*if(query.contains("How do I retrieve available schemas in database")) {
+				System.out.println();
+			}*/
+			
+			queryApis = queryApis.replaceAll("\\s+"," ");
 			
 			List<String> rankedApis = Arrays.asList(queryApis.split(" ")).stream().map(String::trim).collect(Collectors.toList());
 			int k = numberOfAPIClasses;
 			if (rankedApis.size() < k) {
-				logger.warn("The number of retrieved APIs for query is lower than the number of rack classes set as parameter. Ajusting the parameter to -->" + rankedApis.size() + " apis");
+				//logger.warn("The number of retrieved APIs for query is lower than the number of rack classes set as parameter. Ajusting the parameter to -->" + rankedApis.size() + " apis");
+				k = rankedApis.size();
+			}
+		
+			//rankedApis = rankedApis.subList(0, k);
+			
+			//Set<Integer> rankedApisSet = ImmutableSet.copyOf(Iterables.limit(set, 20));
+			
+			Set<String> rankedApisSet = new LinkedHashSet<String>(rankedApis);
+			CrokageUtils.setLimit(rankedApisSet,k);
+			//rankedApisSet = ImmutableSet.copyOf(Iterables.limit(rankedApisSet, k));
+			queriesApis.put(query.trim(), rankedApisSet);
+			
+			//logger.info("discovered classes for query: "+query+ " ->  " + queriesApis.get(query.trim()));
+		}
+		
+		
+		return queriesApis;
+	}
+
+	
+	/*
+	 * Extended version of getQueriesAndApisFromFile where the generated queries can be equal
+	 */
+	private Map<Integer, Set<String>> getQueriesAndApisFromFileMayContainDupes(String fileName) throws IOException {
+		Map<Integer,Set<String>> queriesApis = new LinkedHashMap<>();
+		// reading output from generated file
+		List<String> queriesAndApis = Files.readAllLines(Paths.get(fileName), Charsets.UTF_8);
+		if(limitQueries!=null) {
+			queriesAndApis = queriesAndApis.subList(0, 2*limitQueries);
+		}
+		Iterator<String> it = queriesAndApis.iterator();
+		int key = 1;
+		while(it.hasNext()) {
+			String query = "";
+			String queryApis = "";
+			if(it.hasNext()) {
+				query = it.next();
+				if(it.hasNext()) {
+					queryApis = it.next(); //APIs are in even lines
+				}
+			}
+			
+			queryApis = queryApis.replaceAll("\\s+"," ");
+			
+			List<String> rankedApis = Arrays.asList(queryApis.split(" ")).stream().map(String::trim).collect(Collectors.toList());
+			int k = numberOfAPIClasses;
+			if (rankedApis.size() < k) {
+				//logger.warn("The number of retrieved APIs for query is lower than the number of rack classes set as parameter. Ajusting the parameter to -->" + rankedApis.size() + " apis");
 				k = rankedApis.size();
 			}
 			
@@ -288,10 +557,11 @@ public class CrokageApp {
 			//Set<Integer> rankedApisSet = ImmutableSet.copyOf(Iterables.limit(set, 20));
 			
 			Set<String> rankedApisSet = new LinkedHashSet<String>(rankedApis);
-			rankedApisSet = ImmutableSet.copyOf(Iterables.limit(rankedApisSet, k));
-			queriesApis.put(query.trim(), rankedApisSet);
-			
-			logger.info("discovered classes for query: "+query+ " ->  " + queriesApis.get(query.trim()));
+			//rankedApisSet = ImmutableSet.copyOf(Iterables.limit(rankedApisSet, k));
+			CrokageUtils.setLimit(rankedApisSet, k);
+			queriesApis.put(key, rankedApisSet);
+			//logger.info("discovered classes for query: "+query+ " ->  " + queriesApis.get(key));
+			key++;
 		}
 		
 		
@@ -300,16 +570,14 @@ public class CrokageApp {
 
 
 
-
-
-	private Map<String,Set<String>> extractAPIsFromBIKER() throws Exception {
+	private Map<Integer,Set<String>> extractAPIsFromBIKER() throws Exception {
 		// BIKER
 		if(queries==null) {
 			queries = readInputQueries();
 		}
 		
 		// writing queries to be read by biker
-		Map<String,Set<String>> bikerQueriesApis = new LinkedHashMap<>();
+		Map<Integer,Set<String>> bikerQueriesApis = new LinkedHashMap<>();
 		Path bikerQueriesFile = Paths.get(CrokageStaticData.BIKER_INPUT_QUERIES_FILE);
 		Files.write(bikerQueriesFile, queries, Charset.forName("UTF-8"));
 
@@ -340,9 +608,12 @@ public class CrokageApp {
 			}
 		}
 		
-
+		int key = 1;
 		// reading output from BIKER
 		List<String> queriesWithApis = Files.readAllLines(Paths.get(CrokageStaticData.BIKER_OUTPUT_QUERIES_FILE), Charsets.UTF_8);
+		if(limitQueries!=null) {
+			queriesWithApis = queriesWithApis.subList(0, limitQueries);
+		}
 		for(String generatedLine: queriesWithApis) {
 			String parts[] = generatedLine.split("=  ");
 			List<String> rankedApis = Arrays.asList(parts[1].split("### ")).stream().map(String::trim).collect(Collectors.toList());
@@ -350,7 +621,7 @@ public class CrokageApp {
 			
 			int k = numberOfAPIClasses;
 			if (rankedApis.size() < k) {
-				logger.warn("The number of retrieved APIs from BIKER is lower than the number of rack classes set as parameter. Ajusting the parameter to -->" + rankedApis.size() + " apis, returned by BIKER for this query.");
+				//logger.warn("The number of retrieved APIs from BIKER is lower than the number of rack classes set as parameter. Ajusting the parameter to -->" + rankedApis.size() + " apis, returned by BIKER for this query.");
 				k = rankedApis.size();
 			}
 			
@@ -363,13 +634,15 @@ public class CrokageApp {
 					rankedApisSetClassesOnly.add(api.split("\\.")[0]);
 				}
 				
-				rankedApisSetClassesOnly = ImmutableSet.copyOf(Iterables.limit(rankedApisSetClassesOnly, k));
-				bikerQueriesApis.put(parts[0].trim(), rankedApisSetClassesOnly);
+				CrokageUtils.setLimit(rankedApisSetClassesOnly,k);
+				//rankedApisSetClassesOnly = ImmutableSet.copyOf(Iterables.limit(rankedApisSetClassesOnly, k));
+				bikerQueriesApis.put(key, rankedApisSetClassesOnly);
 			}else {
-				bikerQueriesApis.put(parts[0].trim(), rankedApisSetWithMethods);
+				bikerQueriesApis.put(key, rankedApisSetWithMethods);
 			}
 			
-			logger.info("Biker - discovered classes for query: "+parts[0]+ " ->  " + bikerQueriesApis.get(parts[0].trim()));
+			//logger.info("Biker - discovered classes for query: "+parts[0]+ " ->  " + bikerQueriesApis.get(key));
+			key++;
 		}
 		
 		/*List<String> bikerClasses = new ArrayList<>();
@@ -381,46 +654,40 @@ public class CrokageApp {
 		return bikerQueriesApis;
 	}
 
-	private Map<String,Set<String>> extractAPIsFromRACK() throws Exception {
-		
-		if(queries==null) {
-			queries = readInputQueries();
-		}
-		Map<String,Set<String>> rackQueriesApis = new LinkedHashMap<>();
-		
-		if(callRACKApiProcess) {
-			try (PrintWriter out = new PrintWriter(CrokageStaticData.RACK_CACHE_QUERIES_DIR)) {
-				for(String query: queries) {
-					Set<String> apis = getRackApisForQuery(query);
-					rackQueriesApis.put(query, apis);
-					logger.info("Rack - discovered classes for query: "+query+ " ->  " + apis.stream().limit(numberOfAPIClasses).collect(Collectors.toList()));
-					String joinedApis = String.join(" ", apis);
-					out.write(query+"\n"+joinedApis+"\n");
-				}
-			}
-			
-		}else { //get from cache
-			// reading output from RACK generated file
-			rackQueriesApis = getQueriesAndApisFromFile(CrokageStaticData.RACK_CACHE_QUERIES_DIR);
-			
-		}
-		
-		
-		logger.info("RACK Finished...");
-		return rackQueriesApis;
-	}
+	
+	
 
-	private void generateMetricsForApiExtractors() throws Exception {
-		//subAction is transformed to lowercase
-		if(subAction.contains("rack")) {
-			rackQueriesApis = extractAPIsFromRACK();
+	private void generateMetricsForApiExtractors(Integer[] kArray) throws Exception {
+		
+		//needs to be before extraction, because annotated dataset is used to generate queries file in case of crokage
+		Map<Integer, Set<String>> goldSetQueriesApis = getGoldSetQueriesApis();
+
+		int numApproaches = loadQueriesApisForApproaches();
+		
+		Map<Integer, Set<String>> recommendedApis = getRecommendedApis();
+	
+		
+		if(subAction.contains("generatetableforapproaches")) {
+			
+			List<Integer> ks = new ArrayList<>();
+			ks.add(10); ks.add(5); ks.add(1);
+			if(numApproaches>1) {
+				ks.remove(ks.size()-1);
+			}
+			MetricResult metricResult = new MetricResult();
+			for(int k: ks) {
+				numberOfAPIClasses = k;
+				crokageUtils.reduceSet(goldSetQueriesApis,k);
+				crokageUtils.reduceSet(recommendedApis, k);
+				analyzeResults(recommendedApis,goldSetQueriesApis,metricResult);
+			}
+			logger.info(metricResult.toString());
+		}else {
+			analyzeResults(recommendedApis,goldSetQueriesApis,null);
 		}
-		if(subAction.contains("biker")) {
-			bikerQueriesApis = extractAPIsFromBIKER();
-		}
-		if(subAction.contains("nlp2api")) {
-			nlp2ApiQueriesApis = extractAPIsFromNLP2Api();
-		}
+		
+		
+		
 		
 		/*
 		if(subAction.contains("|")) { 
@@ -442,22 +709,47 @@ public class CrokageApp {
 			nlp2ApiQueriesApis = extractAPIsFromNLP2Api();
 		}*/
 		
-		Map<String, Set<String>> goldSetQueriesApis = getGoldSetQueriesApis();
-		Map<String, Set<String>> recommendedApis = getRecommendedApis();
-		analyzeResults(recommendedApis,goldSetQueriesApis);
+	
+		
+		
+		
 		
 	}
 
 
-	private Map<String, Set<String>> getGoldSetQueriesApis() throws IOException {
-		Map<String, Set<String>> goldSetQueriesApis = new LinkedHashMap<>();
+	private int loadQueriesApisForApproaches() throws Exception {
+		int numApproaches = 0;
+		//subAction is transformed to lowercase
+		if(subAction.contains("rack")) {
+			rackQueriesApis = extractAPIsFromRACK();
+			numApproaches++;
+			logger.info("Metrics for RACK");
+		}
+		if(subAction.contains("biker")) {
+			bikerQueriesApis = extractAPIsFromBIKER();
+			numApproaches++;
+			logger.info("Metrics for BIKER");
+		}
+		if(subAction.contains("nlp2api")) {
+			nlp2ApiQueriesApis = extractAPIsFromNLP2Api();
+			numApproaches++;
+			logger.info("Metrics for nlp2api");
+		}
+		return numApproaches;
+	}
+
+
+
+	private Map<Integer, Set<String>> getGoldSetQueriesApis() throws IOException {
+		Map<Integer, Set<String>> goldSetQueriesApis = new LinkedHashMap<>();
 		
 		if(dataSet.equals("crokage")) {
 			List<UserEvaluation> evaluationsList = loadExcelGroundTruthQuestionsAndLikerts();
+			//get goldset and update input queries to be used by approaches
 			goldSetQueriesApis.putAll(getCrokageGoldSetByEvaluations(evaluationsList));
 	
 		}else if(dataSet.equals("nlp2api")) {
-			goldSetQueriesApis.putAll(getQueriesAndApisFromFile(CrokageStaticData.NLP2API_GOLD_SET_FILE));
+			goldSetQueriesApis.putAll(getQueriesAndApisFromFileMayContainDupes(CrokageStaticData.NLP2API_GOLD_SET_FILE));
 		}
 		
 		return goldSetQueriesApis;
@@ -503,12 +795,12 @@ public class CrokageApp {
 
 	
 
-	private HashSet<String> getRackApisForQuery(String query) {
+	/*private HashSet<String> getRackApisForQuery(String query) {
 		//logger.info("RACK: discovering related classes to query: " + query);
 		CodeTokenProvider ctProvider = new CodeTokenProvider(query);
 		List<String> apis = ctProvider.recommendRelevantAPIs();
 		return new LinkedHashSet<>(apis);
-	}
+	}*/
 
 	private List<String> readInputQueries() throws Exception {
 		String fileName = "";
@@ -574,11 +866,11 @@ public class CrokageApp {
 	}
 	
 	
-	private Map<String, Set<String>> getCrokageGoldSetByEvaluations(List<UserEvaluation> evaluationsWithBothUsersScales) {
+	private Map<Integer, Set<String>> getCrokageGoldSetByEvaluations(List<UserEvaluation> evaluationsWithBothUsersScales) throws FileNotFoundException {
 		//BufferedWriter bw =null;
 		//Map<Integer,Integer> externalQuestionOracleCounter = new HashMap<>();
 		long initTime = System.currentTimeMillis();
-		Map<String,Set<String>> goldSetQueriesApis = new HashMap<>();
+		Map<String,Set<String>> goldSetQueriesApis = new LinkedHashMap<>();
 		try {
 			//Set<ExternalQuery> consideredExternalQueries = new HashSet();
 			/*List<UserEvaluation> consideredEvaluations = new ArrayList<>();
@@ -606,14 +898,15 @@ public class CrokageApp {
 				if(meanLikert>=4) { 
 					
 					Post post = crokageService.findPostById(evaluation.getPostId());
-					Set<String> codeSet = crokageUtils.cleanCode(post.getBody());
+					Set<String> codeSet = crokageUtils.extractClassesFromCode(post.getBody());
 					//ArrayList<String> codeClasses = new ArrayList(codeSet);
 					if(codeSet.isEmpty()) {
 						continue;
 					}
 					
-					if(goldSetQueriesApis.get(evaluation.getQuery())==null){
+					if(goldSetQueriesApis.get(query)==null){
 						goldSetQueriesApis.put(query, codeSet);
+					
 					}else {
 						Set<String> currentClasses = goldSetQueriesApis.get(query);
 						currentClasses.addAll(codeSet);
@@ -639,36 +932,62 @@ public class CrokageApp {
 		
 		crokageUtils.reportElapsedTime(initTime,"generateMetricsForEvaluations");
 		
-		return goldSetQueriesApis;
+		//transform from querie
+		Map<Integer, Set<String>> goldSetMap = new LinkedHashMap<>();
+		Set<String> keySet = goldSetQueriesApis.keySet();
+		
+		int keyNumber =1;
+		for(String keyQuery: keySet) {
+			Set<String> apis = goldSetQueriesApis.get(keyQuery);
+			goldSetMap.put(keyNumber, apis);
+			keyNumber++;
+		}
+		
+		
+		//update input queries to be used by approaches
+		try (PrintWriter out = new PrintWriter(CrokageStaticData.INPUT_QUERIES_FILE_CROKAGE)) {
+		    for(String query: keySet) {
+		    	out.println(query);
+		    }
+			
+		}
+		
+		
+		return goldSetMap;
 	}
 	
 	
-	private Map<String, Set<String>> getRecommendedApis() {
-		Map<String, Set<String>> recommendedApis = new LinkedHashMap<>();
-		Set<String> queries = null; //are the same for all 
+	private Map<Integer, Set<String>> getRecommendedApis() {
+		Map<Integer, Set<String>> recommendedApis = new LinkedHashMap<>();
+		//are the same for all
+		//Set<String> queriesSet = new LinkedHashSet<>(queries);  
+		Set<Integer> keys = null; 
+		String approaches = subAction;
 		
 		int numApproaches = 0;
 		if(rackQueriesApis!=null) {
 			numApproaches++;
-			queries = rackQueriesApis.keySet();
+			keys = rackQueriesApis.keySet();
 		}
 		if(bikerQueriesApis!=null) {
 			numApproaches++;
-			queries = bikerQueriesApis.keySet();
+			keys = bikerQueriesApis.keySet();
 		}
 		if(nlp2ApiQueriesApis!=null) {
 			numApproaches++;
-			queries = nlp2ApiQueriesApis.keySet();
+			keys = nlp2ApiQueriesApis.keySet();
 		}
 				
 		if(numApproaches>1){ 
-			String apisArrOrder[] = subAction.split("\\|");
-			List<String> queriesList = new ArrayList<>(queries);
+			approaches = subAction.replace("|generatetableforapproaches", "");
+			String apisArrOrder[] = approaches.split("\\|");
+			//List<String> queriesList = new ArrayList<>(queriesSet);
 			String bikerApi = null;
 			String nlp2ApiApi = null;
 			String rackApi = null;
 			
-			outer: for(String currentQuery: queriesList) {
+			
+			outer: for(Integer keyNum: keys) {
 				Set<String> recommendedApisSet = new LinkedHashSet<>();
 				Set<String> bikerApisSet = null;
 				Set<String> rackApisSet = null;
@@ -680,15 +999,15 @@ public class CrokageApp {
 				
 				
 				if(rackQueriesApis!=null) {
-					rackApisSet = rackQueriesApis.get(currentQuery);
+					rackApisSet = rackQueriesApis.get(keyNum);
 					rackIt = rackApisSet.iterator();
 				}
 				if(bikerQueriesApis!=null) {
-					bikerApisSet = bikerQueriesApis.get(currentQuery);
+					bikerApisSet = bikerQueriesApis.get(keyNum);
 					bikerIt = bikerApisSet.iterator();
 				}
 				if(nlp2ApiQueriesApis!=null) {
-					nlpApisSet = nlp2ApiQueriesApis.get(currentQuery);
+					nlpApisSet = nlp2ApiQueriesApis.get(keyNum);
 					nlpIt = nlpApisSet.iterator();
 				}
 				
@@ -699,7 +1018,7 @@ public class CrokageApp {
 				
 				int i=1;
 				String chosenApi = null;
-				
+				//int key =1;
 				while(true) { 
 					//collect the ith API from each approach and merge
 					chosenApi = null;
@@ -894,7 +1213,8 @@ public class CrokageApp {
 					}
 			
 				}
-				recommendedApis.put(currentQuery, recommendedApisSet);
+				recommendedApis.put(keyNum, recommendedApisSet);
+				//key++;
 				
 			}
 			
@@ -912,7 +1232,7 @@ public class CrokageApp {
 
 
 
-	public void analyzeResults(Map<String, Set<String>> recommendedApis,Map<String, Set<String>> goldSetQueriesApis) {
+	public void analyzeResults(Map<Integer, Set<String>> recommendedApis,Map<Integer, Set<String>> goldSetQueriesApis, MetricResult metricResult) {
 		int hitK = 0;
 		int correct_sum = 0;
 		double rrank_sum = 0;
@@ -920,16 +1240,22 @@ public class CrokageApp {
 		double preck_sum = 0;
 		double recall_sum = 0;
 		double fmeasure_sum = 0;
+		
 		int k = numberOfAPIClasses;
 		
 		try {
 			
-			for (String keyQuery : goldSetQueriesApis.keySet()) {
+			for (Integer keyQuery : goldSetQueriesApis.keySet()) {
+				
 				List<String> rapis = new ArrayList<>(recommendedApis.get(keyQuery));
 				/*int K = rapis.size() < numberOfAPIClasses ? rapis.size() : numberOfAPIClasses;
 				rapis = rapis.subList(0, K);*/
 				ArrayList<String> gapis = new ArrayList<>(goldSetQueriesApis.get(keyQuery));
 			
+				/*if(keyQuery.contains("Read JSON Array")) {
+					System.out.println();
+				}*/
+				
 				hitK = hitK + isApiFound_K(rapis, gapis);
 				rrank_sum = rrank_sum + getRRank(rapis, gapis);
 				double preck = 0;
@@ -939,17 +1265,42 @@ public class CrokageApp {
 				recall = getRecallK(rapis, gapis);
 				recall_sum = recall_sum + recall;
 				//System.out.println(hitK);
-
+				/*if(keyQuery==308) {
+					System.out.println();
+				}*/
+				//System.out.println("query="+keyQuery+" -hitk="+hitK+" -rrank_sum:"+rrank_sum+" -preck:"+preck+ " -recall:"+recall );
 			}
 
-				
+			double hit_k= CrokageUtils.round((double) hitK / goldSetQueriesApis.size(),4);
+			double mrr = CrokageUtils.round(rrank_sum / goldSetQueriesApis.size(),4);
+			double map = CrokageUtils.round(preck_sum / goldSetQueriesApis.size(),4);
+			double mr = CrokageUtils.round(recall_sum / goldSetQueriesApis.size(),4);
+			
+			if(metricResult!=null) {
+				if(k==10) {
+					metricResult.setHitK10(""+hit_k);
+					metricResult.setMrrK10(""+mrr);
+					metricResult.setMapK10(""+map);
+					metricResult.setMrK10(""+mr);
+				}else if(k==5) {
+					metricResult.setHitK5(""+hit_k);
+					metricResult.setMrrK5(""+mrr);
+					metricResult.setMapK5(""+map);
+					metricResult.setMrK5(""+mr);
+				}else {
+					metricResult.setHitK1(""+hit_k);
+					metricResult.setMrrK1(""+mrr);
+					metricResult.setMapK1(""+map);
+					metricResult.setMrK1(""+mr);
+				}
+			}
+			
 			
 			logger.info("Results: \n"
-					//"\nMR@" + numberOfAPIClasses + ": " + BotUtils.round(recall_sum / goldSetQueriesApis.size(),4)
-					+"\nHit@" + k + ": " + (double) hitK / goldSetQueriesApis.size()
-					+ "\nMRR@" + k + ": " + rrank_sum / goldSetQueriesApis.size()
-					+ "\nMAP@" + k + ": " + preck_sum / goldSetQueriesApis.size() 
-					+ "\nMR@" + k + ": " + recall_sum / goldSetQueriesApis.size()
+					+"\nHit@" + k + ": " + hit_k
+					+ "\nMRR@" + k + ": " + mrr
+					+ "\nMAP@" + k + ": " + map
+					+ "\nMR@" + k + ": " + mr
 					+ "");
 			
 			
@@ -991,7 +1342,7 @@ public class CrokageApp {
 			for (String gapi : gapis) {
 				//if (gapi.endsWith(api) || api.endsWith(gapi)) {
 				if (gapi.equals(api)) {
-					logger.info("Gold:"+gapi+"\t"+"Result:"+api);
+					//logger.info("Gold:"+gapi+"\t"+"Result:"+api);
 					found = 1;
 					break outer;
 				}
@@ -1001,19 +1352,16 @@ public class CrokageApp {
 	}
 	
 
-	protected int isApiFound_K(List<String> rapis, ArrayList<String> gapis, int K) {
+	/*protected int isApiFound_K(List<String> rapis, ArrayList<String> gapis, int K) {
 		// check if correct API is found
 		K = rapis.size() < K ? rapis.size() : K;
 		int found = 0;
 		outer: for (int i = 0; i < K; i++) {
 			String api = rapis.get(i);
-			if(api.equals("PrintWriter")) {
-				System.out.println();
-			}
 			for (String gapi : gapis) {
-				//if (gapi.endsWith(api) || api.endsWith(gapi)) {
-				if (gapi.equals(api)) {
-					logger.info("Gold:"+gapi+"\t"+"Result:"+api);
+				if (gapi.endsWith(api) || api.endsWith(gapi)) {
+				//if (gapi.equals(api)) {
+					//logger.info("Gold:"+gapi+"\t"+"Result:"+api);
 					found = 1;
 					break outer;
 				}
@@ -1022,7 +1370,7 @@ public class CrokageApp {
 		return found;
 	}
 
-
+*/
 
 
 
@@ -1047,7 +1395,7 @@ public class CrokageApp {
 	protected boolean isApiFound(String api, List<String> gapis) {
 		// check if the API can be found
 		for (String gapi : gapis) {
-			/*if (gapi.endsWith(api) || api.endsWith(gapi)) {*/
+			//if (gapi.endsWith(api) || api.endsWith(gapi)) {
 			if (gapi.equals(api)) {
 				return true;
 			}
@@ -1097,6 +1445,8 @@ public class CrokageApp {
 		}
 		return found / gapis.size();
 	}
+	
+	
 	
 
 }

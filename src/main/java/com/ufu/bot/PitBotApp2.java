@@ -20,12 +20,9 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
-
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -48,8 +45,6 @@ import com.ufu.bot.to.RelatedPost.RelationTypeEnum;
 import com.ufu.bot.to.SoThread;
 import com.ufu.bot.util.BotUtils;
 import com.ufu.survey.service.PitSurveyService;
-
-import core.CodeTokenProvider;
 
 
 @Component
@@ -1188,14 +1183,15 @@ public class PitBotApp2 {
 	public List<String> step2(String query){
 		//list is not null. It has been already verified.
 		logger.info("RACK: discovering related classes to query: "+query);
-		CodeTokenProvider ctProvider = new CodeTokenProvider(query);
+		List<String> apis = null;
+		/*CodeTokenProvider ctProvider = new CodeTokenProvider(query);
 		List<String> apis = ctProvider.recommendRelevantAPIs();
 		if(apis.size()<numberOfRackClasses){
 			logger.warn("The number of retrieved APIs from RACK is lower than the number of rack classes set as paramter. Ajusting the parameter to -->"+apis.size()+" apis, returned by RACK for this query.");
 			numberOfRackClasses = apis.size();
 		}
 		
-		apis = apis.subList(0, numberOfRackClasses);
+		apis = apis.subList(0, numberOfRackClasses);*/
 		logger.info("Finished... discored classes:"+ apis.stream().limit(numberOfRackClasses).collect(Collectors.toList()));
 		return apis;
 	}

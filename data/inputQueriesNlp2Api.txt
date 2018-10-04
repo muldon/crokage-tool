@@ -23,7 +23,7 @@ How to create a digital signature and sign data?
 How do I generate public and private keys?
 How do I copy a file in JDK 7?
 How do I set the value of file attributes?
-How do I set file last modified time? 
+How do I set file last modified time?
 How do I reverse the order of array elements?
 How do I send an Http Post request?
 How do I get Http response body as a string?
@@ -65,23 +65,23 @@ How do I upload file to FTP server?
 How do I create an Excel document using Apache POI?
 Draw a draggable triangle in Java
 Take a screenshot and save as image in Java
-Load a Resource Bundle 
+Load a Resource Bundle
 Instantiate unknown class at runtime and call the object's methods
 Invoke methods of an object using reflection
-List methods of a class using Reflection 
+List methods of a class using Reflection
 Redirect Servlet Call to Another URL
 Get and Set Session Variables in a Servlet
-Get Request Parameters in a Servlet 
-Connect to a database and read from table 
+Get Request Parameters in a Servlet
+Connect to a database and read from table
 creating in-memory lucene index
 building lucene search query
 doing lucene search
 read JSON data to JSON Object Model
-how to serialize JSON Object 
+how to serialize JSON Object
 execute the test cases using Test runner
 Java Compare file content
 Java Add comment in XML
-XML How to Add CDATA data 
+XML How to Add CDATA data
 How to Create a Shared File Lock on a File
 How to Tokenize Java Source Code
 How to Visit All the Elements in a DOM Document
@@ -175,7 +175,6 @@ How to get HTTP Response Header in Java
 Convert Object to XML
 How do I create a rolling log files?
 How do I import Java package in script?
-How do I retrieve available schemas in database?
 How do I send email using Gmail via SSL?
 How to Use Semaphore?
 How do I get default date and time format for a defined country?
@@ -208,7 +207,7 @@ Find tag by name
 List XML element Attributes
 Store data in two tables
 Use sql query to select a specific cell in excel
-Connect to a SQLite database 
+Connect to a SQLite database
 Delete e-mail messages on mail server programmatically
 Send e-mail with attachment in Java
 Receive e-mail messages from a POP3-IMAP server
@@ -270,7 +269,6 @@ Center a string in a rectangle
 Connect to Microsoft SQL Server via JDBC
 Read file data from database using JDBC
 How do I calculate difference between two dates?
-Avoid concurrent execution of a time-consuming task without blocking
 Create a timer for every time this int changes
 Limit the number of concurrent evaluation in parallel streams
 how to read ISO Latin-1 Encoded Data

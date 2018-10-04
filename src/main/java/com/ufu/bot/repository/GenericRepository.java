@@ -38,6 +38,8 @@ public interface GenericRepository {
 	public List<Post> findRankedPosts(Integer id, Integer userId, int phaseNum);
 
 	public List<Post> findRankedEvaluatedPosts(Integer id, Integer userId, int phaseNum);
+
+	public List<Post> getAnswersWithCode(String startDate);
 	
 
 	
