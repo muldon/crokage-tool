@@ -1,10 +1,16 @@
 package com.ufu;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+
 import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import javax.validation.constraints.AssertTrue;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -35,6 +41,8 @@ import com.ufu.bot.to.User;
 import com.ufu.bot.util.AbstractService;
 import com.ufu.crokage.util.CrokageUtils;
 import com.ufu.crokage.util.TextNormalizer;
+
+import junit.framework.Assert;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -158,18 +166,21 @@ public class BotApplicationTests extends AbstractService{
 	
 	
 	
+	
+	
+	
 	@Test
-	public void testGetClassesFromCodes() throws Exception {
+	public void testGetClassesFromCodes1() throws Exception {
 		logger.info("testStemStop....");
-		Integer questionId = 50660614;
+		Integer questionId = 37505462;
 		
 		Post post = pitBotService.findPostById(questionId);
 		String body = post.getBody();
 		
-		//Set<String> classes = crokageUtils.extractClassesFromCode(body);
-		//System.out.println(classes);
 		
-		System.out.println(CrokageUtils.cleanCode(body));
+		Set<String> codeSet = crokageUtils.extractClassesFromCode(body);
+		System.out.println(codeSet);
+		assertTrue(codeSet.contains("ConstraintViolation"));
 		
 		//System.out.println(code);
 		
@@ -179,9 +190,33 @@ public class BotApplicationTests extends AbstractService{
 		System.out.println(TextNormalizer.isCamelCase("CamelCase"));
 		System.out.println(TextNormalizer.isCamelCase("camel"));
 		System.out.println(TextNormalizer.isCamelCase("Graphics2D"));*/
-		
-
+	
 	}
+	
+	
+	@Test
+	public void testCamelCase() throws Exception {
+		logger.info("testStemStop....");
+		Integer questionId = 37505462;
+		
+		Post post = pitBotService.findPostById(questionId);
+		String body = post.getBody();
+		
+		
+		Set<String> codeSet = crokageUtils.extractClassesFromCode(body);
+		System.out.println(codeSet);
+		assertTrue(codeSet.contains("ConstraintViolation"));
+		
+		assertTrue(TextNormalizer.isCamelCase("Camel01C")); 
+		assertFalse(TextNormalizer.isCamelCase("camelC"));
+		assertTrue(TextNormalizer.isCamelCase("Camel"));
+		assertTrue(TextNormalizer.isCamelCase("CamelCase"));
+		assertFalse(TextNormalizer.isCamelCase("camel"));
+		assertTrue(TextNormalizer.isCamelCase("Graphics2D"));
+	
+	}
+	
+	
 	
 
 	//@Test

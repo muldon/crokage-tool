@@ -44,7 +44,7 @@ public class TextNormalizer {
 		content = content.replaceAll("System.out.print","");
 		
 		//remove <E> types
-		content = content.replaceAll("\\<([^)]+)\\>","");
+		//content = content.replaceAll("\\<([^)]+)\\>","");
 		
 		//remove "anything here" 
 		content = content.replaceAll("([\"'])((?:(?=(\\\\?))\\3.)*?)\\1","");
@@ -72,8 +72,6 @@ public class TextNormalizer {
 				validTokens.add(token);
 			} 
 		}
-		
-		//remove exceptions
 		
 		
 		return validTokens;

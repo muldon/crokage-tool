@@ -1,5 +1,6 @@
 package com.ufu.bot.repository;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -40,6 +41,8 @@ public interface GenericRepository {
 	public List<Post> findRankedEvaluatedPosts(Integer id, Integer userId, int phaseNum);
 
 	public List<Post> getAnswersWithCode(String startDate);
+
+	public List<Post> getPostsByIds(List<Integer> postsListIds);
 	
 
 	

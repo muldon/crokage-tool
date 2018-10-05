@@ -70,6 +70,7 @@ import com.ufu.bot.to.Evaluation;
 import com.ufu.bot.to.ExternalQuestion;
 import com.ufu.bot.to.Post;
 import com.ufu.bot.util.CosineSimilarity;
+import com.ufu.crokage.config.CrokageStaticData;
 import com.ufu.crokage.to.UserEvaluation;
 
 
@@ -285,16 +286,13 @@ public class CrokageUtils {
 	
 	public void reportElapsedTime(long initTime, String processName) {
 		Integer phaseExceptions[] = {6};
-		if(!Arrays.asList(phaseExceptions).contains(phaseNumber)) {
+		//if(!Arrays.asList(phaseExceptions).contains(phaseNumber)) {
 			endTime = System.currentTimeMillis();
 			String duration = DurationFormatUtils.formatDuration(endTime-initTime, "HH:mm:ss,SSS");
 			logger.info("Elapsed time: "+duration+ " of the execution of  "+processName);
 			
-		}
-		
-		
+		//}
 	}
-	
 	
 	
 	
@@ -1409,21 +1407,46 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 
 
 	public static void printBigMapIntoFile(Map<String, Set<Integer>> bigMapApisIds,	String filePath) throws FileNotFoundException {
-		String lines = "";
+		StringBuilder lines = new StringBuilder("");
 		Set<Entry<String, Set<Integer>>> entries = bigMapApisIds.entrySet();
 		for(Entry<String, Set<Integer>> entry: entries) {
-			lines += entry.getKey()+ ":\t";
+			lines.append(entry.getKey()+ ":\t");
 			Set<Integer> answerIds = entry.getValue();
 			for(Integer id: answerIds) {
-				lines+= id+ " ";
+				lines.append(id+ " ");
 			}
-			lines+="\n";
+			lines.append("\n");
 		}
-		lines+="end@";
-		lines=lines.replace("\nend@", "");
+		lines.append("end@");
+		String linesStr = lines.toString().replace("\nend@", "");
 		try (PrintWriter out = new PrintWriter(filePath)) {
+		    out.println(linesStr);
+		}
+	}
+
+
+	public static void writeStringContentToFile(String content, String file) throws IOException {
+		FileWriter fw = new FileWriter(file);
+		fw.write(content); 
+		fw.close();
+		
+	}
+
+
+	public static void printMapInfosIntoCVSFile(Map<String, Set<Integer>> mapApis, String file) throws FileNotFoundException {
+		StringBuilder lines = new StringBuilder("");
+		
+		Set<Entry<String, Set<Integer>>> entries = mapApis.entrySet();
+		for(Entry<String, Set<Integer>> entry: entries) {
+			lines.append(entry.getKey()+ ";");
+			Set<Integer> answerIds = entry.getValue();
+			lines.append(answerIds.size());
+			lines.append("\n");
+		}
+		try (PrintWriter out = new PrintWriter(file)) {
 		    out.println(lines);
 		}
+		
 	}
 	
 	

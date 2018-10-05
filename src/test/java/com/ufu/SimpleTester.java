@@ -300,11 +300,18 @@ public class SimpleTester {
 					", title=null, tags=null, postTypeId=2, acceptedAnswerId=null, parentId=50654857, creationDate=2018-06-03 00:19:17.017, score=0, viewCount=null, ownerUserId=4744514, lastEditorUserId=null, lastEditorDisplayName=null, lastEditDate=null, lastActivityDate=2018-06-03 00:19:17.017, answerCount=null, commentCount=0, favoriteCount=null, closedDate=null, communityOwnedDate=null, comments=null, user=null, titleVectors=null, tagVectors=null, bodyVectors=null, topicVectors=null, similarityScore=0.0, classesNames=null, topKrelatedQuestions=null, evaluation=null]";
 			
 			String mod = t.replaceAll("(?m)^.*?Exception.*(?:\\R+^\\s*at .*)+", "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz");
-			System.out.println(mod);
+			//System.out.println(mod);
 			
 			
-			
-			
+			String content = "public static <T> String getLoggingOutput(String prefix,\n" + 
+					"        Set<ConstraintViolation<T>> violations) {\n" + 
+					"    \n" + 
+					"} public static <T> String getLoggingOutput(String prefix,\n" + 
+					"        Set<ConstraintViolation<T>> violations) {\n" + 
+					"    \n" + 
+					"}";
+			content = content.replaceAll("\\<([^)]+)\\>","");
+			System.out.println(content);
 			
 		        
 		} catch (Exception e) {

@@ -317,7 +317,33 @@ public class GenericRepositoryImpl implements GenericRepository {
 		}
 			
 		Query q = em.createNativeQuery(sql, Post.class);
-		return (List<Post>) q.getResultList();
+		List<Post> posts = (List<Post>) q.getResultList();
+		logger.info("getAnswersWithCode: "+posts.size()+ " posts retrieved");
+		return posts;
+	}
+
+
+
+
+
+	@Override
+	public List<Post> getPostsByIds(List<Integer> soAnswerIds) {
+		String idsIn = " ";
+		for(Integer soId: soAnswerIds) {
+			idsIn+= soId+ ",";
+		}
+		idsIn+= "#end";
+		idsIn = idsIn.replace(",#end", "");
+		
+		String sql = " select * "
+				+ " from postsmin po"  
+				+ " where po.id in ("+idsIn+")";
+		
+			
+		Query q = em.createNativeQuery(sql, Post.class);
+		List<Post> posts = (List<Post>) q.getResultList();
+		logger.info("getPostsByIds: "+posts.size());
+		return posts;
 	}
 
 
