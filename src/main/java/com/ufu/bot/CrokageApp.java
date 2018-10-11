@@ -39,6 +39,7 @@ import com.ufu.bot.googleSearch.GoogleWebSearch;
 import com.ufu.bot.service.CrokageService;
 import com.ufu.bot.tfidf.TFIDFCalculator;
 import com.ufu.bot.to.Bucket;
+import com.ufu.bot.to.BucketOld;
 import com.ufu.bot.to.Post;
 import com.ufu.bot.util.BotUtils;
 import com.ufu.crokage.config.CrokageStaticData;
@@ -118,18 +119,21 @@ public class CrokageApp {
 	private Map<Integer,Set<String>> bikerQueriesApisClassesAndMethods;
 	private Map<Integer,Set<String>> nlp2ApiQueriesApis;
 	private Map<String,Set<Integer>> bigMapApisIds;
-	private Map<String,List<Double>> soTitlesWordVectors;
+	private Map<String,Set<Integer>> filteredSortedMap;
+	private Map<String,List<Double>> soContentWordVectors;
 	private Map<String,Double> soIDFVocabulary;
+	
 
 	@PostConstruct
 	public void init() throws Exception {
-
+		long initTime = System.currentTimeMillis();
 		logger.info("Initializing CrokageApp app...");
 		// initializeVariables();
 		// botUtils.initializeConfigs();
 		getPropertyValueFromLocalFile();
 		subAction = subAction !=null ? subAction.toLowerCase().trim(): null;
 		dataSet = dataSet !=null ? dataSet.toLowerCase().trim(): null;
+		
 		
 		logger.info("\nConsidering parameters: \n" 
 				+ "\n action: " + action 
@@ -151,9 +155,17 @@ public class CrokageApp {
 		case "runApproach":
 			runApproach();
 			break;
-		
+				
+		case "buildSOSetOfWords":
+			buildSOSetOfWords();
+			break;	
+			
 		case "readIDFVocabulary":
 			readIDFVocabulary();
+			break;	
+			
+		case "readInputQueries":
+			readInputQueries();
 			break;	
 			
 			
@@ -209,30 +221,70 @@ public class CrokageApp {
 			generateInputQueriesFromNLP2ApiGroudTruth();
 			break;	
 			
-			
+		case "tester":
+			tester();
+			break;	
 		
-	
 		default:
 			break;
 		}
+		
+		logger.info("Done running task.");
+		crokageUtils.reportElapsedTime(initTime,action);
 
 	}
 
 	
 	
+	private void tester() throws Exception {
+		
+		queries = readInputQueries();
+		for(String query: queries) {
+			query = CrokageUtils.processQuery(query);
+			System.out.println(query);
+		}
+		System.out.println();
+	}
+
+
+
+	/*
+	 * Used to generate the vec model. After generate this file, use fastText command in command line to build the vectors in a txt file:
+	 * ./fasttext print-word-vectors /home/rodrigo/tmp/fastTextModel.bin < /home/rodrigo/tmp/soSetOfWords.txt > /home/rodrigo/tmp/soContentWordVec.txt
+	 */
+	private void buildSOSetOfWords() throws IOException {
+		long initTime = System.currentTimeMillis();
+		logger.info("Reading all words from IDFs file...");
+		String[] parts;
+		StringBuilder str = new StringBuilder();
+		List<String> wordsAndIDFs = Files.readAllLines(Paths.get(CrokageStaticData.SO_IDF_VOCABULARY));
+		for(String line: wordsAndIDFs) {
+			parts = line.split(" ");
+			str.append(parts[0]);
+			str.append("\n");
+		}
+		wordsAndIDFs = null;
+		logger.info("Done reading idf words. Now writing them to a file");
+		CrokageUtils.writeStringContentToFile(str.toString(), CrokageStaticData.SO_SET_OF_WORDS);
+		crokageUtils.reportElapsedTime(initTime,"readSoContentWordVectors");
+		
+	}
+
+
+
 
 	private void readIDFVocabulary() throws IOException {
 		if(soIDFVocabulary==null) {
 			long initTime = System.currentTimeMillis();
 			logger.info("Reading all idfs from file...");
-			
+			String[] parts;
 			soIDFVocabulary = new HashMap<>();
 			List<String> wordsAndIDFs = Files.readAllLines(Paths.get(CrokageStaticData.SO_IDF_VOCABULARY));
 			for(String line: wordsAndIDFs) {
-				String[] parts = line.split(" ");
+				parts = line.split(" ");
 				soIDFVocabulary.put(parts[0], Double.parseDouble(parts[1]));
 			}
-			
+			wordsAndIDFs = null;
 			logger.info("Done reading idfs. ");
 			crokageUtils.reportElapsedTime(initTime,"readSoContentWordVectors");
 		}
@@ -245,23 +297,30 @@ public class CrokageApp {
 	private void buildIDFVocabulary() throws IOException {
 		//each post has been saved in each line
 		List<List<String>> documents = new ArrayList<>();
-		
+		Set<String> wordsSet = new HashSet<>();
+		logger.info("reading contents lines...");
 		List<String> contentLines = Files.readAllLines(Paths.get(CrokageStaticData.SO_CONTENT_FILE));
 		for(String line: contentLines) {
-			List<String> words = Arrays.asList(line.split(" "));
-			documents.add(words);
+			wordsSet.addAll(Arrays.stream(line.split(" +")).collect(Collectors.toSet()));
 		}
 		
 		StringBuilder idfContent= new StringBuilder();
 		
 		//all file into a String
-		String content = new String(Files.readAllBytes(Paths.get(CrokageStaticData.SO_CONTENT_FILE)));
-		content = content.replaceAll("\n", " ");
-		Set<String> wordsSet = Arrays.stream(content.split(" +")).collect(Collectors.toSet());
+		logger.info("building idf. Total number of words: "+wordsSet.size());
+		int i=0;
 		for(String word: wordsSet) {
-			double idf = tfidfCalculator.idf(documents, word);
-			idfContent.append(word+ " "+idf+ "\n");
+			double idf = tfidfCalculator.idf2(contentLines, word);
+			idfContent.append(word);
+			idfContent.append(" ");
+			idfContent.append(idf);
+			idfContent.append("\n");
+			i++;
+			if(i%1000000==0) {
+				logger.info(i+ " idfs calculated...");
+			}
 		}
+		logger.info("writing idf...");
 		crokageUtils.writeStringContentToFile(idfContent.toString(),CrokageStaticData.SO_IDF_VOCABULARY );
 		
 	}
@@ -270,20 +329,21 @@ public class CrokageApp {
 
 
 	private void readSoContentWordVectors() throws IOException {
-		if(soTitlesWordVectors==null) {
+		if(soContentWordVectors==null) {
 			long initTime = System.currentTimeMillis();
 			logger.info("Reading all vectors from file...");
-			
-			soTitlesWordVectors = new HashMap<>();
+			String[] parts;
+			int vecSize=0;
+			soContentWordVectors = new HashMap<>();
 			List<String> wordsAndVectors = Files.readAllLines(Paths.get(CrokageStaticData.SO_CONTENT_WORD_VECTORS));
 			for(String line: wordsAndVectors) {
-				String[] parts = line.split(" ");
-				int vecSize = parts.length;
+				parts = line.split(" ");
+				vecSize = parts.length;
 				List<Double> vectors = new ArrayList<>();
 				for(int i=1;i<vecSize;i++) {
 					vectors.add(Double.parseDouble(parts[i]));
 				}
-				soTitlesWordVectors.put(parts[0], vectors);
+				soContentWordVectors.put(parts[0], vectors);
 			}
 			//System.out.println(bigMapApisIds);
 			logger.info("Done reading vectors. ");
@@ -327,7 +387,9 @@ public class CrokageApp {
 		}
 	}
 	
-
+	/*
+	 * Each post in one line 
+	 */
 	public void processPosts(List<Integer> somePosts, PrintWriter out) throws FileNotFoundException {
 		List<Post> some = crokageService.findPostsById(somePosts);
 		for (Post post : some) {
@@ -352,12 +414,12 @@ public class CrokageApp {
 	
 	
 
-	private Map<String,Set<Integer>> reduceBigMapFileToMininumAPIsCount() throws Exception {
+	private void reduceBigMapFileToMininumAPIsCount() throws Exception {
 		//load the inverted index
 		loadInvertedIndexFile();
 		
 		//filter by cutoff and sort in descending order
-		Map<String,Set<Integer>> filteredSorted = bigMapApisIds.entrySet().stream()
+		filteredSortedMap = bigMapApisIds.entrySet().stream()
 				.filter( e -> e.getValue().size() > cutoff)
 		        .sorted( (e1,e2)->  Integer.compare(e2.getValue().size(), e1.getValue().size()))
 		        .collect(Collectors.toMap(
@@ -368,8 +430,7 @@ public class CrokageApp {
 		        )); 
 		
 		//generate reduced map
-		CrokageUtils.printMapInfosIntoCVSFile(filteredSorted,CrokageStaticData.REDUCED_MAP_INVERTED_INDEX_APIS_FILE_PATH);
-		return filteredSorted;
+		CrokageUtils.printMapInfosIntoCVSFile(filteredSortedMap,CrokageStaticData.REDUCED_MAP_INVERTED_INDEX_APIS_FILE_PATH);
 		
 	}
 
@@ -377,8 +438,13 @@ public class CrokageApp {
 	private void runApproach() throws Exception {
 		//load the inverted index
 		loadInvertedIndexFile();
-		Map<String,Set<Integer>> filteredSortedMap = reduceBigMapFileToMininumAPIsCount();
+		
+		//filter by cutoff and sort in descending order
+		reduceBigMapFileToMininumAPIsCount();
 				
+		//read word vectors
+		readSoContentWordVectors();
+		
 		loadQueriesApisForApproaches();
 		Map<Integer, Set<String>> recommendedApis = getRecommendedApis();
 		
@@ -386,46 +452,33 @@ public class CrokageApp {
 		for(Integer key: keys) {  //for each query 
 			
 			//get biker methods
-			List<String> topMethods = new ArrayList<>();
-			Set<String> classesAndMethods = bikerQueriesApisClassesAndMethods.get(key);
-			for(String classAndMethod: classesAndMethods) {
-				String parts[] = classAndMethod.split("\\."); 
-				topMethods.add(parts[1]);
-			}
+			List<String> topMethods = getBikerTopMethods(key);
 			
+			//get top classes
 			Set<String> topClasses = recommendedApis.get(key);
-			logger.info("\nQuery: "+queries.get(key-1)+"\nTop classes: "+topClasses+"\nTop methods from biker: "+topMethods);
+			logger.info("\nQuery: "+queries.get(key-1)+"\nTop classes: "+topClasses);
 			
-			//get ids from reducedMap for top classes
-			Set<Integer> soAnswerIds = new HashSet<>();
-			for(String topClass:topClasses) {
-				Set<Integer> idsFromBigMap = filteredSortedMap.get(topClass);
-				if(idsFromBigMap!=null) {
-					soAnswerIds.addAll(idsFromBigMap);
-				}else {
-					logger.info("*** Class not found in bigMap: "+topClass);
-				}
-			}
-			
-			
-			logger.info("\nAt least "+soAnswerIds.size()+ " answers contain those classes. Fetching them...");
-			Set<Post> soCandidateAnswers = crokageService.getPostsByIds(new ArrayList(soAnswerIds));
+			List<Bucket> soCandidateAnswers = getCandidateAnswers(topClasses);
 			logger.info("\nPosts after wrapping in a set: "+soCandidateAnswers.size());
 			
-			Set<Post> topkPosts = calculateRelevance(soCandidateAnswers);
+			List<Bucket> topkPosts = calculateRelevance(queries.get(key-1),soCandidateAnswers,topMethods);
+			
+		}
+		
+			
+	}
+
+	private List<Bucket> calculateRelevance(String query, List<Bucket> soCandidateAnswers, List<String> topMethods) {
+		//parse query
+		query = CrokageUtils.processQuery(query);
+		for(Bucket answer:soCandidateAnswers) {
 			
 		}
 		
 		
-	
+		//get the word vectors for each word of the query 
 		
-		//System.out.println(recommendedApis);
 		
-	}
-
-
-
-	private Set<Post> calculateRelevance(Set<Post> soCandidateAnswers) {
 		
 		
 		
@@ -434,16 +487,54 @@ public class CrokageApp {
 	}
 
 
+
+
+	private List<Bucket> getCandidateAnswers(Set<String> topClasses) {
+		//get ids from reducedMap for top classes
+		Set<Integer> soAnswerIds = new HashSet<>();
+		for(String topClass:topClasses) {
+			Set<Integer> idsFromBigMap = filteredSortedMap.get(topClass);
+			if(idsFromBigMap!=null) {
+				soAnswerIds.addAll(idsFromBigMap);
+			}else {
+				logger.info("*** Class not found in bigMap: "+topClass);
+			}
+		}
+		
+		logger.info("\nAt least "+soAnswerIds.size()+ " answers contain those classes. Fetching them...");
+		List<Bucket> soCandidateAnswers = crokageService.getBucketsByIds(new ArrayList(soAnswerIds));
+		return soCandidateAnswers;
+	}
+
+
+
+	private List<String> getBikerTopMethods(Integer key) {
+		List<String> topMethods = new ArrayList<>();
+		Set<String> classesAndMethods = bikerQueriesApisClassesAndMethods.get(key);
+		for(String classAndMethod: classesAndMethods) {
+			String parts[] = classAndMethod.split("\\."); 
+			topMethods.add(parts[1]);
+		}
+		logger.info("\nQuery: "+queries.get(key-1)+"\nTop methods from biker: "+topMethods);
+		return topMethods;
+	}
+
+
+
+	
+
+
 	private void loadInvertedIndexFile() throws IOException {
 		if(bigMapApisIds==null) {
 			long initTime = System.currentTimeMillis();
 			logger.info("Reading big map inverted index file...");
-			
+			String[] parts;
+			String[] ids;
 			bigMapApisIds = new HashMap<>();
 			List<String> apisAndSOIds = Files.readAllLines(Paths.get(CrokageStaticData.BIG_MAP_INVERTED_INDEX_APIS_FILE_PATH), Charsets.UTF_8);
 			for(String line: apisAndSOIds) {
-				String[] parts = line.split(":\t");
-				String[] ids = parts[1].split(" ");
+				parts = line.split(":\t");
+				ids = parts[1].split(" ");
 				HashSet<Integer> idsSet = new HashSet<>();
 				for(String id:ids) {
 					idsSet.add(Integer.parseInt(id));
@@ -1006,7 +1097,7 @@ public class CrokageApp {
 		return new LinkedHashSet<>(apis);
 	}*/
 
-	private List<String> readInputQueries() throws Exception {
+	public List<String> readInputQueries() throws Exception {
 		String fileName = "";
 		if(dataSet.equals("crokage")) {
 			fileName = CrokageStaticData.INPUT_QUERIES_FILE_CROKAGE;
@@ -1502,14 +1593,14 @@ public class CrokageApp {
 	}
 	
 
-	private double getAvgPrecisionK(List<Bucket> trimmedRankedList, List<UserEvaluation> goldSetEvaluations, Integer externalQuestionId) {
+	private double getAvgPrecisionK(List<BucketOld> trimmedRankedList, List<UserEvaluation> goldSetEvaluations, Integer externalQuestionId) {
 		int count=0;
 		double found = 0;
 		double linePrec = 0;
-		for(Bucket bucket: trimmedRankedList) {
+		for(BucketOld bucketOld: trimmedRankedList) {
 			count++;
 			for(UserEvaluation evaluation: goldSetEvaluations) {
-				if(evaluation.getExternalQuestionId().equals(externalQuestionId) && evaluation.getPostId().equals(bucket.getPostId())) {
+				if(evaluation.getExternalQuestionId().equals(externalQuestionId) && evaluation.getPostId().equals(bucketOld.getPostId())) {
 					found++;
 					linePrec += (found / count);
 				}

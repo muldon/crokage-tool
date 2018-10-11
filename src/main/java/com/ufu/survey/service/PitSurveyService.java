@@ -25,7 +25,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.ufu.bot.tfidf.TfIdf;
 import com.ufu.bot.tfidf.ngram.NgramTfIdf;
-import com.ufu.bot.to.Bucket;
+import com.ufu.bot.to.BucketOld;
 import com.ufu.bot.to.Comment;
 import com.ufu.bot.to.Evaluation;
 import com.ufu.bot.to.Experiment;
@@ -120,16 +120,16 @@ public class PitSurveyService extends AbstractService{
 	
 	
 	@Transactional(readOnly = true)
-	public List<Bucket> runSteps7and8(ExternalQuestion externalQuestion, Set<SoThread> allThreads) throws Exception {
+	public List<BucketOld> runSteps7and8(ExternalQuestion externalQuestion, Set<SoThread> allThreads) throws Exception {
 		/*
 		 * Step 7: Text Processing
 		 * 
 		 */
-		Bucket mainBucket = new Bucket();
+		BucketOld mainBucket = new BucketOld();
 		long initTime; 
 		
 		initTime = System.currentTimeMillis();
-		Set<Bucket> buckets = step7(externalQuestion,allThreads,mainBucket);
+		Set<BucketOld> bucketOlds = step7(externalQuestion,allThreads,mainBucket);
 		botUtils.reportElapsedTime(initTime,"Step 7: Text Processing");
 		
 		/*
@@ -137,7 +137,7 @@ public class PitSurveyService extends AbstractService{
 		 * 
 		 */
 		initTime = System.currentTimeMillis();
-		List<Bucket> scoredBucketList = step8(buckets,mainBucket);
+		List<BucketOld> scoredBucketList = step8(bucketOlds,mainBucket);
 		botUtils.reportElapsedTime(initTime,"Step 8: Relevance Calculation");
 		
 		return scoredBucketList;
@@ -155,7 +155,7 @@ public class PitSurveyService extends AbstractService{
 			maxRankSize = externalSurveyRankListSize;
 		}
 		
-		List<Bucket> trimmedRank = step9(rankedBuckets,externalQuestion.getGoogleQuery(),new ArrayList<String>(Arrays.asList(externalQuestion.getClasses().split(" "))),maxRankSize);
+		List<BucketOld> trimmedRank = step9(rankedBuckets,externalQuestion.getGoogleQuery(),new ArrayList<String>(Arrays.asList(externalQuestion.getClasses().split(" "))),maxRankSize);
 		botUtils.reportElapsedTime(initTime,"Step 9: Answer Generation");
 		
 		return trimmedRank;*/
@@ -172,7 +172,7 @@ public class PitSurveyService extends AbstractService{
 	 * @return A set of buckets
 	 * @throws Exception 
 	 */
-	private Set<Bucket> step7(ExternalQuestion nextQuestion, Set<SoThread> allThreads, Bucket mainBucket) throws Exception {
+	private Set<BucketOld> step7(ExternalQuestion nextQuestion, Set<SoThread> allThreads, BucketOld mainBucket) throws Exception {
 		
 		List<String> apis = new ArrayList<String>(Arrays.asList(nextQuestion.getClasses().split(" ")));
 		apis.remove("");
@@ -212,7 +212,7 @@ public class PitSurveyService extends AbstractService{
 		//logger.info("Main bucket: "+mainBucket.getProcessedBodyStemmedStopped()+ " - classes: "+mainBucket.getClassesNames());
 		
 		//Remaining buckets
-		Set<Bucket> buckets = new LinkedHashSet<>();
+		Set<BucketOld> bucketOlds = new LinkedHashSet<>();
 		
 		for(SoThread thread: allThreads) {
 			
@@ -224,8 +224,8 @@ public class PitSurveyService extends AbstractService{
 					continue;
 				}
 				
-				Bucket bucket = buildAnswerPostBucket(answer);
-				buckets.add(bucket);
+				BucketOld bucketOld = buildAnswerPostBucket(answer);
+				bucketOlds.add(bucketOld);
 				
 				/*if(bucket.getPostScore()!=null) {
 					avgScore      += bucket.getPostScore();
@@ -242,7 +242,7 @@ public class PitSurveyService extends AbstractService{
 		}*/
 		
 		
-		return buckets;
+		return bucketOlds;
 	}
 	
 	
@@ -251,16 +251,16 @@ public class PitSurveyService extends AbstractService{
 
 	
 	@Transactional(readOnly = true)
-	public List<Bucket> step8(Set<Bucket> buckets, Bucket mainBucket) {
-		List<Bucket> bucketsList = new ArrayList<>(buckets);
+	public List<BucketOld> step8(Set<BucketOld> bucketOlds, BucketOld mainBucket) {
+		List<BucketOld> bucketsList = new ArrayList<>(bucketOlds);
 		
 		/*
 		 * Calculate tfidf for all terms
 		 */
 		List<String> bucketsTexts = new ArrayList<>();
 		bucketsTexts.add(mainBucket.getProcessedBodyStemmedStopped());
-		for(Bucket bucket: buckets){
-			bucketsTexts.add(bucket.getProcessedBodyStemmedStopped());
+		for(BucketOld bucketOld: bucketOlds){
+			bucketsTexts.add(bucketOld.getProcessedBodyStemmedStopped());
 		}
 		
 		List<Collection<String>> documents =  Lists.newArrayList(NgramTfIdf.ngramDocumentTerms(Lists.newArrayList(1,2,3), bucketsTexts));
@@ -276,7 +276,7 @@ public class PitSurveyService extends AbstractService{
 		
 		for(Map<String, Double> tfsMap: tfs){
 			tfIdfOtherBucket = (HashMap)TfIdf.tfIdf(tfsMap, idfAll);
-			Bucket postBucket = bucketsList.get(pos);
+			BucketOld postBucket = bucketsList.get(pos);
 			botComposer.calculateScores(avgReputation, avgScore, tfIdfMainBucket, tfIdfOtherBucket, mainBucket, postBucket);
 			pos++;
 		}
@@ -291,17 +291,17 @@ public class PitSurveyService extends AbstractService{
 	 * 
 	*/ 
 	@Transactional(readOnly = true)
-	public List<Bucket> step9(List<Bucket> bucketsList, Integer maxRankSize) throws IOException {
+	public List<BucketOld> step9(List<BucketOld> bucketsList, Integer maxRankSize) throws IOException {
 		//showBucketsOrderByCosineDesc(bucketsList);
 		//showRankedList(rankedBuckets);
 
 	    botComposer.rankList(bucketsList);
 	    
 	    //now the buckets are ranked
-		//List<Bucket> trimmedRankedBuckets = new ArrayList<>();
+		//List<BucketOld> trimmedRankedBuckets = new ArrayList<>();
 		
 		/*int pos=0;
-		for(Bucket bucket: bucketsList){
+		for(BucketOld bucket: bucketsList){
 			//logger.info("Rank: "+(pos+1)+ " total Score: "+bucket.getComposedScore() +" - cosine: "+bucket.getCosSim()+ " - coverageScore: "+bucket.getCoverageScore()+ " - codeSizeScore: "+bucket.getCodeSizeScore() +" - repScore: "+bucket.getRepScore()+ " - upScore: "+bucket.getUpScore()+ " - id: "+bucket.getPostId()+ " \n "+bucket.getPresentingBody());
 			//logger.info("Rank: "+(pos+1)+ " total Score: "+bucket.getComposedScore() +" - cosine: "+bucket.getCosSim()+ " - coverageScore: "+bucket.getCoverageScore()+ " - codeSizeScore: "+bucket.getCodeSizeScore() +" - repScore: "+bucket.getRepScore()+ " - upScore: "+bucket.getUpScore()+ " - id: "+bucket.getPostId());
 			//botUtils.buildOutPutFile(bucket,pos+1,googleQuery,rackApis);
@@ -321,22 +321,22 @@ public class PitSurveyService extends AbstractService{
 		
 	}
 
-	private Bucket buildAnswerPostBucket(Post post) throws Exception {
+	private BucketOld buildAnswerPostBucket(Post post) throws Exception {
 		//for tests --remove in production
 		/*if(botUtils==null) {
 			botUtils = new BotUtils();
 		}*/
 		
-		Bucket bucket = new Bucket();
-		bucket.setParentId(post.getParentId());
-		bucket.setPostId(post.getId());
-		bucket.setPostScore(post.getScore());
+		BucketOld bucketOld = new BucketOld();
+		bucketOld.setParentId(post.getParentId());
+		bucketOld.setPostId(post.getId());
+		bucketOld.setPostScore(post.getScore());
 		if(post.getOwnerUserId()!=null) {
 			User user = usersRepository.findOne(post.getOwnerUserId());
-			bucket.setUserReputation(user.getReputation());
+			bucketOld.setUserReputation(user.getReputation());
 		}
 				
-		bucket.setRelationTypeId(post.getRelationTypeId());		
+		bucketOld.setRelationTypeId(post.getRelationTypeId());		
 		
 		Post parentPost = botUtils.getParentPostsCache().get(post.getParentId());
 		if(parentPost==null) { 
@@ -345,10 +345,10 @@ public class PitSurveyService extends AbstractService{
 		
 		
 		String presentingBody = botUtils.buildPresentationBody(post.getBody(),false);
-		bucket.setPresentingBody(presentingBody);
+		bucketOld.setPresentingBody(presentingBody);
 		presentingBody = botUtils.removeHtmlTagsExceptCode(presentingBody);
 		List<String> preCodes = botUtils.getPreCodes(presentingBody);
-		bucket.setCodes(preCodes);
+		bucketOld.setCodes(preCodes);
 		List<String> smallCodes = botUtils.getSimpleCodes(presentingBody);
 		
 		//classes names of parent post are set inside getParentProcessedContentStemmedStopped method
@@ -367,11 +367,11 @@ public class PitSurveyService extends AbstractService{
 		processedBodyStemmedStopped+= " "+parentProcessedContentStemmedStopped;
 		
 		classesNames.addAll(parentPost.getClassesNames());   //reinforce classes set with parent post
-		bucket.setClassesNames(classesNames);
+		bucketOld.setClassesNames(classesNames);
 		
-		bucket.setProcessedBodyStemmedStopped(processedBodyStemmedStopped);
+		bucketOld.setProcessedBodyStemmedStopped(processedBodyStemmedStopped);
 		
-		return bucket;
+		return bucketOld;
 	}
 
 
@@ -821,7 +821,7 @@ public class PitSurveyService extends AbstractService{
 			threadListOneElement.add(thread);
 			
 			initTime = System.currentTimeMillis();
-			List<Bucket> rankedList = runSteps7toTheEnd(externalQuestion,threadListOneElement);
+			List<BucketOld> rankedList = runSteps7toTheEnd(externalQuestion,threadListOneElement);
 			botUtils.reportElapsedTime(initTime,"runSteps7toTheEnd for question: "+questionStr);
 			
 			

@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Repository;
 
+import com.ufu.bot.to.Bucket;
 import com.ufu.bot.to.Evaluation;
 import com.ufu.bot.to.ExternalQuestion;
 import com.ufu.bot.to.Post;
@@ -347,13 +348,38 @@ public class GenericRepositoryImpl implements GenericRepository {
 	}
 
 
+	@Override
+	public List<Bucket> getBucketsByIds(List<Integer> soAnswerIds) {
+		String idsIn = " ";
+		for(Integer soId: soAnswerIds) {
+			idsIn+= soId+ ",";
+		}
+		idsIn+= "#end";
+		idsIn = idsIn.replace(",#end", "");
+		
+		String sql = " select po.id "
+				+ " from postsmin po"  
+				+ " where po.id in ("+idsIn+")";
+		
+			
+		Query q = em.createNativeQuery(sql);
+		List<Integer> rows = q.getResultList();
+		List<Bucket> result = new ArrayList<>(rows.size());
+		for (Integer id : rows) {
+			Bucket bucket = new Bucket();
+			bucket.setId(id);
+			result.add(bucket);			
+		}
+		
+		return result;
+	}
 
 
 
 
 
 
-
+	
 
 	
 	

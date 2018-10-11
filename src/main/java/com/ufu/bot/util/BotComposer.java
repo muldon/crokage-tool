@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.ufu.bot.to.Bucket;
+import com.ufu.bot.to.BucketOld;
 import com.ufu.bot.to.RelatedPost.RelationTypeEnum;
 
 @Component
@@ -52,7 +52,7 @@ public class BotComposer {
 	
 	
 	
-	public void rankList(List<Bucket> bucketsList) {
+	public void rankList(List<BucketOld> bucketsList) {
 		
 	/*	logger.info("Ranking with weights: "+
 				"\n alphaCosSim = "+alphaCosSim +
@@ -71,21 +71,21 @@ public class BotComposer {
 		*/
 		//int count = 0;
 		
-		for(Bucket bucket: bucketsList){
-			double factorsScore =  alphaCosSim 	  * bucket.getCosSim() 
-					              + betaCoverageScore * bucket.getCoverageScore() 
-					              + gamaCodeSizeScore * bucket.getCodeSizeScore() 
-					              + deltaRepScore 	  * bucket.getRepScore()
-					              + epsilonUpScore    * bucket.getUpScore(); 
+		for(BucketOld bucketOld: bucketsList){
+			double factorsScore =  alphaCosSim 	  * bucketOld.getCosSim() 
+					              + betaCoverageScore * bucketOld.getCoverageScore() 
+					              + gamaCodeSizeScore * bucketOld.getCodeSizeScore() 
+					              + deltaRepScore 	  * bucketOld.getRepScore()
+					              + epsilonUpScore    * bucketOld.getUpScore(); 
 			double adjuster;
 			
-			if(bucket.getRelationTypeId().equals(RelationTypeEnum.FROM_GOOGLE_QUESTION_T1.getId())) {
+			if(bucketOld.getRelationTypeId().equals(RelationTypeEnum.FROM_GOOGLE_QUESTION_T1.getId())) {
 				adjuster = relationTypeFromGoogleQuestion;
-			}else if(bucket.getRelationTypeId().equals(RelationTypeEnum.FROM_GOOGLE_ANSWER_T4.getId())) {
+			}else if(bucketOld.getRelationTypeId().equals(RelationTypeEnum.FROM_GOOGLE_ANSWER_T4.getId())) {
 				adjuster = relationTypeFromGoogleAnswer;
-			}else if(bucket.getRelationTypeId().equals(RelationTypeEnum.RELATED_DUPE_T2.getId())) {
+			}else if(bucketOld.getRelationTypeId().equals(RelationTypeEnum.RELATED_DUPE_T2.getId())) {
 				adjuster = relationTypeRelatedDupe;
-			}else if(bucket.getRelationTypeId().equals(RelationTypeEnum.RELATED_NOT_DUPE_T3.getId())) {
+			}else if(bucketOld.getRelationTypeId().equals(RelationTypeEnum.RELATED_NOT_DUPE_T3.getId())) {
 				adjuster = relationTypeRelatedNotDupe;
 			}else {
 				adjuster = relationTypeLinksInsideTexts;
@@ -97,12 +97,12 @@ public class BotComposer {
 				logger.info("Composed score = "+composedScore+ " - adjuster: "+adjuster+ " - factorsScore: "+factorsScore);
 			}
 			count++;*/
-			bucket.setComposedScore(BotUtils.round(composedScore,5));
+			bucketOld.setComposedScore(BotUtils.round(composedScore,5));
 		}
 		
 		
-		Collections.sort(bucketsList, new Comparator<Bucket>() {
-		    public int compare(Bucket o1, Bucket o2) {
+		Collections.sort(bucketsList, new Comparator<BucketOld>() {
+		    public int compare(BucketOld o1, BucketOld o2) {
 		        return o2.getComposedScore().compareTo(o1.getComposedScore());
 		    }
 		});
@@ -110,7 +110,7 @@ public class BotComposer {
 	}
 
 
-	public void calculateScores(Double avgReputation, Double avgScore,HashMap<String, Double> tfIdfMainBucket, HashMap<String, Double> tfIdfOtherBucket, Bucket mainBucket, Bucket postBucket) {
+	public void calculateScores(Double avgReputation, Double avgScore,HashMap<String, Double> tfIdfMainBucket, HashMap<String, Double> tfIdfOtherBucket, BucketOld mainBucket, BucketOld postBucket) {
 		double cosine = cosineSimilarity(tfIdfMainBucket, tfIdfOtherBucket);
 		postBucket.setCosSim(BotUtils.round(cosine,4));
 		

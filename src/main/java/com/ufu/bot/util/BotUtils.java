@@ -60,7 +60,7 @@ import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import com.ufu.bot.PitBotApp2;
 import com.ufu.bot.repository.GenericRepository;
-import com.ufu.bot.to.Bucket;
+import com.ufu.bot.to.BucketOld;
 import com.ufu.bot.to.Evaluation;
 import com.ufu.bot.to.ExternalQuestion;
 import com.ufu.bot.to.Feature;
@@ -789,7 +789,7 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 		if(bucketDuplicatiosMap==null){
 			bucketDuplicatiosMap = new HashMap<Integer, Set<Integer>>();	
 			getPostsLinks();
-			//Pode haver mais de uma duplicada por questao.. Bucket structure
+			//Pode haver mais de uma duplicada por questao.. BucketOld structure
 			logger.info("Building buckets");
 					
 			for(Map.Entry<Integer, Set<Integer>> entry : allPostLinks.entrySet()){

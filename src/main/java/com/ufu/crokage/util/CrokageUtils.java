@@ -301,7 +301,27 @@ public class CrokageUtils {
 	}
 	
 	
-	
+	/*
+	 * Remove especial simbols only if isolated. Remove .:;'" if surrounded by spaces in any side. ?!, from all 
+	 */
+	public static String removePunctuations(String content) {
+		content = content.replaceAll("\\s+\\p{Punct}+\\s"," "); 
+		content = content.replaceAll("\\s+\\."," ");
+		content = content.replaceAll("\\.(\\s+|$)"," ");
+		content = content.replaceAll("\\s+\\:"," ");
+		content = content.replaceAll("\\:(\\s+|$)"," ");
+		content = content.replaceAll("\"\\s+"," ");
+		content = content.replaceAll("\\s+\""," ");
+		content = content.replaceAll("\'\\s+"," ");
+		content = content.replaceAll("\\s+\'"," ");
+		
+		content = content.replaceAll("\\s+(\\;|$)"," ");
+		content = content.replaceAll("\\;\\s+"," ");
+		content = content.replaceAll("\\,"," ");
+		content = content.replaceAll("\\?"," ");
+		content = content.replaceAll("\\!"," ");
+		return content;
+	}
 	
 	private static String translateHTMLSimbols(String finalContent) {
 		finalContent = finalContent.replaceAll("&amp;","&");
@@ -348,6 +368,11 @@ public class CrokageUtils {
 		}*/
 		
 		return smallCodes;
+	}
+	
+	public static boolean isNumeric(String str)
+	{
+		return str.matches("[+-]?\\d*(\\.\\d+)?");
 	}
 
 	/**
@@ -798,7 +823,7 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 		if(bucketDuplicatiosMap==null){
 			bucketDuplicatiosMap = new HashMap<Integer, Set<Integer>>();	
 			getPostsLinks();
-			//Pode haver mais de uma duplicada por questao.. Bucket structure
+			//Pode haver mais de uma duplicada por questao.. BucketOld structure
 			logger.info("Building buckets");
 					
 			for(Map.Entry<Integer, Set<Integer>> entry : allPostLinks.entrySet()){
@@ -956,6 +981,37 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 	}
 	
 	
+	public static String processQuery(String query) {
+		query = query.toLowerCase();
+		query = translateHTMLSimbols(query);
+		
+		//remove punctuation marks
+		query = query.replaceAll("\\?", " ");
+		query = removePunctuations(query);
+		String[] words = query.split("\\s+");
+		List<String> validWords = new ArrayList<>();
+		
+		//remove stop words or small words or numbers only
+		for(String word:words) {
+			word = word.trim();
+			try {
+			
+			if(!stopWordsList.contains(word) && !(word.length()<2) && !StringUtils.isBlank(word) && !isNumeric(word)) {
+				validWords.add(word);
+			}
+			
+			} catch (Exception e) {
+				System.out.println();
+			}
+		}
+		String finalContent = String.join(" ", validWords);
+		finalContent = finalContent.replaceAll("\u0000", "");
+		validWords = null;
+		query = null;
+		words = null;
+		return finalContent;
+	}
+	
 	
 	public List<ExternalQuestion> readAnswerBotQuestionsAndAnswersOld() throws IOException {
 		List<ExternalQuestion> answerBotQuestionAnswers = new ArrayList<>();
@@ -1064,26 +1120,6 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 		}
 		
 		
-		
-		
-		/*for(int i=0; i<100; i++){
-			url = Resources.getResource(i+".txt");
-			fileContent = Resources.toString(url, Charsets.UTF_8);
-			
-			List<String> lines = IOUtils.readLines(new StringReader(fileContent));
-			query = lines.get(1);
-			query = query.replace("query : ","");
-			
-			lines.remove(0);
-			lines.remove(0);
-			lines.remove(0);
-			lines.remove(0);
-			lines.remove(lines.size()-1);
-			
-			answer = lines.stream().collect(Collectors.joining("\n"));
-			//System.out.println(answer);
-			answerBotQuestionAnswers.add(new ExternalQuestion(i+1,query,answer));
-		}*/
 		
 		return externalQuestionAnswers;
 		

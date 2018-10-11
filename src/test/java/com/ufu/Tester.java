@@ -41,7 +41,7 @@ import com.google.common.math.BigIntegerMath;
 import com.ufu.bot.PitBotApp2;
 import com.ufu.bot.tfidf.TfIdf;
 import com.ufu.bot.tfidf.ngram.NgramTfIdf;
-import com.ufu.bot.to.Bucket;
+import com.ufu.bot.to.BucketOld;
 import com.ufu.bot.to.Post;
 import com.ufu.bot.util.BotComposer;
 import com.ufu.bot.util.BotUtils;
@@ -202,7 +202,7 @@ public class Tester {
 		
 		//app.storeInCache(parent);
 		
-		//Bucket bucket = app.buildAnswerPostBucket(answer);
+		//BucketOld bucket = app.buildAnswerPostBucket(answer);
 		//System.out.println(bucket);
 		
 		
@@ -240,8 +240,8 @@ public class Tester {
 		//String[] fileNames = {"ds_2012"};
 		String[] fileNames = {"ds_2012","ds_2013","ds_2014","ds_2015","ds_CDS","ds_IBM","hp-cs.txt","hp-dh.txt","huck-finn.txt","les-mis.txt","50-shades.txt"};
 		
-		Set<Bucket> buckets = new LinkedHashSet<>();
-		Bucket main = new Bucket();
+		Set<BucketOld> bucketOlds = new LinkedHashSet<>();
+		BucketOld main = new BucketOld();
 		main.setPostId(0);
 		//main.setProcessedBodyStemmedStopped("how it fits into the larger picture of an organization, explains IBM’s Jeff Jonas, distinguished");
 		main.setProcessedBodyStemmedStopped("A data scientist represents an evolution from the business or data analyst role. The formal training is similar, with a solid foundation typically in computer science and applications, modeling, statistics, analytics and math. What sets the data scientist apart is strong business acumen, coupled with the ability to communicate findings to both business and IT leaders in a way that can influence how an organization approaches a business challenge. Good data scientists will not just address business problems, they will pick the right problems that have the most value to the organization.\n" + 
@@ -256,28 +256,28 @@ public class Tester {
 		for(int i=0; i<fileNames.length; i++){
 			url = Resources.getResource(fileNames[i]);
 			text1 = Resources.toString(url, Charsets.UTF_8);
-			Bucket bucket = new Bucket();
-			bucket.setProcessedBodyStemmedStopped(text1);
-			bucket.setPostId(i+1);
-			buckets.add(bucket);
+			BucketOld bucketOld = new BucketOld();
+			bucketOld.setProcessedBodyStemmedStopped(text1);
+			bucketOld.setPostId(i+1);
+			bucketOlds.add(bucketOld);
 		}
 		
 		
-		List<Bucket> rankedBuckets = step8OnlyTfIdf(buckets,main);
+		List<BucketOld> rankedBuckets = step8OnlyTfIdf(bucketOlds,main);
 		showBucketsOrderByCosineDesc(rankedBuckets);
 	}
 	
 	
-	public List<Bucket> step8OnlyTfIdf(Set<Bucket> buckets, Bucket mainBucket) {
-		List<Bucket> bucketsList = new ArrayList<>(buckets);
+	public List<BucketOld> step8OnlyTfIdf(Set<BucketOld> bucketOlds, BucketOld mainBucket) {
+		List<BucketOld> bucketsList = new ArrayList<>(bucketOlds);
 		
 		/*
 		 * Calculate tfidf for all terms
 		 */
 		List<String> bucketsTexts = new ArrayList<>();
 		bucketsTexts.add(mainBucket.getProcessedBodyStemmedStopped());
-		for(Bucket bucket: buckets){
-			bucketsTexts.add(bucket.getProcessedBodyStemmedStopped());
+		for(BucketOld bucketOld: bucketOlds){
+			bucketsTexts.add(bucketOld.getProcessedBodyStemmedStopped());
 		}
 		
 		List<Collection<String>> documents =  Lists.newArrayList(NgramTfIdf.ngramDocumentTerms(Lists.newArrayList(1,2,3), bucketsTexts));
@@ -293,7 +293,7 @@ public class Tester {
 		
 		for(Map<String, Double> tfsMap: tfs){
 			tfIdfOtherBucket = (HashMap)TfIdf.tfIdf(tfsMap, idfAll);
-			Bucket postBucket = bucketsList.get(pos);
+			BucketOld postBucket = bucketsList.get(pos);
 			double cosine = BotComposer.cosineSimilarity(tfIdfMainBucket, tfIdfOtherBucket);
 			postBucket.setCosSim(BotUtils.round(cosine,4));
 			pos++;
@@ -305,15 +305,15 @@ public class Tester {
 
 	
 	
-	private void showBucketsOrderByCosineDesc(List<Bucket> bucketsList) {
-		Collections.sort(bucketsList, new Comparator<Bucket>() {
-		    public int compare(Bucket o1, Bucket o2) {
+	private void showBucketsOrderByCosineDesc(List<BucketOld> bucketsList) {
+		Collections.sort(bucketsList, new Comparator<BucketOld>() {
+		    public int compare(BucketOld o1, BucketOld o2) {
 		        return o2.getCosSim().compareTo(o1.getCosSim());
 		    }
 		});
 		int pos=1;
-		for(Bucket bucket: bucketsList){
-			System.out.print("Rank: "+(pos)+ " cosine: "+bucket.getCosSim()+" id: "+bucket.getPostId()+ " -\n "+bucket.getPresentingBody());
+		for(BucketOld bucketOld: bucketsList){
+			System.out.print("Rank: "+(pos)+ " cosine: "+bucketOld.getCosSim()+" id: "+bucketOld.getPostId()+ " -\n "+bucketOld.getPresentingBody());
 			pos++;
 			if(pos>10){
 				break;
@@ -361,7 +361,7 @@ public class Tester {
 	**/
 	private void testGetClassesNames() throws Exception {
 		String code1 = "//Main bucket\n" + 
-				"		Bucket mainBucket = new Bucket();\n" + 
+				"		BucketOld mainBucket = new BucketOld();\n" + 
 				"		mainBucket.setClassesNames(apis);\n" + 
 				"		\n" + 
 				"		String presentingBody = botUtils.buildPresentationBody(googleQuery);\n" + 
@@ -375,7 +375,7 @@ public class Tester {
 				"		System.out.println(mainBucket);\n" + 
 				"		\n" + 
 				"		//Remaining buckets\n" + 
-				"		Set<Bucket> buckets = new HashSet<>();\n" + 
+				"		Set<BucketOld> buckets = new HashSet<>();\n" + 
 				"		\n" + 
 				"		/**\n" + 
 				"	* sss\n" + 
@@ -385,7 +385,7 @@ public class Tester {
 				"			\n" + 
 				"			List<Post> answers = thread.getAnswers();\n" + 
 				"			for(Post answer: answers) {\n" + 
-				"				Bucket bucket = buildBucket(answer,true);\n" + 
+				"				BucketOld bucket = buildBucket(answer,true);\n" + 
 				"				buckets.add(bucket);\n" + 
 				"			}\n" + 
 				"		}\n" + 

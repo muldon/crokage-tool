@@ -3,61 +3,68 @@ package com.ufu.bot.to;
 import java.util.List;
 import java.util.Set;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
 import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
+@Entity
+@Table(name = "postsmin")
 public class Bucket {
-	private static final long serialVersionUID = -11115191211815641L;
+	private static final long serialVersionUID = -11118191211815641L;
+	@Id
+	private Integer id;
 	
-	private Integer postId;
+	@Column(name="processedtitle")
+    private String processedTitle;
 	
-	private Integer parentId;
+	@Transient
+	private Integer score;
 	
-	private String presentingBody;
-	
-	private String processedBodyStemmedStopped;
-	
-	private Integer postScore;
-	
-	private List<String> codes;
-	
-	private Set<String> classesNames;
-	    
-	private Integer userReputation;
-	
-	private Integer relationTypeId;
-	
-	/*
-	 * Similarity values compared to main bucket
-	 */
-	private Double cosSim;
-	private Double coverageScore;
-	private Double codeSizeScore;
-	private Double repScore;
-	private Double upScore;
-	
-	private Double composedScore;
-	
-	public Bucket() {
-		cosSim = 0d;
-		coverageScore = 0d;
-		repScore = 0d;
-		upScore = 0d;
-		composedScore = 0d;
+
+	public Integer getId() {
+		return id;
 	}
 
+	public void setId(Integer id) {
+		this.id = id;
+	}
 
+	public String getProcessedTitle() {
+		return processedTitle;
+	}
+
+	public void setProcessedTitle(String processedTitle) {
+		this.processedTitle = processedTitle;
+	}
+
+	public Integer getScore() {
+		return score;
+	}
+
+	public void setScore(Integer score) {
+		this.score = score;
+	}
+
+	public static long getSerialversionuid() {
+		return serialVersionUID;
+	}
+
+	@Override
+	public String toString() {
+		return "Bucket [id=" + id + ", processedTitle=" + processedTitle + ", score=" + score + "]";
+	}
 
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((postId == null) ? 0 : postId.hashCode());
+		result = prime * result + ((id == null) ? 0 : id.hashCode());
 		return result;
 	}
-
-
 
 	@Override
 	public boolean equals(Object obj) {
@@ -68,230 +75,15 @@ public class Bucket {
 		if (getClass() != obj.getClass())
 			return false;
 		Bucket other = (Bucket) obj;
-		if (postId == null) {
-			if (other.postId != null)
+		if (id == null) {
+			if (other.id != null)
 				return false;
-		} else if (!postId.equals(other.postId))
+		} else if (!id.equals(other.id))
 			return false;
 		return true;
 	}
-
-
-
-	public Integer getPostId() {
-		return postId;
-	}
-
-
-
-	public void setPostId(Integer postId) {
-		this.postId = postId;
-	}
-
-
-
-	public Integer getParentId() {
-		return parentId;
-	}
-
-
-
-	public void setParentId(Integer parentId) {
-		this.parentId = parentId;
-	}
-
-
-
 	
-
-
-	public String getProcessedBodyStemmedStopped() {
-		return processedBodyStemmedStopped;
-	}
-
-
-
-	public void setProcessedBodyStemmedStopped(String processedBodyStemmedStopped) {
-		this.processedBodyStemmedStopped = processedBodyStemmedStopped;
-	}
-
-
-
-	public Integer getPostScore() {
-		return postScore;
-	}
-
-
-
-	public void setPostScore(Integer postScore) {
-		this.postScore = postScore;
-	}
-
-
-
-
-
-
-	public Integer getUserReputation() {
-		return userReputation;
-	}
-
-
-
-	public void setUserReputation(Integer userReputation) {
-		this.userReputation = userReputation;
-	}
-
-
-
-	public static long getSerialversionuid() {
-		return serialVersionUID;
-	}
-
-
-
-	public String getPresentingBody() {
-		return presentingBody;
-	}
-
-
-
-	public void setPresentingBody(String presentingBody) {
-		this.presentingBody = presentingBody;
-	}
-
-
-
-
-
-
-	public List<String> getCodes() {
-		return codes;
-	}
-
-
-
-	public void setCodes(List<String> codes) {
-		this.codes = codes;
-	}
-
-
-
-	public Set<String> getClassesNames() {
-		return classesNames;
-	}
-
-
-
-	public void setClassesNames(Set<String> classesNames) {
-		this.classesNames = classesNames;
-	}
-
-
-
-	public Double getCosSim() {
-		return cosSim;
-	}
-
-
-
-	public void setCosSim(Double cosSim) {
-		this.cosSim = cosSim;
-	}
-
-
-
-
-
-
-
-	@Override
-	public String toString() {
-		return "Bucket [postId=" + postId + ", parentId=" + parentId + ", presentingBody=" + presentingBody
-				+ ", processedBodyStemmedStopped=" + processedBodyStemmedStopped + ", postScore=" + postScore
-				+ ", codes=" + codes + ", classesNames=" + classesNames + ", userReputation=" + userReputation
-				+ ", relationTypeId=" + relationTypeId + ", cosSim=" + cosSim + ", coverageScore=" + coverageScore
-				+ ", codeSizeScore=" + codeSizeScore + ", repScore=" + repScore + ", upScore=" + upScore
-				+ ", composedScore=" + composedScore + "]";
-	}
-
-
-
-	public Double getCoverageScore() {
-		return coverageScore;
-	}
-
-
-
-	public void setCoverageScore(Double coverageScore) {
-		this.coverageScore = coverageScore;
-	}
-
-
-
-	public Double getRepScore() {
-		return repScore;
-	}
-
-
-
-	public void setRepScore(Double repScore) {
-		this.repScore = repScore;
-	}
-
-
-
-	public Double getUpScore() {
-		return upScore;
-	}
-
-
-
-	public void setUpScore(Double upScore) {
-		this.upScore = upScore;
-	}
-
-
-
-	public Double getComposedScore() {
-		return composedScore;
-	}
-
-
-
-	public void setComposedScore(Double composedScore) {
-		this.composedScore = composedScore;
-	}
-
-
-
-	public Double getCodeSizeScore() {
-		return codeSizeScore;
-	}
-
-
-
-	public void setCodeSizeScore(Double codeSizeScore) {
-		this.codeSizeScore = codeSizeScore;
-	}
-
-
-
-	public Integer getRelationTypeId() {
-		return relationTypeId;
-	}
-
-
-
-	public void setRelationTypeId(Integer relationTypeId) {
-		this.relationTypeId = relationTypeId;
-	}
-
-
-
-
-
-
+	
 
 	
 	

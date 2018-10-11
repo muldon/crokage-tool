@@ -1,10 +1,10 @@
 package com.ufu.bot.repository;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.ufu.bot.to.Bucket;
 import com.ufu.bot.to.Evaluation;
 import com.ufu.bot.to.ExternalQuestion;
 import com.ufu.bot.to.Post;
@@ -44,7 +44,7 @@ public interface GenericRepository {
 
 	public List<Post> getPostsByIds(List<Integer> postsListIds);
 
-	
+	public List<Bucket> getBucketsByIds(List<Integer> postsListIds);
 
 	
     

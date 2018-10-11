@@ -1,6 +1,7 @@
 package com.ufu.bot.tfidf;
 
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
@@ -44,6 +45,23 @@ public class TFIDFCalculator {
         }
         return Math.log(docs.size() / n);
     }
+    
+    
+	public double idf2(List<String> lines, String term) {
+		double n = 0;
+		String[] words;
+		for (String line : lines) {
+			words = line.split(" ");
+			for(String word: words) {
+				if (word.equalsIgnoreCase(term)) {
+					n++;
+					break;
+				}
+			}
+		}
+		words = null;
+		return Math.log(lines.size() / n);
+	}
 
     /**
      * @param doc  a text document

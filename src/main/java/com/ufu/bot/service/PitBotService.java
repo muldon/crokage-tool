@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.Sets;
-import com.ufu.bot.to.Bucket;
+import com.ufu.bot.to.BucketOld;
 import com.ufu.bot.to.Evaluation;
 import com.ufu.bot.to.Experiment;
 import com.ufu.bot.to.ExternalQuestion;
@@ -278,10 +278,10 @@ public class PitBotService extends AbstractService{
 
 
 
-	public void saveRanks(ExternalQuestion externalQuestion, List<Bucket> rankedList, Boolean internalEvaluation, Integer phaseNumber) {
+	public void saveRanks(ExternalQuestion externalQuestion, List<BucketOld> rankedList, Boolean internalEvaluation, Integer phaseNumber) {
 		int order=1;
-		for(Bucket bucket: rankedList) {
-			RelatedPost relatedPost = relatedPostRepository.findByExternalQuestionIdAndPostId(externalQuestion.getId(),bucket.getPostId());
+		for(BucketOld bucketOld: rankedList) {
+			RelatedPost relatedPost = relatedPostRepository.findByExternalQuestionIdAndPostId(externalQuestion.getId(),bucketOld.getPostId());
 			Rank rank=new Rank(relatedPost.getId(),order,internalEvaluation,phaseNumber);
 			rankRepository.save(rank);
 			order++;

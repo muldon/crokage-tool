@@ -34,7 +34,7 @@ import com.ufu.bot.googleSearch.GoogleWebSearch;
 import com.ufu.bot.googleSearch.SearchQuery;
 import com.ufu.bot.googleSearch.SearchResult;
 import com.ufu.bot.service.PitBotService;
-import com.ufu.bot.to.Bucket;
+import com.ufu.bot.to.BucketOld;
 import com.ufu.bot.to.Comment;
 import com.ufu.bot.to.Evaluation;
 import com.ufu.bot.to.ExternalQuestion;
@@ -177,7 +177,7 @@ public class PitBotApp2 {
 	
 	
 	//protected Set<Post> postsByFilter;
-	//private Bucket mainBucket;
+	//private BucketOld mainBucket;
 	private List<ExternalQuestion> externalQuestions;
 	private Set<SoThread> augmentedThreads;
 	private String googleQuery;
@@ -381,10 +381,10 @@ public class PitBotApp2 {
 			}
 			
 			initTime = System.currentTimeMillis();
-			List<Bucket> scoredBucketList = pitSurveyService.runSteps7and8(externalQuestion,augmentedThreads);
+			List<BucketOld> scoredBucketList = pitSurveyService.runSteps7and8(externalQuestion,augmentedThreads);
 			
 			Integer maxRankSize = getMaxRankSize();
-			List<Bucket> trimmedRankedList = pitSurveyService.step9(scoredBucketList,maxRankSize);
+			List<BucketOld> trimmedRankedList = pitSurveyService.step9(scoredBucketList,maxRankSize);
 			
 			logger.info("list of ranks generated, now saving ranks for question "+externalQuestion.getFileReferenceId());
 			
@@ -662,8 +662,8 @@ public class PitBotApp2 {
 				threadListOneElement.add(thread);
 				
 				
-				List<Bucket> scoredBucketList = pitSurveyService.runSteps7and8(externalQuestion,threadListOneElement);
-				List<Bucket> trimmedRankedList = pitSurveyService.step9(scoredBucketList,maxRankSize);
+				List<BucketOld> scoredBucketList = pitSurveyService.runSteps7and8(externalQuestion,threadListOneElement);
+				List<BucketOld> trimmedRankedList = pitSurveyService.step9(scoredBucketList,maxRankSize);
 				double dcg = computeDCG(trimmedRankedList,consideredEvaluations,externalQuestion.getId());
 				ndcg = BotUtils.round(dcg / idcg , 4);
 				all_ndcgs[index] = ndcg;
@@ -730,13 +730,13 @@ public class PitBotApp2 {
 	}
 	
 
-	private double computeDCG(List<Bucket> trimmedRankedList, List<Evaluation> consideredEvaluations, Integer externalQuestionId) {
+	private double computeDCG(List<BucketOld> trimmedRankedList, List<Evaluation> consideredEvaluations, Integer externalQuestionId) {
 		double dcg = 0;
 		int rank = 0;
-		for(Bucket bucket: trimmedRankedList) {
+		for(BucketOld bucketOld: trimmedRankedList) {
 			rank++;
 			for(Evaluation evaluation: consideredEvaluations) {
-				if(evaluation.getExternalQuestionId().equals(externalQuestionId) && evaluation.getPostId().equals(bucket.getPostId())) {
+				if(evaluation.getExternalQuestionId().equals(externalQuestionId) && evaluation.getPostId().equals(bucketOld.getPostId())) {
 					double dcgEval = BotUtils.computeDCG(evaluation.getMeanLikert(),rank);
 					dcg += dcgEval;
 					break;					
@@ -824,11 +824,11 @@ public class PitBotApp2 {
 				threadListOneElement.add(thread);
 				
 				
-				List<Bucket> scoredBucketList = pitSurveyService.runSteps7and8(externalQuestion,threadListOneElement);
+				List<BucketOld> scoredBucketList = pitSurveyService.runSteps7and8(externalQuestion,threadListOneElement);
 				int goldSetSize = externalQuestionOracleCounter.get(externalQuestion.getId());
 				
 				//bootstrap here
-				List<Bucket> trimmedRankedList = pitSurveyService.step9(scoredBucketList,maxRankSize);
+				List<BucketOld> trimmedRankedList = pitSurveyService.step9(scoredBucketList,maxRankSize);
 				hitK += isRelevantPostFound(trimmedRankedList,goldSetEvaluations,externalQuestion.getId());
 				double recall = 0;
 				recall = getRecallK(trimmedRankedList,goldSetEvaluations,externalQuestion.getId(),goldSetSize);
@@ -860,14 +860,14 @@ public class PitBotApp2 {
 
 
 
-	private double getAvgPrecisionK(List<Bucket> trimmedRankedList, List<Evaluation> goldSetEvaluations, Integer externalQuestionId) {
+	private double getAvgPrecisionK(List<BucketOld> trimmedRankedList, List<Evaluation> goldSetEvaluations, Integer externalQuestionId) {
 		int count=0;
 		double found = 0;
 		double linePrec = 0;
-		for(Bucket bucket: trimmedRankedList) {
+		for(BucketOld bucketOld: trimmedRankedList) {
 			count++;
 			for(Evaluation evaluation: goldSetEvaluations) {
-				if(evaluation.getExternalQuestionId().equals(externalQuestionId) && evaluation.getPostId().equals(bucket.getPostId())) {
+				if(evaluation.getExternalQuestionId().equals(externalQuestionId) && evaluation.getPostId().equals(bucketOld.getPostId())) {
 					found++;
 					linePrec += (found / count);
 				}
@@ -885,13 +885,13 @@ public class PitBotApp2 {
 
 
 
-	private double getRRank(List<Bucket> trimmedRankedList, List<Evaluation> goldSetEvaluations, Integer externalQuestionId) {
+	private double getRRank(List<BucketOld> trimmedRankedList, List<Evaluation> goldSetEvaluations, Integer externalQuestionId) {
 		double rrank = 0;
 		int count=0;
-		outer: for(Bucket bucket: trimmedRankedList) {
+		outer: for(BucketOld bucketOld: trimmedRankedList) {
 			count++;
 			for(Evaluation evaluation: goldSetEvaluations) {
-				if(evaluation.getExternalQuestionId().equals(externalQuestionId) && evaluation.getPostId().equals(bucket.getPostId())) {
+				if(evaluation.getExternalQuestionId().equals(externalQuestionId) && evaluation.getPostId().equals(bucketOld.getPostId())) {
 					rrank = 1.0 / (count);
 					break outer;
 				}
@@ -905,13 +905,13 @@ public class PitBotApp2 {
 
 
 
-	private double getRecallK(List<Bucket> trimmedRankedList, List<Evaluation> goldSetEvaluations, Integer externalQuestionId, int goldSetSize) {
+	private double getRecallK(List<BucketOld> trimmedRankedList, List<Evaluation> goldSetEvaluations, Integer externalQuestionId, int goldSetSize) {
 		double found = 0;
 		int rank = 0;
-		for(Bucket bucket: trimmedRankedList) {
+		for(BucketOld bucketOld: trimmedRankedList) {
 			rank++;
 			for(Evaluation evaluation: goldSetEvaluations) {
-				if(evaluation.getExternalQuestionId().equals(externalQuestionId) && evaluation.getPostId().equals(bucket.getPostId())) {
+				if(evaluation.getExternalQuestionId().equals(externalQuestionId) && evaluation.getPostId().equals(bucketOld.getPostId())) {
 					found++;
 					//logger.info("hit on rank: "+rank+ " -postid: "+bucket.getPostId());
 				}
@@ -925,13 +925,13 @@ public class PitBotApp2 {
 
 
 
-	private int isRelevantPostFound(List<Bucket> trimmedRankedList, List<Evaluation> goldSetEvaluations, Integer externalQuestionId) {
+	private int isRelevantPostFound(List<BucketOld> trimmedRankedList, List<Evaluation> goldSetEvaluations, Integer externalQuestionId) {
 		int found = 0;
 		int rank = 0;
-		outer: for(Bucket bucket: trimmedRankedList) {
+		outer: for(BucketOld bucketOld: trimmedRankedList) {
 			rank++;
 			for(Evaluation evaluation: goldSetEvaluations) {
-				if(evaluation.getExternalQuestionId().equals(externalQuestionId) && evaluation.getPostId().equals(bucket.getPostId())) {
+				if(evaluation.getExternalQuestionId().equals(externalQuestionId) && evaluation.getPostId().equals(bucketOld.getPostId())) {
 					found = 1;
 					//logger.info("hit on rank: "+rank);
 					break outer;
@@ -943,10 +943,10 @@ public class PitBotApp2 {
 	}
 
 	
-	private double getRecallK(List<Bucket> trimmedRankedList, List<Evaluation> goldSetEvaluations, Integer externalQuestionId) {
+	private double getRecallK(List<BucketOld> trimmedRankedList, List<Evaluation> goldSetEvaluations, Integer externalQuestionId) {
 		double found = 0;
 		int rank = 0;
-		outer: for(Bucket bucket: trimmedRankedList) {
+		outer: for(BucketOld bucketOld: trimmedRankedList) {
 			rank++;
 			/*if(isFoundPost(bucket,goldSetEvaluations)) {
 				found++;
@@ -959,9 +959,9 @@ public class PitBotApp2 {
 
 
 /*
-	private void calculateMetrics(List<Bucket> trimmedRankedList, List<Evaluation> goldSetEvaluationsWithMeanLikerts, Integer externalQuestionId) {
+	private void calculateMetrics(List<BucketOld> trimmedRankedList, List<Evaluation> goldSetEvaluationsWithMeanLikerts, Integer externalQuestionId) {
 		int rankCount = 0;
-		for(Bucket bucket: trimmedRankedList) {
+		for(BucketOld bucket: trimmedRankedList) {
 			rankCount++;
 			
 		}
@@ -1376,15 +1376,15 @@ public class PitBotApp2 {
 
 	
 
-	private void showBucketsOrderByCosineDesc(List<Bucket> bucketsList) {
-		Collections.sort(bucketsList, new Comparator<Bucket>() {
-		    public int compare(Bucket o1, Bucket o2) {
+	private void showBucketsOrderByCosineDesc(List<BucketOld> bucketsList) {
+		Collections.sort(bucketsList, new Comparator<BucketOld>() {
+		    public int compare(BucketOld o1, BucketOld o2) {
 		        return o2.getCosSim().compareTo(o1.getCosSim());
 		    }
 		});
 		int pos=1;
-		for(Bucket bucket: bucketsList){
-			logger.info("Rank: "+(pos)+ " cosine: "+bucket.getCosSim()+" id: "+bucket.getPostId()+ " -\n "+bucket.getPresentingBody());
+		for(BucketOld bucketOld: bucketsList){
+			logger.info("Rank: "+(pos)+ " cosine: "+bucketOld.getCosSim()+" id: "+bucketOld.getPostId()+ " -\n "+bucketOld.getPresentingBody());
 			pos++;
 			if(pos>10){
 				break;
@@ -1394,9 +1394,9 @@ public class PitBotApp2 {
 	}
 	
 
-	/*private void showRankedList(List<Bucket> rankedBuckets) {
+	/*private void showRankedList(List<BucketOld> rankedBuckets) {
 		int pos=0;
-		for(Bucket bucket: rankedBuckets){
+		for(BucketOld bucket: rankedBuckets){
 			logger.info("Rank: "+(pos+1)+ " total Score: "+bucket.getComposedScore() +" - cosine: "+bucket.getCosSim()+ " - coverageScore: "+bucket.getCoverageScore()+ " - codeSizeScore: "+bucket.getCodeSizeScore() +" - repScore: "+bucket.getRepScore()+ " - upScore: "+bucket.getUpScore()+ " - id: "+bucket.getPostId()+ " \n "+bucket.getPresentingBody());
 			buildOutPutFile(bucket,pos+1);
 			pos++;
