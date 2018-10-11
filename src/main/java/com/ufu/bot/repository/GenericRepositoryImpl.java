@@ -342,9 +342,10 @@ public class GenericRepositoryImpl implements GenericRepository {
 			
 		Query q = em.createNativeQuery(sql, Post.class);
 		List<Post> posts = (List<Post>) q.getResultList();
-		logger.info("getPostsByIds: "+posts.size());
+		//logger.info("getPostsByIds: "+posts.size());
 		return posts;
 	}
+
 
 
 

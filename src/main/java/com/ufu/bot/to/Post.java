@@ -22,9 +22,17 @@ public class Post {
 	
 	private String body;
 	
+	@Column(name="processedbody")
+    private String processedBody;
+	
 	private String title;
 	
-	 private String tags;
+	@Column(name="processedtitle")
+    private String processedTitle;
+	
+	private String tags;
+	
+	private String code;
     	
 	@Column(name="posttypeid")
 	private Integer postTypeId;
@@ -371,20 +379,6 @@ public class Post {
 
 	
 
-	@Override
-	public String toString() {
-		return "Post [id=" + id + ", body=" + body + ", title=" + title + ", tags=" + tags + ", postTypeId="
-				+ postTypeId + ", acceptedAnswerId=" + acceptedAnswerId + ", parentId=" + parentId + ", creationDate="
-				+ creationDate + ", score=" + score + ", viewCount=" + viewCount + ", ownerUserId=" + ownerUserId
-				+ ", lastEditorUserId=" + lastEditorUserId + ", lastEditorDisplayName=" + lastEditorDisplayName
-				+ ", lastEditDate=" + lastEditDate + ", lastActivityDate=" + lastActivityDate + ", answerCount="
-				+ answerCount + ", commentCount=" + commentCount + ", favoriteCount=" + favoriteCount + ", closedDate="
-				+ closedDate + ", communityOwnedDate=" + communityOwnedDate + ", comments=" + comments + ", user="
-				+ user + ", titleVectors=" + titleVectors + ", tagVectors=" + tagVectors + ", bodyVectors="
-				+ bodyVectors + ", topicVectors=" + topicVectors + ", similarityScore=" + similarityScore
-				+ ", classesNames=" + classesNames + ", topKrelatedQuestions=" + topKrelatedQuestions + ", evaluation="
-				+ evaluation + "]";
-	}
 
 	public Set<String> getClassesNames() {
 		return classesNames;
@@ -408,6 +402,36 @@ public class Post {
 
 	public void setRelationTypeId(Integer relationTypeId) {
 		this.relationTypeId = relationTypeId;
+	}
+
+	public String getProcessedBody() {
+		return processedBody;
+	}
+
+	public void setProcessedBody(String processedBody) {
+		this.processedBody = processedBody;
+	}
+
+	public String getProcessedTitle() {
+		return processedTitle;
+	}
+
+	public void setProcessedTitle(String processedTitle) {
+		this.processedTitle = processedTitle;
+	}
+
+	public String getCode() {
+		return code;
+	}
+
+	public void setCode(String code) {
+		this.code = code;
+	}
+
+	@Override
+	public String toString() {
+		return "Post [id=" + id + ", body=" + body + ", processedBody=" + processedBody + ", title=" + title
+				+ ", processedTitle=" + processedTitle + ", tags=" + tags + ", code=" + code + "]";
 	}
 
 	

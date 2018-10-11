@@ -1,16 +1,16 @@
 package com.ufu.bot.service;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.google.common.collect.Lists;
 import com.ufu.bot.to.Post;
 import com.ufu.bot.util.AbstractService;
-
 
 
 @Service
@@ -54,6 +54,23 @@ public class CrokageService extends AbstractService{
 		fetchedPosts.addAll(genericRepository.getPostsByIds(postsListIds));
 		return fetchedPosts;
 	}
+
+	@Transactional(readOnly = true)
+	public List<Integer> findAllQuestionsIds() {
+		return postsRepository.findAllQuestionsIds();
+	}
+
+	@Transactional(readOnly = true)
+	public List<Post> findPostsById(List<Integer> somePosts) {
+		return genericRepository.getPostsByIds(somePosts);
+	}
+
+	public List<Integer> findAllPostsIds() {
+		return postsRepository.findAllPostsIds();
+	}
+	
+	
+	
 	
 	
 	

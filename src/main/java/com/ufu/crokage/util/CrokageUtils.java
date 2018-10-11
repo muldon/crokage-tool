@@ -14,6 +14,8 @@ import java.io.StringReader;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,6 +25,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -96,7 +99,7 @@ public class CrokageUtils {
 	private Map<Integer,Post> parentPostsCache;
 	private Map<Integer,Post> answerPostsCache;
 	private static DCG_TYPE dcgType = DCG_TYPE.COMB;
-	
+	private static List<String> stopWordsList;
 
 	@Value("${phaseNumber}")
 	public Integer phaseNumber; 
@@ -193,6 +196,7 @@ public class CrokageUtils {
 			
 			standardTokenizer.close();
 			//loadTagSynonyms();
+			
 		}
 		
 		if(minTokenSize==null) {
@@ -204,7 +208,9 @@ public class CrokageUtils {
 		parentPostsCache = new HashMap<>();
 		parentPostsCache = new HashMap<Integer, Post>();
 		answerPostsCache = new HashMap<Integer, Post>();
-				
+		
+		stopWordsList = Files.readAllLines(Paths.get(CrokageStaticData.STOP_WORDS_FILE_PATH)); 
+		
 	}
 	
 	
@@ -500,6 +506,7 @@ public class CrokageUtils {
 		
 		//codeContent = codeContent.replaceAll("\n", " ");
 		codeContent = removeHtmlTags(codeContent);
+		
 					
 		//textoSemCodigosLinksEBlackquotes = textoSemCodigosLinksEBlackquotes.replaceAll(BLOCKQUOTE_EXPRESSION, " ");
 		//String codeToBeJoinedInBody = retiraSimbolosCodeParaBody(codeContent);
@@ -1348,11 +1355,14 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 	
 
 	public Set<String> extractClassesFromCode(String content) {
-		Set<String> normClasses = BodyCleaner.extractClassesFromCode(content);
-		return normClasses;
-		
+		Document doc = Jsoup.parse(content);
+		Elements elems = doc.select("code,pre");
+		String codeText = elems.text();
+		return new TextNormalizer(codeText).normalizeSimpleCodeDiscardSmall();
 	}
 
+	
+	
 
 	public void reduceSet(Map<Integer, Set<String>> goldSetQueriesApis, int k) {
 		Set<Integer> keys = goldSetQueriesApis.keySet();
@@ -1448,6 +1458,38 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 		}
 		
 	}
+
+
+	public Map<String, List<Double>> readVectors(String words) throws Exception {
+		String modelPath = CrokageStaticData.FAST_TEXT_MODEL_PATH;
+		String fastTextIntallationDir = CrokageStaticData.FAST_TEXT_INSTALLATION_DIR;
+		
+		// echo "java filewriter file" | ./fasttext print-word-vectors
+		String[] cmd = { "bash", "-c", "echo \""+words+"\" | " + fastTextIntallationDir+ "/fasttext print-word-vectors "+modelPath };
+
+		ProcessBuilder pb = new ProcessBuilder(cmd);
+		Process p = pb.start();
+		p.waitFor();
+		String output = CrokageUtils.loadStream(p.getInputStream());
+		String error = CrokageUtils.loadStream(p.getErrorStream());
+		int rc = p.waitFor();
+		//System.out.println(output);
+		String lines[] = output.split("\n");
+		
+		Map vectorsMap = new LinkedHashMap<>();
+		for(String line: lines) {
+			String[] parts = line.split(" ");
+			int vecSize = parts.length;
+			List<Double> vectors = new ArrayList<>();
+			for(int i=1;i<vecSize;i++) {
+				vectors.add(Double.parseDouble(parts[i]));
+			}
+			vectorsMap.put(parts[0], vectors);
+		}
+		return vectorsMap;
+	}
+
+	
 	
 	
 }

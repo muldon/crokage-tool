@@ -37,6 +37,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.base.Charsets;
 import com.ufu.bot.googleSearch.GoogleWebSearch;
 import com.ufu.bot.service.CrokageService;
+import com.ufu.bot.tfidf.TFIDFCalculator;
 import com.ufu.bot.to.Bucket;
 import com.ufu.bot.to.Post;
 import com.ufu.bot.util.BotUtils;
@@ -50,13 +51,16 @@ public class CrokageApp {
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	@Autowired
-	private CrokageService crokageService;
+	public CrokageService crokageService;
 
 	@Autowired
 	private CrokageUtils crokageUtils;
 
 	@Autowired
 	private GoogleWebSearch googleWebSearch;
+	
+	@Autowired
+	private TFIDFCalculator tfidfCalculator;
 
 	@Value("${action}")
 	public String action;
@@ -114,6 +118,8 @@ public class CrokageApp {
 	private Map<Integer,Set<String>> bikerQueriesApisClassesAndMethods;
 	private Map<Integer,Set<String>> nlp2ApiQueriesApis;
 	private Map<String,Set<Integer>> bigMapApisIds;
+	private Map<String,List<Double>> soTitlesWordVectors;
+	private Map<String,Double> soIDFVocabulary;
 
 	@PostConstruct
 	public void init() throws Exception {
@@ -146,6 +152,23 @@ public class CrokageApp {
 			runApproach();
 			break;
 		
+		case "readIDFVocabulary":
+			readIDFVocabulary();
+			break;	
+			
+			
+		case "buildIDFVocabulary":
+			buildIDFVocabulary();
+			break;	
+			
+		case "readSoContentWordVectors":
+			readSoContentWordVectors();
+			break;		
+			
+		case "generateTrainingFileToFastText":
+			generateTrainingFileToFastText();
+			break;	
+			
 		case "reduceBigMapFileToMininumAPIsCount":
 			reduceBigMapFileToMininumAPIsCount();
 			break;	
@@ -184,7 +207,10 @@ public class CrokageApp {
 			
 		case "generateInputQueriesFromNLP2ApiGroudTruth":
 			generateInputQueriesFromNLP2ApiGroudTruth();
-			break;		
+			break;	
+			
+			
+		
 	
 		default:
 			break;
@@ -193,6 +219,139 @@ public class CrokageApp {
 	}
 
 	
+	
+
+	private void readIDFVocabulary() throws IOException {
+		if(soIDFVocabulary==null) {
+			long initTime = System.currentTimeMillis();
+			logger.info("Reading all idfs from file...");
+			
+			soIDFVocabulary = new HashMap<>();
+			List<String> wordsAndIDFs = Files.readAllLines(Paths.get(CrokageStaticData.SO_IDF_VOCABULARY));
+			for(String line: wordsAndIDFs) {
+				String[] parts = line.split(" ");
+				soIDFVocabulary.put(parts[0], Double.parseDouble(parts[1]));
+			}
+			
+			logger.info("Done reading idfs. ");
+			crokageUtils.reportElapsedTime(initTime,"readSoContentWordVectors");
+		}
+		
+	}
+
+
+
+
+	private void buildIDFVocabulary() throws IOException {
+		//each post has been saved in each line
+		List<List<String>> documents = new ArrayList<>();
+		
+		List<String> contentLines = Files.readAllLines(Paths.get(CrokageStaticData.SO_CONTENT_FILE));
+		for(String line: contentLines) {
+			List<String> words = Arrays.asList(line.split(" "));
+			documents.add(words);
+		}
+		
+		StringBuilder idfContent= new StringBuilder();
+		
+		//all file into a String
+		String content = new String(Files.readAllBytes(Paths.get(CrokageStaticData.SO_CONTENT_FILE)));
+		content = content.replaceAll("\n", " ");
+		Set<String> wordsSet = Arrays.stream(content.split(" +")).collect(Collectors.toSet());
+		for(String word: wordsSet) {
+			double idf = tfidfCalculator.idf(documents, word);
+			idfContent.append(word+ " "+idf+ "\n");
+		}
+		crokageUtils.writeStringContentToFile(idfContent.toString(),CrokageStaticData.SO_IDF_VOCABULARY );
+		
+	}
+
+
+
+
+	private void readSoContentWordVectors() throws IOException {
+		if(soTitlesWordVectors==null) {
+			long initTime = System.currentTimeMillis();
+			logger.info("Reading all vectors from file...");
+			
+			soTitlesWordVectors = new HashMap<>();
+			List<String> wordsAndVectors = Files.readAllLines(Paths.get(CrokageStaticData.SO_CONTENT_WORD_VECTORS));
+			for(String line: wordsAndVectors) {
+				String[] parts = line.split(" ");
+				int vecSize = parts.length;
+				List<Double> vectors = new ArrayList<>();
+				for(int i=1;i<vecSize;i++) {
+					vectors.add(Double.parseDouble(parts[i]));
+				}
+				soTitlesWordVectors.put(parts[0], vectors);
+			}
+			//System.out.println(bigMapApisIds);
+			logger.info("Done reading vectors. ");
+			crokageUtils.reportElapsedTime(initTime,"readSoTitlesWordVectors");
+		}
+		
+	}
+
+
+
+
+	private void generateTrainingFileToFastText() throws FileNotFoundException {
+		//load all SO questions
+		List<Integer> allJavaPostsIds = crokageService.findAllPostsIds();
+		try (PrintWriter out = new PrintWriter(CrokageStaticData.SO_CONTENT_FILE)) {
+			List<Integer> somePostsIds=null; 
+			int maxQuestions = 1000;
+			
+			int init=0;
+			int end=maxQuestions;
+			int remainingSize = allJavaPostsIds.size();
+			logger.info("all posts ids:  "+remainingSize);
+			while(remainingSize>maxQuestions){ //this is for memory issues
+				somePostsIds = allJavaPostsIds.subList(init, end);
+				//preProcessService.processPosts(somePostsIds);
+				processPosts(somePostsIds, out);
+				remainingSize = remainingSize - maxQuestions;
+				init+=maxQuestions;
+				end+=maxQuestions;
+				somePostsIds=null;
+				if(init%100000==0) {
+					logger.info("Processed "+init);
+				}
+				
+			}
+			somePostsIds = allJavaPostsIds.subList(init, init+remainingSize);
+			//remaining
+			//preProcessService.processPosts(somePostsIds);
+			processPosts(somePostsIds, out);
+		
+		}
+	}
+	
+
+	public void processPosts(List<Integer> somePosts, PrintWriter out) throws FileNotFoundException {
+		List<Post> some = crokageService.findPostsById(somePosts);
+		for (Post post : some) {
+			StringBuilder postContent = new StringBuilder();
+			if(post.getPostTypeId().equals(1)) { //question
+				postContent.append(post.getProcessedTitle());
+			}
+			postContent.append(" ");
+			postContent.append(post.getProcessedBody());
+			if(!StringUtils.isBlank(post.getCode())) {
+				String oneLineCode = post.getCode().replaceAll("\n", " ");
+				oneLineCode = oneLineCode.toLowerCase();
+				oneLineCode = oneLineCode.replaceAll("----next----", " ");
+				oneLineCode = StringUtils.normalizeSpace(oneLineCode);
+				postContent.append(" ");
+				postContent.append(oneLineCode);
+				//out.println(oneLineCode);
+			}
+			out.println(postContent);
+		}
+	}
+	
+	
+
 	private Map<String,Set<Integer>> reduceBigMapFileToMininumAPIsCount() throws Exception {
 		//load the inverted index
 		loadInvertedIndexFile();
@@ -1476,8 +1635,8 @@ public class CrokageApp {
 		}
 		return found / gapis.size();
 	}
-	
-	
-	
+
+
+
 
 }

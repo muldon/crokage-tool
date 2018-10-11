@@ -43,6 +43,7 @@ public interface GenericRepository {
 	public List<Post> getAnswersWithCode(String startDate);
 
 	public List<Post> getPostsByIds(List<Integer> postsListIds);
+
 	
 
 	
