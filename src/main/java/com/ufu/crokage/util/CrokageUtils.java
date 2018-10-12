@@ -295,7 +295,7 @@ public class CrokageUtils {
 		//if(!Arrays.asList(phaseExceptions).contains(phaseNumber)) {
 			endTime = System.currentTimeMillis();
 			String duration = DurationFormatUtils.formatDuration(endTime-initTime, "HH:mm:ss,SSS");
-			logger.info("Elapsed time: "+duration+ " of the execution of  "+processName);
+			logger.info("Done with "+processName+", duration: "+duration);
 			
 		//}
 	}
@@ -782,33 +782,9 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 	}
 
 
-	public static <K, V extends Comparable<? super V>> List<Entry<K, V>> entriesSortedByValuesDesc(Map<K, V> map) {
-
-		List<Entry<K, V>> sortedEntries = new LinkedList<Entry<K, V>>(map.entrySet());
-
-		Collections.sort(sortedEntries, new Comparator<Entry<K, V>>() {
-			@Override
-			public int compare(Entry<K, V> e1, Entry<K, V> e2) {
-				return e2.getValue().compareTo(e1.getValue());
-			}
-		});
-
-		return sortedEntries;
-	}
-
-	public static <K, V extends Comparable<? super V>> List<Entry<K, V>> entriesSortedByValues(Map<K, V> map) {
-
-		List<Entry<K, V>> sortedEntries = new LinkedList<Entry<K, V>>(map.entrySet());
-
-		Collections.sort(sortedEntries, new Comparator<Entry<K, V>>() {
-			@Override
-			public int compare(Entry<K, V> e1, Entry<K, V> e2) {
-				return e1.getValue().compareTo(e2.getValue());
-			}
-		});
-
-		return sortedEntries;
-	}
+	
+	
+	
 	
 	public void getPostsLinks() {
 		logger.info("Retrieving PostLinks... ");
@@ -1523,6 +1499,23 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 			vectorsMap.put(parts[0], vectors);
 		}
 		return vectorsMap;
+	}
+
+
+	public void writeMapToFile(Map<String, Double> idfs, String file) throws FileNotFoundException {
+		StringBuilder lines = new StringBuilder("");
+		
+		Set<String> keys = idfs.keySet();
+		for(String key: keys) {
+			lines.append(key);
+			lines.append(" ");
+			lines.append(idfs.get(key));
+			lines.append("\n");
+		}
+		try (PrintWriter out = new PrintWriter(file)) {
+		    out.println(lines);
+		}
+		
 	}
 
 	

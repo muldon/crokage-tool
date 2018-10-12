@@ -82,6 +82,16 @@ public class Bucket {
 			return false;
 		return true;
 	}
+
+	public Bucket(Integer id, String processedTitle) {
+		super();
+		this.id = id;
+		this.processedTitle = processedTitle;
+	}
+
+	public Bucket() {
+		super();
+	}
 	
 	
 

@@ -46,6 +46,20 @@ public class TFIDFCalculator {
         return Math.log(docs.size() / n);
     }
     
+    public double idf3(List<String> lines, String term) {
+    	double n = 0;
+		Set<String> auxSet; 
+		for (String line : lines) {
+			auxSet = Arrays.stream(line.split(" +")).collect(Collectors.toSet());
+			if (auxSet.contains(term)) {
+				n++;
+				break;
+			}
+		}
+		auxSet=null;
+		return Math.log(lines.size() / n);
+	}
+    
     
 	public double idf2(List<String> lines, String term) {
 		double n = 0;

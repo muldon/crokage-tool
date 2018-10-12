@@ -357,17 +357,18 @@ public class GenericRepositoryImpl implements GenericRepository {
 		idsIn+= "#end";
 		idsIn = idsIn.replace(",#end", "");
 		
-		String sql = " select po.id "
+		String sql = " select po.id,po.processedTitle "
 				+ " from postsmin po"  
 				+ " where po.id in ("+idsIn+")";
 		
 			
 		Query q = em.createNativeQuery(sql);
-		List<Integer> rows = q.getResultList();
+		List<Object[]> rows = q.getResultList();
 		List<Bucket> result = new ArrayList<>(rows.size());
-		for (Integer id : rows) {
+		for (Object[] row : rows) {
 			Bucket bucket = new Bucket();
-			bucket.setId(id);
+			bucket.setId((Integer) row[0]);
+			bucket.setProcessedTitle((String) row[1]);
 			result.add(bucket);			
 		}
 		
@@ -376,12 +377,44 @@ public class GenericRepositoryImpl implements GenericRepository {
 
 
 
+	@Override
+	public Map<Integer, String> getQuestionsIdsTitles() {
+		String sql = " select po.id,po.processedTitle "
+				+ " from postsmin po"
+				+ " where po.posttypeid=1";  
+			
+			
+		Query q = em.createNativeQuery(sql);
+		List<Object[]> rows = q.getResultList();
+		Map<Integer, String> questionsIdsTitles = new HashMap<>();
+		for (Object[] row : rows) {
+			questionsIdsTitles.put((Integer)row[0], (String)row[1]);
+		}
+		
+		return questionsIdsTitles;
+	}
 
 
 
-	
 
-	
-	
+
+	@Override
+	public Map<Integer, Integer> getAnswersIdsParentIds() {
+		String sql = " select po.id,po.parentid "
+				+ " from postsmin po"
+				+ " where po.posttypeid=2";  
+			
+			
+		Query q = em.createNativeQuery(sql);
+		List<Object[]> rows = q.getResultList();
+		Map<Integer, Integer> answersIdsParentIds = new HashMap<>();
+		for (Object[] row : rows) {
+			answersIdsParentIds.put((Integer)row[0], (Integer)row[1]);
+		}
+		
+		return answersIdsParentIds;
+	}
+
+
 	
 }

@@ -309,7 +309,7 @@ public class Matrix {
 		}
 	}*/
 
-	private static double simDocPair(double[][] matrix1, double[][] matrix2, double[][] idf1, double[][] idf2) {
+	public static double simDocPair(double[][] matrix1, double[][] matrix2, double[][] idf1, double[][] idf2) {
 		double[] idf1Aux = idf1[0];
 		double[] idf2Aux = idf2[0];
 		
