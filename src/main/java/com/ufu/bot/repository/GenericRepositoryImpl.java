@@ -349,7 +349,7 @@ public class GenericRepositoryImpl implements GenericRepository {
 
 
 	@Override
-	public List<Bucket> getBucketsByIds(List<Integer> soAnswerIds) {
+	public List<Bucket> getBucketsByIds(Set<Integer> soAnswerIds) {
 		String idsIn = " ";
 		for(Integer soId: soAnswerIds) {
 			idsIn+= soId+ ",";
@@ -357,9 +357,11 @@ public class GenericRepositoryImpl implements GenericRepository {
 		idsIn+= "#end";
 		idsIn = idsIn.replace(",#end", "");
 		
-		String sql = " select po.id,po.processedTitle "
-				+ " from postsmin po"  
-				+ " where po.id in ("+idsIn+")";
+		String sql = " select po.id,po.body,po.code,u.reputation,po.commentcount,po.viewcount,po.score,parent.acceptedanswerid  "  
+				+ " from postsmin po, usersmin u, postsmin parent  "  
+				+ " where po.owneruserid=u.id" 
+				+ " and po.parentid = parent.id"  
+				+ " and po.id in ("+idsIn+")";
 		
 			
 		Query q = em.createNativeQuery(sql);
@@ -368,7 +370,14 @@ public class GenericRepositoryImpl implements GenericRepository {
 		for (Object[] row : rows) {
 			Bucket bucket = new Bucket();
 			bucket.setId((Integer) row[0]);
-			bucket.setProcessedTitle((String) row[1]);
+			//bucket.setProcessedTitle((String) row[1]);
+			bucket.setBody((String) row[1]);
+			bucket.setCode((String) row[2]);
+			bucket.setUserReputation((Integer) row[3]);
+			bucket.setCommentCount((Integer) row[4]);
+			bucket.setViewCount((Integer) row[5]);
+			bucket.setScore((Integer) row[6]);
+			bucket.setAcceptedAnswer( ((Integer) row[7]) != null ? true: false);
 			result.add(bucket);			
 		}
 		

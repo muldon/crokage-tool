@@ -58,7 +58,7 @@ public class CrokageApp {
 	public CrokageService crokageService;
 
 	@Autowired
-	private CrokageUtils crokageUtils;
+	public CrokageUtils crokageUtils;
 
 	@Autowired
 	private GoogleWebSearch googleWebSearch;
@@ -121,18 +121,19 @@ public class CrokageApp {
 	private long endTime;
 	private Set<String> extractedAPIs;
 	private List<String> queries;
-	private Map<Integer,Set<String>> rackQueriesApis;
+	private Map<Integer,Set<String>> rackQueriesApisMap;
 	//private Map<String,Set<String>> rackReformulatedQueriesApis;  // because output from rack is reformulated. This map contains the real output.
-	private Map<Integer,Set<String>> bikerQueriesApisClasses;
-	private Map<Integer,Set<String>> bikerQueriesApisClassesAndMethods;
-	private Map<Integer,Set<String>> nlp2ApiQueriesApis;
+	private Map<Integer,Set<String>> bikerQueriesApisClassesMap;
+	private Map<Integer,Set<String>> bikerQueriesApisClassesAndMethodsMap;
+	private Map<Integer,Set<String>> nlp2ApiQueriesApisMap;
 	private Map<String,Set<Integer>> bigMapApisIds;
 	private Map<String,Set<Integer>> filteredSortedMap;
-	private Map<String,List<Double>> soContentWordVectors;
-	private Map<String,Double> soIDFVocabulary;
-	private Map<String,Double> queryIDFVectors;
-	private Map<Integer,String> questionsIdsTitles;
-	private Map<Integer,Integer> answersIdsParentIds;
+	private Map<String,List<Double>> soContentWordVectorsMap;
+	private Map<String,Double> soIDFVocabularyMap;
+	private Map<String,Double> queryIDFVectorsMap;
+	private Map<Integer,String> allQuestionsIdsTitlesMap;
+	private Map<Integer,Integer> allAnswersIdsParentIdsMap;
+	private Set<Integer> topClassesRelevantAnswersIds;
 	
 
 	@PostConstruct
@@ -144,7 +145,7 @@ public class CrokageApp {
 		getPropertyValueFromLocalFile();
 		subAction = subAction !=null ? subAction.toLowerCase().trim(): null;
 		dataSet = dataSet !=null ? dataSet.toLowerCase().trim(): null;
-		
+		soIDFVocabularyMap = new HashMap<>();
 		
 		logger.info("\nConsidering parameters: \n" 
 				+ "\n action: " + action 
@@ -177,7 +178,7 @@ public class CrokageApp {
 			break;	
 			
 		case "readIDFVocabulary":
-			readIDFVocabulary();
+			crokageUtils.readIDFVocabulary(soIDFVocabularyMap);
 			break;	
 			
 		case "readInputQueries":
@@ -289,24 +290,6 @@ public class CrokageApp {
 
 
 
-	private void readIDFVocabulary() throws IOException {
-		if(soIDFVocabulary==null) {
-			long initTime = System.currentTimeMillis();
-			logger.info("Reading all idfs from file...");
-			String[] parts;
-			soIDFVocabulary = new HashMap<>();
-			List<String> wordsAndIDFs = Files.readAllLines(Paths.get(CrokageStaticData.SO_IDF_VOCABULARY));
-			for(String line: wordsAndIDFs) {
-				parts = line.split(" ");
-				soIDFVocabulary.put(parts[0], Double.parseDouble(parts[1]));
-			}
-			wordsAndIDFs = null;
-			crokageUtils.reportElapsedTime(initTime,"readIDFVocabulary");
-		}
-		
-	}
-
-
 	private void buildIDFVocabulary() throws IOException {
 		//each post has been saved in each line
 		Set<String> wordsSet = new HashSet<>();
@@ -363,12 +346,12 @@ public class CrokageApp {
 
 
 	private void readSoContentWordVectors() throws IOException {
-		if(soContentWordVectors==null) {
+		if(soContentWordVectorsMap==null) {
 			long initTime = System.currentTimeMillis();
 			logger.info("Reading all vectors from file...");
 			String[] parts;
 			int vecSize=0;
-			soContentWordVectors = new HashMap<>();
+			soContentWordVectorsMap = new HashMap<>();
 			List<String> wordsAndVectors = Files.readAllLines(Paths.get(CrokageStaticData.SO_CONTENT_WORD_VECTORS));
 			for(String line: wordsAndVectors) {
 				parts = line.split(" ");
@@ -377,7 +360,7 @@ public class CrokageApp {
 				for(int i=1;i<vecSize;i++) {
 					vectors.add(Double.parseDouble(parts[i]));
 				}
-				soContentWordVectors.put(parts[0], vectors);
+				soContentWordVectorsMap.put(parts[0], vectors);
 			}
 			//System.out.println(bigMapApisIds);
 			crokageUtils.reportElapsedTime(initTime,"readSoTitlesWordVectors");
@@ -487,14 +470,9 @@ public class CrokageApp {
 			}
 			postContent.append(" ");
 			postContent.append(post.getProcessedBody());
-			if(!StringUtils.isBlank(post.getCode())) {
-				String oneLineCode = post.getCode().replaceAll("\n", " ");
-				oneLineCode = oneLineCode.toLowerCase();
-				oneLineCode = oneLineCode.replaceAll("----next----", " ");
-				oneLineCode = StringUtils.normalizeSpace(oneLineCode);
+			if(!StringUtils.isBlank(post.getProcessedCode())) {
 				postContent.append(" ");
-				postContent.append(oneLineCode);
-				//out.println(oneLineCode);
+				postContent.append(post.getProcessedCode());
 			}
 			try (PrintWriter out = new PrintWriter(CrokageStaticData.SO_DIRECTORY_FILES+"/"+post.getId()+".txt")) {
 				out.println(postContent);
@@ -540,7 +518,7 @@ public class CrokageApp {
 		readSoContentWordVectors();
 		
 		//read idf vocabulary 
-		readIDFVocabulary();
+		crokageUtils.readIDFVocabulary(soIDFVocabularyMap);
 		
 		loadQueriesApisForApproaches();
 		Map<Integer, Set<String>> recommendedApis = getRecommendedApis();
@@ -555,10 +533,10 @@ public class CrokageApp {
 			query = crokageUtils.processQuery(query);
 			
 			//get vectors for query words
-			double[][] matrix1 = getMatrixVectorsForQuery(query);
+			double[][] matrix1 = CrokageUtils.getMatrixVectorsForQuery(query,soContentWordVectorsMap);
 			
 			//get idfs for query
-			double[][] idf1 = getIDFMatrixForQuery(query);
+			double[][] idf1 = CrokageUtils.getIDFMatrixForQuery(query, soIDFVocabularyMap);
 			
 			//get biker methods
 			List<String> topMethods = getBikerTopMethods(key);
@@ -577,6 +555,31 @@ public class CrokageApp {
 			
 	}
 
+	
+	private Set<Integer> getCandidateQuestionsFromTopApis(Set<String> topClasses) {
+		//get ids from reducedMap for top classes
+		topClassesRelevantAnswersIds = new HashSet<>();
+		Set<Integer> relevantQuestionsIds = new HashSet<>();
+		for(String topClass:topClasses) {
+			Set<Integer> idsFromBigMap = filteredSortedMap.get(topClass);
+			if(idsFromBigMap!=null) {
+				topClassesRelevantAnswersIds.addAll(idsFromBigMap);
+			}else {
+				logger.info("*** Class not found in bigMap: "+topClass);
+			}
+		}
+		
+		logger.info("\nAt least "+topClassesRelevantAnswersIds.size()+ " answers contain those classes. Fetching their questions...");
+		
+		
+		for(Integer answerId: topClassesRelevantAnswersIds) {
+			int questionId = allAnswersIdsParentIdsMap.get(answerId);
+			relevantQuestionsIds.add(questionId);
+		}
+		
+		return relevantQuestionsIds;
+	}
+
 
 	private List<Bucket> calculateRelevance(Set<Integer> relevantQuestionsIds, List<String> topMethods, double[][] matrix1, double[][] idf1) {
 		//parse query
@@ -586,13 +589,13 @@ public class CrokageApp {
 		
 		for(Integer questionId:relevantQuestionsIds) {
 			//get the word vectors for each word of the query
-			comparingTitle = questionsIdsTitles.get(questionId);
+			comparingTitle = allQuestionsIdsTitlesMap.get(questionId);
 			
 			//get vectors for query2 words
-			double[][] matrix2 = getMatrixVectorsForQuery(comparingTitle);
+			double[][] matrix2 = CrokageUtils.getMatrixVectorsForQuery(comparingTitle,soContentWordVectorsMap);
 			
 			//get idfs for query2
-			double[][] idf2 = getIDFMatrixForQuery(comparingTitle);
+			double[][] idf2 = CrokageUtils.getIDFMatrixForQuery(comparingTitle, soIDFVocabularyMap);
 			
 			double simPair = Matrix.simDocPair(matrix1,matrix2,idf1,idf2);
 			
@@ -606,59 +609,38 @@ public class CrokageApp {
 			       .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
 		
 		
-		Set<Integer> questionsIds = topSimilarQuestions.keySet();
+		Set<Integer> topSimilarQuestionsIds = topSimilarQuestions.keySet();
 		
 		//fetch again the answers related to those questions
 		Set<Integer> answersIds = new HashSet<>();
-		for(Map.Entry<Integer, Integer> entry : answersIdsParentIds.entrySet()){
-		    
+		
+		for(Integer answerId : topClassesRelevantAnswersIds){
+			if(topSimilarQuestionsIds.contains(allAnswersIdsParentIdsMap.get(answerId))) {
+				answersIds.add(answerId);
+		    }
+		}
+		
+		//fetch body and code of answers
+		List<Bucket> answerBuckets = crokageService.getBucketsByIds(answersIds);
+		
+		//answers with code
+		for(Bucket bucket:answerBuckets) {
+			System.out.println(bucket.getId());
+			
+			
+			//comentarios com sentimento positivo
+			
+			
 		}
 		
 		
-		Map<Integer, Integer> mapInversed = answersIdsParentIds.entrySet().stream()
-			       .collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
-		
-		
-		
-		return null;
+		return answerBuckets;
 	}
-
-
-	private double[][] getIDFMatrixForQuery(String query) {
-		String queryTokens[] = query.split("\\s+");
-		double[][] matrix = new double[1][queryTokens.length];
-		
-		for(int i=0; i<queryTokens.length; i++) {
-			String word = queryTokens[i];
-			double idfValue = soIDFVocabulary.get(word);
-			matrix[0][i] = idfValue;
-		}
-				
-		return matrix;
-	}
-
-
-
-
-	private double[][] getMatrixVectorsForQuery(String query) {
-		String queryTokens[] = query.split("\\s+");
-		double[][] matrix = new double[queryTokens.length][100];
-		
-		for(int i=0; i<queryTokens.length; i++) {
-			String word = queryTokens[i];
-			double[] vectors = soContentWordVectors.get(word).stream().mapToDouble(Double::doubleValue).toArray();
-			matrix[i] = vectors;
-		}
-				
-		return matrix;
-	}
-
-
 
 
 	private void loadAllAnswersIdsParentIds() {
 		long initTime = System.currentTimeMillis();
-		answersIdsParentIds = crokageService.getAnswersIdsParentIds();
+		allAnswersIdsParentIdsMap = crokageService.getAnswersIdsParentIds();
 		crokageUtils.reportElapsedTime(initTime,"loadAllAnswersIdsParentIds");
 	}
 
@@ -666,44 +648,21 @@ public class CrokageApp {
 
 	private void loadAllQuestionsIdsTitles() {
 		long initTime = System.currentTimeMillis();
-		questionsIdsTitles = crokageService.getQuestionsIdsTitles();
+		allQuestionsIdsTitlesMap = crokageService.getQuestionsIdsTitles();
 		crokageUtils.reportElapsedTime(initTime,"loadAllQuestionsIdsTitles");
 	}
 
 
 
 
-	private Set<Integer> getCandidateQuestionsFromTopApis(Set<String> topClasses) {
-		//get ids from reducedMap for top classes
-		Set<Integer> soAnswerIds = new HashSet<>();
-		Set<Integer> relevantQuestionsIds = new HashSet<>();
-		for(String topClass:topClasses) {
-			Set<Integer> idsFromBigMap = filteredSortedMap.get(topClass);
-			if(idsFromBigMap!=null) {
-				soAnswerIds.addAll(idsFromBigMap);
-			}else {
-				logger.info("*** Class not found in bigMap: "+topClass);
-			}
-		}
-		
-		logger.info("\nAt least "+soAnswerIds.size()+ " answers contain those classes. Fetching their questions...");
-		
-		
-		for(Integer answerId: soAnswerIds) {
-			int questionId = answersIdsParentIds.get(answerId);
-			relevantQuestionsIds.add(questionId);
-		}
-		
-		return relevantQuestionsIds;
-	}
-
+	
 
 
 
 
 	private List<String> getBikerTopMethods(Integer key) {
 		List<String> topMethods = new ArrayList<>();
-		Set<String> classesAndMethods = bikerQueriesApisClassesAndMethods.get(key);
+		Set<String> classesAndMethods = bikerQueriesApisClassesAndMethodsMap.get(key);
 		for(String classAndMethod: classesAndMethods) {
 			String parts[] = classAndMethod.split("\\."); 
 			topMethods.add(parts[1]);
@@ -750,14 +709,14 @@ public class CrokageApp {
 		String startDate = null;
 		long initTime = System.currentTimeMillis();
 		logger.info("Processing posts to generate inverted index file...");
-		List<Post> postsWithPreCode =  crokageService.getAnswersWithCode(startDate);
+		List<Post> answersWithPreCode =  crokageService.getAnswersWithCode(startDate);
 		
 		String postsWithoutAPICalls = "";
 		int postsWithoutAPICallsCounter=0;
 		
 		Map<String,Set<Integer>> bigMapApisIds = new HashMap<>();
 		int i=1;
-		for(Post answer:postsWithPreCode) {
+		for(Post answer:answersWithPreCode) {
 			
 			/*if(answer.getId().equals(50662268)) {
 				System.out.println();
@@ -881,7 +840,7 @@ public class CrokageApp {
 		}
 		
 
-		getQueriesAndApisFromFileMayContainDupes(nlp2ApiQueriesApis,CrokageStaticData.NLP2API_OUTPUT_QUERIES_FILE);
+		getQueriesAndApisFromFileMayContainDupes(nlp2ApiQueriesApisMap,CrokageStaticData.NLP2API_OUTPUT_QUERIES_FILE);
 		
 		
 	}
@@ -937,7 +896,7 @@ public class CrokageApp {
 			e.printStackTrace();
 		}
 		
-		getQueriesAndApisFromFileMayContainDupes(rackQueriesApis,CrokageStaticData.RACK_OUTPUT_QUERIES_FILE);
+		getQueriesAndApisFromFileMayContainDupes(rackQueriesApisMap,CrokageStaticData.RACK_OUTPUT_QUERIES_FILE);
 		
 	}
 	
@@ -946,8 +905,8 @@ public class CrokageApp {
 		if(queries==null) {
 			queries = readInputQueries();
 		}
-		bikerQueriesApisClasses = new LinkedHashMap<>();
-		bikerQueriesApisClassesAndMethods = new LinkedHashMap<>();
+		bikerQueriesApisClassesMap = new LinkedHashMap<>();
+		bikerQueriesApisClassesAndMethodsMap = new LinkedHashMap<>();
 		
 		// writing queries to be read by biker
 		
@@ -999,7 +958,7 @@ public class CrokageApp {
 			}
 			
 			Set<String> rankedApisSetWithMethods = new LinkedHashSet<String>(rankedApis);
-			bikerQueriesApisClassesAndMethods.put(key, rankedApisSetWithMethods);
+			bikerQueriesApisClassesAndMethodsMap.put(key, rankedApisSetWithMethods);
 			
 			Set<String> rankedApisSetClassesOnly = new LinkedHashSet<String>();
 			for(String api: rankedApisSetWithMethods) {
@@ -1007,9 +966,9 @@ public class CrokageApp {
 			}
 			
 			CrokageUtils.setLimit(rankedApisSetClassesOnly,k);
-			bikerQueriesApisClasses.put(key, rankedApisSetClassesOnly);
+			bikerQueriesApisClassesMap.put(key, rankedApisSetClassesOnly);
 		
-			//logger.info("Biker - discovered classes for query: "+parts[0]+ " ->  " + bikerQueriesApisClasses.get(key));
+			//logger.info("Biker - discovered classes for query: "+parts[0]+ " ->  " + bikerQueriesApisClassesMap.get(key));
 			key++;
 		}
 		
@@ -1178,20 +1137,20 @@ public class CrokageApp {
 		if(subAction.contains("|")) { 
 			
 			if(subAction.contains("rack")) {
-				rackQueriesApis = extractAPIsFromRACK();
+				rackQueriesApisMap = extractAPIsFromRACK();
 			}
 			if(subAction.contains("biker")) {
-				bikerQueriesApisClasses = extractAPIsFromBIKER();
+				bikerQueriesApisClassesMap = extractAPIsFromBIKER();
 			}
 			if(subAction.contains("nlp2api")) {
-				nlp2ApiQueriesApis = extractAPIsFromNLP2Api();
+				nlp2ApiQueriesApisMap = extractAPIsFromNLP2Api();
 			}
 		}else if(subAction.equals("biker")) {
-			bikerQueriesApisClasses = extractAPIsFromBIKER();
+			bikerQueriesApisClassesMap = extractAPIsFromBIKER();
 		}else if(subAction.equals("rack")) {
-			rackQueriesApis = extractAPIsFromRACK();
+			rackQueriesApisMap = extractAPIsFromRACK();
 		}else {
-			nlp2ApiQueriesApis = extractAPIsFromNLP2Api();
+			nlp2ApiQueriesApisMap = extractAPIsFromNLP2Api();
 		}*/
 		
 	
@@ -1438,17 +1397,17 @@ public class CrokageApp {
 		String approaches = subAction;
 		
 		int numApproaches = 0;
-		if(rackQueriesApis!=null) {
+		if(rackQueriesApisMap!=null) {
 			numApproaches++;
-			keys = rackQueriesApis.keySet();
+			keys = rackQueriesApisMap.keySet();
 		}
-		if(bikerQueriesApisClasses!=null) {
+		if(bikerQueriesApisClassesMap!=null) {
 			numApproaches++;
-			keys = bikerQueriesApisClasses.keySet();
+			keys = bikerQueriesApisClassesMap.keySet();
 		}
-		if(nlp2ApiQueriesApis!=null) {
+		if(nlp2ApiQueriesApisMap!=null) {
 			numApproaches++;
-			keys = nlp2ApiQueriesApis.keySet();
+			keys = nlp2ApiQueriesApisMap.keySet();
 		}
 				
 		if(numApproaches>1){ 
@@ -1471,16 +1430,16 @@ public class CrokageApp {
 				Iterator<String> nlpIt = null;
 				
 				
-				if(rackQueriesApis!=null) {
-					rackApisSet = rackQueriesApis.get(keyNum);
+				if(rackQueriesApisMap!=null) {
+					rackApisSet = rackQueriesApisMap.get(keyNum);
 					rackIt = rackApisSet.iterator();
 				}
-				if(bikerQueriesApisClasses!=null) {
-					bikerApisSet = bikerQueriesApisClasses.get(keyNum);
+				if(bikerQueriesApisClassesMap!=null) {
+					bikerApisSet = bikerQueriesApisClassesMap.get(keyNum);
 					bikerIt = bikerApisSet.iterator();
 				}
-				if(nlp2ApiQueriesApis!=null) {
-					nlpApisSet = nlp2ApiQueriesApis.get(keyNum);
+				if(nlp2ApiQueriesApisMap!=null) {
+					nlpApisSet = nlp2ApiQueriesApisMap.get(keyNum);
 					nlpIt = nlpApisSet.iterator();
 				}
 				
@@ -1691,12 +1650,12 @@ public class CrokageApp {
 				
 			}
 			
-		}else if(rackQueriesApis!=null) {
-			recommendedApis.putAll(rackQueriesApis);
-		}else if(bikerQueriesApisClasses!=null) {
-			recommendedApis.putAll(bikerQueriesApisClasses);
+		}else if(rackQueriesApisMap!=null) {
+			recommendedApis.putAll(rackQueriesApisMap);
+		}else if(bikerQueriesApisClassesMap!=null) {
+			recommendedApis.putAll(bikerQueriesApisClassesMap);
 		}else {
-			recommendedApis.putAll(nlp2ApiQueriesApis);
+			recommendedApis.putAll(nlp2ApiQueriesApisMap);
 		}
 		return recommendedApis;
 	}

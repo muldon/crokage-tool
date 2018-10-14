@@ -2,6 +2,7 @@ package com.ufu.bot.service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,7 +29,7 @@ public class CrokageService extends AbstractService{
 	}
 
 	@Transactional(readOnly = true)
-	public List<Bucket> getBucketsByIds(List<Integer> postsListIds) {
+	public List<Bucket> getBucketsByIds(Set<Integer> postsListIds) {
 		return genericRepository.getBucketsByIds(postsListIds);
 	}
 

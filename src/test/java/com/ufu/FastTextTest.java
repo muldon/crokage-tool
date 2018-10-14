@@ -26,7 +26,7 @@ public class FastTextTest {
 		System.out.println(output);
 */
 		CrokageUtils crokageUtils = new CrokageUtils();
-		Map<String, List<Double>> vectors = crokageUtils.readVectors(words);
+		Map<String, List<Double>> vectors = crokageUtils.readVectorsForQuery(words);
 		System.out.println(vectors);
 	}
 	

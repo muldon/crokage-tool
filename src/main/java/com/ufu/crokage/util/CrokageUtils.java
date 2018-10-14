@@ -67,6 +67,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
+import com.ufu.bot.CrokageApp;
 import com.ufu.bot.PitBotApp2;
 import com.ufu.bot.repository.GenericRepository;
 import com.ufu.bot.to.Evaluation;
@@ -321,6 +322,11 @@ public class CrokageUtils {
 		content = content.replaceAll("\\?"," ");
 		content = content.replaceAll("\\!"," ");
 		return content;
+	}
+	
+	public static String removeAllPunctuations(String body) {
+		body = body.replaceAll("\\p{Punct}+"," "); 
+		return body;
 	}
 	
 	private static String translateHTMLSimbols(String finalContent) {
@@ -961,25 +967,14 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 		query = query.toLowerCase();
 		query = translateHTMLSimbols(query);
 		
-		//remove punctuation marks
-		query = query.replaceAll("\\?", " ");
-		query = removePunctuations(query);
+		//remove punctuations
+		query = removeAllPunctuations(query);
 		String[] words = query.split("\\s+");
-		List<String> validWords = new ArrayList<>();
+		Set<String> validWords = new LinkedHashSet<>();
 		
 		//remove stop words or small words or numbers only
-		for(String word:words) {
-			word = word.trim();
-			try {
-			
-			if(!stopWordsList.contains(word) && !(word.length()<2) && !StringUtils.isBlank(word) && !isNumeric(word)) {
-				validWords.add(word);
-			}
-			
-			} catch (Exception e) {
-				System.out.println();
-			}
-		}
+		assembleValidWords(validWords,words);
+				
 		String finalContent = String.join(" ", validWords);
 		finalContent = finalContent.replaceAll("\u0000", "");
 		validWords = null;
@@ -987,6 +982,18 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 		words = null;
 		return finalContent;
 	}
+	
+	
+	private static void assembleValidWords(Set<String> validWords, String[] words) {
+		for(String word:words) {
+			word = word.trim();
+			if(!stopWordsList.contains(word) && !(word.length()<2) && !StringUtils.isBlank(word) && !isNumeric(word)) {
+				validWords.add(word);
+			}
+			
+		}
+	}
+
 	
 	
 	public List<ExternalQuestion> readAnswerBotQuestionsAndAnswersOld() throws IOException {
@@ -1465,14 +1472,16 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 			lines.append(answerIds.size());
 			lines.append("\n");
 		}
+		lines.append("end@");
+		String linesStr = lines.toString().replace("\nend@", "");
 		try (PrintWriter out = new PrintWriter(file)) {
-		    out.println(lines);
+		    out.println(linesStr);
 		}
 		
 	}
 
 
-	public Map<String, List<Double>> readVectors(String words) throws Exception {
+	public Map<String, List<Double>> readVectorsForQuery(String words) throws Exception {
 		String modelPath = CrokageStaticData.FAST_TEXT_MODEL_PATH;
 		String fastTextIntallationDir = CrokageStaticData.FAST_TEXT_INSTALLATION_DIR;
 		
@@ -1512,10 +1521,59 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 			lines.append(idfs.get(key));
 			lines.append("\n");
 		}
+		lines.append("end@");
+		String linesStr = lines.toString().replace("\nend@", "");
 		try (PrintWriter out = new PrintWriter(file)) {
-		    out.println(lines);
+		    out.println(linesStr);
 		}
 		
+	}
+
+
+	public void readIDFVocabulary(Map<String, Double> soIDFVocabularyMap) throws Exception {
+		if(soIDFVocabularyMap!=null) {
+			long initTime = System.currentTimeMillis();
+			logger.info("Reading all idfs from file...");
+			String[] parts;
+			List<String> wordsAndIDFs = Files.readAllLines(Paths.get(CrokageStaticData.SO_IDF_VOCABULARY));
+			for(String line: wordsAndIDFs) {
+				parts = line.split(" ");
+				soIDFVocabularyMap.put(parts[0], Double.parseDouble(parts[1]));
+			}
+			wordsAndIDFs = null;
+			reportElapsedTime(initTime,"readIDFVocabulary");
+		}else {
+			throw new Exception("IDF vacabulary is null.");
+		}
+		
+	}
+
+
+	public static double[][] getIDFMatrixForQuery(String query, Map<String, Double> IDFVocabularyMap) {
+		String queryTokens[] = query.split("\\s+");
+		double[][] matrix = new double[1][queryTokens.length];
+		
+		for(int i=0; i<queryTokens.length; i++) {
+			String word = queryTokens[i];
+			double idfValue = IDFVocabularyMap.get(word);
+			matrix[0][i] = idfValue;
+		}
+				
+		return matrix;
+	}
+
+
+	public static double[][] getMatrixVectorsForQuery(String query, Map<String, List<Double>> wordVectorsMap) {
+		String queryTokens[] = query.split("\\s+");
+		double[][] matrix = new double[queryTokens.length][100];
+		
+		for(int i=0; i<queryTokens.length; i++) {
+			String word = queryTokens[i];
+			double[] vectors = wordVectorsMap.get(word).stream().mapToDouble(Double::doubleValue).toArray();
+			matrix[i] = vectors;
+		}
+				
+		return matrix;
 	}
 
 	

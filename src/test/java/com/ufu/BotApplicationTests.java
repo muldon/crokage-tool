@@ -1,16 +1,15 @@
 package com.ufu;
 
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 import java.sql.Timestamp;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
-
-import javax.validation.constraints.AssertTrue;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,7 +26,6 @@ import com.google.code.stackexchange.common.PagedList;
 import com.google.code.stackexchange.schema.Paging;
 import com.google.code.stackexchange.schema.Question;
 import com.google.code.stackexchange.schema.StackExchangeSite;
-import com.ufu.bot.CrokageApp;
 import com.ufu.bot.service.PitBotService;
 import com.ufu.bot.to.Comment;
 import com.ufu.bot.to.Evaluation;
@@ -40,10 +38,9 @@ import com.ufu.bot.to.Result;
 import com.ufu.bot.to.SurveyUser;
 import com.ufu.bot.to.User;
 import com.ufu.bot.util.AbstractService;
+import com.ufu.bot.util.Matrix;
 import com.ufu.crokage.util.CrokageUtils;
 import com.ufu.crokage.util.TextNormalizer;
-
-import junit.framework.Assert;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -338,7 +335,64 @@ public class BotApplicationTests extends AbstractService{
 		
 	}	*/
 	
-	
+	@Test
+	public void testSimilarity() throws Exception {
+		
+		String query1 = "How to send HTTP request in java?";
+		String query2 = "How to programmatically send a HTTP request with parameters?";
+		String query3 = "How do I do a HTTP GET in Java?";
+		String query4 = "How to call and pass the parameters to the Servlet using the Java in my swing application?";
+		String query5 = "How to invoke and passing the parameter to the Servlet with the Javac in my swing app?";
+		
+		CrokageUtils crokageUtils = new CrokageUtils();
+		
+		query1 = CrokageUtils.processQuery(query1);
+		query2 = CrokageUtils.processQuery(query2);
+		query3 = CrokageUtils.processQuery(query3);
+		query4 = CrokageUtils.processQuery(query4);
+		query5 = CrokageUtils.processQuery(query5);
+		
+		Map<String, List<Double>> vectorsWords1 = crokageUtils.readVectorsForQuery(query1);
+		Map<String, List<Double>> vectorsWords2 = crokageUtils.readVectorsForQuery(query2);
+		Map<String, List<Double>> vectorsWords3 = crokageUtils.readVectorsForQuery(query3);
+		Map<String, List<Double>> vectorsWords4 = crokageUtils.readVectorsForQuery(query4);
+		Map<String, List<Double>> vectorsWords5 = crokageUtils.readVectorsForQuery(query5);
+		
+		
+		double[][] matrix1 = CrokageUtils.getMatrixVectorsForQuery(query1, vectorsWords1);
+		double[][] matrix2 = CrokageUtils.getMatrixVectorsForQuery(query2, vectorsWords2);
+		double[][] matrix3 = CrokageUtils.getMatrixVectorsForQuery(query3, vectorsWords3);
+		double[][] matrix4 = CrokageUtils.getMatrixVectorsForQuery(query4, vectorsWords4);
+		double[][] matrix5 = CrokageUtils.getMatrixVectorsForQuery(query5, vectorsWords5);
+		
+		Map<String, Double> soIDFVocabularyMap=new HashMap<>();
+		crokageUtils.readIDFVocabulary(soIDFVocabularyMap);
+		
+		double[][] idf1 = CrokageUtils.getIDFMatrixForQuery(query1, soIDFVocabularyMap);
+		double[][] idf2 = CrokageUtils.getIDFMatrixForQuery(query2, soIDFVocabularyMap);
+		double[][] idf3 = CrokageUtils.getIDFMatrixForQuery(query3, soIDFVocabularyMap);
+		double[][] idf4 = CrokageUtils.getIDFMatrixForQuery(query4, soIDFVocabularyMap);
+		double[][] idf5 = CrokageUtils.getIDFMatrixForQuery(query5, soIDFVocabularyMap);
+		
+		
+		//System.out.println(vectorsWords1);
+		//System.out.println(vectorsWords2);
+		//double[][] matrix1 
+		
+		double simPair12 = Matrix.simDocPair(matrix1,matrix2,idf1,idf2);
+		double simPair21 = Matrix.simDocPair(matrix2,matrix1,idf2,idf1);
+		double simPair13 = Matrix.simDocPair(matrix1,matrix3,idf1,idf3);
+		double simPair14 = Matrix.simDocPair(matrix1,matrix4,idf1,idf4);
+		double simPair45 = Matrix.simDocPair(matrix4,matrix5,idf4,idf5);
+		
+		System.out.println(simPair12);
+		System.out.println(simPair21);
+		System.out.println(simPair13);
+		System.out.println(simPair14);
+		System.out.println(simPair45);
+		
+		
+	}
 	
 
 }

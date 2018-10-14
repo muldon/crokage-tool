@@ -44,7 +44,7 @@ public interface GenericRepository {
 
 	public List<Post> getPostsByIds(List<Integer> postsListIds);
 
-	public List<Bucket> getBucketsByIds(List<Integer> postsListIds);
+	public List<Bucket> getBucketsByIds(Set<Integer> postsListIds);
 
 	public Map<Integer, String> getQuestionsIdsTitles();
 

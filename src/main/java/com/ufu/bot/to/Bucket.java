@@ -18,13 +18,21 @@ public class Bucket {
 	@Id
 	private Integer id;
 	
-	@Column(name="processedtitle")
-    private String processedTitle;
+	private String body;
 	
-	@Transient
+	private String code;
+	
 	private Integer score;
 	
-
+	private Integer userReputation;
+	
+	private Integer commentCount;
+	
+	private Integer viewCount;
+	
+	private Boolean acceptedAnswer;
+	
+	
 	public Integer getId() {
 		return id;
 	}
@@ -33,13 +41,7 @@ public class Bucket {
 		this.id = id;
 	}
 
-	public String getProcessedTitle() {
-		return processedTitle;
-	}
-
-	public void setProcessedTitle(String processedTitle) {
-		this.processedTitle = processedTitle;
-	}
+	
 
 	public Integer getScore() {
 		return score;
@@ -53,10 +55,7 @@ public class Bucket {
 		return serialVersionUID;
 	}
 
-	@Override
-	public String toString() {
-		return "Bucket [id=" + id + ", processedTitle=" + processedTitle + ", score=" + score + "]";
-	}
+	
 
 	@Override
 	public int hashCode() {
@@ -83,14 +82,69 @@ public class Bucket {
 		return true;
 	}
 
-	public Bucket(Integer id, String processedTitle) {
-		super();
-		this.id = id;
-		this.processedTitle = processedTitle;
-	}
+	
 
 	public Bucket() {
 		super();
+	}
+
+	public String getBody() {
+		return body;
+	}
+
+	public void setBody(String body) {
+		this.body = body;
+	}
+
+	public String getCode() {
+		return code;
+	}
+
+	public void setCode(String code) {
+		this.code = code;
+	}
+
+	
+
+	@Override
+	public String toString() {
+		return "Bucket [id=" + id + ", body=" + body + ", code=" + code + ", score=" + score + ", userReputation="
+				+ userReputation + ", commentCount=" + commentCount + ", viewCount=" + viewCount + ", acceptedAnswer="
+				+ acceptedAnswer + "]";
+	}
+
+	
+
+	public Integer getUserReputation() {
+		return userReputation;
+	}
+
+	public void setUserReputation(Integer userReputation) {
+		this.userReputation = userReputation;
+	}
+
+	public Integer getCommentCount() {
+		return commentCount;
+	}
+
+	public void setCommentCount(Integer commentCount) {
+		this.commentCount = commentCount;
+	}
+
+	public Integer getViewCount() {
+		return viewCount;
+	}
+
+	public void setViewCount(Integer viewCount) {
+		this.viewCount = viewCount;
+	}
+
+	public Boolean getAcceptedAnswer() {
+		return acceptedAnswer;
+	}
+
+	public void setAcceptedAnswer(Boolean acceptedAnswer) {
+		this.acceptedAnswer = acceptedAnswer;
 	}
 	
 	

@@ -18,6 +18,7 @@ import edu.stanford.nlp.simple.Document;
 import edu.stanford.nlp.simple.Sentence;
 import edu.stanford.nlp.trees.Tree;
 
+
 public class BasicPipelineExample {
 
   public static String text = "Joe Smith was born in California. " +
@@ -31,17 +32,13 @@ public class BasicPipelineExample {
     // set up pipeline properties
     Properties props = new Properties();
     // set the list of annotators to run
-    //props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,parse,depparse,coref,kbp,quote");
-    props.setProperty("annotators", "tokenize,ssplit,pos,lemma,stopword");
+    props.setProperty("annotators", "tokenize,ssplit,pos,lemma,ner,parse,depparse,coref,kbp,quote");
     // set a property for an annotator, in this case the coref annotator is being set to use the neural algorithm
-    //props.setProperty("coref.algorithm", "neural");
+    props.setProperty("coref.algorithm", "neural");
     // build pipeline
     StanfordCoreNLP pipeline = new StanfordCoreNLP(props);
     // create a document object
     CoreDocument document = new CoreDocument(text);
-    Document doc = new Document(text);
-    
-    
     // annnotate the document
     pipeline.annotate(document);
     // examples
@@ -129,24 +126,7 @@ public class BasicPipelineExample {
     System.out.println("Example: canonical speaker of quote");
     System.out.println(quote.canonicalSpeaker().get());
     System.out.println();
-    
-    
-    //lemma
-    List<Sentence> sentences = doc.sentences();
-    
-    for (Sentence sent : sentences) {  // Will iterate over two sentences
-        // We're only asking for words -- no need to load any models yet
-       // System.out.println("The second word of the sentence '" + sent + "' is " + sent.word(1));
-        // When we ask for the lemma, it will load and run the part of speech tagger
-      //  System.out.println("The third lemma of the sentence '" + sent + "' is " + sent.lemma(2));
-        // When we ask for the parse, it will load and run the parser
-       // System.out.println("The parse of the sentence '" + sent + "' is " + sent.parse());
-        // ...
-        
-        List<String> lemmas = sent.lemmas();
-        System.out.println("Lemmas: "+lemmas);
-    }
-    
+
   }
 
 }

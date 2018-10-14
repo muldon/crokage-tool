@@ -319,7 +319,7 @@ public class Matrix {
 		double numerator1 = sumElements(idfAndDotProductMax1);
 		double idfSum1 = sumElements(idf1Aux);
 		double sim12 = numerator1/idfSum1;
-		 System.out.println(sim12);
+		//System.out.println(sim12);
 		
 		double[][] dotProduct2 = dotProduct(matrix2,transpose(matrix1));
 		double[] dotProductMax2 = max(dotProduct2);
@@ -327,10 +327,10 @@ public class Matrix {
 		double numerator2 = sumElements(idfAndDotProductMax2);
 		double idfSum2 = sumElements(idf2Aux);
 		double sim21 = numerator2/idfSum2;
-		System.out.println(sim21);
+		//System.out.println(sim21);
 		
 		double result = 2*sim12*sim21/(sim12+sim21);
-		System.out.println(result);
+		//System.out.println(result);
 		return result; 
 	
 	}

@@ -33,6 +33,9 @@ public class Post {
 	private String tags;
 	
 	private String code;
+	
+	@Column(name="processedcode")
+    private String processedCode;
     	
 	@Column(name="posttypeid")
 	private Integer postTypeId;
@@ -432,6 +435,14 @@ public class Post {
 	public String toString() {
 		return "Post [id=" + id + ", body=" + body + ", processedBody=" + processedBody + ", title=" + title
 				+ ", processedTitle=" + processedTitle + ", tags=" + tags + ", code=" + code + "]";
+	}
+
+	public String getProcessedCode() {
+		return processedCode;
+	}
+
+	public void setProcessedCode(String processedCode) {
+		this.processedCode = processedCode;
 	}
 
 	
