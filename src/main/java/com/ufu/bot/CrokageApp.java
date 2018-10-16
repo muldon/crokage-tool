@@ -529,6 +529,9 @@ public class CrokageApp {
 
 
 	private void runApproach() throws Exception {
+		//load input queries considering dataset
+		readInputQueries();
+		
 		//load apis considering approaches
 		getApisForApproaches();
 		
@@ -552,11 +555,6 @@ public class CrokageApp {
 		
 		//read idf vocabulary map (word, idf)
 		crokageUtils.readIDFVocabulary(soIDFVocabularyMap);
-		
-		//load input queries considering dataset
-		readInputQueries();
-		
-		
 		
 		Set<Integer> keys = recommendedApis.keySet();
 		String query;
@@ -710,6 +708,9 @@ public class CrokageApp {
 
 
 	private List<String> getBikerTopMethods(Integer key) {
+		if(bikerQueriesApisClassesAndMethodsMap==null) {
+			return null;
+		}
 		List<String> topMethods = new ArrayList<>();
 		Set<String> classesAndMethods = bikerQueriesApisClassesAndMethodsMap.get(key);
 		for(String classAndMethod: classesAndMethods) {
