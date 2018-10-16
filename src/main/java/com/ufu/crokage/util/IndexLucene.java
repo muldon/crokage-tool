@@ -45,6 +45,7 @@ public class IndexLucene {
 	public void indexCorpusFiles() {
 		// index the files
 		try {
+			
 			Directory dir = FSDirectory.open(new File(index).toPath());
 			Analyzer analyzer = new StandardAnalyzer();
 			// Analyzer analyzer=new EnglishAnalyzer(Version.LUCENE_44);

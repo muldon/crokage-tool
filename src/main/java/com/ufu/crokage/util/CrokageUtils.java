@@ -20,14 +20,11 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -67,7 +64,6 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
-import com.ufu.bot.CrokageApp;
 import com.ufu.bot.PitBotApp2;
 import com.ufu.bot.repository.GenericRepository;
 import com.ufu.bot.to.Evaluation;
@@ -326,6 +322,7 @@ public class CrokageUtils {
 	
 	public static String removeAllPunctuations(String body) {
 		body = body.replaceAll("\\p{Punct}+"," "); 
+		body = body.replaceAll("[^\\x20-\\x7e]", " "); //non-UTF-8 chars
 		return body;
 	}
 	
@@ -1481,7 +1478,7 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 	}
 
 
-	public Map<String, List<Double>> readVectorsForQuery(String words) throws Exception {
+	public Map<String, double[]> readVectorsForQuery(String words) throws Exception {
 		String modelPath = CrokageStaticData.FAST_TEXT_MODEL_PATH;
 		String fastTextIntallationDir = CrokageStaticData.FAST_TEXT_INSTALLATION_DIR;
 		
@@ -1496,18 +1493,44 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 		int rc = p.waitFor();
 		//System.out.println(output);
 		String lines[] = output.split("\n");
+		Map<String,double[]> vectorsMap = new LinkedHashMap<>();
+		getVectorsFromLines(Arrays.asList(lines),vectorsMap);
 		
-		Map vectorsMap = new LinkedHashMap<>();
-		for(String line: lines) {
+		/*for(String line: lines) {
 			String[] parts = line.split(" ");
 			int vecSize = parts.length;
-			List<Double> vectors = new ArrayList<>();
+			//List<Double> vectors = new ArrayList<>();
+			
+			double[] vectors = new double[vecSize-1];
 			for(int i=1;i<vecSize;i++) {
-				vectors.add(Double.parseDouble(parts[i]));
+				vectors[](round(Double.parseDouble(parts[i]),6));
+			}
+			vectorsMap.put(parts[0], vectors);
+		}*/
+		
+		return vectorsMap;
+	}
+
+
+	public static void getVectorsFromLines(List<String> wordsAndVectors, Map<String,double[]> vectorsMap) {
+		String[] parts;
+		int vecSize=0;
+		if(vectorsMap==null) {
+			vectorsMap = new HashMap<>();
+		}
+		for(String line: wordsAndVectors) {
+			parts = line.split(" ");
+			vecSize = parts.length;
+			int vecCol = 0;
+			double[] vectors = new double[vecSize-1];
+			for(int i=1;i<vecSize;i++) {
+				vectors[vecCol] = CrokageUtils.round(Double.parseDouble(parts[i]),6);
+				vecCol++;
 			}
 			vectorsMap.put(parts[0], vectors);
 		}
-		return vectorsMap;
+		
+		
 	}
 
 
@@ -1563,13 +1586,14 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 	}
 
 
-	public static double[][] getMatrixVectorsForQuery(String query, Map<String, List<Double>> wordVectorsMap) {
+	public static double[][] getMatrixVectorsForQuery(String query, Map<String, double[]> wordVectorsMap) {
 		String queryTokens[] = query.split("\\s+");
 		double[][] matrix = new double[queryTokens.length][100];
 		
 		for(int i=0; i<queryTokens.length; i++) {
 			String word = queryTokens[i];
-			double[] vectors = wordVectorsMap.get(word).stream().mapToDouble(Double::doubleValue).toArray();
+			//double[] vectors = wordVectorsMap.get(word).stream().mapToDouble(Double::doubleValue).toArray();
+			double[] vectors = wordVectorsMap.get(word);
 			matrix[i] = vectors;
 		}
 				

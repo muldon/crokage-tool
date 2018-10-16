@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.math.BigInteger;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -25,6 +27,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -45,6 +48,7 @@ import com.ufu.bot.to.BucketOld;
 import com.ufu.bot.to.Post;
 import com.ufu.bot.util.BotComposer;
 import com.ufu.bot.util.BotUtils;
+import com.ufu.crokage.config.CrokageStaticData;
 import com.ufu.survey.service.PitSurveyService;
 
 public class Tester {
@@ -82,6 +86,13 @@ public class Tester {
 		// repeat only the following part:
 		//String output = p.matcher(input).replaceAll("");
 				
+		
+		String s = " just looking guidance code     calling given web service look like sample web service chosen example  ";
+		//System.out.println(StringUtils.normalizeSpace(s));
+		
+		Set<String> wordsSet = new HashSet<>();
+		wordsSet.addAll(Arrays.stream(s.split(" +")).collect(Collectors.toSet()));
+		System.out.println(wordsSet);
 		
 		
 	}

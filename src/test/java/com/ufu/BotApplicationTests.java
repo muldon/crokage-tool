@@ -342,7 +342,8 @@ public class BotApplicationTests extends AbstractService{
 		String query2 = "How to programmatically send a HTTP request with parameters?";
 		String query3 = "How do I do a HTTP GET in Java?";
 		String query4 = "How to call and pass the parameters to the Servlet using the Java in my swing application?";
-		String query5 = "How to invoke and passing the parameter to the Servlet with the Javac in my swing app?";
+		String query5 = "How to calling and passing the parameter to the Servlet with the Javac in my swing app?";
+		String query6 = "Most efficient way to write a string to a file";
 		
 		CrokageUtils crokageUtils = new CrokageUtils();
 		
@@ -351,12 +352,14 @@ public class BotApplicationTests extends AbstractService{
 		query3 = CrokageUtils.processQuery(query3);
 		query4 = CrokageUtils.processQuery(query4);
 		query5 = CrokageUtils.processQuery(query5);
+		query6 = CrokageUtils.processQuery(query6);
 		
-		Map<String, List<Double>> vectorsWords1 = crokageUtils.readVectorsForQuery(query1);
-		Map<String, List<Double>> vectorsWords2 = crokageUtils.readVectorsForQuery(query2);
-		Map<String, List<Double>> vectorsWords3 = crokageUtils.readVectorsForQuery(query3);
-		Map<String, List<Double>> vectorsWords4 = crokageUtils.readVectorsForQuery(query4);
-		Map<String, List<Double>> vectorsWords5 = crokageUtils.readVectorsForQuery(query5);
+		Map<String, double[]> vectorsWords1 = crokageUtils.readVectorsForQuery(query1);
+		Map<String, double[]> vectorsWords2 = crokageUtils.readVectorsForQuery(query2);
+		Map<String, double[]> vectorsWords3 = crokageUtils.readVectorsForQuery(query3);
+		Map<String, double[]> vectorsWords4 = crokageUtils.readVectorsForQuery(query4);
+		Map<String, double[]> vectorsWords5 = crokageUtils.readVectorsForQuery(query5);
+		Map<String, double[]> vectorsWords6 = crokageUtils.readVectorsForQuery(query6);
 		
 		
 		double[][] matrix1 = CrokageUtils.getMatrixVectorsForQuery(query1, vectorsWords1);
@@ -364,15 +367,23 @@ public class BotApplicationTests extends AbstractService{
 		double[][] matrix3 = CrokageUtils.getMatrixVectorsForQuery(query3, vectorsWords3);
 		double[][] matrix4 = CrokageUtils.getMatrixVectorsForQuery(query4, vectorsWords4);
 		double[][] matrix5 = CrokageUtils.getMatrixVectorsForQuery(query5, vectorsWords5);
+		double[][] matrix6 = CrokageUtils.getMatrixVectorsForQuery(query6, vectorsWords6);
 		
 		Map<String, Double> soIDFVocabularyMap=new HashMap<>();
 		crokageUtils.readIDFVocabulary(soIDFVocabularyMap);
 		
-		double[][] idf1 = CrokageUtils.getIDFMatrixForQuery(query1, soIDFVocabularyMap);
+		/*double[][] idf1 = CrokageUtils.getIDFMatrixForQuery(query1, soIDFVocabularyMap);
 		double[][] idf2 = CrokageUtils.getIDFMatrixForQuery(query2, soIDFVocabularyMap);
 		double[][] idf3 = CrokageUtils.getIDFMatrixForQuery(query3, soIDFVocabularyMap);
 		double[][] idf4 = CrokageUtils.getIDFMatrixForQuery(query4, soIDFVocabularyMap);
-		double[][] idf5 = CrokageUtils.getIDFMatrixForQuery(query5, soIDFVocabularyMap);
+		double[][] idf5 = CrokageUtils.getIDFMatrixForQuery(query5, soIDFVocabularyMap);*/
+		double[][] idf1 = {{1,1,1,1}};
+		double[][] idf2 = {{1,1,1,1,1}};
+		double[][] idf3 = {{1,1,1}};
+		double[][] idf4 = {{1,1,1,1,1,1,1,1}};
+		double[][] idf5 = {{1,1,1,1,1,1,1}};
+		double[][] idf6 = {{1,1,1,1,1}};
+
 		
 		
 		//System.out.println(vectorsWords1);
@@ -384,12 +395,15 @@ public class BotApplicationTests extends AbstractService{
 		double simPair13 = Matrix.simDocPair(matrix1,matrix3,idf1,idf3);
 		double simPair14 = Matrix.simDocPair(matrix1,matrix4,idf1,idf4);
 		double simPair45 = Matrix.simDocPair(matrix4,matrix5,idf4,idf5);
+		double simPair56 = Matrix.simDocPair(matrix5,matrix6,idf5,idf6);
 		
-		System.out.println(simPair12);
-		System.out.println(simPair21);
-		System.out.println(simPair13);
-		System.out.println(simPair14);
-		System.out.println(simPair45);
+		
+		System.out.println("simPair12= "+simPair12);
+		//System.out.println(simPair21);
+		System.out.println("simPair13= "+simPair13);
+		System.out.println("simPair14= "+simPair14);
+		System.out.println("simPair45= "+simPair45);
+		System.out.println("simPair56= "+simPair56);
 		
 		
 	}

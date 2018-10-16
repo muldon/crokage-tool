@@ -1,18 +1,9 @@
 package com.ufu.bot.to;
 
-import java.util.List;
-import java.util.Set;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.Table;
-import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
-@Entity
-@Table(name = "postsmin")
 public class Bucket {
 	private static final long serialVersionUID = -11118191211815641L;
 	@Id
@@ -22,7 +13,7 @@ public class Bucket {
 	
 	private String code;
 	
-	private Integer score;
+	private Integer upVotesScore;
 	
 	private Integer userReputation;
 	
@@ -31,6 +22,10 @@ public class Bucket {
 	private Integer viewCount;
 	
 	private Boolean acceptedAnswer;
+	
+	private Integer parentUpVotesScore;
+	
+	private Double calculatedScore;
 	
 	
 	public Integer getId() {
@@ -43,12 +38,14 @@ public class Bucket {
 
 	
 
-	public Integer getScore() {
-		return score;
+	
+
+	public Integer getUpVotesScore() {
+		return upVotesScore;
 	}
 
-	public void setScore(Integer score) {
-		this.score = score;
+	public void setUpVotesScore(Integer upVotesScore) {
+		this.upVotesScore = upVotesScore;
 	}
 
 	public static long getSerialversionuid() {
@@ -105,15 +102,13 @@ public class Bucket {
 	}
 
 	
-
 	@Override
 	public String toString() {
-		return "Bucket [id=" + id + ", body=" + body + ", code=" + code + ", score=" + score + ", userReputation="
-				+ userReputation + ", commentCount=" + commentCount + ", viewCount=" + viewCount + ", acceptedAnswer="
-				+ acceptedAnswer + "]";
+		return "Bucket [id=" + id + ", body=" + body + ", code=" + code + ", upVotesScore=" + upVotesScore
+				+ ", userReputation=" + userReputation + ", commentCount=" + commentCount + ", viewCount=" + viewCount
+				+ ", acceptedAnswer=" + acceptedAnswer + ", parentUpVotesScore=" + parentUpVotesScore
+				+ ", calculatedScore=" + calculatedScore + "]";
 	}
-
-	
 
 	public Integer getUserReputation() {
 		return userReputation;
@@ -145,6 +140,22 @@ public class Bucket {
 
 	public void setAcceptedAnswer(Boolean acceptedAnswer) {
 		this.acceptedAnswer = acceptedAnswer;
+	}
+
+	public Integer getParentUpVotesScore() {
+		return parentUpVotesScore;
+	}
+
+	public void setParentUpVotesScore(Integer parentUpVotesScore) {
+		this.parentUpVotesScore = parentUpVotesScore;
+	}
+
+	public Double getCalculatedScore() {
+		return calculatedScore;
+	}
+
+	public void setCalculatedScore(Double calculatedScore) {
+		this.calculatedScore = calculatedScore;
 	}
 	
 	
