@@ -390,10 +390,10 @@ public class GenericRepositoryImpl implements GenericRepository {
 	@Override
 	public Map<Integer, String> getQuestionsIdsTitles() {
 		String sql = " select po.id,po.processedTitle "
-				+ " from postsmin po"
+				+ " from postsmin po, postsmin children"
 				+ " where po.posttypeid=1"
-				+ " and po.processedTitle is not null";  
-			
+				+ " and po.processedTitle is not null"
+				+ " and po.answercount>0 ";
 			
 		Query q = em.createNativeQuery(sql);
 		List<Object[]> rows = q.getResultList();

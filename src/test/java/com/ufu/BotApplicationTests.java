@@ -354,12 +354,16 @@ public class BotApplicationTests extends AbstractService{
 		query5 = CrokageUtils.processQuery(query5);
 		query6 = CrokageUtils.processQuery(query6);
 		
+		long initTime = System.currentTimeMillis();
+		
 		Map<String, double[]> vectorsWords1 = crokageUtils.readVectorsForQuery(query1);
+		crokageUtils.reportElapsedTime(initTime,"readVectorsForQuery");
 		Map<String, double[]> vectorsWords2 = crokageUtils.readVectorsForQuery(query2);
 		Map<String, double[]> vectorsWords3 = crokageUtils.readVectorsForQuery(query3);
 		Map<String, double[]> vectorsWords4 = crokageUtils.readVectorsForQuery(query4);
 		Map<String, double[]> vectorsWords5 = crokageUtils.readVectorsForQuery(query5);
 		Map<String, double[]> vectorsWords6 = crokageUtils.readVectorsForQuery(query6);
+		
 		
 		
 		double[][] matrix1 = CrokageUtils.getMatrixVectorsForQuery(query1, vectorsWords1);
