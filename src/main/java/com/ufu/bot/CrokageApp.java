@@ -888,7 +888,7 @@ public class CrokageApp {
 			e.printStackTrace();
 		}
 		
-
+		nlp2ApiQueriesApisMap = new LinkedHashMap<>();
 		getQueriesAndApisFromFileMayContainDupes(nlp2ApiQueriesApisMap,CrokageStaticData.NLP2API_OUTPUT_QUERIES_FILE);
 		
 		
@@ -945,6 +945,7 @@ public class CrokageApp {
 			e.printStackTrace();
 		}
 		
+		rackQueriesApisMap = new LinkedHashMap<>();
 		getQueriesAndApisFromFileMayContainDupes(rackQueriesApisMap,CrokageStaticData.RACK_OUTPUT_QUERIES_FILE);
 		
 	}
