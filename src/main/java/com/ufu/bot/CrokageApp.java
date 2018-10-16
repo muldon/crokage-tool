@@ -654,6 +654,20 @@ public class CrokageApp {
 		
 		
 		Set<Integer> topSimilarQuestionsIds = topSimilarQuestions.keySet();
+		StringBuilder topQuestionsIds= new StringBuilder("Top related questions: \n\n");
+		int pos=1;
+		for(Integer questionId: topSimilarQuestionsIds) {
+			topQuestionsIds.append(pos);
+			topQuestionsIds.append("-");
+			topQuestionsIds.append(questionId);
+			topQuestionsIds.append("\n");
+			pos++;
+			if(pos==20) {
+				break;
+			}
+		}
+		logger.info(topQuestionsIds.toString());
+		
 		
 		//fetch again the answers related to those questions
 		Set<Integer> answersIds = new HashSet<>();
