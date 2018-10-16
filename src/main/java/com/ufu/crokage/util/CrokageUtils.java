@@ -1496,18 +1496,6 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 		Map<String,double[]> vectorsMap = new LinkedHashMap<>();
 		getVectorsFromLines(Arrays.asList(lines),vectorsMap);
 		
-		/*for(String line: lines) {
-			String[] parts = line.split(" ");
-			int vecSize = parts.length;
-			//List<Double> vectors = new ArrayList<>();
-			
-			double[] vectors = new double[vecSize-1];
-			for(int i=1;i<vecSize;i++) {
-				vectors[](round(Double.parseDouble(parts[i]),6));
-			}
-			vectorsMap.put(parts[0], vectors);
-		}*/
-		
 		return vectorsMap;
 	}
 

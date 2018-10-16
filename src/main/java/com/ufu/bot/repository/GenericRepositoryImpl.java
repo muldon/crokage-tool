@@ -391,7 +391,8 @@ public class GenericRepositoryImpl implements GenericRepository {
 	public Map<Integer, String> getQuestionsIdsTitles() {
 		String sql = " select po.id,po.processedTitle "
 				+ " from postsmin po"
-				+ " where po.posttypeid=1";  
+				+ " where po.posttypeid=1"
+				+ " and po.processedTitle is not null";  
 			
 			
 		Query q = em.createNativeQuery(sql);

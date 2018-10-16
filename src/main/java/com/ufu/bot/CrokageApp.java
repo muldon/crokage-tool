@@ -622,6 +622,9 @@ public class CrokageApp {
 		Map<Integer,Double> questionsIdsScores = new HashMap<>();
 		
 		for(Integer questionId:relevantQuestionsIds) {
+			
+			try {
+			
 			//get the word vectors for each word of the query
 			comparingTitle = allQuestionsIdsTitlesMap.get(questionId);
 			
@@ -634,7 +637,14 @@ public class CrokageApp {
 			double simPair = Matrix.simDocPair(matrix1,matrix2,idf1,idf2);
 			
 			questionsIdsScores.put(questionId, simPair);
+			
+			} catch (Exception e) {
+				System.err.println("Error here: post: "+questionId+" - "+e);
+			}
+			
 		}
+		
+
 		
 		//sort scores in descending order and consider the first topSimilarQuestionsNumber parameter
 		Map<Integer,Double> topSimilarQuestions = questionsIdsScores.entrySet().stream()
