@@ -357,7 +357,7 @@ public class GenericRepositoryImpl implements GenericRepository {
 		idsIn+= "#end";
 		idsIn = idsIn.replace(",#end", "");
 		
-		String sql = " select po.id,po.body,po.code,u.reputation,po.commentcount,po.viewcount,po.score,parent.acceptedanswerid, parent.score  "  
+		String sql = " select po.id,po.body,po.code,u.reputation,po.commentcount,po.viewcount,po.score,parent.acceptedanswerid, parent.score as parentscore "  
 				+ " from postsmin po, usersmin u, postsmin parent  "  
 				+ " where po.owneruserid=u.id" 
 				+ " and po.parentid = parent.id"  
