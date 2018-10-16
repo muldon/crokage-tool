@@ -529,6 +529,12 @@ public class CrokageApp {
 
 
 	private void runApproach() throws Exception {
+		//load apis considering approaches
+		getApisForApproaches();
+		
+		//combine state of art approaches considering the order in parameters
+		Map<Integer, Set<String>> recommendedApis = getRecommendedApis();
+		
 		//load questions map (id,title)
 		loadAllQuestionsIdsTitles();
 		
@@ -550,11 +556,7 @@ public class CrokageApp {
 		//load input queries considering dataset
 		readInputQueries();
 		
-		//load apis considering approaches
-		getApisForApproaches();
 		
-		//combine state of art approaches considering the order in parameters
-		Map<Integer, Set<String>> recommendedApis = getRecommendedApis();
 		
 		Set<Integer> keys = recommendedApis.keySet();
 		String query;
