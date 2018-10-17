@@ -1553,6 +1553,8 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 		String line;
 		Set<Integer> keys = idsTitles.keySet();
 		for(Integer key: keys) {
+			lines.append(key);
+			lines.append(" ");
 			line = idsTitles.get(key);
 			parts = line.split(" ");
 			for(String word: parts) {
