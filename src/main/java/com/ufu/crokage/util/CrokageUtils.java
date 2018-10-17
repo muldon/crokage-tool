@@ -1620,14 +1620,12 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 	}
 
 
-	public Map<String, double[]> readVectorsFromSOMapForWords(HashSet<String> allQueriesWords) throws IOException {
+	public Map<String, double[]> readVectorsFromSOMapForWords(HashSet<String> allQueriesWords, List<String> wordsAndVectors) throws IOException {
 		long initTime = System.currentTimeMillis();
-		logger.info("Reading all vectors from file...");
+		//logger.info("Reading all vectors from file...");
 		String[] parts;
 		int vecSize=0;
 		Map<String, double[]> soContentWordVectorsMap = new HashMap<>();
-		List<String> wordsAndVectors = Files.readAllLines(Paths.get(CrokageStaticData.SO_CONTENT_WORD_VECTORS));
-		reportElapsedTime(initTime,"readVectorsFromSOMapForWords - Files.readAllLines...");
 		
 		for(String line: wordsAndVectors) {
 			parts = line.split(" ");

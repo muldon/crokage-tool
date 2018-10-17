@@ -137,7 +137,7 @@ public class CrokageApp {
 	private Map<Integer,String> allQuestionsIdsTitlesMap;
 	private Map<Integer,Integer> allAnswersIdsParentIdsMap;
 	private Set<Integer> topClassesRelevantAnswersIds;
-	
+	private List<String> wordsAndVectorsLines;
 
 	@PostConstruct
 	public void init() throws Exception {
@@ -149,6 +149,8 @@ public class CrokageApp {
 		subAction = subAction !=null ? subAction.toLowerCase().trim(): null;
 		dataSet = dataSet !=null ? dataSet.toLowerCase().trim(): null;
 		soIDFVocabularyMap = new HashMap<>();
+		wordsAndVectorsLines = new ArrayList<>();
+		soContentWordVectorsMap = new HashMap<>();
 		
 		logger.info("\nConsidering parameters: \n" 
 				+ "\n callBIKERProcess: " + callBIKERProcess
@@ -216,7 +218,7 @@ public class CrokageApp {
 			break;
 			
 		case "readSoContentWordVectors":
-			readSoContentWordVectors();
+			readSoContentWordVectorsForAllWords();
 			break;		
 			
 		case "generateTrainingFileToFastText":
@@ -425,34 +427,30 @@ public class CrokageApp {
 
 
 
-	private void readSoContentWordVectors() throws IOException {
+	private void readSoContentWordVectorsForAllWords() throws IOException {
 		if(soContentWordVectorsMap==null) {
 			long initTime = System.currentTimeMillis();
-			logger.info("Reading all vectors from file...");
-			String[] parts;
-			int vecSize=0;
 			soContentWordVectorsMap = new HashMap<>();
-			List<String> wordsAndVectors = Files.readAllLines(Paths.get(CrokageStaticData.SO_CONTENT_WORD_VECTORS));
 			
-			CrokageUtils.getVectorsFromLines(wordsAndVectors,soContentWordVectorsMap);
+			readSOContentWordAndVectorsLines();
 			
-			/*for(String line: wordsAndVectors) {
-				parts = line.split(" ");
-				vecSize = parts.length;
-				int vecCol = 0;
-				//List<Double> vectors = new ArrayList<>();
-				double[] vectors = new double[vecSize-1];
-				for(int i=1;i<=vecSize;i++) {
-					vectors[vecCol] = CrokageUtils.round(Double.parseDouble(parts[i]),6);
-					
-				}
-				soContentWordVectorsMap.put(parts[0], vectors);
-			}*/
-			//System.out.println(bigMapApisIds);
-			crokageUtils.reportElapsedTime(initTime,"readSoTitlesWordVectors");
+			CrokageUtils.getVectorsFromLines(wordsAndVectorsLines,soContentWordVectorsMap);
+			
+			crokageUtils.reportElapsedTime(initTime,"readSoContentWordVectorsForAllWords");
 		}
 		
 	}
+
+
+	private void readSOContentWordAndVectorsLines() throws IOException {
+		long initTime = System.currentTimeMillis();
+		wordsAndVectorsLines.addAll(Files.readAllLines(Paths.get(CrokageStaticData.SO_CONTENT_WORD_VECTORS)));
+		crokageUtils.reportElapsedTime(initTime,"readSOContentWordAndVectorsLines. Total number of words: "+wordsAndVectorsLines.size());
+		
+		
+	}
+
+
 
 
 	private void buildSODirectoryFiles() throws FileNotFoundException {
@@ -594,6 +592,9 @@ public class CrokageApp {
 
 
 	private void runApproach() throws Exception {
+		//load so content word vectors to a string
+		readSOContentWordAndVectorsLines();
+		
 		//load input queries considering dataset
 		processInputQueries();
 		
@@ -617,7 +618,7 @@ public class CrokageApp {
 				
 		//read word vectors map (word, vectors[])
 		//readSoContentWordVectors();
-		soContentWordVectorsMap = readSoContentWordVectorsForQueries(queries);
+		readSoContentWordVectorsForQueries(queries);
 		
 		//read idf vocabulary map (word, idf)
 		crokageUtils.readIDFVocabulary(soIDFVocabularyMap);
@@ -645,10 +646,9 @@ public class CrokageApp {
 			logger.info("\nQuery: "+query+"\nTop classes: "+topClasses);
 			
 			Set<Integer> relevantQuestionsIds = getCandidateQuestionsFromTopApis(topClasses);
-			logger.info("\nPosts after wrapping in a set: "+relevantQuestionsIds.size());
 			
-			//add vectors for all retrieved queries
-			addVectorsToSoContentWordVectorsMap(relevantQuestionsIds,soContentWordVectorsMap);
+			//add vectors for all retrieved questions titles
+			addVectorsToSoContentWordVectorsMap(relevantQuestionsIds);
 			
 			List<Bucket> topkPosts = calculateRelevance(relevantQuestionsIds,topMethods,matrix1,idf1);
 			
@@ -670,25 +670,25 @@ public class CrokageApp {
 
 
 
-	private void addVectorsToSoContentWordVectorsMap(Set<Integer> relevantQuestionsIds,	Map<String, double[]> wordMap) throws Exception {
+	private void addVectorsToSoContentWordVectorsMap(Set<Integer> relevantQuestionsIds) throws Exception {
 		List<String> titles = new ArrayList<>();
 		for(Integer questionId:relevantQuestionsIds) {
 			titles.add(allQuestionsIdsTitlesMap.get(questionId));
 		}
 		
-		Map<String, double[]> titlesWordVectorsMap = readSoContentWordVectorsForQueries(titles);
-		Set<String> keys = titlesWordVectorsMap.keySet();
+		readSoContentWordVectorsForQueries(titles);
+		/*Set<String> keys = soContentWordVectorsMap.keySet();
 		for(String word: keys) {
 			if(!wordMap.containsKey(word)) {
-				wordMap.put(word, titlesWordVectorsMap.get(word));
+				wordMap.put(word, soContentWordVectorsMap.get(word));
 			}
-		}
+		}*/
 	}
 
 
 
 
-	private Map<String, double[]> readSoContentWordVectorsForQueries(List<String> queries) throws Exception {
+	private void readSoContentWordVectorsForQueries(List<String> queries) throws Exception {
 		HashSet<String> allWordsSet = new HashSet<>();
 		String words[];
 		for(String query: queries) {
@@ -703,12 +703,11 @@ public class CrokageApp {
 		}*/
 		
 		
-		logger.info("Reading vectors by demand for "+allWordsSet.size()+ " words...");
+		logger.info("Reading vectors by demand for "+allWordsSet.size()+ " words. Size of soContentWordVectorsMap before: "+soContentWordVectorsMap.size());
 		//Map<String, double[]> vectorsForQueries = crokageUtils.readVectorsForQuery(allWords.toString());
-		Map<String, double[]> vectorsForQueries = crokageUtils.readVectorsFromSOMapForWords(allWordsSet);
 		
-		return vectorsForQueries;
-		
+		soContentWordVectorsMap.putAll(crokageUtils.readVectorsFromSOMapForWords(allWordsSet,wordsAndVectorsLines));
+		logger.info("Size after: "+soContentWordVectorsMap.size());
 	}
 
 
@@ -734,7 +733,7 @@ public class CrokageApp {
 			int questionId = allAnswersIdsParentIdsMap.get(answerId);
 			relevantQuestionsIds.add(questionId);
 		}
-		
+		logger.info("\nNumber of relevant questions to relevant answers: "+relevantQuestionsIds.size());
 		return relevantQuestionsIds;
 	}
 
@@ -748,11 +747,11 @@ public class CrokageApp {
 		for(Integer questionId:relevantQuestionsIds) {
 			
 			try {
-			
+			if(questionId.equals(43966301)) {
+				System.out.println("here..");
+			}
 			//get the word vectors for each word of the query
 			comparingTitle = allQuestionsIdsTitlesMap.get(questionId);
-			
-			//add 
 			
 			//get vectors for query2 words
 			double[][] matrix2 = CrokageUtils.getMatrixVectorsForQuery(comparingTitle,soContentWordVectorsMap);
