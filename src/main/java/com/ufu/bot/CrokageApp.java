@@ -901,13 +901,13 @@ public class CrokageApp {
 				String output = CrokageUtils.loadStream(p.getInputStream());
 				String error = CrokageUtils.loadStream(p.getErrorStream());
 				int rc = p.waitFor();
-				System.out.println("Process ended with rc=" + rc);
-				System.out.println("\nStandard Output:\n");
-				System.out.println(output);
+				//System.out.println("Process ended with rc=" + rc);
+				//System.out.println("\nStandard Output:\n");
+				//System.out.println(output);
 				//String apis[] = output.replaceAll("\n", " ").split(" ");
 				//System.out.println(apis);
-				System.out.println("\nStandard Error:\n");
-				System.out.println(error);
+				//System.out.println("\nStandard Error:\n");
+				//System.out.println(error);
 		 	}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -958,13 +958,13 @@ public class CrokageApp {
 				String output = CrokageUtils.loadStream(p.getInputStream());
 				String error = CrokageUtils.loadStream(p.getErrorStream());
 				int rc = p.waitFor();
-				System.out.println("Process ended with rc=" + rc);
-				System.out.println("\nStandard Output:\n");
-				System.out.println(output);
-				String apis[] = output.replaceAll("\n", " ").split(" ");
-				System.out.println(apis);
-				System.out.println("\nStandard Error:\n");
-				System.out.println(error);
+				//System.out.println("Process ended with rc=" + rc);
+				//System.out.println("\nStandard Output:\n");
+				//System.out.println(output);
+				//String apis[] = output.replaceAll("\n", " ").split(" ");
+				//System.out.println(apis);
+				//System.out.println("\nStandard Error:\n");
+				//System.out.println(error);
 		 	}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -1005,11 +1005,11 @@ public class CrokageApp {
 				String output = CrokageUtils.loadStream(p.getInputStream());
 				String error = CrokageUtils.loadStream(p.getErrorStream());
 				int rc = p.waitFor();
-				System.out.println("Process ended with rc=" + rc);
-				System.out.println("\nStandard Output:\n");
-				System.out.println(output);
-				System.out.println("\nStandard Error:\n");
-				System.out.println(error);
+				//System.out.println("Process ended with rc=" + rc);
+				//System.out.println("\nStandard Output:\n");
+				//System.out.println(output);
+				//System.out.println("\nStandard Error:\n");
+				//System.out.println(error);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

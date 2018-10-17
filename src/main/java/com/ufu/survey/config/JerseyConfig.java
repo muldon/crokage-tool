@@ -29,10 +29,10 @@ public class JerseyConfig extends ResourceConfig {
 	
 	public JerseyConfig() {
 		register(JerseyConfig.class);
-		packages("com.ufu.survey.config");
+		//packages("com.ufu.survey.config");
 		//packages("com.ufu.survey.interceptor");
-		packages("com.ufu.survey.resources");
-		packages("com.ufu.survey.util");
+		//packages("com.ufu.survey.resources");
+		//packages("com.ufu.survey.util");
 		//packages("com.ufu.survey.report");
 				
 		
