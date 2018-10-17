@@ -1529,7 +1529,7 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 	}
 
 
-	public void writeMapToFile(Map idfs, String file) throws FileNotFoundException {
+	public void writeMapToFile(Map<String, Double> idfs, String file) throws FileNotFoundException {
 		StringBuilder lines = new StringBuilder("");
 		
 		Set<String> keys = idfs.keySet();
@@ -1537,6 +1537,28 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 			lines.append(key);
 			lines.append(" ");
 			lines.append(idfs.get(key));
+			lines.append("\n");
+		}
+		lines.append("end@");
+		String linesStr = lines.toString().replace("\nend@", "");
+		try (PrintWriter out = new PrintWriter(file)) {
+		    out.println(linesStr);
+		}
+		
+	}
+	
+	public void writeMapToFile2(Map<Integer, String> idsTitles, String file) throws FileNotFoundException {
+		StringBuilder lines = new StringBuilder("");
+		String[] parts;
+		String line;
+		Set<Integer> keys = idsTitles.keySet();
+		for(Integer key: keys) {
+			line = idsTitles.get(key);
+			parts = line.split(" ");
+			for(String word: parts) {
+				lines.append(word);
+				lines.append(" ");
+			}
 			lines.append("\n");
 		}
 		lines.append("end@");

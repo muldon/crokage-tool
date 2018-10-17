@@ -269,7 +269,7 @@ public class CrokageApp {
 	private void generateQuestionsIdsTitlesMap() throws FileNotFoundException {
 		long initTime = System.currentTimeMillis();
 		loadAllQuestionsIdsTitles();
-		crokageUtils.writeMapToFile(allQuestionsIdsTitlesMap, CrokageStaticData.SO_QUESTIONS_IDS_TITLES_MAP);
+		crokageUtils.writeMapToFile2(allQuestionsIdsTitlesMap, CrokageStaticData.SO_QUESTIONS_IDS_TITLES_MAP);
 		crokageUtils.reportElapsedTime(initTime,"generateQuestionsIdsTitlesMap");
 	}
 
