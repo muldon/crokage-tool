@@ -619,7 +619,7 @@ public class CrokageApp {
 			words = query.split("\\s+");
 			allQueriesWords.addAll(Arrays.asList(words));
 		}
-		
+		allQueriesWords.remove("");
 		StringBuilder allWords = new StringBuilder();
 		for(String word: allQueriesWords) {
 			allWords.append(word);
