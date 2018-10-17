@@ -392,7 +392,7 @@ public class GenericRepositoryImpl implements GenericRepository {
 		String sql = " select po.id,po.processedTitle "
 				+ " from postsmin po"
 				+ " where po.posttypeid=1"
-				+ " and po.processedTitle is not null"
+				+ " and po.processedTitle != ''"
 				+ " and po.answercount>0 ";
 			
 		Query q = em.createNativeQuery(sql);
