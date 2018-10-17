@@ -1639,9 +1639,9 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 			int vecCol = 0;
 			//List<Double> vectors = new ArrayList<>();
 			double[] vectors = new double[vecSize-1];
-			for(int i=1;i<=vecSize;i++) {
+			for(int i=1;i<vecSize;i++) {
 				vectors[vecCol] = CrokageUtils.round(Double.parseDouble(parts[i]),6);
-				
+				vecCol++;
 			}
 			soContentWordVectorsMap.put(parts[0], vectors);
 		}
@@ -1650,6 +1650,53 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 		return soContentWordVectorsMap;
 	}
 
+
+	public void readWordsFromFileToMap(Map<Integer, String> soIdsTitlesMap, List<String> idsAndWords) throws IOException {
+		long initTime = System.currentTimeMillis();
+		logger.info("Reading all ids and titles from file...");
+		String[] parts;
+		String title;
+		for(String line: idsAndWords) {
+			parts = line.split(" ");
+			title = line.replace(parts[0], "").trim();
+			soIdsTitlesMap.put(Integer.parseInt(parts[0]), title);
+		}
+		//System.out.println(bigMapApisIds);
+		reportElapsedTime(initTime,"readVectorsFromSOMapForWords");
+		
+	}
+	
+	public void readWordsFromFileToMap2(Map<Integer, Integer> soIdsIds, List<String> idsAndWords) throws IOException {
+		long initTime = System.currentTimeMillis();
+		logger.info("Reading all ids and titles from file...");
+		String[] parts;
+		String title;
+		for(String line: idsAndWords) {
+			parts = line.split(" ");
+			soIdsIds.put(Integer.parseInt(parts[0]), Integer.parseInt(parts[1]));
+		}
+		//System.out.println(bigMapApisIds);
+		reportElapsedTime(initTime,"readVectorsFromSOMapForWords");
+		
+	}
+
+
+	public void writeMapToFile3(Map<Integer, Integer> allAnswersIdsParentIdsMap, String file) throws FileNotFoundException {
+		StringBuilder lines = new StringBuilder("");
+		Set<Integer> keys = allAnswersIdsParentIdsMap.keySet();
+		for(Integer key: keys) {
+			lines.append(key);
+			lines.append(" ");
+			lines.append(allAnswersIdsParentIdsMap.get(key));
+			lines.append("\n");
+		}
+		lines.append("end@");
+		String linesStr = lines.toString().replace("\nend@", "");
+		try (PrintWriter out = new PrintWriter(file)) {
+		    out.println(linesStr);
+		}
+		
+	}
 	
 	
 	

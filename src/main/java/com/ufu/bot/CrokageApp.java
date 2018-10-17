@@ -173,6 +173,14 @@ public class CrokageApp {
 			runApproach();
 			break;
 		
+		case "readAnswersIdsParentsMap":
+			readAnswersIdsParentsMap();
+			break;
+			
+		case "generateAnswersIdsParentsMap":
+			generateAnswersIdsParentsMap();
+			break;	
+			
 		case "generateQuestionsIdsTitlesMap":
 			generateQuestionsIdsTitlesMap();
 			break;	
@@ -201,6 +209,11 @@ public class CrokageApp {
 		case "buildIDFVocabulary":
 			buildIDFVocabulary();
 			break;	
+			
+				
+		case "readQuestionsIdsTitlesMap":
+			readQuestionsIdsTitlesMap();
+			break;
 			
 		case "readSoContentWordVectors":
 			readSoContentWordVectors();
@@ -265,6 +278,38 @@ public class CrokageApp {
 
 	
 	
+
+	private void readAnswersIdsParentsMap() throws IOException {
+		long initTime = System.currentTimeMillis();
+		List<String> idsAndids = Files.readAllLines(Paths.get(CrokageStaticData.SO_ANSWERS_IDS_PARENT_IDS_MAP));
+		allAnswersIdsParentIdsMap = new HashMap<>();
+		crokageUtils.readWordsFromFileToMap2(allAnswersIdsParentIdsMap, idsAndids);
+		crokageUtils.reportElapsedTime(initTime,"readAnswersIdsParentsMap");
+	}
+
+
+
+
+	private void generateAnswersIdsParentsMap() throws FileNotFoundException {
+		long initTime = System.currentTimeMillis();
+		loadAllAnswersIdsParentIds();
+		crokageUtils.writeMapToFile3(allAnswersIdsParentIdsMap, CrokageStaticData.SO_ANSWERS_IDS_PARENT_IDS_MAP);
+		crokageUtils.reportElapsedTime(initTime,"generateAnswersIdsParentsMap");
+	}
+
+
+
+
+	private void readQuestionsIdsTitlesMap() throws IOException {
+		long initTime = System.currentTimeMillis();
+		List<String> idsAndWords = Files.readAllLines(Paths.get(CrokageStaticData.SO_QUESTIONS_IDS_TITLES_MAP));
+		allQuestionsIdsTitlesMap = new HashMap<>();
+		crokageUtils.readWordsFromFileToMap(allQuestionsIdsTitlesMap,idsAndWords);
+		crokageUtils.reportElapsedTime(initTime,"readQuestionsIdsTitlesMap");
+	}
+
+
+
 
 	private void generateQuestionsIdsTitlesMap() throws FileNotFoundException {
 		long initTime = System.currentTimeMillis();
@@ -559,10 +604,10 @@ public class CrokageApp {
 		Map<Integer, Set<String>> recommendedApis = getRecommendedApis();
 		
 		//load questions map (id,title)
-		loadAllQuestionsIdsTitles();
+		readQuestionsIdsTitlesMap();
 		
 		//load answers map (id,parentId)
-		loadAllAnswersIdsParentIds();
+		readAnswersIdsParentsMap();
 		
 		//load the inverted index (api, postsSet)
 		loadInvertedIndexFile();
