@@ -1478,13 +1478,20 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 	}
 
 
-	public Map<String, double[]> readVectorsForQuery(String words) throws Exception {
+	public Map<String, double[]> readVectorsForQuery(String word) throws Exception {
 		String modelPath = CrokageStaticData.FAST_TEXT_MODEL_PATH;
 		String fastTextIntallationDir = CrokageStaticData.FAST_TEXT_INSTALLATION_DIR;
 		
+		//build a temporary file with words --size issues
+		File tmpFile = new File("/home/rodrigo/tmp/tempWordsFile.txt");
+		try (PrintWriter out = new PrintWriter(tmpFile)) {
+		    out.println(word);
+		}
+		
 		// echo "java filewriter file" | ./fasttext print-word-vectors
-		String[] cmd = { "bash", "-c", "echo \""+words+"\" | " + fastTextIntallationDir+ "/fasttext print-word-vectors "+modelPath };
-
+		//String[] cmd = { "bash", "-c", "echo \""+words+"\" | " + fastTextIntallationDir+ "/fasttext print-word-vectors "+modelPath };
+		String[] cmd = { "bash", "-c", "echo \"$(cat "+tmpFile.getAbsolutePath()+")\" | " + fastTextIntallationDir+ "/fasttext print-word-vectors "+modelPath };
+		
 		ProcessBuilder pb = new ProcessBuilder(cmd);
 		Process p = pb.start();
 		p.waitFor();
@@ -1522,7 +1529,7 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 	}
 
 
-	public void writeMapToFile(Map<String, Double> idfs, String file) throws FileNotFoundException {
+	public void writeMapToFile(Map idfs, String file) throws FileNotFoundException {
 		StringBuilder lines = new StringBuilder("");
 		
 		Set<String> keys = idfs.keySet();
@@ -1586,6 +1593,37 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 		}
 				
 		return matrix;
+	}
+
+
+	public Map<String, double[]> readVectorsFromSOMapForWords(HashSet<String> allQueriesWords) throws IOException {
+		long initTime = System.currentTimeMillis();
+		logger.info("Reading all vectors from file...");
+		String[] parts;
+		int vecSize=0;
+		Map<String, double[]> soContentWordVectorsMap = new HashMap<>();
+		List<String> wordsAndVectors = Files.readAllLines(Paths.get(CrokageStaticData.SO_CONTENT_WORD_VECTORS));
+		reportElapsedTime(initTime,"readVectorsFromSOMapForWords - Files.readAllLines...");
+		
+		for(String line: wordsAndVectors) {
+			parts = line.split(" ");
+			if(!allQueriesWords.contains(parts[0])) {
+				continue;
+			}
+			
+			vecSize = parts.length;
+			int vecCol = 0;
+			//List<Double> vectors = new ArrayList<>();
+			double[] vectors = new double[vecSize-1];
+			for(int i=1;i<=vecSize;i++) {
+				vectors[vecCol] = CrokageUtils.round(Double.parseDouble(parts[i]),6);
+				
+			}
+			soContentWordVectorsMap.put(parts[0], vectors);
+		}
+		//System.out.println(bigMapApisIds);
+		reportElapsedTime(initTime,"readVectorsFromSOMapForWords");
+		return soContentWordVectorsMap;
 	}
 
 	

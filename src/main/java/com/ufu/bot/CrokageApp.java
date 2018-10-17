@@ -172,6 +172,10 @@ public class CrokageApp {
 		case "runApproach":
 			runApproach();
 			break;
+		
+		case "generateQuestionsIdsTitlesMap":
+			generateQuestionsIdsTitlesMap();
+			break;	
 				
 		case "buildSOSetOfWords":
 			buildSOSetOfWords();
@@ -261,6 +265,16 @@ public class CrokageApp {
 
 	
 	
+
+	private void generateQuestionsIdsTitlesMap() throws FileNotFoundException {
+		long initTime = System.currentTimeMillis();
+		loadAllQuestionsIdsTitles();
+		crokageUtils.writeMapToFile(allQuestionsIdsTitlesMap, CrokageStaticData.SO_QUESTIONS_IDS_TITLES_MAP);
+		crokageUtils.reportElapsedTime(initTime,"generateQuestionsIdsTitlesMap");
+	}
+
+
+
 
 	private void buildLuceneIndex() {
 		long start = System.currentTimeMillis();
@@ -525,15 +539,18 @@ public class CrokageApp {
 		                LinkedHashMap::new
 		        )); 
 		
+		//remove String
+		filteredSortedMap.remove("String");
+		
 		//generate reduced map
-		CrokageUtils.printMapInfosIntoCVSFile(filteredSortedMap,CrokageStaticData.REDUCED_MAP_INVERTED_INDEX_APIS_FILE_PATH);
+		//CrokageUtils.printMapInfosIntoCVSFile(filteredSortedMap,CrokageStaticData.REDUCED_MAP_INVERTED_INDEX_APIS_FILE_PATH);
 		crokageUtils.reportElapsedTime(initTime,"reduceBigMapFileToMininumAPIsCount");
 	}
 
 
 	private void runApproach() throws Exception {
 		//load input queries considering dataset
-		queries = readInputQueries();
+		processInputQueries();
 		
 		//load apis considering approaches
 		getApisForApproaches();
@@ -594,6 +611,20 @@ public class CrokageApp {
 	}
 
 	
+	private void processInputQueries() throws Exception {
+		List<String> processedQueries = new ArrayList<>();
+		queries = readInputQueries();
+		for(String query: queries) {
+			query = crokageUtils.processQuery(query);
+			processedQueries.add(query);
+		}
+		queries.clear();
+		queries.addAll(processedQueries);
+	}
+
+
+
+
 	private void addVectorsToSoContentWordVectorsMap(Set<Integer> relevantQuestionsIds,	Map<String, double[]> wordMap) throws Exception {
 		List<String> titles = new ArrayList<>();
 		for(Integer questionId:relevantQuestionsIds) {
@@ -613,22 +644,24 @@ public class CrokageApp {
 
 
 	private Map<String, double[]> readSoContentWordVectorsForQueries(List<String> queries) throws Exception {
-		HashSet<String> allQueriesWords = new HashSet<>();
+		HashSet<String> allWordsSet = new HashSet<>();
 		String words[];
 		for(String query: queries) {
 			words = query.split("\\s+");
-			allQueriesWords.addAll(Arrays.asList(words));
+			allWordsSet.addAll(Arrays.asList(words));
 		}
-		allQueriesWords.remove("");
-		StringBuilder allWords = new StringBuilder();
+		allWordsSet.remove("");
+		/*StringBuilder allWords = new StringBuilder();
 		for(String word: allQueriesWords) {
 			allWords.append(word);
 			allWords.append(" ");
-		}
+		}*/
 		
 		
-		logger.info("Reading vectors by demand for "+allQueriesWords.size()+ " words...");
-		Map<String, double[]> vectorsForQueries = crokageUtils.readVectorsForQuery(allWords.toString());
+		logger.info("Reading vectors by demand for "+allWordsSet.size()+ " words...");
+		//Map<String, double[]> vectorsForQueries = crokageUtils.readVectorsForQuery(allWords.toString());
+		Map<String, double[]> vectorsForQueries = crokageUtils.readVectorsFromSOMapForWords(allWordsSet);
+		
 		return vectorsForQueries;
 		
 	}
