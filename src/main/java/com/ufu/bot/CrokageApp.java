@@ -29,6 +29,7 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.assertj.core.util.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -117,6 +118,7 @@ public class CrokageApp {
 	 * Stores the value obtained from the pathFileEnvFlag file
 	 */
 	private Boolean useProxy;
+	private String environment;
 
 	private long initTime;
 	private long endTime;
@@ -149,19 +151,20 @@ public class CrokageApp {
 		soIDFVocabularyMap = new HashMap<>();
 		
 		logger.info("\nConsidering parameters: \n" 
-				+ "\n action: " + action 
-				+ "\n subAction: " + subAction 
 				+ "\n callBIKERProcess: " + callBIKERProcess
 				+ "\n callNLP2ApiProcess: " + callNLP2ApiProcess
 				+ "\n callRACKApiProcess: " + callRACKApiProcess
 				+ "\n pathFileEnvFlag: " + pathFileEnvFlag 
 				+ "\n useProxy: " + useProxy 
+				+ "\n environment: " + environment
 				+ "\n numberOfAPIClasses: " + numberOfAPIClasses 
 				+ "\n limitQueries: " + limitQueries
 				+ "\n cutoff: " + cutoff
 				+ "\n topSimilarQuestionsNumber: " + topSimilarQuestionsNumber
 				+ "\n dataSet: " + dataSet
-				+ "\n obs: " + obs 
+				+ "\n obs: " + obs
+				+ "\n action: " + action 
+				+ "\n subAction: " + subAction 
 				+ "\n");
 
 		switch (action) {
@@ -530,7 +533,7 @@ public class CrokageApp {
 
 	private void runApproach() throws Exception {
 		//load input queries considering dataset
-		readInputQueries();
+		queries = readInputQueries();
 		
 		//load apis considering approaches
 		getApisForApproaches();
@@ -551,7 +554,8 @@ public class CrokageApp {
 		reduceBigMapFileToMininumAPIsCount();
 				
 		//read word vectors map (word, vectors[])
-		readSoContentWordVectors();
+		//readSoContentWordVectors();
+		soContentWordVectorsMap = readSoContentWordVectorsForQueries(queries);
 		
 		//read idf vocabulary map (word, idf)
 		crokageUtils.readIDFVocabulary(soIDFVocabularyMap);
@@ -581,15 +585,57 @@ public class CrokageApp {
 			Set<Integer> relevantQuestionsIds = getCandidateQuestionsFromTopApis(topClasses);
 			logger.info("\nPosts after wrapping in a set: "+relevantQuestionsIds.size());
 			
+			//add vectors for all retrieved queries
+			addVectorsToSoContentWordVectorsMap(relevantQuestionsIds,soContentWordVectorsMap);
 			
 			List<Bucket> topkPosts = calculateRelevance(relevantQuestionsIds,topMethods,matrix1,idf1);
 			
 		}
-		
-			
 	}
 
 	
+	private void addVectorsToSoContentWordVectorsMap(Set<Integer> relevantQuestionsIds,	Map<String, double[]> wordMap) throws Exception {
+		List<String> titles = new ArrayList<>();
+		for(Integer questionId:relevantQuestionsIds) {
+			titles.add(allQuestionsIdsTitlesMap.get(questionId));
+		}
+		
+		Map<String, double[]> titlesWordVectorsMap = readSoContentWordVectorsForQueries(titles);
+		Set<String> keys = titlesWordVectorsMap.keySet();
+		for(String word: keys) {
+			if(!wordMap.containsKey(word)) {
+				wordMap.put(word, titlesWordVectorsMap.get(word));
+			}
+		}
+	}
+
+
+
+
+	private Map<String, double[]> readSoContentWordVectorsForQueries(List<String> queries) throws Exception {
+		HashSet<String> allQueriesWords = new HashSet<>();
+		String words[];
+		for(String query: queries) {
+			words = query.split("\\s+");
+			allQueriesWords.addAll(Arrays.asList(words));
+		}
+		
+		StringBuilder allWords = new StringBuilder();
+		for(String word: allQueriesWords) {
+			allWords.append(word);
+			allWords.append(" ");
+		}
+		
+		
+		logger.info("Reading vectors by demand for "+allQueriesWords.size()+ " words...");
+		Map<String, double[]> vectorsForQueries = crokageUtils.readVectorsForQuery(allWords.toString());
+		return vectorsForQueries;
+		
+	}
+
+
+
+
 	private Set<Integer> getCandidateQuestionsFromTopApis(Set<String> topClasses) {
 		//get ids from reducedMap for top classes
 		topClassesRelevantAnswersIds = new HashSet<>();
@@ -627,6 +673,8 @@ public class CrokageApp {
 			
 			//get the word vectors for each word of the query
 			comparingTitle = allQuestionsIdsTitlesMap.get(questionId);
+			
+			//add 
 			
 			//get vectors for query2 words
 			double[][] matrix2 = CrokageUtils.getMatrixVectorsForQuery(comparingTitle,soContentWordVectorsMap);
@@ -1368,14 +1416,16 @@ public class CrokageApp {
 			if (!StringUtils.isBlank(useProxyStr)) {
 				useProxy = new Boolean(useProxyStr);
 			}
-			String msg = "\nEnvironment property is (useProxy): ";
+			environment = prop.getProperty("environment");
+			
+			String msg = "\nEnvironment property (useProxy): ";
 			if (useProxy) {
 				msg += "with proxy";
 			} else {
 				msg += "no proxy";
 			}
 
-			logger.info(msg);
+			logger.info(msg+"\nnEnvironment: "+environment);
 
 		} catch (IOException ex) {
 			ex.printStackTrace();
