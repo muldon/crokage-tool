@@ -28,6 +28,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -1696,6 +1697,12 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 		
 	}
 	
-	
+	public static <T, E> Set<T> getKeysByValue(Map<T, E> map, E value) {
+	    return map.entrySet()
+	              .stream()
+	              .filter(entry -> Objects.equals(entry.getValue(), value))
+	              .map(Map.Entry::getKey)
+	              .collect(Collectors.toSet());
+	}
 	
 }

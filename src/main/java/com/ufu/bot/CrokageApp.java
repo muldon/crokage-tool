@@ -585,7 +585,7 @@ public class CrokageApp {
 		        )); 
 		
 		//remove String
-		filteredSortedMap.remove("String");
+		//filteredSortedMap.remove("String");
 		
 		//generate reduced map
 		//CrokageUtils.printMapInfosIntoCVSFile(filteredSortedMap,CrokageStaticData.REDUCED_MAP_INVERTED_INDEX_APIS_FILE_PATH);
@@ -702,7 +702,7 @@ public class CrokageApp {
 			       .limit(topSimilarQuestionsNumber)
 			       .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
 		
-		
+		//first 3 questions retrieved by Google
 		System.out.println(topSimilarQuestions.containsKey(3961087));
 		System.out.println(topSimilarQuestions.containsKey(2403830));
 		System.out.println(topSimilarQuestions.containsKey(15968883));
@@ -718,23 +718,32 @@ public class CrokageApp {
 		
 		
 		//fetch again the answers related to those questions
-		Set<Integer> answersIds = new HashSet<>();
+		List<Integer> answersIds = new ArrayList<>();
 		
-		for(Integer answerId : topClassesRelevantAnswersIds){
+		for(Integer quesitonId: topSimilarQuestionsIds) {
+			if(allAnswersWithUpvotesIdsParentIdsMap.containsValue(quesitonId)) {
+				Set<Integer> keys = CrokageUtils.getKeysByValue(allAnswersWithUpvotesIdsParentIdsMap, quesitonId);
+				for(Integer key: keys) {
+					answersIds.add(key);
+				}
+			}
+		}
+		
+		/*for(Integer answerId : topClassesRelevantAnswersIds){
 			if(topSimilarQuestionsIds.contains(allAnswersWithUpvotesIdsParentIdsMap.get(answerId))) {
 				answersIds.add(answerId);
 		    }
-		}
+		}*/
 		
 		listSize = answersIds.size();
 		k = listSize > topSimilarQuestionsNumber? topSimilarQuestionsNumber:listSize;
 		String topAnswersIds= "Number of relevant answers to top similar questions: "+listSize+ ", showing ("+k+"): ";
-		topAnswersIds+= StringUtils.join(new ArrayList(answersIds).subList(0, k), ',');
+		topAnswersIds+= StringUtils.join(answersIds.subList(0, k), ',');
 		logger.info(topAnswersIds.toString());
 		
 		
 		//fetch body and code of answers
-		List<Bucket> answerBuckets = crokageService.getBucketsByIds(answersIds);
+		List<Bucket> answerBuckets = crokageService.getBucketsByIds(new HashSet(answersIds));
 		
 		//answers with code
 		for(Bucket bucket:answerBuckets) {
@@ -849,6 +858,9 @@ public class CrokageApp {
 				answersWithNoUpvotes.add(answerId);
 			}
 		}
+		
+		topClassesRelevantAnswersIds.removeAll(answersWithNoUpvotes);
+		
 		int listSize = answersWithNoUpvotes.size();
 		int k = listSize > 10? 10:listSize; 
 		
