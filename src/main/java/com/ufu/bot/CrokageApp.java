@@ -103,6 +103,9 @@ public class CrokageApp {
 	@Value("${topSimilarQuestionsNumber}")
 	public Integer topSimilarQuestionsNumber;
 	
+	@Value("${topSimilarAnswersNumber}")
+	public Integer topSimilarAnswersNumber;
+	
 	
 	
 	/*
@@ -138,6 +141,9 @@ public class CrokageApp {
 	private Map<Integer,Integer> allAnswersWithUpvotesIdsParentIdsMap;
 	private Set<Integer> topClassesRelevantAnswersIds;
 	private List<String> wordsAndVectorsLines;
+	private Map<Integer,Double> questionsIdsScores;
+	private Map<Integer,Double> answersIdsScores;
+	
 
 	@PostConstruct
 	public void init() throws Exception {
@@ -152,6 +158,8 @@ public class CrokageApp {
 		wordsAndVectorsLines = new ArrayList<>();
 		soContentWordVectorsMap = new HashMap<>();
 		allQuestionsIdsTitlesMap = new HashMap<>();
+		questionsIdsScores = new HashMap<>();
+		answersIdsScores = new HashMap<>();
 		
 		logger.info("\nConsidering parameters: \n" 
 				+ "\n callBIKERProcess: " + callBIKERProcess
@@ -164,6 +172,7 @@ public class CrokageApp {
 				+ "\n limitQueries: " + limitQueries
 				+ "\n cutoff: " + cutoff
 				+ "\n topSimilarQuestionsNumber: " + topSimilarQuestionsNumber
+				+ "\n topSimilarAnswersNumber: " + topSimilarAnswersNumber
 				+ "\n dataSet: " + dataSet
 				+ "\n obs: " + obs
 				+ "\n action: " + action 
@@ -678,7 +687,7 @@ public class CrokageApp {
 			//add vectors for all retrieved questions titles
 			addVectorsToSoContentWordVectorsMap(relevantQuestionsIds);
 			
-			List<Bucket> topkPosts = calculateRelevance(relevantQuestionsIds,topMethods,matrix1,idf1,key);
+			List<Bucket> topkPosts = calculateRelevance(relevantQuestionsIds,topMethods,matrix1,idf1,key,query);
 			
 		}
 	}
@@ -686,11 +695,11 @@ public class CrokageApp {
 	
 
 
-	private List<Bucket> calculateRelevance(Set<Integer> relevantQuestionsIds, List<String> topMethods, double[][] matrix1, double[][] idf1, Integer key) {
+	private List<Bucket> calculateRelevance(Set<Integer> relevantQuestionsIds, List<String> topMethods, double[][] matrix1, double[][] idf1, Integer key, String query) {
 		//parse query
 		
 		String comparingTitle;
-		Map<Integer,Double> questionsIdsScores = new HashMap<>();
+		questionsIdsScores.clear();
 		
 		for(Integer questionId:relevantQuestionsIds) {
 			
@@ -718,17 +727,10 @@ public class CrokageApp {
 			       .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
 		
 		
-			
 		Set<Integer> topSimilarQuestionsIds = topSimilarQuestions.keySet();
 		
-		int listSize = topSimilarQuestionsIds.size();
-		int k = listSize > topSimilarQuestionsNumber? topSimilarQuestionsNumber:listSize;
-		String topQuestionsIds= "Top similar related questions ids ("+k+"): ";
-		topQuestionsIds+= StringUtils.join(new ArrayList(topSimilarQuestionsIds).subList(0, k), ',');
-		logger.info(topQuestionsIds.toString());
+		reportSimilarRelatedPosts(topSimilarQuestionsIds,"questions","");
 		
-		
-
 		//first 3 questions retrieved by Google
 
 		if(key==1) {
@@ -757,7 +759,7 @@ public class CrokageApp {
 		
 		
 		//fetch again the answers related to those questions
-		List<Integer> answersIds = new ArrayList<>();
+		Set<Integer> answersIds = new LinkedHashSet<>();
 		
 		for(Integer quesitonId: topSimilarQuestionsIds) {
 			if(allAnswersWithUpvotesIdsParentIdsMap.containsValue(quesitonId)) {
@@ -770,23 +772,40 @@ public class CrokageApp {
 			}
 		}
 		
-		
-		listSize = answersIds.size();
+		reportSimilarRelatedPosts(answersIds,"answers","End of Ranking phase 1: ");
+		/*listSize = answersIds.size();
 		k = listSize > topSimilarQuestionsNumber? topSimilarQuestionsNumber:listSize;
-		String topAnswersIds= "Number of relevant answers with codes and upvotes to top similar questions: "+listSize+ ", showing ("+k+"): ";
+		String topAnswersIds= "End of Ranking phase 1: number of relevant answers with codes and upvotes to top similar questions: "+listSize+ ", showing ("+k+") in order: ";
 		topAnswersIds+= StringUtils.join(answersIds.subList(0, k), ',');
-		logger.info(topAnswersIds.toString());
+		logger.info(topAnswersIds.toString());*/
 		
 		
-		//fetch body and code of answers
+		long initTime = System.currentTimeMillis();
 		List<Bucket> answerBuckets = crokageService.getBucketsByIds(new HashSet(answersIds));
+		crokageUtils.reportElapsedTime(initTime,"getBucketsByIds");
+		//fetch body and code of answers
 		
+		
+		String comparingContent;
+		answersIdsScores.clear();
 		//answers with code
 		for(Bucket bucket:answerBuckets) {
 			
-			//System.out.println(bucket.getId());
+			//second ranking
 			
+			//get the word vectors for each word of the query
+			comparingContent = bucket.getProcessedBody()+ " "+bucket.getProcessedCode();
 			
+			//get vectors for query2 words
+			double[][] matrix2 = CrokageUtils.getMatrixVectorsForQuery(comparingContent,soContentWordVectorsMap);
+			
+			//get idfs for query2
+			double[][] idf2 = CrokageUtils.getIDFMatrixForQuery(comparingContent, soIDFVocabularyMap);
+			
+			double simPair = CrokageUtils.round(Matrix.simDocPair(matrix1,matrix2,idf1,idf2),6);
+			
+			answersIdsScores.put(bucket.getId(), simPair);
+			logger.info("id: "+bucket.getId()+ " -score: "+simPair);
 			
 			//observar ex: https://stackoverflow.com/questions/1053467/how-do-i-save-a-string-to-a-text-file-using-java
 			
@@ -799,10 +818,15 @@ public class CrokageApp {
 			
 			
 			//comentarios com sentimento positivo
-			
-			
-			
 		}
+		
+		//sort scores in descending order and consider the first topSimilarAnswersNumber parameter
+		Map<Integer,Double> topSimilarAnswers = answersIdsScores.entrySet().stream()
+			       .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+			       .limit(topSimilarAnswersNumber)
+			       .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+		
+		reportSimilarRelatedPosts(topSimilarAnswers.keySet(),"answers","End of Ranking phase 2: ");
 		
 		
 		return answerBuckets;
@@ -810,6 +834,19 @@ public class CrokageApp {
 
 
 	
+
+
+	private void reportSimilarRelatedPosts(Set<Integer> topSimilarIds, String postType, String obs) {
+		int listSize = topSimilarIds.size();
+		int k = listSize > topSimilarQuestionsNumber? topSimilarQuestionsNumber:listSize;
+		String topIdsStr= obs+ " - Number of related "+postType+":"+listSize +". Showing first ("+k+") ids: ";
+		topIdsStr+= StringUtils.join(new ArrayList(topSimilarIds).subList(0, k), ',');
+		logger.info(topIdsStr.toString());
+		
+		
+	}
+
+
 
 
 	private void addVectorsToSoContentWordVectorsMap(Set<Integer> relevantQuestionsIds) throws Exception {

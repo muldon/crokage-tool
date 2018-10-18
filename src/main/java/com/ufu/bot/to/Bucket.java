@@ -11,7 +11,11 @@ public class Bucket {
 	
 	private String body;
 	
+	private String processedBody;
+	
 	private String code;
+	
+	private String processedCode;
 	
 	private Integer upVotesScore;
 	
@@ -102,12 +106,10 @@ public class Bucket {
 	}
 
 	
+
 	@Override
 	public String toString() {
-		return "Bucket [id=" + id + ", body=" + body + ", code=" + code + ", upVotesScore=" + upVotesScore
-				+ ", userReputation=" + userReputation + ", commentCount=" + commentCount + ", viewCount=" + viewCount
-				+ ", acceptedAnswer=" + acceptedAnswer + ", parentUpVotesScore=" + parentUpVotesScore
-				+ ", calculatedScore=" + calculatedScore + "]";
+		return "Bucket [id=" + id + ", body=" + body + ", code=" + code + ", calculatedScore=" + calculatedScore + "]";
 	}
 
 	public Integer getUserReputation() {
@@ -156,6 +158,22 @@ public class Bucket {
 
 	public void setCalculatedScore(Double calculatedScore) {
 		this.calculatedScore = calculatedScore;
+	}
+
+	public String getProcessedBody() {
+		return processedBody;
+	}
+
+	public void setProcessedBody(String processedBody) {
+		this.processedBody = processedBody;
+	}
+
+	public String getProcessedCode() {
+		return processedCode;
+	}
+
+	public void setProcessedCode(String processedCode) {
+		this.processedCode = processedCode;
 	}
 	
 	

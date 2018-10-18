@@ -357,7 +357,7 @@ public class GenericRepositoryImpl implements GenericRepository {
 		idsIn+= "#end";
 		idsIn = idsIn.replace(",#end", "");
 		
-		String sql = " select po.id,po.body,po.code,u.reputation,po.commentcount,po.viewcount,po.score,parent.acceptedanswerid, parent.score as parentscore "  
+		String sql = " select po.id,po.body,po.code,u.reputation,po.commentcount,po.viewcount,po.score,parent.acceptedanswerid, parent.score as parentscore,po.processedbody,po.processedcode "  
 				+ " from postsmin po, usersmin u, postsmin parent  "  
 				+ " where po.owneruserid=u.id" 
 				+ " and po.parentid = parent.id"  
@@ -379,6 +379,8 @@ public class GenericRepositoryImpl implements GenericRepository {
 			bucket.setUpVotesScore((Integer) row[6]);
 			bucket.setAcceptedAnswer( ((Integer) row[7]) != null ? true: false);
 			bucket.setParentUpVotesScore((Integer) row[8]);
+			bucket.setProcessedBody((String) row[9]);
+			bucket.setProcessedCode((String) row[10]);
 			result.add(bucket);			
 		}
 		
