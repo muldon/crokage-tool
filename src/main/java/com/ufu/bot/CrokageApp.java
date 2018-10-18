@@ -649,21 +649,36 @@ public class CrokageApp {
 			
 			Set<Integer> relevantQuestionsIds = getCandidateQuestionsFromTopApis(topClasses);
 			
-			if(relevantQuestionsIds.contains(3961087)) {
-				System.out.println("here..");
+			
+			if(key==1) {
+				if(relevantQuestionsIds.contains(7384908)) {
+					System.out.println("here 1..");
+				}
+				if(relevantQuestionsIds.contains(7074402)) {
+					System.out.println("here 1..");
+				}
+				if(relevantQuestionsIds.contains(7679819)) {
+					System.out.println("here 1..");
+				}
 			}
-			if(relevantQuestionsIds.contains(2403830)) {
-				System.out.println("here..");
+			if(key==2) {
+				if(relevantQuestionsIds.contains(3961087)) {
+					System.out.println("here 1..");
+				}
+				if(relevantQuestionsIds.contains(2403830)) {
+					System.out.println("here 1..");
+				}
+				if(relevantQuestionsIds.contains(15968883)) {
+					System.out.println("here 1..");
+				}
 			}
-			if(relevantQuestionsIds.contains(15968883)) {
-				System.out.println("here..");
-			}
+			
 			
 				
 			//add vectors for all retrieved questions titles
 			addVectorsToSoContentWordVectorsMap(relevantQuestionsIds);
 			
-			List<Bucket> topkPosts = calculateRelevance(relevantQuestionsIds,topMethods,matrix1,idf1);
+			List<Bucket> topkPosts = calculateRelevance(relevantQuestionsIds,topMethods,matrix1,idf1,key);
 			
 		}
 	}
@@ -671,7 +686,7 @@ public class CrokageApp {
 	
 
 
-	private List<Bucket> calculateRelevance(Set<Integer> relevantQuestionsIds, List<String> topMethods, double[][] matrix1, double[][] idf1) {
+	private List<Bucket> calculateRelevance(Set<Integer> relevantQuestionsIds, List<String> topMethods, double[][] matrix1, double[][] idf1, Integer key) {
 		//parse query
 		
 		String comparingTitle;
@@ -702,12 +717,8 @@ public class CrokageApp {
 			       .limit(topSimilarQuestionsNumber)
 			       .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
 		
-		//first 3 questions retrieved by Google
-		System.out.println(topSimilarQuestions.containsKey(3961087));
-		System.out.println(topSimilarQuestions.containsKey(2403830));
-		System.out.println(topSimilarQuestions.containsKey(15968883));
-	
 		
+			
 		Set<Integer> topSimilarQuestionsIds = topSimilarQuestions.keySet();
 		
 		int listSize = topSimilarQuestionsIds.size();
@@ -717,27 +728,52 @@ public class CrokageApp {
 		logger.info(topQuestionsIds.toString());
 		
 		
+
+		//first 3 questions retrieved by Google
+
+		if(key==1) {
+			if(topSimilarQuestionsIds.contains(7384908)) {
+				System.out.println("here 2..7384908");
+			}
+			if(topSimilarQuestionsIds.contains(7074402)) {
+				System.out.println("here 2..7074402");
+			}
+			if(topSimilarQuestionsIds.contains(7679819)) {
+				System.out.println("here 2..7679819");
+			}
+		}
+		if(key==2) {
+			if(topSimilarQuestionsIds.contains(3961087)) {
+				System.out.println("here 2..3961087");
+			}
+			if(topSimilarQuestionsIds.contains(2403830)) {
+				System.out.println("here 2..2403830");
+			}
+			if(topSimilarQuestionsIds.contains(15968883)) {
+				System.out.println("here 2..15968883");
+			}
+		}
+		
+		
+		
 		//fetch again the answers related to those questions
 		List<Integer> answersIds = new ArrayList<>();
 		
 		for(Integer quesitonId: topSimilarQuestionsIds) {
 			if(allAnswersWithUpvotesIdsParentIdsMap.containsValue(quesitonId)) {
 				Set<Integer> keys = CrokageUtils.getKeysByValue(allAnswersWithUpvotesIdsParentIdsMap, quesitonId);
-				for(Integer key: keys) {
-					answersIds.add(key);
+				for(Integer id: keys) {
+					if(topClassesRelevantAnswersIds.contains(id)) {
+						answersIds.add(id);
+					}
 				}
 			}
 		}
 		
-		/*for(Integer answerId : topClassesRelevantAnswersIds){
-			if(topSimilarQuestionsIds.contains(allAnswersWithUpvotesIdsParentIdsMap.get(answerId))) {
-				answersIds.add(answerId);
-		    }
-		}*/
 		
 		listSize = answersIds.size();
 		k = listSize > topSimilarQuestionsNumber? topSimilarQuestionsNumber:listSize;
-		String topAnswersIds= "Number of relevant answers to top similar questions: "+listSize+ ", showing ("+k+"): ";
+		String topAnswersIds= "Number of relevant answers with codes and upvotes to top similar questions: "+listSize+ ", showing ("+k+"): ";
 		topAnswersIds+= StringUtils.join(answersIds.subList(0, k), ',');
 		logger.info(topAnswersIds.toString());
 		
@@ -868,7 +904,7 @@ public class CrokageApp {
 		
 		logger.info("\nNumber of relevant questions to relevant answers: "+relevantQuestionsIds.size());
 		logger.info("\nNumber of discarded answers because they have no upvotes: "+answersWithNoUpvotes.size()+ " showing "+k+": "+answersWithNoUpvotesStr);
-		
+		logger.info("\nNumber of candidate answers left - stage 1: "+topClassesRelevantAnswersIds.size());
 		
 		return relevantQuestionsIds;
 	}
