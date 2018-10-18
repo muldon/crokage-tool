@@ -597,7 +597,7 @@ public class CrokageApp {
 		//load questions map (id,title)
 		readQuestionsIdsTitlesMap();
 		
-		//load so content word vectors to a string
+		//load so content word vectors to a list of strings representing posts (each line is a post)
 		readSOContentWordAndVectorsLines();
 		
 		//load input queries considering dataset
@@ -649,6 +649,17 @@ public class CrokageApp {
 			
 			Set<Integer> relevantQuestionsIds = getCandidateQuestionsFromTopApis(topClasses);
 			
+			if(relevantQuestionsIds.contains(3961087)) {
+				System.out.println("here..");
+			}
+			if(relevantQuestionsIds.contains(2403830)) {
+				System.out.println("here..");
+			}
+			if(relevantQuestionsIds.contains(15968883)) {
+				System.out.println("here..");
+			}
+			
+				
 			//add vectors for all retrieved questions titles
 			addVectorsToSoContentWordVectorsMap(relevantQuestionsIds);
 			
@@ -658,18 +669,102 @@ public class CrokageApp {
 	}
 
 	
-	private void processInputQueries() throws Exception {
-		List<String> processedQueries = new ArrayList<>();
-		queries = readInputQueries();
-		for(String query: queries) {
-			query = crokageUtils.processQuery(query);
-			processedQueries.add(query);
+
+
+	private List<Bucket> calculateRelevance(Set<Integer> relevantQuestionsIds, List<String> topMethods, double[][] matrix1, double[][] idf1) {
+		//parse query
+		
+		String comparingTitle;
+		Map<Integer,Double> questionsIdsScores = new HashMap<>();
+		
+		for(Integer questionId:relevantQuestionsIds) {
+			
+			//get the word vectors for each word of the query
+			comparingTitle = allQuestionsIdsTitlesMap.get(questionId);
+			
+			//get vectors for query2 words
+			double[][] matrix2 = CrokageUtils.getMatrixVectorsForQuery(comparingTitle,soContentWordVectorsMap);
+			
+			//get idfs for query2
+			double[][] idf2 = CrokageUtils.getIDFMatrixForQuery(comparingTitle, soIDFVocabularyMap);
+			
+			double simPair = CrokageUtils.round(Matrix.simDocPair(matrix1,matrix2,idf1,idf2),6);
+			
+			questionsIdsScores.put(questionId, simPair);
+			
 		}
-		queries.clear();
-		queries.addAll(processedQueries);
+		
+
+		
+		//sort scores in descending order and consider the first topSimilarQuestionsNumber parameter
+		Map<Integer,Double> topSimilarQuestions = questionsIdsScores.entrySet().stream()
+			       .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+			       .limit(topSimilarQuestionsNumber)
+			       .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+		
+		
+		System.out.println(topSimilarQuestions.containsKey(3961087));
+		System.out.println(topSimilarQuestions.containsKey(2403830));
+		System.out.println(topSimilarQuestions.containsKey(15968883));
+	
+		
+		Set<Integer> topSimilarQuestionsIds = topSimilarQuestions.keySet();
+		StringBuilder topQuestionsIds= new StringBuilder("Top related questions: \n\n");
+		int pos=1;
+		for(Integer questionId: topSimilarQuestionsIds) {
+			topQuestionsIds.append(pos);
+			topQuestionsIds.append("-");
+			topQuestionsIds.append(questionId);
+			topQuestionsIds.append("\n");
+			pos++;
+			if(pos==20) {
+				break;
+			}
+		}
+		logger.info(topQuestionsIds.toString());
+		
+		
+		//fetch again the answers related to those questions
+		Set<Integer> answersIds = new HashSet<>();
+		
+		for(Integer answerId : topClassesRelevantAnswersIds){
+			if(topSimilarQuestionsIds.contains(allAnswersIdsParentIdsMap.get(answerId))) {
+				answersIds.add(answerId);
+		    }
+		}
+		
+		//fetch body and code of answers
+		List<Bucket> answerBuckets = crokageService.getBucketsByIds(answersIds);
+		
+		//answers with code
+		for(Bucket bucket:answerBuckets) {
+			
+			System.out.println(bucket.getId());
+			
+			
+			
+			//observar ex: https://stackoverflow.com/questions/1053467/how-do-i-save-a-string-to-a-text-file-using-java
+			
+			//score da pergunta : parentUpVotesScore
+			
+			//codigo deve ter chamada de método com ponto *.*
+			
+			//poucas linhas de codigo (desconsiderar imports . pontuar imports )
+			
+			
+			
+			//comentarios com sentimento positivo
+			
+			
+			
+		}
+		
+		
+		return answerBuckets;
 	}
 
 
+	
 
 
 	private void addVectorsToSoContentWordVectorsMap(Set<Integer> relevantQuestionsIds) throws Exception {
@@ -752,103 +847,6 @@ public class CrokageApp {
 		logger.info("\nNumber of relevant questions to relevant answers: "+relevantQuestionsIds.size());
 		return relevantQuestionsIds;
 	}
-
-
-	private List<Bucket> calculateRelevance(Set<Integer> relevantQuestionsIds, List<String> topMethods, double[][] matrix1, double[][] idf1) {
-		//parse query
-		
-		String comparingTitle;
-		Map<Integer,Double> questionsIdsScores = new HashMap<>();
-		
-		for(Integer questionId:relevantQuestionsIds) {
-			
-			try {
-			if(questionId.equals(43966301)) {
-				System.out.println("here..");
-			}
-			//get the word vectors for each word of the query
-			comparingTitle = allQuestionsIdsTitlesMap.get(questionId);
-			
-			//get vectors for query2 words
-			double[][] matrix2 = CrokageUtils.getMatrixVectorsForQuery(comparingTitle,soContentWordVectorsMap);
-			
-			//get idfs for query2
-			double[][] idf2 = CrokageUtils.getIDFMatrixForQuery(comparingTitle, soIDFVocabularyMap);
-			
-			double simPair = Matrix.simDocPair(matrix1,matrix2,idf1,idf2);
-			
-			questionsIdsScores.put(questionId, simPair);
-			
-			} catch (Exception e) {
-				System.err.println("Error here: post: "+questionId+" - "+e);
-			}
-			
-		}
-		
-
-		
-		//sort scores in descending order and consider the first topSimilarQuestionsNumber parameter
-		Map<Integer,Double> topSimilarQuestions = questionsIdsScores.entrySet().stream()
-			       .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
-			       .limit(topSimilarQuestionsNumber)
-			       .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
-		
-		
-		Set<Integer> topSimilarQuestionsIds = topSimilarQuestions.keySet();
-		StringBuilder topQuestionsIds= new StringBuilder("Top related questions: \n\n");
-		int pos=1;
-		for(Integer questionId: topSimilarQuestionsIds) {
-			topQuestionsIds.append(pos);
-			topQuestionsIds.append("-");
-			topQuestionsIds.append(questionId);
-			topQuestionsIds.append("\n");
-			pos++;
-			if(pos==20) {
-				break;
-			}
-		}
-		logger.info(topQuestionsIds.toString());
-		
-		
-		//fetch again the answers related to those questions
-		Set<Integer> answersIds = new HashSet<>();
-		
-		for(Integer answerId : topClassesRelevantAnswersIds){
-			if(topSimilarQuestionsIds.contains(allAnswersIdsParentIdsMap.get(answerId))) {
-				answersIds.add(answerId);
-		    }
-		}
-		
-		//fetch body and code of answers
-		List<Bucket> answerBuckets = crokageService.getBucketsByIds(answersIds);
-		
-		//answers with code
-		for(Bucket bucket:answerBuckets) {
-			
-			System.out.println(bucket.getId());
-			
-			
-			
-			//observar ex: https://stackoverflow.com/questions/1053467/how-do-i-save-a-string-to-a-text-file-using-java
-			
-			//score da pergunta : parentUpVotesScore
-			
-			//codigo deve ter chamada de método com ponto *.*
-			
-			//poucas linhas de codigo (desconsiderar imports . pontuar imports )
-			
-			
-			
-			//comentarios com sentimento positivo
-			
-			
-			
-		}
-		
-		
-		return answerBuckets;
-	}
-
 
 	private void loadAllAnswersIdsParentIds() {
 		long initTime = System.currentTimeMillis();
@@ -1465,6 +1463,19 @@ public class CrokageApp {
 		List<String> apis = ctProvider.recommendRelevantAPIs();
 		return new LinkedHashSet<>(apis);
 	}*/
+	
+	private void processInputQueries() throws Exception {
+		List<String> processedQueries = new ArrayList<>();
+		queries = readInputQueries();
+		for(String query: queries) {
+			query = crokageUtils.processQuery(query);
+			processedQueries.add(query);
+		}
+		queries.clear();
+		queries.addAll(processedQueries);
+	}
+
+
 
 	public List<String> readInputQueries() throws Exception {
 		long initTime = System.currentTimeMillis();

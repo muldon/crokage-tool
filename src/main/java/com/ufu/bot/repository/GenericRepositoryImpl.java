@@ -413,7 +413,8 @@ public class GenericRepositoryImpl implements GenericRepository {
 	public Map<Integer, Integer> getAnswersIdsParentIds() {
 		String sql = " select po.id,po.parentid "
 				+ " from postsmin po"
-				+ " where po.posttypeid=2";  
+				+ " where po.posttypeid=2"
+				+ " and po.score>0";  
 			
 			
 		Query q = em.createNativeQuery(sql);
