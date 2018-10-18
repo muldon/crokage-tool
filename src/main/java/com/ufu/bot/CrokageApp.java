@@ -135,7 +135,7 @@ public class CrokageApp {
 	private Map<String,Double> soIDFVocabularyMap;
 	private Map<String,Double> queryIDFVectorsMap;
 	private Map<Integer,String> allQuestionsIdsTitlesMap;
-	private Map<Integer,Integer> allAnswersIdsParentIdsMap;
+	private Map<Integer,Integer> allAnswersWithUpvotesIdsParentIdsMap;
 	private Set<Integer> topClassesRelevantAnswersIds;
 	private List<String> wordsAndVectorsLines;
 
@@ -285,8 +285,8 @@ public class CrokageApp {
 	private void readAnswersIdsParentsMap() throws IOException {
 		long initTime = System.currentTimeMillis();
 		List<String> idsAndids = Files.readAllLines(Paths.get(CrokageStaticData.SO_ANSWERS_IDS_PARENT_IDS_MAP));
-		allAnswersIdsParentIdsMap = new HashMap<>();
-		crokageUtils.readWordsFromFileToMap2(allAnswersIdsParentIdsMap, idsAndids);
+		allAnswersWithUpvotesIdsParentIdsMap = new HashMap<>();
+		crokageUtils.readWordsFromFileToMap2(allAnswersWithUpvotesIdsParentIdsMap, idsAndids);
 		crokageUtils.reportElapsedTime(initTime,"readAnswersIdsParentsMap");
 	}
 
@@ -296,7 +296,7 @@ public class CrokageApp {
 	private void generateAnswersIdsParentsMap() throws FileNotFoundException {
 		long initTime = System.currentTimeMillis();
 		loadAllAnswersIdsParentIds();
-		crokageUtils.writeMapToFile3(allAnswersIdsParentIdsMap, CrokageStaticData.SO_ANSWERS_IDS_PARENT_IDS_MAP);
+		crokageUtils.writeMapToFile3(allAnswersWithUpvotesIdsParentIdsMap, CrokageStaticData.SO_ANSWERS_IDS_PARENT_IDS_MAP);
 		crokageUtils.reportElapsedTime(initTime,"generateAnswersIdsParentsMap");
 	}
 
@@ -709,18 +709,11 @@ public class CrokageApp {
 	
 		
 		Set<Integer> topSimilarQuestionsIds = topSimilarQuestions.keySet();
-		StringBuilder topQuestionsIds= new StringBuilder("Top related questions: \n\n");
-		int pos=1;
-		for(Integer questionId: topSimilarQuestionsIds) {
-			topQuestionsIds.append(pos);
-			topQuestionsIds.append("-");
-			topQuestionsIds.append(questionId);
-			topQuestionsIds.append("\n");
-			pos++;
-			if(pos==20) {
-				break;
-			}
-		}
+		
+		int listSize = topSimilarQuestionsIds.size();
+		int k = listSize > topSimilarQuestionsNumber? topSimilarQuestionsNumber:listSize;
+		String topQuestionsIds= "Top similar related questions ids ("+k+"): ";
+		topQuestionsIds+= StringUtils.join(new ArrayList(topSimilarQuestionsIds).subList(0, k), ',');
 		logger.info(topQuestionsIds.toString());
 		
 		
@@ -728,10 +721,17 @@ public class CrokageApp {
 		Set<Integer> answersIds = new HashSet<>();
 		
 		for(Integer answerId : topClassesRelevantAnswersIds){
-			if(topSimilarQuestionsIds.contains(allAnswersIdsParentIdsMap.get(answerId))) {
+			if(topSimilarQuestionsIds.contains(allAnswersWithUpvotesIdsParentIdsMap.get(answerId))) {
 				answersIds.add(answerId);
 		    }
 		}
+		
+		listSize = answersIds.size();
+		k = listSize > topSimilarQuestionsNumber? topSimilarQuestionsNumber:listSize;
+		String topAnswersIds= "Top similar related answers ids ("+k+"): ";
+		topAnswersIds+= StringUtils.join(new ArrayList(answersIds).subList(0, k), ',');
+		logger.info(topAnswersIds.toString());
+		
 		
 		//fetch body and code of answers
 		List<Bucket> answerBuckets = crokageService.getBucketsByIds(answersIds);
@@ -739,7 +739,7 @@ public class CrokageApp {
 		//answers with code
 		for(Bucket bucket:answerBuckets) {
 			
-			System.out.println(bucket.getId());
+			//System.out.println(bucket.getId());
 			
 			
 			
@@ -828,6 +828,8 @@ public class CrokageApp {
 		//get ids from reducedMap for top classes
 		topClassesRelevantAnswersIds = new HashSet<>();
 		Set<Integer> relevantQuestionsIds = new HashSet<>();
+		List<Integer> answersWithNoUpvotes = new ArrayList<>();  //allAnswersWithUpvotesIdsParentIdsMap is filled with previou process that fetches answers with upvotes
+		
 		for(String topClass:topClasses) {
 			Set<Integer> idsFromBigMap = filteredSortedMap.get(topClass);
 			if(idsFromBigMap!=null) {
@@ -837,20 +839,31 @@ public class CrokageApp {
 			}
 		}
 		
-		logger.info("\nAt least "+topClassesRelevantAnswersIds.size()+ " answers contain those classes. Fetching their questions...");
-		
+		logger.info("\nAt least "+topClassesRelevantAnswersIds.size()+ " answers contain those classes. Filtering relevants...");
 		
 		for(Integer answerId: topClassesRelevantAnswersIds) {
-			int questionId = allAnswersIdsParentIdsMap.get(answerId);
-			relevantQuestionsIds.add(questionId);
+			if(allAnswersWithUpvotesIdsParentIdsMap.get(answerId)!=null) {
+				int questionId = allAnswersWithUpvotesIdsParentIdsMap.get(answerId);
+				relevantQuestionsIds.add(questionId);
+			}else {
+				answersWithNoUpvotes.add(answerId);
+			}
 		}
+		int listSize = answersWithNoUpvotes.size();
+		int k = listSize > 10? 10:listSize; 
+		
+		String answersWithNoUpvotesStr = StringUtils.join(answersWithNoUpvotes.subList(0, k), ',');
+		
 		logger.info("\nNumber of relevant questions to relevant answers: "+relevantQuestionsIds.size());
+		logger.info("\nNumber of discarded answers because they have no upvotes: "+answersWithNoUpvotes.size()+ " showing "+k+": "+answersWithNoUpvotesStr);
+		
+		
 		return relevantQuestionsIds;
 	}
 
 	private void loadAllAnswersIdsParentIds() {
 		long initTime = System.currentTimeMillis();
-		allAnswersIdsParentIdsMap = crokageService.getAnswersIdsParentIds();
+		allAnswersWithUpvotesIdsParentIdsMap = crokageService.getAnswersIdsParentIds();
 		crokageUtils.reportElapsedTime(initTime,"loadAllAnswersIdsParentIds");
 	}
 
