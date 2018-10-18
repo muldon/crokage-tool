@@ -728,7 +728,7 @@ public class CrokageApp {
 		
 		listSize = answersIds.size();
 		k = listSize > topSimilarQuestionsNumber? topSimilarQuestionsNumber:listSize;
-		String topAnswersIds= "Top similar related answers ids ("+k+"): ";
+		String topAnswersIds= "Number of relevant answers to top similar questions: "+listSize+ ", showing ("+k+"): ";
 		topAnswersIds+= StringUtils.join(new ArrayList(answersIds).subList(0, k), ',');
 		logger.info(topAnswersIds.toString());
 		
