@@ -143,7 +143,7 @@ public class CrokageApp {
 	private List<String> wordsAndVectorsLines;
 	private Map<Integer,Double> questionsIdsScores;
 	private Map<Integer,Double> answersIdsScores;
-	
+	private Set<String> allWordsSetForBuckets;
 
 	@PostConstruct
 	public void init() throws Exception {
@@ -160,6 +160,7 @@ public class CrokageApp {
 		allQuestionsIdsTitlesMap = new HashMap<>();
 		questionsIdsScores = new HashMap<>();
 		answersIdsScores = new HashMap<>();
+		allWordsSetForBuckets = new HashSet<>();
 		
 		logger.info("\nConsidering parameters: \n" 
 				+ "\n callBIKERProcess: " + callBIKERProcess
@@ -695,7 +696,7 @@ public class CrokageApp {
 	
 
 
-	private List<Bucket> calculateRelevance(Set<Integer> relevantQuestionsIds, List<String> topMethods, double[][] matrix1, double[][] idf1, Integer key, String query) {
+	private List<Bucket> calculateRelevance(Set<Integer> relevantQuestionsIds, List<String> topMethods, double[][] matrix1, double[][] idf1, Integer key, String query) throws IOException {
 		//parse query
 		
 		String comparingTitle;
@@ -780,10 +781,17 @@ public class CrokageApp {
 		logger.info(topAnswersIds.toString());*/
 		
 		
+		//fetch answers fields
 		long initTime = System.currentTimeMillis();
 		List<Bucket> answerBuckets = crokageService.getBucketsByIds(new HashSet(answersIds));
 		crokageUtils.reportElapsedTime(initTime,"getBucketsByIds");
-		//fetch body and code of answers
+		
+		allWordsSetForBuckets = getAllWordsForBuckets(answerBuckets); 
+		
+		
+		logger.info("Reading vectors by demand for "+allWordsSetForBuckets.size()+ " words. Size of soContentWordVectorsMap before: "+soContentWordVectorsMap.size());
+		soContentWordVectorsMap.putAll(crokageUtils.readVectorsFromSOMapForWords(allWordsSetForBuckets,wordsAndVectorsLines));
+		logger.info("Size after: "+soContentWordVectorsMap.size());
 		
 		
 		String comparingContent;
@@ -792,6 +800,8 @@ public class CrokageApp {
 		for(Bucket bucket:answerBuckets) {
 			
 			//second ranking
+			try {
+				
 			
 			//get the word vectors for each word of the query
 			comparingContent = bucket.getProcessedBody()+ " "+bucket.getProcessedCode();
@@ -818,6 +828,11 @@ public class CrokageApp {
 			
 			
 			//comentarios com sentimento positivo
+			
+			} catch (Exception e) {
+				System.out.println(e);
+			}
+			
 		}
 		
 		//sort scores in descending order and consider the first topSimilarAnswersNumber parameter
@@ -834,6 +849,23 @@ public class CrokageApp {
 
 
 	
+
+
+	private Set<String> getAllWordsForBuckets(List<Bucket> answerBuckets) {
+		Set<String> allWords = new HashSet<>();
+		String line;
+		String words[];
+		for(Bucket bucket:answerBuckets) {
+			line = bucket.getProcessedBody()+ " "+bucket.getProcessedCode(); 
+			words = line.split("\\s+");
+			allWords.addAll(Arrays.asList(words));
+		}
+		line=null;
+		words=null;
+		return allWords;
+	}
+
+
 
 
 	private void reportSimilarRelatedPosts(Set<Integer> topSimilarIds, String postType, String obs) {
@@ -882,7 +914,7 @@ public class CrokageApp {
 
 
 	private void readSoContentWordVectorsForQueries(List<String> queries) throws Exception {
-		HashSet<String> allWordsSet = new HashSet<>();
+		Set<String> allWordsSet = new HashSet<>();
 		String words[];
 		for(String query: queries) {
 			words = query.split("\\s+");

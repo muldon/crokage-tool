@@ -1614,6 +1614,9 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 			String word = queryTokens[i];
 			//double[] vectors = wordVectorsMap.get(word).stream().mapToDouble(Double::doubleValue).toArray();
 			double[] vectors = wordVectorsMap.get(word);
+			if(vectors==null) {
+				System.out.println("here: "+word);
+			}
 			matrix[i] = vectors;
 		}
 				
@@ -1621,7 +1624,7 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 	}
 
 
-	public Map<String, double[]> readVectorsFromSOMapForWords(HashSet<String> allQueriesWords, List<String> wordsAndVectors) throws IOException {
+	public Map<String, double[]> readVectorsFromSOMapForWords(Set<String> allQueriesWords, List<String> wordsAndVectors) throws IOException {
 		long initTime = System.currentTimeMillis();
 		//logger.info("Reading all vectors from file...");
 		String[] parts;
