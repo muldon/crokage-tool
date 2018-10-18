@@ -151,6 +151,7 @@ public class CrokageApp {
 		soIDFVocabularyMap = new HashMap<>();
 		wordsAndVectorsLines = new ArrayList<>();
 		soContentWordVectorsMap = new HashMap<>();
+		allQuestionsIdsTitlesMap = new HashMap<>();
 		
 		logger.info("\nConsidering parameters: \n" 
 				+ "\n callBIKERProcess: " + callBIKERProcess
@@ -305,8 +306,9 @@ public class CrokageApp {
 	private void readQuestionsIdsTitlesMap() throws IOException {
 		long initTime = System.currentTimeMillis();
 		List<String> idsAndWords = Files.readAllLines(Paths.get(CrokageStaticData.SO_QUESTIONS_IDS_TITLES_MAP));
-		allQuestionsIdsTitlesMap = new HashMap<>();
 		crokageUtils.readWordsFromFileToMap(allQuestionsIdsTitlesMap,idsAndWords);
+		/*String titleTest = allQuestionsIdsTitlesMap.get(43966301);
+		System.out.println(titleTest);*/
 		crokageUtils.reportElapsedTime(initTime,"readQuestionsIdsTitlesMap");
 	}
 
@@ -592,6 +594,9 @@ public class CrokageApp {
 
 
 	private void runApproach() throws Exception {
+		//load questions map (id,title)
+		readQuestionsIdsTitlesMap();
+		
 		//load so content word vectors to a string
 		readSOContentWordAndVectorsLines();
 		
@@ -603,9 +608,6 @@ public class CrokageApp {
 		
 		//combine state of art approaches considering the order in parameters
 		Map<Integer, Set<String>> recommendedApis = getRecommendedApis();
-		
-		//load questions map (id,title)
-		readQuestionsIdsTitlesMap();
 		
 		//load answers map (id,parentId)
 		readAnswersIdsParentsMap();
@@ -672,9 +674,23 @@ public class CrokageApp {
 
 	private void addVectorsToSoContentWordVectorsMap(Set<Integer> relevantQuestionsIds) throws Exception {
 		List<String> titles = new ArrayList<>();
+		String title;
+		Set<Integer> irrelevantQuestionsIds = new HashSet<>();
 		for(Integer questionId:relevantQuestionsIds) {
-			titles.add(allQuestionsIdsTitlesMap.get(questionId));
+			title = allQuestionsIdsTitlesMap.get(questionId);
+			if(!StringUtils.isBlank(title)) {
+				titles.add(title);
+			}else {
+				irrelevantQuestionsIds.add(questionId);
+			}
 		}
+		
+		logger.info("Discarding irrelevant questions ids, size: "+irrelevantQuestionsIds.size());
+		for(Integer irrelevantQuestionId: irrelevantQuestionsIds) {
+			allQuestionsIdsTitlesMap.remove(irrelevantQuestionId);
+		}
+		relevantQuestionsIds.removeAll(irrelevantQuestionsIds);
+		
 		
 		readSoContentWordVectorsForQueries(titles);
 		/*Set<String> keys = soContentWordVectorsMap.keySet();
@@ -844,7 +860,7 @@ public class CrokageApp {
 
 	private void loadAllQuestionsIdsTitles() {
 		long initTime = System.currentTimeMillis();
-		allQuestionsIdsTitlesMap = crokageService.getQuestionsIdsTitles();
+		allQuestionsIdsTitlesMap.putAll(crokageService.getQuestionsIdsTitles());
 		crokageUtils.reportElapsedTime(initTime,"loadAllQuestionsIdsTitles");
 	}
 
