@@ -676,9 +676,13 @@ public class CrokageApp {
 			long initTime = System.currentTimeMillis();
 			
 			query = queries.get(key-1);
+			logger.info("Query: "+query);
+			Set<String> topClasses = recommendedApis.get(key);
+			logger.info("Top classes: "+topClasses);
 			
 			//remove stop words, punctuations, etc. The same process applied to preprocess all SO titles.
 			query = CrokageUtils.processQuery(query);
+			logger.info("Processed query: "+query);
 			
 			//get vectors for query words
 			double[][] matrix1 = CrokageUtils.getMatrixVectorsForQuery(query,soContentWordVectorsMap);
@@ -686,22 +690,20 @@ public class CrokageApp {
 			//get idfs for query
 			double[][] idf1 = CrokageUtils.getIDFMatrixForQuery(query, soIDFVocabularyMap);
 			
-			//get biker methods
-			List<String> topMethods = getBikerTopMethods(key);
+			//get biker methods and classes
+			List<String> bikerTopMethods = getBikerTopMethods(key);
+			Set<String> bikerTopClasses = bikerQueriesApisClassesMap.get(key);
+			logger.info("Top classes from biker: "+bikerTopClasses);
 			
-			//get top classes
-			Set<String> topClasses = recommendedApis.get(key);
-			logger.info("Query: "+query);
-			logger.info("Top classes: "+topClasses);
 			
 			Set<Integer> candidateQuestionsIds = getCandidateQuestionsFromTopApis(topClasses);
 			reportTest("here 1",candidateQuestionsIds,key);
 				
-			Set<Integer> topKRelevantQuestionsIds = getTopKRelevantQuestionsIds(candidateQuestionsIds,topMethods,matrix1,idf1,key,query);
+			Set<Integer> topKRelevantQuestionsIds = getTopKRelevantQuestionsIds(candidateQuestionsIds,bikerTopMethods,matrix1,idf1,key,query);
 			
 			Set<Integer> candidateAnswersIds = getCandidateAnswersIds(topKRelevantQuestionsIds);
 			
-			List<Bucket> topKRelevantAnswers = getTopKRelevantAnswers(candidateAnswersIds,topMethods,matrix1,idf1,key,query);
+			List<Bucket> topKRelevantAnswers = getTopKRelevantAnswers(candidateAnswersIds,bikerTopMethods,matrix1,idf1,key,query);
 		
 			crokageUtils.reportElapsedTime(initTime,"total time spent for query "+key);
 			
@@ -1005,7 +1007,7 @@ public class CrokageApp {
 			String parts[] = classAndMethod.split("\\."); 
 			topMethods.add(parts[1]);
 		}
-		logger.info("\nQuery: "+queries.get(key-1)+"\nTop methods from biker: "+topMethods);
+		logger.info("Top methods from biker: "+topMethods);
 		return topMethods;
 	}
 
