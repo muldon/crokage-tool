@@ -192,6 +192,10 @@ public class CrokageApp {
 		case "readAnswersIdsParentsMap":
 			readAnswersIdsParentsMap();
 			break;
+		
+		case "checkConditions":
+			checkConditions();
+			break;	
 			
 		case "generateAnswersIdsParentsMap":
 			generateAnswersIdsParentsMap();
@@ -294,6 +298,30 @@ public class CrokageApp {
 
 	
 	
+
+	private void checkConditions() throws Exception {
+		File file1 = new File(CrokageStaticData.BIKER_OUTPUT_QUERIES_FILE);
+		boolean exists1 = file1.exists();
+		if(!exists1) {
+			throw new Exception("File "+file1.getAbsolutePath()+ " must exist. Has it been provided ? ");
+		}
+		
+		File file2 = new File(CrokageStaticData.NLP2API_OUTPUT_QUERIES_FILE);
+		boolean exists2 = file2.exists();
+		if(!exists1) {
+			throw new Exception("File "+file2.getAbsolutePath()+ " must exist. Has it been provided ? ");
+		}
+		
+		File file3 = new File(CrokageStaticData.RACK_OUTPUT_QUERIES_FILE);
+		boolean exists3 = file3.exists();
+		if(!exists1) {
+			throw new Exception("File "+file3.getAbsolutePath()+ " must exist. Has it been provided ? ");
+		}
+		
+	}
+
+
+
 
 	private void readAnswersIdsParentsMap() throws IOException {
 		long initTime = System.currentTimeMillis();
@@ -1101,18 +1129,17 @@ public class CrokageApp {
 				queries = readInputQueries();
 			}
 			
-			//queries = queries.subList(0, 5);
-			//First generate inputQueries file in a format NLP2Api understand
-			FileWriter fw = new FileWriter(CrokageStaticData.NLP2API_INPUT_QUERIES_FILE);
-			for (String query: queries) {
-				fw.write(query+"\n--\n"); //specific format to NLP2API understand
-				
-			}
-		 	fw.close();
-			
-			
 			if(callNLP2ApiProcess) {
+				//queries = queries.subList(0, 5);
+				//First generate inputQueries file in a format NLP2Api understand
+				FileWriter fw = new FileWriter(CrokageStaticData.NLP2API_INPUT_QUERIES_FILE);
+				for (String query: queries) {
+					fw.write(query+"\n--\n"); //specific format to NLP2API understand
 					
+				}
+			 	fw.close();
+				
+				
 		 		//call jar with parameters
 			 	//java -jar /home/rodrigo/projects/bot/myNlp2Api.jar -K 10 -task reformulate -queryFile /home/rodrigo/projects/NLP2API-Replication-Package/NL-Query+GroundTruth.txt -outputFile /home/rodrigo/projects/NLP2API-Replication-Package/nlp2apiQueriesOutput.txt
 				
@@ -1162,15 +1189,16 @@ public class CrokageApp {
 		
 		try {	
 			
-			//First generate inputQueries file in a format NLP2Api understand
-			FileWriter fw = new FileWriter(CrokageStaticData.RACK_INPUT_QUERIES_FILE);
-			for (String query: queries) {
-				fw.write(query+"\n--\n"); //specific format to NLP2API understand
-				
-			}
-		 	fw.close();
-			
 			if(callRACKApiProcess) {
+				//First generate inputQueries file in a format NLP2Api understand
+				FileWriter fw = new FileWriter(CrokageStaticData.RACK_INPUT_QUERIES_FILE);
+				for (String query: queries) {
+					fw.write(query+"\n--\n"); //specific format to NLP2API understand
+					
+				}
+			 	fw.close();
+				
+				
 			 	//call jar with parameters
 			 	
 			 	String jarPath = CrokageStaticData.CROKAGE_HOME;
@@ -1218,22 +1246,21 @@ public class CrokageApp {
 		}
 		bikerQueriesApisClassesMap = new LinkedHashMap<>();
 		bikerQueriesApisClassesAndMethodsMap = new LinkedHashMap<>();
-		
-		// writing queries to be read by biker
-		
-		Path bikerQueriesFile = Paths.get(CrokageStaticData.BIKER_INPUT_QUERIES_FILE);
-		Files.write(bikerQueriesFile, queries, Charset.forName("UTF-8"));
-
-		// writing script to be called
-		Path scriptFile = Paths.get(CrokageStaticData.BIKER_SCRIPT_FILE);
-		List<String> lines = Arrays.asList("export PYTHONPATH=" + CrokageStaticData.BIKER_HOME, "echo $PYTHONPATH", "cd $PYTHONPATH/main", "python " + CrokageStaticData.BIKER_RUNNER_PATH);
-		Files.write(scriptFile, lines, Charset.forName("UTF-8"));
-		File file = new File(CrokageStaticData.BIKER_SCRIPT_FILE);
-		file.setExecutable(true);
-		file.setReadable(true);
-		file.setWritable(true);
-
+	
 		if(callBIKERProcess) {
+			// writing queries to be read by biker
+			Path bikerQueriesFile = Paths.get(CrokageStaticData.BIKER_INPUT_QUERIES_FILE);
+			Files.write(bikerQueriesFile, queries, Charset.forName("UTF-8"));
+
+			// writing script to be called
+			Path scriptFile = Paths.get(CrokageStaticData.BIKER_SCRIPT_FILE);
+			List<String> lines = Arrays.asList("export PYTHONPATH=" + CrokageStaticData.BIKER_HOME, "echo $PYTHONPATH", "cd $PYTHONPATH/main", "python " + CrokageStaticData.BIKER_RUNNER_PATH);
+			Files.write(scriptFile, lines, Charset.forName("UTF-8"));
+			File file = new File(CrokageStaticData.BIKER_SCRIPT_FILE);
+			file.setExecutable(true);
+			file.setReadable(true);
+			file.setWritable(true);
+			
 			try {
 				ProcessBuilder pb = new ProcessBuilder(CrokageStaticData.BIKER_SCRIPT_FILE);
 				Process p = pb.start();
