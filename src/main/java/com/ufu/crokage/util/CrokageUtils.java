@@ -1593,7 +1593,7 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 
 
 	public static double[][] getIDFMatrixForQuery(String query, Map<String, Double> IDFVocabularyMap) {
-		String queryTokens[] = query.split("\\s+");
+		String queryTokens[] = query.trim().split("\\s+");
 		double[][] matrix = new double[1][queryTokens.length];
 		
 		for(int i=0; i<queryTokens.length; i++) {

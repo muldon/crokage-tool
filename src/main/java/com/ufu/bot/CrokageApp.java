@@ -146,6 +146,8 @@ public class CrokageApp {
 	private Map<Integer,Double> questionsIdsScores;
 	private Map<Integer,Double> answersIdsScores;
 	private Set<String> allWordsSetForBuckets;
+	private List<String> bikerTopMethods;
+	private Set<String> bikerTopClasses;
 
 	@PostConstruct
 	public void init() throws Exception {
@@ -691,10 +693,9 @@ public class CrokageApp {
 			double[][] idf1 = CrokageUtils.getIDFMatrixForQuery(query, soIDFVocabularyMap);
 			
 			//get biker methods and classes
-			List<String> bikerTopMethods = getBikerTopMethods(key);
-			Set<String> bikerTopClasses = bikerQueriesApisClassesMap.get(key);
+			bikerTopMethods = getBikerTopMethods(key);
+			bikerTopClasses = bikerQueriesApisClassesMap.get(key);
 			logger.info("Top classes from biker: "+bikerTopClasses);
-			
 			
 			Set<Integer> candidateQuestionsIds = getCandidateQuestionsFromTopApis(topClasses);
 			reportTest("here 1",candidateQuestionsIds,key);
@@ -794,44 +795,58 @@ public class CrokageApp {
 		
 		String comparingContent;
 		answersIdsScores.clear();
+		double maxSimPair=0;
 		//answers with code
 		for(Bucket bucket:answerBuckets) {
 			
 			//second ranking
 			try {
 				
-			
-			//get the word vectors for each word of the query
-			comparingContent = bucket.getProcessedBody()+ " "+bucket.getProcessedCode();
-			
-			//get vectors for query2 words
-			double[][] matrix2 = CrokageUtils.getMatrixVectorsForQuery(comparingContent,soContentWordVectorsMap);
-			
-			//get idfs for query2
-			double[][] idf2 = CrokageUtils.getIDFMatrixForQuery(comparingContent, soIDFVocabularyMap);
-			
-			double simPair = CrokageUtils.round(Matrix.simDocPair(matrix1,matrix2,idf1,idf2),6);
-			
-			answersIdsScores.put(bucket.getId(), simPair);
-			
-			
-			//observar ex: https://stackoverflow.com/questions/1053467/how-do-i-save-a-string-to-a-text-file-using-java
-			
-			//score da pergunta : parentUpVotesScore
-			
-			//codigo deve ter chamada de método com ponto *.*
-			
-			//poucas linhas de codigo (desconsiderar imports . pontuar imports )
-			
-			
-			
-			//comentarios com sentimento positivo
-			
+				//get the word vectors for each word of the query
+				comparingContent = bucket.getProcessedBody()+ " "+bucket.getProcessedCode();
+				
+				//get vectors for query2 words
+				double[][] matrix2 = CrokageUtils.getMatrixVectorsForQuery(comparingContent,soContentWordVectorsMap);
+				
+				//get idfs for query2
+				double[][] idf2 = CrokageUtils.getIDFMatrixForQuery(comparingContent, soIDFVocabularyMap);
+				
+				double simPair = CrokageUtils.round(Matrix.simDocPair(matrix1,matrix2,idf1,idf2),6);
+				
+				if(simPair>maxSimPair) {
+					maxSimPair=simPair;
+				}
+				
+				answersIdsScores.put(bucket.getId(), simPair);
+				
 			} catch (Exception e) {
-				logger.info(e.getMessage());
+				logger.info(e.getMessage()+ " post: "+bucket);
 			}
 			
 		}
+		
+		//normalization and other relevance boosts
+		for(Bucket bucket:answerBuckets) {
+				double simPair = answersIdsScores.get(bucket.getId());
+				simPair = crokageUtils.round((simPair / maxSimPair),6);
+				answersIdsScores.put(bucket.getId(), simPair);
+				
+				
+				//observar ex: https://stackoverflow.com/questions/1053467/how-do-i-save-a-string-to-a-text-file-using-java
+				
+				//score da pergunta : parentUpVotesScore
+				
+				//codigo deve ter chamada de método com ponto *.*
+				
+				//poucas linhas de codigo (desconsiderar imports . pontuar imports )
+				
+				
+				//comentarios com sentimento positivo
+		
+			
+		}
+		
+		
 		
 		//sort scores in descending order and consider the first topSimilarAnswersNumber parameter
 		Map<Integer,Double> topSimilarAnswers = answersIdsScores.entrySet().stream()
@@ -1317,7 +1332,7 @@ public class CrokageApp {
 			classes.add(api.split("\\.")[0]); 
 		}*/
 		
-		logger.info("Biker finished... ");
+		//logger.info("Biker finished... ");
 		
 	}
 
