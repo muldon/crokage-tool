@@ -917,7 +917,7 @@ public class CrokageApp {
 			}
 		}
 		
-		logger.info("\nAt least "+topClassesRelevantAnswersIds.size()+ " answers contain those classes. Filtering relevants...");
+		logger.info("At least "+topClassesRelevantAnswersIds.size()+ " answers contain those classes. Filtering relevants...");
 		
 		for(Integer answerId: topClassesRelevantAnswersIds) {
 			if(allAnswersWithUpvotesIdsParentIdsMap.get(answerId)!=null) {

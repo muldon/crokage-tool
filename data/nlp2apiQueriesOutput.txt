@@ -1,4 +1,4 @@
-How can I insert an element in array at a given position?
+insert element array given position
 ArrayList FlattenedElement String Element Position System Assignment ArrayImplementation HighArray Audi
-How do I compress or zip a directory recursively?
+compress zip directory recursively
 Compress ZipOutputStream ZipEntry File TFile Zip FileOutputStream FileInputStream ZipArchiveOutputStream IOException

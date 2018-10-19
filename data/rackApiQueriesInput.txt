@@ -1,4 +1,4 @@
-How can I insert an element in array at a given position?
+insert element array given position
 --
-How do I compress or zip a directory recursively?
+compress zip directory recursively
 --
