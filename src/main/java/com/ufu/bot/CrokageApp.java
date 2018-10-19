@@ -881,7 +881,7 @@ public class CrokageApp {
 
 	private boolean codeContainAnyClass(String processedCode) {
 		for(String bikerClass: bikerTopClasses) {
-			if(processedCode.contains(bikerClass)) {
+			if(processedCode.contains(bikerClass.toLowerCase())) {
 				return true;
 			}
 		}
