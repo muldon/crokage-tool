@@ -53,6 +53,7 @@ import com.ufu.crokage.util.IDFCalc;
 import com.ufu.crokage.util.IndexLucene;
 
 @Component
+@SuppressWarnings("unused")
 public class CrokageApp {
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -320,7 +321,7 @@ public class CrokageApp {
 		List<String> idsAndWords = Files.readAllLines(Paths.get(CrokageStaticData.SO_QUESTIONS_IDS_TITLES_MAP));
 		crokageUtils.readWordsFromFileToMap(allQuestionsIdsTitlesMap,idsAndWords);
 		/*String titleTest = allQuestionsIdsTitlesMap.get(43966301);
-		System.out.println(titleTest);*/
+		logger.info(titleTest);*/
 		crokageUtils.reportElapsedTime(initTime,"readQuestionsIdsTitlesMap");
 	}
 
@@ -354,9 +355,9 @@ public class CrokageApp {
 		queries = readInputQueries();
 		for(String query: queries) {
 			query = CrokageUtils.processQuery(query);
-			System.out.println(query);
+			logger.info(query);
 		}
-		System.out.println();
+		logger.info("");
 	}
 
 
@@ -602,6 +603,7 @@ public class CrokageApp {
 	}
 
 
+	
 	private void runApproach() throws Exception {
 		if(iHaveALotOfMemory) { //load all word vectors only once
 			readSoContentWordVectorsForAllWords();
@@ -661,7 +663,8 @@ public class CrokageApp {
 			
 			//get top classes
 			Set<String> topClasses = recommendedApis.get(key);
-			logger.info("\nQuery: "+query+"\nTop classes: "+topClasses);
+			logger.info("Query: "+query);
+			logger.info("Top classes: "+topClasses);
 			
 			Set<Integer> candidateQuestionsIds = getCandidateQuestionsFromTopApis(topClasses);
 			reportTest("here 1",candidateQuestionsIds,key);
@@ -670,7 +673,7 @@ public class CrokageApp {
 			
 			Set<Integer> candidateAnswersIds = getCandidateAnswersIds(topKRelevantQuestionsIds);
 			
-			List<Bucket> topKRelevantAnswers = getTopKRelevantAnswers(candidateQuestionsIds,topMethods,matrix1,idf1,key,query);
+			List<Bucket> topKRelevantAnswers = getTopKRelevantAnswers(candidateAnswersIds,topMethods,matrix1,idf1,key,query);
 		
 			crokageUtils.reportElapsedTime(initTime,"total time spent for query "+key);
 			
@@ -795,7 +798,7 @@ public class CrokageApp {
 			//comentarios com sentimento positivo
 			
 			} catch (Exception e) {
-				System.out.println(e);
+				logger.info(e.getMessage());
 			}
 			
 		}
@@ -932,9 +935,9 @@ public class CrokageApp {
 		
 		String answersWithNoUpvotesStr = StringUtils.join(answersWithNoUpvotes.subList(0, k), ',');
 		
-		logger.info("\nNumber of candidate questions to top classes relevant answers: "+candidateQuestionsIds.size());
-		logger.info("\nNumber of discarded answers because they have no upvotes: "+answersWithNoUpvotes.size()+ " showing "+k+": "+answersWithNoUpvotesStr);
-		logger.info("\nNumber of candidate answers left - stage 1: "+topClassesRelevantAnswersIds.size());
+		logger.info("Number of candidate questions to top classes relevant answers: "+candidateQuestionsIds.size());
+		logger.info("Number of discarded answers because they have no upvotes: "+answersWithNoUpvotes.size()+ " showing "+k+": "+answersWithNoUpvotesStr);
+		logger.info("Number of candidate answers left - stage 1: "+topClassesRelevantAnswersIds.size());
 		
 		//add vectors for all retrieved questions titles
 		addVectorsToSoContentWordVectorsMap(candidateQuestionsIds);
@@ -1000,7 +1003,7 @@ public class CrokageApp {
 				}
 				bigMapApisIds.put(parts[0], idsSet);
 			}
-			//System.out.println(bigMapApisIds);
+			//logger.info(bigMapApisIds);
 			crokageUtils.reportElapsedTime(initTime,"loadInvertedIndexFile");
 		}
 		
@@ -1026,7 +1029,7 @@ public class CrokageApp {
 		for(Post answer:answersWithPreCode) {
 			
 			/*if(answer.getId().equals(50662268)) {
-				System.out.println();
+				logger.info();
 			}*/
 			
 			if(i%10000==0) {
@@ -1061,7 +1064,7 @@ public class CrokageApp {
 				
 				}else {
 					/*if(api.equals("MainActivity")) {
-						System.out.println();
+						logger.info();
 					}*/
 					Set<Integer> currentApis = bigMapApisIds.get(api);
 					currentApis.add(answer.getId());
@@ -1134,13 +1137,13 @@ public class CrokageApp {
 				String output = CrokageUtils.loadStream(p.getInputStream());
 				String error = CrokageUtils.loadStream(p.getErrorStream());
 				int rc = p.waitFor();
-				//System.out.println("Process ended with rc=" + rc);
-				//System.out.println("\nStandard Output:\n");
-				//System.out.println(output);
+				//logger.info("Process ended with rc=" + rc);
+				//logger.info("\nStandard Output:\n");
+				//logger.info(output);
 				//String apis[] = output.replaceAll("\n", " ").split(" ");
-				//System.out.println(apis);
-				//System.out.println("\nStandard Error:\n");
-				//System.out.println(error);
+				//logger.info(apis);
+				//logger.info("\nStandard Error:\n");
+				//logger.info(error);
 		 	}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -1191,13 +1194,13 @@ public class CrokageApp {
 				String output = CrokageUtils.loadStream(p.getInputStream());
 				String error = CrokageUtils.loadStream(p.getErrorStream());
 				int rc = p.waitFor();
-				//System.out.println("Process ended with rc=" + rc);
-				//System.out.println("\nStandard Output:\n");
-				//System.out.println(output);
+				//logger.info("Process ended with rc=" + rc);
+				//logger.info("\nStandard Output:\n");
+				//logger.info(output);
 				//String apis[] = output.replaceAll("\n", " ").split(" ");
-				//System.out.println(apis);
-				//System.out.println("\nStandard Error:\n");
-				//System.out.println(error);
+				//logger.info(apis);
+				//logger.info("\nStandard Error:\n");
+				//logger.info(error);
 		 	}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -1238,11 +1241,11 @@ public class CrokageApp {
 				String output = CrokageUtils.loadStream(p.getInputStream());
 				String error = CrokageUtils.loadStream(p.getErrorStream());
 				int rc = p.waitFor();
-				//System.out.println("Process ended with rc=" + rc);
-				//System.out.println("\nStandard Output:\n");
-				//System.out.println(output);
-				//System.out.println("\nStandard Error:\n");
-				//System.out.println(error);
+				//logger.info("Process ended with rc=" + rc);
+				//logger.info("\nStandard Output:\n");
+				//logger.info(output);
+				//logger.info("\nStandard Error:\n");
+				//logger.info(error);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -1331,7 +1334,7 @@ public class CrokageApp {
 			}
 			
 			/*if(query.contains("How do I retrieve available schemas in database")) {
-				System.out.println();
+				logger.info();
 			}*/
 			
 			queryApis = queryApis.replaceAll("\\s+"," ");
@@ -1527,7 +1530,7 @@ public class CrokageApp {
 		List<UserEvaluation> evaluationsList = new ArrayList<>();
 		List<String> inputQueries = new ArrayList<>();
 		crokageUtils.readXlsxToEvaluationList(evaluationsList,file1,likertsResearcher1AfterAgreementColumn,likertsResearcher2AfterAgreementColumn,inputQueries);
-		//System.out.println(inputQueries);
+		//logger.info(inputQueries);
 		
 		try (PrintWriter out = new PrintWriter(CrokageStaticData.INPUT_QUERIES_FILE_CROKAGE)) {
 		    for(String query: inputQueries) {
@@ -2016,7 +2019,7 @@ public class CrokageApp {
 				ArrayList<String> gapis = new ArrayList<>(goldSetQueriesApis.get(keyQuery));
 			
 				/*if(keyQuery.contains("Read JSON Array")) {
-					System.out.println();
+					logger.info();
 				}*/
 				
 				hitK = hitK + isApiFound_K(rapis, gapis);
@@ -2027,11 +2030,11 @@ public class CrokageApp {
 				double recall = 0;
 				recall = getRecallK(rapis, gapis);
 				recall_sum = recall_sum + recall;
-				//System.out.println(hitK);
+				//logger.info(hitK);
 				/*if(keyQuery==308) {
-					System.out.println();
+					logger.info();
 				}*/
-				//System.out.println("query="+keyQuery+" -hitk="+hitK+" -rrank_sum:"+rrank_sum+" -preck:"+preck+ " -recall:"+recall );
+				//logger.info("query="+keyQuery+" -hitk="+hitK+" -rrank_sum:"+rrank_sum+" -preck:"+preck+ " -recall:"+recall );
 			}
 
 			double hit_k= CrokageUtils.round((double) hitK / goldSetQueriesApis.size(),4);
@@ -2214,24 +2217,24 @@ public class CrokageApp {
 	private void reportTest(String msg, Set<Integer> candidateQuestionsIds, Integer key) {
 		if(key==1) {
 			if(candidateQuestionsIds.contains(7384908)) {
-				System.out.println(msg);
+				logger.info(msg);
 			}
 			if(candidateQuestionsIds.contains(7074402)) {
-				System.out.println(msg);
+				logger.info(msg);
 			}
 			if(candidateQuestionsIds.contains(7679819)) {
-				System.out.println(msg);
+				logger.info(msg);
 			}
 		}
 		if(key==2) {
 			if(candidateQuestionsIds.contains(3961087)) {
-				System.out.println(msg);
+				logger.info(msg);
 			}
 			if(candidateQuestionsIds.contains(2403830)) {
-				System.out.println(msg);
+				logger.info(msg);
 			}
 			if(candidateQuestionsIds.contains(15968883)) {
-				System.out.println(msg);
+				logger.info(msg);
 			}
 		}
 		
