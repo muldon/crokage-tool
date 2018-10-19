@@ -829,7 +829,18 @@ public class CrokageApp {
 		for(Bucket bucket:answerBuckets) {
 				double simPair = answersIdsScores.get(bucket.getId());
 				simPair = crokageUtils.round((simPair / maxSimPair),6);
+				
+				String processedCode = bucket.getProcessedCode();
+				for(int i=0; i<numberOfAPIClasses;i++) {
+					String bikerMethod = bikerTopMethods.get(i);
+					if(processedCode.contains(bikerMethod) && codeContainAnyClass(processedCode)) {
+						simPair += 1/bikerTopMethods.indexOf(bikerMethod);
+						break; //only once
+					}
+				}
+				
 				answersIdsScores.put(bucket.getId(), simPair);
+				
 				
 				
 				//observar ex: https://stackoverflow.com/questions/1053467/how-do-i-save-a-string-to-a-text-file-using-java
@@ -866,6 +877,19 @@ public class CrokageApp {
 
 
 	
+
+
+	private boolean codeContainAnyClass(String processedCode) {
+		for(String bikerClass: bikerTopClasses) {
+			if(processedCode.contains(bikerClass)) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+
+
 
 
 	private Set<String> getAllWordsForBuckets(List<Bucket> answerBuckets) {
