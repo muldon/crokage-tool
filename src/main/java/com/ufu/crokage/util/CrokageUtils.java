@@ -1615,12 +1615,22 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 			//double[] vectors = wordVectorsMap.get(word).stream().mapToDouble(Double::doubleValue).toArray();
 			double[] vectors = wordVectorsMap.get(word);
 			if(vectors==null) {
-				System.out.println("here: "+word);
+				System.out.println("error here: "+word);
 			}
 			matrix[i] = vectors;
 		}
 				
 		return matrix;
+	}
+	
+	
+
+	public void readVectorsFromSOMapForWords(Map<String, double[]> soContentWordVectorsMap, Set<String> listOfWords, List<String> wordsAndVectorsLines) throws IOException {
+		Set<String> allWordsSet = getWordsForList(listOfWords);
+		logger.info("Reading vectors by demand for "+allWordsSet.size()+ " words. Size of soContentWordVectorsMap before: "+soContentWordVectorsMap.size());
+		soContentWordVectorsMap.putAll(readVectorsFromSOMapForWords(allWordsSet,wordsAndVectorsLines));
+		logger.info("Size after: "+soContentWordVectorsMap.size());
+		
 	}
 
 
@@ -1700,6 +1710,18 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 		
 	}
 	
+	public Set<String> getWordsForList(Set<String> listOfWords) {
+		Set<String> allWordsSet = new HashSet<>();
+		String words[];
+		for(String query: listOfWords) {
+			words = query.split("\\s+");
+			allWordsSet.addAll(Arrays.asList(words));
+		}
+		allWordsSet.remove("");
+		return allWordsSet;
+	}
+
+
 	public static <T, E> Set<T> getKeysByValue(Map<T, E> map, E value) {
 	    return map.entrySet()
 	              .stream()
@@ -1707,5 +1729,7 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 	              .map(Map.Entry::getKey)
 	              .collect(Collectors.toSet());
 	}
+
+
 	
 }
