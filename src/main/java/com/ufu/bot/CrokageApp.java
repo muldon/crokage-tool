@@ -834,7 +834,7 @@ public class CrokageApp {
 				for(int i=0; i<numberOfAPIClasses;i++) {
 					String bikerMethod = bikerTopMethods.get(i);
 					if(processedCode.contains(bikerMethod) && codeContainAnyClass(processedCode)) {
-						simPair += 1/bikerTopMethods.indexOf(bikerMethod);
+						simPair += 1/((bikerTopMethods.indexOf(bikerMethod)+1));
 						break; //only once
 					}
 				}
