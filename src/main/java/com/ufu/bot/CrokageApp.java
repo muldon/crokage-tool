@@ -638,6 +638,7 @@ public class CrokageApp {
 		Set<Integer> keys = recommendedApis.keySet();
 		String query;
 		for(Integer key: keys) {  //for each query 
+			long initTime = System.currentTimeMillis();
 			
 			query = queries.get(key-1);
 			
@@ -689,6 +690,8 @@ public class CrokageApp {
 			addVectorsToSoContentWordVectorsMap(relevantQuestionsIds);
 			
 			List<Bucket> topkPosts = calculateRelevance(relevantQuestionsIds,topMethods,matrix1,idf1,key,query);
+		
+			crokageUtils.reportElapsedTime(initTime,"total time spent for query "+key);
 			
 		}
 	}
@@ -815,7 +818,7 @@ public class CrokageApp {
 			double simPair = CrokageUtils.round(Matrix.simDocPair(matrix1,matrix2,idf1,idf2),6);
 			
 			answersIdsScores.put(bucket.getId(), simPair);
-			logger.info("id: "+bucket.getId()+ " -score: "+simPair);
+			
 			
 			//observar ex: https://stackoverflow.com/questions/1053467/how-do-i-save-a-string-to-a-text-file-using-java
 			
@@ -843,6 +846,10 @@ public class CrokageApp {
 		
 		reportSimilarRelatedPosts(topSimilarAnswers.keySet(),"answers","End of Ranking phase 2: ");
 		
+		answersIds = topSimilarAnswers.keySet();
+		for(Integer answerId: answersIds) {
+			logger.info("id: "+answerId+ " -score:"+topSimilarAnswers.get(answerId));
+		}
 		
 		return answerBuckets;
 	}

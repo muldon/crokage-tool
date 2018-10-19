@@ -1607,7 +1607,7 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 
 
 	public static double[][] getMatrixVectorsForQuery(String query, Map<String, double[]> wordVectorsMap) {
-		String queryTokens[] = query.split("\\s+");
+		String queryTokens[] = query.trim().split("\\s+");
 		double[][] matrix = new double[queryTokens.length][100];
 		
 		for(int i=0; i<queryTokens.length; i++) {
