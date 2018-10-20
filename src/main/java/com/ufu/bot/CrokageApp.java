@@ -789,8 +789,12 @@ public class CrokageApp {
 		int k = listSize > 20? 20:listSize;
 		listIds=listIds.subList(0, k);
 		logger.info("Top "+k+" similar titles to query");
-		for(Integer questionId:topKRelevantQuestionsIds) {
-			logger.info(allQuestionsIdsTitlesMap.get(questionId));
+		List<Post> questions = crokageService.findPostsById(listIds);
+		
+		for(Post question:questions) {
+			//logger.info(allQuestionsIdsTitlesMap.get(questionId));
+			logger.info(question.getTitle());
+			
 		}
 		
 	}
