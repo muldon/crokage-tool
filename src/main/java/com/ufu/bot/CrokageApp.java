@@ -148,6 +148,8 @@ public class CrokageApp {
 	private Set<String> allWordsSetForBuckets;
 	private List<String> bikerTopMethods;
 	private Set<String> bikerTopClasses;
+	private Map<String,Integer> methodsCounterMap;
+	
 
 	@PostConstruct
 	public void init() throws Exception {
@@ -165,6 +167,7 @@ public class CrokageApp {
 		questionsIdsScores = new HashMap<>();
 		answersIdsScores = new HashMap<>();
 		allWordsSetForBuckets = new HashSet<>();
+		methodsCounterMap = new HashMap<>();
 		
 		logger.info("\nConsidering parameters: \n" 
 				+ "\n callBIKERProcess: " + callBIKERProcess
@@ -770,10 +773,26 @@ public class CrokageApp {
 		Set<Integer> topKRelevantQuestionsIds = topKRelevantQuestionsMap.keySet();
 		
 		reportSimilarRelatedPosts(topKRelevantQuestionsIds,"questions","");
+		reportSimilarTitles(topKRelevantQuestionsIds);
 		
 		reportTest("here 2", topKRelevantQuestionsIds, key);
 		
 		return topKRelevantQuestionsIds;
+	}
+
+
+
+
+	private void reportSimilarTitles(Set<Integer> topKRelevantQuestionsIds) {
+		List<Integer> listIds = new ArrayList<>(topKRelevantQuestionsIds);
+		int listSize = listIds.size();
+		int k = listSize > 20? 20:listSize;
+		listIds=listIds.subList(0, k);
+		logger.info("Top "+k+" similar titles to query");
+		for(Integer questionId:topKRelevantQuestionsIds) {
+			logger.info(allQuestionsIdsTitlesMap.get(questionId));
+		}
+		
 	}
 
 
@@ -796,6 +815,7 @@ public class CrokageApp {
 		String comparingContent;
 		answersIdsScores.clear();
 		double maxSimPair=0;
+		methodsCounterMap.clear();
 		//answers with code
 		for(Bucket bucket:answerBuckets) {
 			
@@ -817,6 +837,8 @@ public class CrokageApp {
 					maxSimPair=simPair;
 				}
 				
+				countMethods(bucket.getCode());
+				
 				answersIdsScores.put(bucket.getId(), simPair);
 				
 			} catch (Exception e) {
@@ -830,14 +852,20 @@ public class CrokageApp {
 				double simPair = answersIdsScores.get(bucket.getId());
 				simPair = crokageUtils.round((simPair / maxSimPair),6);
 				
-				String processedCode = bucket.getProcessedCode();
+				
+				//not good results yet...
+				/*String processedCode = bucket.getProcessedCode();
 				for(int i=0; i<numberOfAPIClasses;i++) {
 					String bikerMethod = bikerTopMethods.get(i);
 					if(processedCode.contains(bikerMethod) && codeContainAnyClass(processedCode)) {
-						simPair += 1/((bikerTopMethods.indexOf(bikerMethod)+1));
+						double methodBoost = (float)1/((bikerTopMethods.indexOf(bikerMethod)+1));
+						simPair += crokageUtils.round(methodBoost,6);
 						break; //only once
 					}
-				}
+				}*/
+				
+				
+				
 				
 				answersIdsScores.put(bucket.getId(), simPair);
 				
@@ -877,6 +905,14 @@ public class CrokageApp {
 
 
 	
+
+
+	private void countMethods(String code) {
+		
+		//parei aqui. boost nos methodos mais frequentes
+	}
+
+
 
 
 	private boolean codeContainAnyClass(String processedCode) {
