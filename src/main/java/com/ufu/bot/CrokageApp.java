@@ -793,7 +793,7 @@ public class CrokageApp {
 		
 		for(Post question:questions) {
 			//logger.info(allQuestionsIdsTitlesMap.get(questionId));
-			logger.info(question.getTitle());
+			logger.info(question.getId()+ " - "+question.getTitle());
 			
 		}
 		
