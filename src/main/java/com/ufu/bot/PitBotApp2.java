@@ -83,8 +83,8 @@ public class PitBotApp2 {
 	@Value("${runRack}")
 	public Boolean runRack;  
 		
-	@Value("${runGoogleSearch}")
-	public Boolean runGoogleSearch;  
+	@Value("${useGoogleSearch}")
+	public Boolean useGoogleSearch;  
 	
 	
 	@Value("${numberOfRackClasses}")
@@ -209,7 +209,7 @@ public class PitBotApp2 {
 				+ "\n shuffleListOfQueriesBeforeGoogleSearch: "+shuffleListOfQueriesBeforeGoogleSearch
 				+ "\n runRack: "+runRack
 				+ "\n numberOfRackClasses: "+numberOfRackClasses
-				+ "\n runGoogleSearch: "+runGoogleSearch
+				+ "\n useGoogleSearch: "+useGoogleSearch
 				+ "\n useProxy: "+useProxy
 				+ "\n numberOfGoogleResults: "+numberOfGoogleResults
 				+ "\n minTokenSize: "+minTokenSize
@@ -1133,7 +1133,7 @@ public class PitBotApp2 {
 		
 		
 		Set<Integer> soPostsIds = null;
-		if(runGoogleSearch) {
+		if(useGoogleSearch) {
 		/*
 		 * Step 4: Query Serach
 		 * 

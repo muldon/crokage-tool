@@ -335,7 +335,7 @@ public class BotApplicationTests extends AbstractService{
 		
 	}	*/
 	
-	@Test
+	//@Test
 	public void testSimilarity() throws Exception {
 		
 		String query1 = "How to send HTTP request in java?";
@@ -411,6 +411,26 @@ public class BotApplicationTests extends AbstractService{
 		
 		
 	}
+	
+	@Test
+	public void testMethodCallsCapture() {
+		Integer answersIds[] = {910522,45960571,2900755,1053475,1911947,34959450,1921200,34959470,1928690,1928707,1928778,1969067,34959570};
+		for(Integer postId:answersIds) {
+			Post post = postsRepository.findOne(postId);
+			System.out.println("id: "+post.getId()+ " \n- code: "+post.getCode()+ " \n\nMethods found: ");
+			
+			Set<String> codes = crokageUtils.getMethodCalls(post.getCode());
+			for(String code:codes) {
+				System.out.println(code);
+			}
+			System.out.println("\n\n\n");
+		}
+		
+		
+		
+
+	}
+	
 	
 
 }

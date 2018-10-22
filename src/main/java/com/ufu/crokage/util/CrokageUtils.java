@@ -20,6 +20,8 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -151,6 +153,9 @@ public class CrokageUtils {
 	public static final String DOUBLE_QUOTES_REGEX_EXPRESSION = "\"(.*?)\"";
 	
 	public static final String NUMBERS_REGEX_EXPRESSION = "([\\d]+)";
+	
+	public static final String METHOD_CALLS_REGEX_EXPRESSION = "\\.\\w+\\(";
+	public static final Pattern METHOD_CALLS_PATTERN = Pattern.compile(METHOD_CALLS_REGEX_EXPRESSION, Pattern.DOTALL);
 		
 	
 	public static final String keywords[] = { "abstract", "assert", "boolean",
@@ -345,6 +350,15 @@ public class CrokageUtils {
 	        tagValues.add(matcher.group(1));
 	    }
 	    return tagValues;
+	}
+	
+	public static Set<String> getMethodCalls(String str) {
+	    final Set<String> methodCalls = new HashSet<String>();
+	    final Matcher matcher = CrokageUtils.METHOD_CALLS_PATTERN.matcher(str);
+	    while (matcher.find()) {
+	        methodCalls.add(matcher.group(0));
+	    }
+	    return methodCalls;
 	}
 	
 
@@ -1731,5 +1745,24 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 	}
 
 
+	public static <K, V extends Comparable<? super V>> List<Entry<K, V>> sortMapByValueDescending(Map<K, V> map) {
+
+		List<Entry<K, V>> sortedEntries = new ArrayList<Entry<K, V>>(map.entrySet());
+
+		Collections.sort(sortedEntries, new Comparator<Entry<K, V>>() {
+			@Override
+			public int compare(Entry<K, V> e1, Entry<K, V> e2) {
+				return e2.getValue().compareTo(e1.getValue());
+			}
+		});
+
+		return sortedEntries;
+	}
+	
+	public static double log2(int n)
+	{
+	    return (Math.log(n) / Math.log(2));
+	}
+	
 	
 }

@@ -3,9 +3,8 @@ package com.ufu;
 import java.io.IOException;
 import java.io.StringReader;
 import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -18,29 +17,22 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedSet;
 import java.util.StringTokenizer;
-import java.util.TreeSet;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import com.google.common.base.Charsets;
-import com.google.common.base.Splitter;
-import com.google.common.collect.HashMultiset;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Multiset;
 import com.google.common.io.Resources;
-import com.google.common.math.BigIntegerMath;
+import com.google.common.math.LongMath;
 import com.ufu.bot.PitBotApp2;
 import com.ufu.bot.tfidf.TfIdf;
 import com.ufu.bot.tfidf.ngram.NgramTfIdf;
@@ -48,7 +40,6 @@ import com.ufu.bot.to.BucketOld;
 import com.ufu.bot.to.Post;
 import com.ufu.bot.util.BotComposer;
 import com.ufu.bot.util.BotUtils;
-import com.ufu.crokage.config.CrokageStaticData;
 import com.ufu.survey.service.PitSurveyService;
 
 public class Tester {
@@ -59,7 +50,12 @@ public class Tester {
 		Boolean containToken = Pattern.compile(".*\\bjava\\b.*").matcher(str.toLowerCase()).find();
 		String token;
 		
-		
+		System.out.println(log2(16)/10);
+		System.out.println(log2(14)/10);
+		System.out.println(log2(12)/10);
+		System.out.println(log2(10)/10);
+		System.out.println(log2(8)/10);
+		System.out.println(log2(4)/10);
 		//System.out.println(containToken);
 		
 		/*System.out.println("---- Split by space ------");
@@ -95,6 +91,12 @@ public class Tester {
 		System.out.println(wordsSet);
 		
 		
+	}
+	
+	
+	public static double log2(int n)
+	{
+	    return (Math.log(n) / Math.log(2));
 	}
 	
 	
