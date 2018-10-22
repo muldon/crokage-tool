@@ -56,6 +56,7 @@ public class Tester {
 		System.out.println(log2(10)/10);
 		System.out.println(log2(8)/10);
 		System.out.println(log2(4)/10);
+		System.out.println(log2(1)/10);
 		//System.out.println(containToken);
 		
 		/*System.out.println("---- Split by space ------");

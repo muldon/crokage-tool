@@ -1039,7 +1039,7 @@ public class CrokageApp {
 		
 		logger.info("Top methods: ");
 		for(String method:topMethodsCounterMap.keySet()) {
-			logger.info(method+" :"+topSimilarAnswersNumber.getInteger(method));
+			logger.info(method+" :"+topMethodsCounterMap.get(method));
 		}
 		
 		methodsCounterMap.clear();
@@ -1067,6 +1067,9 @@ public class CrokageApp {
 	private void countMethods(String code) {
 		Set<String> codes = crokageUtils.getMethodCalls(code);
 		for(String method: codes) {
+			if(method.equals(".println(") && code.contains("ystem.out.println")) {
+				continue;
+			}
 			if(methodsCounterMap.containsKey(method)) {
 				Integer currentCount = methodsCounterMap.get(method);
 				currentCount++;
