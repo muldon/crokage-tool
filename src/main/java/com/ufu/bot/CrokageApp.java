@@ -978,7 +978,11 @@ public class CrokageApp {
 				double simPair = answersIdsScores.get(bucket.getId());
 				simPair = (simPair / maxSimPair);
 				
-				double classFreqScore = calculateScoreForPresentClasses(bucket.getCode(),topClasses);
+				double classFreqScore = calculateScoreForPresentClasses(bucket.getBody(),topClasses);
+				
+				if(bucket.getId().equals(4352901)) {
+					System.out.println();
+				}
 				
 				simPair+= classFreqScore;
 				
@@ -1103,10 +1107,12 @@ public class CrokageApp {
 		return 0;
 	}
 	
-	private double calculateScoreForPresentClasses(String code, Set<String> topClasses) {
+	private double calculateScoreForPresentClasses(String body, Set<String> topClasses) {
+		Set<String> codeSet = crokageUtils.extractClassesFromCode(body);
+		
 		double i=0;
 		for(String topClass:topClasses) {
-			if(code.contains(topClass)) {
+			if(codeSet.contains(topClass)) {
 				return 1-i;
 			}
 			i+=0.1;
