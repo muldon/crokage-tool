@@ -901,23 +901,6 @@ public class CrokageApp {
 
 
 
-	private void reportSimilarTitles(Set<Integer> topKRelevantQuestionsIds) {
-		List<Integer> listIds = new ArrayList<>(topKRelevantQuestionsIds);
-		int listSize = listIds.size();
-		int k = listSize > 20? 20:listSize;
-		listIds=listIds.subList(0, k);
-		logger.info("Top "+k+" similar titles to query");
-		List<Post> questions = crokageService.findPostsById(listIds);
-		
-		for(Post question:questions) {
-			//logger.info(allQuestionsIdsTitlesMap.get(questionId));
-			logger.info(question.getId()+ " - "+question.getTitle());
-			
-		}
-		
-	}
-
-
 
 
 	private List<Bucket> getTopKRelevantAnswers(Set<Integer> candidateAnswersIds, List<String> topMethods, double[][] matrix1, double[][] idf1, Integer key, String query, Set<String> topClasses) throws IOException {
@@ -978,11 +961,7 @@ public class CrokageApp {
 				double simPair = answersIdsScores.get(bucket.getId());
 				simPair = (simPair / maxSimPair);
 				
-				double classFreqScore = calculateScoreForPresentClasses(bucket.getBody(),topClasses);
-				
-				if(bucket.getId().equals(4352901)) {
-					System.out.println();
-				}
+				double classFreqScore = calculateScoreForPresentClasses(bucket,topClasses);
 				
 				simPair+= classFreqScore;
 				
@@ -1035,6 +1014,9 @@ public class CrokageApp {
 		reportSimilarRelatedPosts(topSimilarAnswers.keySet(),"answers","End of Ranking phase 2: ");
 		
 		candidateAnswersIds = topSimilarAnswers.keySet();
+		reportAnswers(candidateAnswersIds,topSimilarAnswers);
+		
+		/*
 		int i=0;
 		for(Integer answerId: candidateAnswersIds) {
 			logger.info("id: "+answerId+ " -score:"+topSimilarAnswers.get(answerId));
@@ -1043,7 +1025,7 @@ public class CrokageApp {
 				break;
 			}
 		}
-		
+		*/
 		return answerBuckets;
 	}
 
@@ -1107,16 +1089,23 @@ public class CrokageApp {
 		return 0;
 	}
 	
-	private double calculateScoreForPresentClasses(String body, Set<String> topClasses) {
-		Set<String> codeSet = crokageUtils.extractClassesFromCode(body);
-		
-		double i=0;
-		for(String topClass:topClasses) {
-			if(codeSet.contains(topClass)) {
-				return 1-i;
+	private double calculateScoreForPresentClasses(Bucket bucket, Set<String> topClasses) {
+		try {
+			
+			Set<String> codeSet = crokageUtils.extractClassesFromCode(bucket.getBody());
+			
+			double i=0;
+			for(String topClass:topClasses) {
+				if(codeSet.contains(topClass)) {
+					return 1-i;
+				}
+				i+=0.1;
 			}
-			i+=0.1;
+			
+		} catch (Exception e) {
+			logger.error("******** Error extracting classes from bucket: "+bucket.getId());
 		}
+		
 		return 0;
 	}
 
@@ -1662,6 +1651,40 @@ public class CrokageApp {
 		return queries;
 	}
 	
+	
+
+
+	private void reportSimilarTitles(Set<Integer> topKRelevantQuestionsIds) {
+		List<Integer> listIds = new ArrayList<>(topKRelevantQuestionsIds);
+		int listSize = listIds.size();
+		int k = listSize > 10? 10:listSize;
+		listIds=listIds.subList(0, k);
+		logger.info("Top "+k+" similar titles to query");
+		List<Post> questions = crokageService.findPostsById(listIds);
+		
+		for(Post question:questions) {
+			//logger.info(allQuestionsIdsTitlesMap.get(questionId));
+			logger.info(question.getId()+ " - "+question.getTitle());
+			
+		}
+		
+	}
+	
+	
+	private void reportAnswers(Set<Integer> topKRelevantAnswersIds, Map<Integer, Double> topSimilarAnswers) {
+		List<Integer> listIds = new ArrayList<>(topKRelevantAnswersIds);
+		int listSize = listIds.size();
+		int k = listSize > 10? 10:listSize;
+		listIds=listIds.subList(0, k);
+		logger.info("Top "+k+" similar answers to query");
+		
+		for(Integer id:topKRelevantAnswersIds) {
+			logger.info(id.toString()+ " -score:"+topSimilarAnswers.get(id));
+			
+		}
+		
+	}
+
 	
 	@Deprecated
 	private Map<String, Set<String>> getQueriesAndApisFromFile(String fileName) throws IOException {
