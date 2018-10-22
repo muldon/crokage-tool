@@ -214,6 +214,20 @@ public class BotApplicationTests extends AbstractService{
 	
 	}
 	
+	@Test
+	public void testExtractClassesFromCode() {
+		Integer answersIds[] = {910522,45960571,2900755,1053475,1911947,34959450,1921200,34959470,1928690,1928707,1928778,1969067,34959570};
+		for(Integer postId:answersIds) {
+			Post post = postsRepository.findOne(postId);
+			System.out.println("id: "+post.getId()+ " \n- code: "+post.getCode()+ " \n\nClasses found: ");
+			
+			Set<String> classes = crokageUtils.extractClassesFromProcessedCode(post.getCode());
+			System.out.println(classes);
+		}
+		
+
+	}
+	
 	
 	
 

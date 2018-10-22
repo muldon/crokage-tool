@@ -6,13 +6,24 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.springframework.stereotype.Component;
+
+@Component
 public class TextNormalizer {
 
 	String content;
-
+/*
 	public TextNormalizer(String content) {
 		this.content = content;
 	}
+	*/
+	
+
+	public void setContent(String content) {
+		this.content = content;
+	}
+
+
 
 	public TextNormalizer() {
 		// default constructor

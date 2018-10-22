@@ -159,6 +159,7 @@ public class CrokageApp {
 	private List<String> bikerTopMethods;
 	private Set<String> bikerTopClasses;
 	private Map<String,Integer> methodsCounterMap;
+	private Map<String,Integer> classesCounterMap;
 	private Map<String,Set<Integer>> googleQueriesAndSOIds;
 	
 
@@ -179,6 +180,7 @@ public class CrokageApp {
 		answersIdsScores = new HashMap<>();
 		allWordsSetForBuckets = new HashSet<>();
 		methodsCounterMap = new HashMap<>();
+		classesCounterMap = new HashMap<>();
 		googleQueriesAndSOIds = new LinkedHashMap<>();
 		
 		
@@ -823,7 +825,7 @@ public class CrokageApp {
 			
 			Set<Integer> candidateAnswersIds = getCandidateAnswersIds(topKRelevantQuestionsIds);
 			
-			List<Bucket> topKRelevantAnswers = getTopKRelevantAnswers(candidateAnswersIds,bikerTopMethods,matrix1,idf1,key,processedQuery);
+			List<Bucket> topKRelevantAnswers = getTopKRelevantAnswers(candidateAnswersIds,bikerTopMethods,matrix1,idf1,key,processedQuery,topClasses);
 		
 			crokageUtils.reportElapsedTime(initTime,"total time spent for query "+key);
 			
@@ -918,7 +920,7 @@ public class CrokageApp {
 
 
 
-	private List<Bucket> getTopKRelevantAnswers(Set<Integer> candidateAnswersIds, List<String> topMethods, double[][] matrix1, double[][] idf1, Integer key, String query) throws IOException {
+	private List<Bucket> getTopKRelevantAnswers(Set<Integer> candidateAnswersIds, List<String> topMethods, double[][] matrix1, double[][] idf1, Integer key, String query, Set<String> topClasses) throws IOException {
 		
 		//fetch answers fields
 		long initTime = System.currentTimeMillis();
@@ -936,6 +938,7 @@ public class CrokageApp {
 		answersIdsScores.clear();
 		double maxSimPair=0;
 		methodsCounterMap.clear();
+		classesCounterMap.clear();
 		//answers with code
 		for(Bucket bucket:answerBuckets) {
 			
@@ -957,6 +960,7 @@ public class CrokageApp {
 					maxSimPair=simPair;
 				}
 				
+				//countClasses(bucket.getCode()); //use recommended to score
 				countMethods(bucket.getCode());
 				
 				answersIdsScores.put(bucket.getId(), simPair);
@@ -972,11 +976,17 @@ public class CrokageApp {
 		//normalization and other relevance boosts
 		for(Bucket bucket:answerBuckets) {
 				double simPair = answersIdsScores.get(bucket.getId());
-				simPair = crokageUtils.round((simPair / maxSimPair),6);
+				simPair = (simPair / maxSimPair);
 				
-				double methodScore = calculateScoreForCommonMethods(bucket.getCode());
+				double classFreqScore = calculateScoreForPresentClasses(bucket.getCode(),topClasses);
 				
-				simPair+= methodScore;
+				simPair+= classFreqScore;
+				
+				double methodFreqScore = calculateScoreForCommonMethods(bucket.getCode());
+				
+				simPair+= methodFreqScore;
+				
+				simPair = crokageUtils.round(simPair,6);
 				
 				//not good results yet...
 				/*String processedCode = bucket.getProcessedCode();
@@ -1021,8 +1031,13 @@ public class CrokageApp {
 		reportSimilarRelatedPosts(topSimilarAnswers.keySet(),"answers","End of Ranking phase 2: ");
 		
 		candidateAnswersIds = topSimilarAnswers.keySet();
+		int i=0;
 		for(Integer answerId: candidateAnswersIds) {
 			logger.info("id: "+answerId+ " -score:"+topSimilarAnswers.get(answerId));
+			i++;
+			if(i==10) {
+				break;
+			}
 		}
 		
 		return answerBuckets;
@@ -1032,14 +1047,41 @@ public class CrokageApp {
 	
 
 
+
+	private void reportCommonClasses() {
+		Map<String,Integer> topClassesCounterMap = classesCounterMap.entrySet().stream()
+			       .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+			       .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+		
+		logger.info("Top classes: ");
+		int i=0;
+		for(String className:topClassesCounterMap.keySet()) {
+			logger.info(className+" :"+topClassesCounterMap.get(className));
+			i++;
+			if(i==10) {
+				break;
+			}
+		}
+		
+		classesCounterMap.clear();
+		classesCounterMap.putAll(topClassesCounterMap);
+		
+	}
+
+
 	private void reportCommonMethods() {
 		Map<String,Integer> topMethodsCounterMap = methodsCounterMap.entrySet().stream()
 			       .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
 			       .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
 		
 		logger.info("Top methods: ");
+		int i=0;
 		for(String method:topMethodsCounterMap.keySet()) {
 			logger.info(method+" :"+topMethodsCounterMap.get(method));
+			i++;
+			if(i==10) {
+				break;
+			}
 		}
 		
 		methodsCounterMap.clear();
@@ -1054,15 +1096,42 @@ public class CrokageApp {
 		for(String topMethod:methodsCounterMap.keySet()) {
 			if(code.contains(topMethod)) {
 				int topMethodFrequency = methodsCounterMap.get(topMethod);
-				double score = crokageUtils.round((crokageUtils.log2(topMethodFrequency)/10),4);
+				double score = crokageUtils.log2(topMethodFrequency)/10;
 				return score;
 			}
+		}
+		return 0;
+	}
+	
+	private double calculateScoreForPresentClasses(String code, Set<String> topClasses) {
+		double i=0;
+		for(String topClass:topClasses) {
+			if(code.contains(topClass)) {
+				return 1-i;
+			}
+			i+=0.1;
 		}
 		return 0;
 	}
 
 
 
+	private void countClasses(String code) {
+		Set<String> classes = crokageUtils.extractClassesFromProcessedCode(code);
+		for(String className: classes) {
+			/*if(className.equals(".println(") && code.contains("ystem.out.println")) {
+				continue;
+			}*/
+			if(classesCounterMap.containsKey(className)) {
+				Integer currentCount = classesCounterMap.get(className);
+				currentCount++;
+				classesCounterMap.put(className,currentCount);
+			}else {
+				classesCounterMap.put(className,1);
+			}
+		}
+		
+	}
 
 	private void countMethods(String code) {
 		Set<String> codes = crokageUtils.getMethodCalls(code);

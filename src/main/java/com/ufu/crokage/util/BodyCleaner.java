@@ -27,12 +27,12 @@ public class BodyCleaner {
 		ContentWriter.writeContent(outFile, content);
 	}
 
-	protected static Set<String> extractClassesFromCode(String postHTML) {
+	/*protected static Set<String> extractClassesFromCode(String postHTML) {
 		Document doc = Jsoup.parse(postHTML);
 		Elements elems = doc.select("code,pre");
 		String codeText = elems.text();
 		return new TextNormalizer(codeText).normalizeSimpleCodeDiscardSmall();
-	}
+	}*/
 
 	protected static String extractText(String postHTML) {
 		Document doc = Jsoup.parse(postHTML);

@@ -113,6 +113,10 @@ public class CrokageUtils {
 	@Autowired
 	protected GenericRepository genericRepository;
 	
+	@Autowired
+	protected TextNormalizer textNormalizer;
+	
+	
 	
 	public static final String PRE_CODE_REGEX_EXPRESSION = "(?sm)<pre><code>(.*?)</code></pre>";
 	//public static final String CODE_REGEX_EXPRESSION = "(?sm)<pre.*?><code>(.*?)</code></pre>";
@@ -1389,10 +1393,16 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 		Document doc = Jsoup.parse(content);
 		Elements elems = doc.select("code,pre");
 		String codeText = elems.text();
-		return new TextNormalizer(codeText).normalizeSimpleCodeDiscardSmall();
+		textNormalizer.setContent(content);
+		return textNormalizer.normalizeSimpleCodeDiscardSmall();
+		
 	}
 
-	
+	public Set<String> extractClassesFromProcessedCode(String content) {
+		textNormalizer.setContent(content);
+		return textNormalizer.normalizeSimpleCodeDiscardSmall();
+	}
+
 	
 
 	public void reduceSet(Map<Integer, Set<String>> goldSetQueriesApis, int k) {
