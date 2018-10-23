@@ -746,7 +746,6 @@ public class CrokageApp {
 			readSoContentWordVectorsForAllWords();
 		}
 		
-		
 		//load questions map (id,title)
 		readQuestionsIdsTitlesMap();
 		
@@ -773,7 +772,7 @@ public class CrokageApp {
 				
 		//read word vectors map (word, vectors[]) by demand
 		if(!iHaveALotOfMemory) {
-			crokageUtils.readVectorsFromSOMapForWords(soContentWordVectorsMap,new HashSet(queries),wordsAndVectorsLines);
+			crokageUtils.readVectorsFromSOMapForWords(soContentWordVectorsMap,new HashSet(processedQueries),wordsAndVectorsLines);
 		}
 		
 		//read idf vocabulary map (word, idf)
@@ -893,7 +892,7 @@ public class CrokageApp {
 		Set<Integer> topKRelevantQuestionsIds = topKRelevantQuestionsMap.keySet();
 		
 		reportSimilarRelatedPosts(topKRelevantQuestionsIds,"questions","");
-		reportSimilarTitles(topKRelevantQuestionsIds);
+		reportSimilarTitles(topKRelevantQuestionsIds,topKRelevantQuestionsMap);
 		
 		reportTest("here 2", topKRelevantQuestionsIds, key);
 		
@@ -965,23 +964,23 @@ public class CrokageApp {
 				
 				double classFreqScore = calculateScoreForPresentClasses(bucket.getCode(),topClasses);
 				
-				simPair+= classFreqScore;
+				simPair+= classFreqScore*0.75;
 				
 				double methodFreqScore = calculateScoreForCommonMethods(bucket.getCode());
 				
-				simPair+= methodFreqScore;
+				simPair+= methodFreqScore*0.75;
 				
-				double codeScore = BotComposer.calculateCodeSizeScore(CrokageUtils.getPreCodes(bucket.getBody()));
+				/*double codeScore = BotComposer.calculateCodeSizeScore(CrokageUtils.getPreCodes(bucket.getBody()));
 				
-				simPair+= codeScore;
+				simPair+= codeScore;*/
 				
 				double repScore = BotComposer.calculateRepScore(bucket.getUserReputation());
 			
-				simPair+= repScore;
+				simPair+= repScore*0.5;
 				
 				double upScore = BotComposer.calculateUpScore(bucket.getUpVotesScore());
 				
-				simPair+= upScore;
+				simPair+= upScore*0.5;
 				
 				simPair = crokageUtils.round(simPair,6);
 				
@@ -1682,19 +1681,24 @@ public class CrokageApp {
 	
 
 
-	private void reportSimilarTitles(Set<Integer> topKRelevantQuestionsIds) {
+	private void reportSimilarTitles(Set<Integer> topKRelevantQuestionsIds, Map<Integer, Double> topKRelevantQuestionsMap) {
 		List<Integer> listIds = new ArrayList<>(topKRelevantQuestionsIds);
 		int listSize = listIds.size();
 		int k = listSize > 10? 10:listSize;
 		listIds=listIds.subList(0, k);
 		logger.info("Top "+k+" similar titles to query");
-		List<Post> questions = crokageService.findPostsById(listIds);
+		/*List<Post> questions = crokageService.findPostsById(listIds);
 		
 		for(Post question:questions) {
 			//logger.info(allQuestionsIdsTitlesMap.get(questionId));
-			logger.info(question.getId()+ " - "+question.getTitle());
+			logger.info(question.getId()+ " score: "+topKRelevantQuestionsMap.get(key)- "+question.getTitle());
 			
+		}*/
+		
+		for(Integer id: listIds) {
+			logger.info(id+ " score: "+topKRelevantQuestionsMap.get(id) +" - "+ allQuestionsIdsTitlesMap.get(id));
 		}
+		
 		
 	}
 	
