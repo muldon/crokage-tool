@@ -163,7 +163,14 @@ public class BotApplicationTests extends AbstractService{
 	}
 	
 	
-	
+	//@Test
+	public void testExtractCodes() {
+		Integer questionId = 11227902;
+		
+		Post post = pitBotService.findPostById(questionId);
+		
+		
+	}
 	
 	
 	

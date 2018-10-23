@@ -46,6 +46,7 @@ import com.ufu.bot.tfidf.TFIDFCalculator;
 import com.ufu.bot.to.Bucket;
 import com.ufu.bot.to.BucketOld;
 import com.ufu.bot.to.Post;
+import com.ufu.bot.util.BotComposer;
 import com.ufu.bot.util.BotUtils;
 import com.ufu.bot.util.Matrix;
 import com.ufu.crokage.config.CrokageStaticData;
@@ -139,6 +140,7 @@ public class CrokageApp {
 	private long endTime;
 	private Set<String> extractedAPIs;
 	private List<String> queries;
+	private List<String> processedQueries;
 	private Map<Integer,Set<String>> rackQueriesApisMap;
 	//private Map<String,Set<String>> rackReformulatedQueriesApis;  // because output from rack is reformulated. This map contains the real output.
 	private Map<Integer,Set<String>> bikerQueriesApisClassesMap;
@@ -182,7 +184,7 @@ public class CrokageApp {
 		methodsCounterMap = new HashMap<>();
 		classesCounterMap = new HashMap<>();
 		googleQueriesAndSOIds = new LinkedHashMap<>();
-		
+		processedQueries = new ArrayList<>();
 		
 		logger.info("\nConsidering parameters: \n" 
 				+ "\n callBIKERProcess: " + callBIKERProcess
@@ -355,7 +357,7 @@ public class CrokageApp {
 		
 		try (PrintWriter out = new PrintWriter(CrokageStaticData.CROKAGE_HOME+"/data/googleNLP2ApiResults-0-100.txt")) {
 			for(String query: queries) {
-				Set<Integer> soQuestionsIds = executeGoogleSearch(prepareGoogleQuery(query),15);
+				Set<Integer> soQuestionsIds = executeGoogleSearch(prepareGoogleQuery(query),numberOfGoogleResults);
 				out.print("\n"+query+ " >> ");
 				for(Integer soQuestionId: soQuestionsIds) {
 					out.print(soQuestionId+ " ");
@@ -793,12 +795,12 @@ public class CrokageApp {
 			
 			rawQuery = queries.get(key-1);
 			logger.info("Query: "+rawQuery);
-			Set<String> topClasses = recommendedApis.get(key);
-			logger.info("Top classes: "+topClasses);
 			
 			//remove stop words, punctuations, etc. The same process applied to preprocess all SO titles.
-			processedQuery = CrokageUtils.processQuery(rawQuery);
+			processedQuery = processedQueries.get(key-1);
 			logger.info("Processed query: "+processedQuery);
+			Set<String> topClasses = recommendedApis.get(key);
+			logger.info("Top classes: "+topClasses);
 			
 			//get vectors for query words
 			double[][] matrix1 = CrokageUtils.getMatrixVectorsForQuery(processedQuery,soContentWordVectorsMap);
@@ -968,6 +970,18 @@ public class CrokageApp {
 				double methodFreqScore = calculateScoreForCommonMethods(bucket.getCode());
 				
 				simPair+= methodFreqScore;
+				
+				double codeScore = BotComposer.calculateCodeSizeScore(CrokageUtils.getPreCodes(bucket.getBody()));
+				
+				simPair+= codeScore;
+				
+				double repScore = BotComposer.calculateRepScore(bucket.getUserReputation());
+			
+				simPair+= repScore;
+				
+				double upScore = BotComposer.calculateUpScore(bucket.getUpVotesScore());
+				
+				simPair+= upScore;
 				
 				simPair = crokageUtils.round(simPair,6);
 				
@@ -1946,14 +1960,11 @@ public class CrokageApp {
 	}*/
 	
 	private void processInputQueries() throws Exception {
-		List<String> processedQueries = new ArrayList<>();
 		queries = readInputQueries();
 		for(String query: queries) {
-			query = crokageUtils.processQuery(query);
-			processedQueries.add(query);
+			processedQueries.add(crokageUtils.processQuery(query));
 		}
-		queries.clear();
-		queries.addAll(processedQueries);
+		
 	}
 
 

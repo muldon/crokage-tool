@@ -157,7 +157,7 @@ public class BotComposer {
 	
 	
 	
-	private double calculateUpScore(Integer upVotes) {
+	public static double calculateUpScore(Integer upVotes) {
 		Integer range1  = 1;
 		Integer range2  = 5;
 		Integer range3  = 10;
@@ -200,7 +200,7 @@ public class BotComposer {
 	}
 	
 	
-	private double calculateRepScore(Integer userReputation) {
+	public static double calculateRepScore(Integer userReputation) {
 		Integer range1   = 1;
 		Integer range2   = 5;
 		Integer range3   = 10;
@@ -274,7 +274,7 @@ public class BotComposer {
 	}
 
 
-	private double calculateCodeSizeScore(List<String> postCodes) {
+	public static double calculateCodeSizeScore(List<String> postCodes) {
 		if(postCodes.size()==0) {
 			return 0d;
 		}
@@ -303,7 +303,7 @@ public class BotComposer {
 	}
 
 
-	public double calculateCoverageScore(Set<String> mainBucketClassesNames, Set<String> postBucketlassesNames) {
+	public static double calculateCoverageScore(Set<String> mainBucketClassesNames, Set<String> postBucketlassesNames) {
 		Set<String> intersection = new HashSet<String>(mainBucketClassesNames);
 		
 		float pSetSize = postBucketlassesNames.size();

@@ -1651,9 +1651,9 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 
 	public void readVectorsFromSOMapForWords(Map<String, double[]> soContentWordVectorsMap, Set<String> listOfWords, List<String> wordsAndVectorsLines) throws IOException {
 		Set<String> allWordsSet = getWordsForList(listOfWords);
-		logger.info("Reading vectors by demand for "+allWordsSet.size()+ " words. Size of soContentWordVectorsMap before: "+soContentWordVectorsMap.size());
+		//logger.info("Reading vectors by demand for "+allWordsSet.size()+ " words. Size of soContentWordVectorsMap before: "+soContentWordVectorsMap.size());
 		soContentWordVectorsMap.putAll(readVectorsFromSOMapForWords(allWordsSet,wordsAndVectorsLines));
-		logger.info("Size after: "+soContentWordVectorsMap.size());
+		//logger.info("Size after: "+soContentWordVectorsMap.size());
 		
 	}
 

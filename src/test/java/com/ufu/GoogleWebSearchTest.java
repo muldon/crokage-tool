@@ -54,7 +54,7 @@ public class GoogleWebSearchTest {
     
   }*/
 
-      @Test
+   @Test
   public void shouldSearchWithSpecialCharacters() {
  //Intentionally commented out to comply with Google Terms of Service
   /*  SearchQuery query = new SearchQuery.Builder("java api")
