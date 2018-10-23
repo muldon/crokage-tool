@@ -27,6 +27,8 @@ public class Bucket {
 	
 	private Boolean acceptedAnswer;
 	
+	private Integer parentId;
+	
 	private Integer parentUpVotesScore;
 	
 	private Double calculatedScore;
@@ -174,6 +176,14 @@ public class Bucket {
 
 	public void setProcessedCode(String processedCode) {
 		this.processedCode = processedCode;
+	}
+
+	public Integer getParentId() {
+		return parentId;
+	}
+
+	public void setParentId(Integer parentId) {
+		this.parentId = parentId;
 	}
 	
 	

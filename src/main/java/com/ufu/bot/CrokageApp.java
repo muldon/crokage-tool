@@ -917,7 +917,7 @@ public class CrokageApp {
 		}
 		
 		
-		
+		String parentTitle;
 		String comparingContent;
 		answersIdsScores.clear();
 		double maxSimPair=0;
@@ -929,8 +929,10 @@ public class CrokageApp {
 			//second ranking
 			try {
 				
+				parentTitle =  allQuestionsIdsTitlesMap.get(bucket.getParentId());
+				
 				//get the word vectors for each word of the query
-				comparingContent = bucket.getProcessedBody()+ " "+bucket.getProcessedCode();
+				comparingContent =  parentTitle+" "+bucket.getProcessedBody()+ " "+bucket.getProcessedCode();
 				
 				//get vectors for query2 words
 				double[][] matrix2 = CrokageUtils.getMatrixVectorsForQuery(comparingContent,soContentWordVectorsMap);
