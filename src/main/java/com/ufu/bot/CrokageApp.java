@@ -809,7 +809,7 @@ public class CrokageApp {
 			//get biker methods and classes
 			bikerTopMethods = getBikerTopMethods(key);
 			bikerTopClasses = bikerQueriesApisClassesMap.get(key);
-			logger.info("Top classes from biker: "+bikerTopClasses);
+			//logger.info("Top classes from biker: "+bikerTopClasses);
 			
 			if(useGoogleSearch) {
 				topKRelevantQuestionsIds = googleQueriesAndSOIds.get(rawQuery);
@@ -961,7 +961,7 @@ public class CrokageApp {
 				double simPair = answersIdsScores.get(bucket.getId());
 				simPair = (simPair / maxSimPair);
 				
-				double classFreqScore = calculateScoreForPresentClasses(bucket,topClasses);
+				double classFreqScore = calculateScoreForPresentClasses(bucket.getCode(),topClasses);
 				
 				simPair+= classFreqScore;
 				
@@ -1089,7 +1089,21 @@ public class CrokageApp {
 		return 0;
 	}
 	
-	private double calculateScoreForPresentClasses(Bucket bucket, Set<String> topClasses) {
+	
+	private double calculateScoreForPresentClasses(String code, Set<String> topClasses) {
+		
+		double i = 0;
+		for (String topClass : topClasses) {
+			if (code.contains(topClass)) {
+				return 1 - i;
+			}
+			i += 0.1;
+		}
+
+		return 0;
+	}
+	
+	private double calculateScoreForPresentClassesOldExceptionStackOverflow(Bucket bucket, Set<String> topClasses) {
 		try {
 			
 			Set<String> codeSet = crokageUtils.extractClassesFromCode(bucket.getBody());
@@ -1314,7 +1328,7 @@ public class CrokageApp {
 			String parts[] = classAndMethod.split("\\."); 
 			topMethods.add(parts[1]);
 		}
-		logger.info("Top methods from biker: "+topMethods);
+		//logger.info("Top methods from biker: "+topMethods);
 		return topMethods;
 	}
 
@@ -1678,7 +1692,7 @@ public class CrokageApp {
 		listIds=listIds.subList(0, k);
 		logger.info("Top "+k+" similar answers to query");
 		
-		for(Integer id:topKRelevantAnswersIds) {
+		for(Integer id:listIds) {
 			logger.info(id.toString()+ " -score:"+topSimilarAnswers.get(id));
 			
 		}
