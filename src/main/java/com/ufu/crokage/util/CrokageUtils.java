@@ -302,7 +302,7 @@ public class CrokageUtils {
 		//if(!Arrays.asList(phaseExceptions).contains(phaseNumber)) {
 			endTime = System.currentTimeMillis();
 			String duration = DurationFormatUtils.formatDuration(endTime-initTime, "HH:mm:ss,SSS");
-			logger.info("Done with "+processName+", duration: "+duration);
+			System.out.println("Done with "+processName+", duration: "+duration);
 			
 		//}
 	}
@@ -375,7 +375,7 @@ public class CrokageUtils {
 			codeContent+= code+ "\n\n";
 			//i++;
 		}*/
-		//logger.info("\nCodes: \n"+codeContent);
+		//System.out.println("\nCodes: \n"+codeContent);
 		return codes;
 	}
 	
@@ -809,11 +809,11 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 	
 	
 	public void getPostsLinks() {
-		logger.info("Retrieving PostLinks... ");
+		System.out.println("Retrieving PostLinks... ");
 		if(allPostLinks==null){
 			allPostLinks = genericRepository.getAllPostLinks();
 		}
-		logger.info("PostLinks retrieved: " + allPostLinks.size());
+		System.out.println("PostLinks retrieved: " + allPostLinks.size());
 
 	}
 	
@@ -822,7 +822,7 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 			bucketDuplicatiosMap = new HashMap<Integer, Set<Integer>>();	
 			getPostsLinks();
 			//Pode haver mais de uma duplicada por questao.. BucketOld structure
-			logger.info("Building buckets");
+			System.out.println("Building buckets");
 					
 			for(Map.Entry<Integer, Set<Integer>> entry : allPostLinks.entrySet()){
 				
@@ -840,7 +840,7 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 				
 			}
 			
-			logger.info("Buckets gerados...");
+			System.out.println("Buckets gerados...");
 		}
 	}
 	
@@ -878,7 +878,7 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 	
 	
 	/*public void removePostsWithIncompleteTitlesOld(Set<ProcessedPostOld> processedPostsByFilter, Set<ProcessedPostOld> closedDuplicatedNonMastersByTag) {
-		logger.info("Removing invalid posts. Processedposts before: "+processedPostsByFilter.size());
+		System.out.println("Removing invalid posts. Processedposts before: "+processedPostsByFilter.size());
 		StringTokenizer st = null;
 		Set<ProcessedPostOld> invalidPosts = new HashSet<>();
 		
@@ -893,10 +893,10 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 		}
 		
 		processedPostsByFilter.removeAll(invalidPosts);
-		logger.info("Processed posts after removing invalid posts: "+processedPostsByFilter.size()+"\nInvalid posts: "+invalidPosts.size());
+		System.out.println("Processed posts after removing invalid posts: "+processedPostsByFilter.size()+"\nInvalid posts: "+invalidPosts.size());
 		
 		
-		logger.info("...now removing invalid posts from closedDuplicatedNonMastersIdsByTag. Before: "+closedDuplicatedNonMastersByTag.size());
+		System.out.println("...now removing invalid posts from closedDuplicatedNonMastersIdsByTag. Before: "+closedDuplicatedNonMastersByTag.size());
 		invalidPosts = new HashSet<>();
 		
 		for(ProcessedPostOld processedPosts: closedDuplicatedNonMastersByTag) {
@@ -908,7 +908,7 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 		}
 		
 		closedDuplicatedNonMastersByTag.removeAll(invalidPosts);
-		logger.info("closedDuplicatedNonMastersIdsByTag after removing invalid posts: "+closedDuplicatedNonMastersByTag.size()+"\nInvalid posts: "+invalidPosts.size());
+		System.out.println("closedDuplicatedNonMastersIdsByTag after removing invalid posts: "+closedDuplicatedNonMastersByTag.size()+"\nInvalid posts: "+invalidPosts.size());
 				
 	}*/
 	
@@ -1049,7 +1049,7 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 		
 		URL url;
 		String fileContent="";
-		logger.info("...reading external questions");		
+		System.out.println("...reading external questions");		
 		url = Resources.getResource("external_questions.txt");
 		fileContent = Resources.toString(url, Charsets.UTF_8);
 		
@@ -1171,7 +1171,7 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 	public static void identifyQuestionsIdsFromUrls(List<String> urls, Set<Integer> soQuestionsIds) {
 		for(String url: urls){
 			if(!url.contains("stackoverflow.com")) {
-				//logger.info("Discarting URL because its is not a SO url: "+url);
+				//System.out.println("Discarting URL because its is not a SO url: "+url);
 				continue;
 			}
 			//String[] urlPart = url.split("\\/[[:digit:]].*\\/");
@@ -1189,7 +1189,7 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 	
 	public static Integer identifyQuestionIdFromUrl(String url) {
 		if(!url.contains("stackoverflow.com")) {
-			//logger.info("Discarting URL because its is not a SO url: "+url);
+			//System.out.println("Discarting URL because its is not a SO url: "+url);
 			return null;
 		}
 		//String[] urlPart = url.split("\\/[[:digit:]].*\\/");
@@ -1217,7 +1217,7 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 		soPostsIds.add(9740830);
 		
 		for(Integer id:soPostsIds) {
-			logger.info("id: "+id);
+			System.out.println("id: "+id);
 		}
 		
 		return soPostsIds;
@@ -1600,7 +1600,7 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 	public void readIDFVocabulary(Map<String, Double> soIDFVocabularyMap) throws Exception {
 		if(soIDFVocabularyMap!=null) {
 			long initTime = System.currentTimeMillis();
-			logger.info("Reading all idfs from file...");
+			System.out.println("Reading all idfs from file...");
 			String[] parts;
 			List<String> wordsAndIDFs = Files.readAllLines(Paths.get(CrokageStaticData.SO_IDF_VOCABULARY));
 			for(String line: wordsAndIDFs) {
@@ -1651,16 +1651,16 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 
 	public void readVectorsFromSOMapForWords(Map<String, double[]> soContentWordVectorsMap, Set<String> listOfWords, List<String> wordsAndVectorsLines) throws IOException {
 		Set<String> allWordsSet = getWordsForList(listOfWords);
-		//logger.info("Reading vectors by demand for "+allWordsSet.size()+ " words. Size of soContentWordVectorsMap before: "+soContentWordVectorsMap.size());
+		//System.out.println("Reading vectors by demand for "+allWordsSet.size()+ " words. Size of soContentWordVectorsMap before: "+soContentWordVectorsMap.size());
 		soContentWordVectorsMap.putAll(readVectorsFromSOMapForWords(allWordsSet,wordsAndVectorsLines));
-		//logger.info("Size after: "+soContentWordVectorsMap.size());
+		//System.out.println("Size after: "+soContentWordVectorsMap.size());
 		
 	}
 
 
 	public Map<String, double[]> readVectorsFromSOMapForWords(Set<String> allQueriesWords, List<String> wordsAndVectors) throws IOException {
 		long initTime = System.currentTimeMillis();
-		//logger.info("Reading all vectors from file...");
+		//System.out.println("Reading all vectors from file...");
 		String[] parts;
 		int vecSize=0;
 		Map<String, double[]> soContentWordVectorsMap = new HashMap<>();
@@ -1689,7 +1689,7 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 
 	public void readWordsFromFileToMap(Map<Integer, String> soIdsTitlesMap, List<String> idsAndWords) throws IOException {
 		long initTime = System.currentTimeMillis();
-		logger.info("Reading all ids and titles from file...");
+		System.out.println("Reading all ids and titles from file...");
 		String[] parts;
 		String title;
 		for(String line: idsAndWords) {
@@ -1704,7 +1704,7 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 	
 	public void readWordsFromFileToMap2(Map<Integer, Integer> soIdsIds, List<String> idsAndWords) throws IOException {
 		long initTime = System.currentTimeMillis();
-		logger.info("Reading all ids and titles from file...");
+		System.out.println("Reading all ids and titles from file...");
 		String[] parts;
 		String title;
 		for(String line: idsAndWords) {
