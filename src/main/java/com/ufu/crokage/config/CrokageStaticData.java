@@ -1,5 +1,8 @@
 package com.ufu.crokage.config;
 
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
+
 public class CrokageStaticData {
 	/*
 	 * Must be set
@@ -53,4 +56,51 @@ public class CrokageStaticData {
 	 * Comes with project
 	 */
 	public static String STOP_WORDS_FILE_PATH = CROKAGE_HOME+"/data/stanford_stop_words.txt";         //from stanford: https://github.com/stanfordnlp/CoreNLP/blob/master/data/edu/stanford/nlp/patterns/surface/stopwords.txt
+	
+	
+	
+	
+	
+	@Value("${BIKER_HOME}")
+    public void setBikerHome(String bikerHome) {
+        if(!StringUtils.isBlank(bikerHome)) {
+        	BIKER_HOME = bikerHome;
+        }
+		
+    }
+	
+	
+	@Value("${CROKAGE_HOME}")
+    public void setCrokageHome(String var) {
+        if(!StringUtils.isBlank(var)) {
+        	CROKAGE_HOME = var;
+        }
+		
+    }
+	
+	@Value("${TMP_DIR}")
+    public void setTmpDir(String var) {
+        if(!StringUtils.isBlank(var)) {
+        	TMP_DIR = var;
+        }
+		
+    }
+	
+	@Value("${FAST_TEXT_INSTALLATION_DIR}")
+    public void setFastTextDir(String var) {
+        if(!StringUtils.isBlank(var)) {
+        	FAST_TEXT_INSTALLATION_DIR = var;
+        }
+		
+    }
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 }

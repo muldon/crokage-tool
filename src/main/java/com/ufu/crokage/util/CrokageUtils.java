@@ -227,7 +227,7 @@ public class CrokageUtils {
 			
 			standardTokenizer.close();
 			//loadTagSynonyms();
-			configureEnvironmentVariables();
+			//configureEnvironmentVariables();
 		}
 		
 		if(minTokenSize==null) {
@@ -246,7 +246,7 @@ public class CrokageUtils {
 	
 	
 
-	private void configureEnvironmentVariables() {
+	/*private void configureEnvironmentVariables() {
 		if(!StringUtils.isBlank(bikerHome)) {
 			CrokageStaticData.BIKER_HOME=bikerHome;
 		}
@@ -258,7 +258,7 @@ public class CrokageUtils {
 		}
 		
 		
-	}
+	}*/
 
 
 	

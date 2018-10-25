@@ -210,6 +210,12 @@ public class CrokageApp {
 				+ "\n topSimilarAnswersNumber: " + topSimilarAnswersNumber
 				+ "\n dataSet: " + dataSet
 				+ "\n iHaveALotOfMemory: " + iHaveALotOfMemory
+				
+				+ "\n BIKER_HOME: " + CrokageStaticData.BIKER_HOME
+				+ "\n CROKAGE_HOME: " + CrokageStaticData.CROKAGE_HOME
+				+ "\n TMP_DIR: " + CrokageStaticData.TMP_DIR
+				+ "\n FAST_TEXT_INSTALLATION_DIR: " + CrokageStaticData.FAST_TEXT_INSTALLATION_DIR
+				
 				+ "\n obs: " + obs
 				+ "\n action: " + action 
 				+ "\n subAction: " + subAction 
