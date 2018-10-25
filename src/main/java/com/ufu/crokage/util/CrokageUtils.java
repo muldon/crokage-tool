@@ -37,6 +37,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.StrTokenizer;
@@ -189,10 +191,10 @@ public class CrokageUtils {
 	private static String unncessaryWords[] = {}; //td-idf comparates a query with an answer content, but this content is reinforced with its parent title and body
 	
 	public CrokageUtils() throws Exception {
-		initializeConfigs();
+		//initializeConfigs();
 	}
 	
-	
+	@PostConstruct
 	public void initializeConfigs() throws Exception {
 		if(!configsInitialized){
 			configsInitialized = true;
