@@ -1,9 +1,13 @@
 package com.ufu;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.StringReader;
 import java.math.BigInteger;
-import java.math.RoundingMode;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,7 +36,7 @@ import org.json.simple.parser.ParseException;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
-import com.google.common.math.LongMath;
+import com.ufu.bot.CrokageApp;
 import com.ufu.bot.PitBotApp2;
 import com.ufu.bot.tfidf.TfIdf;
 import com.ufu.bot.tfidf.ngram.NgramTfIdf;
@@ -40,11 +44,20 @@ import com.ufu.bot.to.BucketOld;
 import com.ufu.bot.to.Post;
 import com.ufu.bot.util.BotComposer;
 import com.ufu.bot.util.BotUtils;
+import com.ufu.crokage.config.CrokageStaticData;
 import com.ufu.survey.service.PitSurveyService;
 
 public class Tester {
 
 	public Tester() throws Exception {
+		
+		CrokageApp crokageApp = new CrokageApp();
+		System.out.println(crokageApp.prepareGoogleQuery("How can I insert an element in array at a given position?"));
+		
+		
+		//stripDuplicatesFromFile(CrokageStaticData.INPUT_QUERIES_FILE_NLP2API);
+		
+		
 		String str = "How do I send an HTML email? javascript javac dd JAVA";
 		StringTokenizer st = new StringTokenizer(str);
 		Boolean containToken = Pattern.compile(".*\\bjava\\b.*").matcher(str.toLowerCase()).find();
@@ -571,5 +584,23 @@ public class Tester {
 	    return roman;
 	}
 
+	
+	public void stripDuplicatesFromFile(String filename) throws Exception {
+	    BufferedReader reader = new BufferedReader(new FileReader(filename));
+	    Set<String> lines = new LinkedHashSet<String>(); 
+	    String line;
+	    while ((line = reader.readLine()) != null) {
+	        lines.add(line.trim());
+	    }
+	    reader.close();
+	    BufferedWriter writer = new BufferedWriter(new FileWriter(filename));
+	    for (String unique : lines) {
+	        writer.write(unique);
+	        writer.newLine();
+	    }
+	    writer.close();
+	}
+	
+	
 	
 }

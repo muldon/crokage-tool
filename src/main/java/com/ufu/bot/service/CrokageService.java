@@ -57,6 +57,8 @@ public class CrokageService extends AbstractService{
 	public Map<Integer, Integer> getAnswersIdsParentIds() {
 		return genericRepository.getAnswersIdsParentIds();
 	}
+
+	
 	
 	
 	

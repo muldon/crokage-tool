@@ -31,7 +31,8 @@ public interface PostsRepository extends CrudRepository<Post, Integer> {
 	@Query(value="select p.id "
 			  + " from postsmin p",nativeQuery=true)
 	List<Integer> findAllPostsIds();
-    
+
+	
 	
 
 	

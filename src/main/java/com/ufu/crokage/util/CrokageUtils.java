@@ -1774,5 +1774,31 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 	    return (Math.log(n) / Math.log(2));
 	}
 	
+	public void buildCsvQuestionsForEvaluation(String fileName,Map<String, Set<Integer>> queriesSOQuestionIds) throws IOException {
+		BufferedWriter bw =null;
+		try {
+			bw = new BufferedWriter(new FileWriter(fileName));
+			bw.write(";Rodrigo;Klerisson;Rodrigo agreement;Klerisson agreement\n\n");
+			Set<String> queries = queriesSOQuestionIds.keySet(); 
+						
+			for(String query:queries){
+				
+				bw.write("\n"+query+"\n\n");
+				Set<Integer> ids = queriesSOQuestionIds.get(query);					
+				for(Integer id: ids) {
+					bw.write("https://stackoverflow.com/questions/"+id+"/\n");
+				}
+				
+				bw.write("\n\n");
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			bw.close();
+		}
+		
+	}
+	
 	
 }

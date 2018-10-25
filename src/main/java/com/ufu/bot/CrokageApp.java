@@ -213,10 +213,14 @@ public class CrokageApp {
 			runApproach();
 			break;
 			
+		case "generateGoogleRelatedQuestionsIdsForEvaluation":
+			generateGoogleRelatedQuestionsIdsForEvaluation();
+			break;
+		
 		case "generateGoogleRelatedQuestionsIdsForNLP2Api":
 			generateGoogleRelatedQuestionsIdsForNLP2Api();
 			break;
-		
+			
 		case "readGoogleRelatedQuestionsIdsForNLP2Api":
 			readGoogleRelatedQuestionsIdsForNLP2Api();
 			break;
@@ -331,6 +335,95 @@ public class CrokageApp {
 	
 	
 
+	private void generateGoogleRelatedQuestionsIdsForEvaluation() throws Exception {
+		readGoogleRelatedQuestionsIdsForNLP2Api();
+		
+		queries = readInputQueries();
+		
+		//load apis considering approaches
+		getApisForApproaches();
+		
+		//combine state of art approaches considering the order in parameters
+		Map<Integer, Set<String>> recommendedApis = getRecommendedApis();
+		//Set<String> googleQueriesAndQuestionsIdsEntrySet = googleQueriesAndSOIds.keySet();
+		
+		Set<Integer> keys = recommendedApis.keySet();
+		String rawQuery;
+		Map<String, Set<Integer>> exceptionQueriesSOQuestionIds = new LinkedHashMap<>();
+		StringBuilder lines = new StringBuilder("");
+		
+		for(Integer key: keys) {  //for each query 
+			long initTime = System.currentTimeMillis();
+			rawQuery = queries.get(key-1);
+			System.out.println("\n\nQuery: "+rawQuery);
+			
+			//remove questions without answers, or without answers with upvotes or answers that do not contain recommended apis
+			Set<Integer> googleSOQuestionsIds = googleQueriesAndSOIds.get(rawQuery);
+			System.out.println(googleSOQuestionsIds);
+			
+			Set<String> topClasses = recommendedApis.get(key);
+			System.out.println("Top classes: "+topClasses);
+			
+			List<Post> soQuestions = crokageService.findPostsById(new ArrayList(googleSOQuestionsIds));
+			Set<Integer> exceptionIdsSet = new LinkedHashSet<>();
+			
+			outer:for(Post question:soQuestions) {
+				/*if(question.getId().equals(16693307)) {
+					System.out.println();
+				}*/
+				if(question.getAnswerCount()==0) {
+					exceptionIdsSet.add(question.getId());
+				}else {
+					List<Post> answers = crokageService.findUpVotedAnswersByQuestionId(question.getId());
+					if(answers.isEmpty()) {
+						exceptionIdsSet.add(question.getId());
+					}else {
+						inner:for(Post answer: answers) {
+							/*if(answer.getId().equals(30782740)) {
+								System.out.println();
+							}*/
+							for (String topClass : topClasses) {
+								if (answer.getCode().contains(topClass)) {
+									continue outer;
+								}
+							}
+						}
+						exceptionIdsSet.add(question.getId());
+					}
+				}
+				
+				if(!exceptionIdsSet.isEmpty()) {
+					exceptionQueriesSOQuestionIds.put(rawQuery, exceptionIdsSet);
+					
+				}
+				
+			}
+			System.out.println("Query: "+rawQuery + " - exceptions: "+exceptionQueriesSOQuestionIds.get(rawQuery));
+		}
+		
+		Set<String> queriesIdsSet = exceptionQueriesSOQuestionIds.keySet();
+		for(String query: queriesIdsSet) {
+			lines.append("\n"+query+" >> ");
+			 Set<Integer> ids = exceptionQueriesSOQuestionIds.get(query);
+			 for(Integer id: ids) {
+				lines.append(id+" ");
+			}
+			//remove from googleQueriesAndSOIds, ids not relevant 
+			googleQueriesAndSOIds.get(query).removeAll(ids);
+			 
+		}
+		
+		crokageUtils.writeStringContentToFile(lines.toString(), CrokageStaticData.GOOGLE_EXCEPTIONS_FOR_NLP2API);
+	
+		//build an excel file 
+		crokageUtils.buildCsvQuestionsForEvaluation(CrokageStaticData.NLP2API_QUERIES_AND_SO_QUESTIONS_TO_EVALUATE,googleQueriesAndSOIds);
+		
+		
+	}
+
+
+
+
 	private void readGoogleRelatedQuestionsIdsForNLP2Api() throws IOException {
 		long initTime = System.currentTimeMillis();
 		List<String> queriesAndGoogleSOIds = Files.readAllLines(Paths.get(CrokageStaticData.GOOGLE_TOP_RESULTS_FOR_NLP2API));
@@ -346,16 +439,16 @@ public class CrokageApp {
 		}
 		
 		crokageUtils.reportElapsedTime(initTime,"readGoogleRelatedQuestionsIdsForNLP2Api");
-		System.out.println("Size of googleQueriesAndSOIds: "+googleQueriesAndSOIds.size()+ " matches with the number of queries ?");
+		System.out.println("Size of googleQueriesAndSOIds: "+googleQueriesAndSOIds.size());
 	}
 
 
 
 
 	private void generateGoogleRelatedQuestionsIdsForNLP2Api() throws Exception {
-		List<String> queries = Files.readAllLines(Paths.get(CrokageStaticData.CROKAGE_HOME+"/data/inputQueriesNlp2Api-0-100.txt"));
+		List<String> queries = Files.readAllLines(Paths.get(CrokageStaticData.CROKAGE_HOME+"/data/inputQueriesNlp2Api-201-300.txt"));
 		
-		try (PrintWriter out = new PrintWriter(CrokageStaticData.CROKAGE_HOME+"/data/googleNLP2ApiResults-0-100.txt")) {
+		try (PrintWriter out = new PrintWriter(CrokageStaticData.CROKAGE_HOME+"/data/googleNLP2ApiResults-201-300.txt")) {
 			for(String query: queries) {
 				Set<Integer> soQuestionsIds = executeGoogleSearch(prepareGoogleQuery(query),numberOfGoogleResults);
 				out.print("\n"+query+ " >> ");
@@ -778,11 +871,6 @@ public class CrokageApp {
 		//read idf vocabulary map (word, idf)
 		crokageUtils.readIDFVocabulary(soIDFVocabularyMap);
 		
-		if(useGoogleSearch) {
-			readGoogleRelatedQuestionsIdsForNLP2Api();
-		}
-		
-		
 		Set<Integer> keys = recommendedApis.keySet();
 		String processedQuery;
 		String rawQuery;
@@ -793,7 +881,7 @@ public class CrokageApp {
 			long initTime = System.currentTimeMillis();
 			
 			rawQuery = queries.get(key-1);
-			System.out.println("Query: "+rawQuery);
+			System.out.println("\n\nQuery: "+rawQuery);
 			
 			//remove stop words, punctuations, etc. The same process applied to preprocess all SO titles.
 			processedQuery = processedQueries.get(key-1);
@@ -812,17 +900,10 @@ public class CrokageApp {
 			bikerTopClasses = bikerQueriesApisClassesMap.get(key);
 			//System.out.println("Top classes from biker: "+bikerTopClasses);
 			
-			if(useGoogleSearch) {
-				topKRelevantQuestionsIds = googleQueriesAndSOIds.get(rawQuery);
-				if(topKRelevantQuestionsIds==null) {
-					throw new Exception("Google ids not found by query: "+rawQuery);
-				}
-				
-			}else {
-				candidateQuestionsIds = getCandidateQuestionsFromTopApis(topClasses);
-				//reportTest("here 1",candidateQuestionsIds,key);
-				topKRelevantQuestionsIds = getTopKRelevantQuestionsIds(candidateQuestionsIds,bikerTopMethods,matrix1,idf1,key,processedQuery);
-			}
+			candidateQuestionsIds = getCandidateQuestionsFromTopApis(topClasses);
+			//reportTest("here 1",candidateQuestionsIds,key);
+			topKRelevantQuestionsIds = getTopKRelevantQuestionsIds(candidateQuestionsIds,bikerTopMethods,matrix1,idf1,key,processedQuery);
+		
 			
 			Set<Integer> candidateAnswersIds = getCandidateAnswersIds(topKRelevantQuestionsIds);
 			
