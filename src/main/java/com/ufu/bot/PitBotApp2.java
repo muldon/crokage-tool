@@ -156,8 +156,8 @@ public class PitBotApp2 {
 	 * Path to a file which contains a FLAG indicating if the environment is test or production. This file (environmentFlag.properties) contains only one line with a boolean value (useProxy = true|false)
 	 * If useProxy = true, the proxy is not applied for the google search engine. Otherwise, proxy is set.   
 	 */
-	@Value("${pathFileEnvFlag}")
-	public String pathFileEnvFlag;   
+	/*@Value("${pathFileEnvFlag}")
+	public String pathFileEnvFlag;   */
 	
 	/*
 	 * Stores the value obtained from the pathFileEnvFlag file 
@@ -196,14 +196,14 @@ public class PitBotApp2 {
 		logger.info("Initializing app...");
 		//initializeVariables();
 		botUtils.initializeConfigs();
-		getPropertyValueFromLocalFile();
+		//getPropertyValueFromLocalFile();
 		
 				
 		logger.info("\nConsidering parameters: \n"
 				+ "\n phaseNumber: "+phaseNumber
 				+ "\n section: "+section
 				+ "\n lot: "+lot
-				+ "\n pathFileEnvFlag: "+pathFileEnvFlag
+				//+ "\n pathFileEnvFlag: "+pathFileEnvFlag
 				+ "\n obs: "+obs
 				+ "\n numberOfQueriesToTest: "+numberOfQueriesToTest
 				+ "\n shuffleListOfQueriesBeforeGoogleSearch: "+shuffleListOfQueriesBeforeGoogleSearch
@@ -1427,7 +1427,7 @@ public class PitBotApp2 {
 	
 
 
-	private void getPropertyValueFromLocalFile() {
+	/*private void getPropertyValueFromLocalFile() {
 		Properties prop = new Properties();
 		InputStream input = null;
 		useProxy = false;
@@ -1464,7 +1464,7 @@ public class PitBotApp2 {
 				}
 			}
 		}
-	}
+	}*/
 
 	
 

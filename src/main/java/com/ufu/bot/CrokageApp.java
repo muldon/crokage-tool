@@ -127,15 +127,24 @@ public class CrokageApp {
 	 * with a boolean value (useProxy = true|false) If useProxy = true, the proxy is
 	 * not applied for the google search engine. Otherwise, proxy is set.
 	 */
-	@Value("${pathFileEnvFlag}")
-	public String pathFileEnvFlag;
+	/*@Value("${pathFileEnvFlag}")
+	public String pathFileEnvFlag;*/
 
 	/*
 	 * Stores the value obtained from the pathFileEnvFlag file
 	 */
-	private Boolean useProxy;
-	private String environment;
-
+	@Value("${useProxy}")
+	public Boolean useProxy;
+	
+	@Value("${environment}")
+	public String environment;
+	
+	@Value("${BIKER_HOME}")
+	public String bikerHome;
+	
+	@Value("${virutalPythonEnv}")
+	public String virutalPythonEnv;
+	
 	private long initTime;
 	private long endTime;
 	private Set<String> extractedAPIs;
@@ -171,7 +180,8 @@ public class CrokageApp {
 		System.out.println("Initializing CrokageApp app...");
 		// initializeVariables();
 		// botUtils.initializeConfigs();
-		getPropertyValueFromLocalFile();
+		//getPropertyValueFromLocalFile();
+		replaceStaticDataConfigs();
 		subAction = subAction !=null ? subAction.toLowerCase().trim(): null;
 		dataSet = dataSet !=null ? dataSet.toLowerCase().trim(): null;
 		soIDFVocabularyMap = new HashMap<>();
@@ -190,7 +200,7 @@ public class CrokageApp {
 				+ "\n callBIKERProcess: " + callBIKERProcess
 				+ "\n callNLP2ApiProcess: " + callNLP2ApiProcess
 				+ "\n callRACKApiProcess: " + callRACKApiProcess
-				+ "\n pathFileEnvFlag: " + pathFileEnvFlag 
+				//+ "\n pathFileEnvFlag: " + pathFileEnvFlag 
 				+ "\n useProxy: " + useProxy 
 				+ "\n environment: " + environment
 				+ "\n numberOfGoogleResults: " + numberOfGoogleResults
@@ -335,6 +345,17 @@ public class CrokageApp {
 	
 	
 
+	private void replaceStaticDataConfigs() {
+		if(!StringUtils.isBlank(bikerHome)) {
+			CrokageStaticData.BIKER_HOME=bikerHome;
+		}
+		
+		
+	}
+
+
+
+
 	private void generateGoogleRelatedQuestionsIdsForEvaluation() throws Exception {
 		readGoogleRelatedQuestionsIdsForNLP2Api();
 		
@@ -446,9 +467,9 @@ public class CrokageApp {
 
 
 	private void generateGoogleRelatedQuestionsIdsForNLP2Api() throws Exception {
-		List<String> queries = Files.readAllLines(Paths.get(CrokageStaticData.CROKAGE_HOME+"/data/inputQueriesNlp2Api-201-300.txt"));
+		List<String> queries = Files.readAllLines(Paths.get(CrokageStaticData.CROKAGE_HOME+"/data/inputQueriesNlp2Api-1-100.txt"));
 		
-		try (PrintWriter out = new PrintWriter(CrokageStaticData.CROKAGE_HOME+"/data/googleNLP2ApiResults-201-300.txt")) {
+		try (PrintWriter out = new PrintWriter(CrokageStaticData.CROKAGE_HOME+"/data/googleNLP2ApiResults-1-100.txt")) {
 			for(String query: queries) {
 				Set<Integer> soQuestionsIds = executeGoogleSearch(prepareGoogleQuery(query),numberOfGoogleResults);
 				out.print("\n"+query+ " >> ");
@@ -1673,7 +1694,15 @@ public class CrokageApp {
 
 			// writing script to be called
 			Path scriptFile = Paths.get(CrokageStaticData.BIKER_SCRIPT_FILE);
-			List<String> lines = Arrays.asList("export PYTHONPATH=" + CrokageStaticData.BIKER_HOME, "echo $PYTHONPATH", "cd $PYTHONPATH/main", "python " + CrokageStaticData.BIKER_RUNNER_PATH);
+			List<String> lines=null;
+			
+			if(!StringUtils.isBlank(virutalPythonEnv)) { //specific env
+				lines = Arrays.asList("export PYTHONPATH=" + CrokageStaticData.BIKER_HOME, "echo $PYTHONPATH", "cd $PYTHONPATH/main", virutalPythonEnv,"python " + CrokageStaticData.BIKER_RUNNER_PATH);
+			}else {
+				lines = Arrays.asList("export PYTHONPATH=" + CrokageStaticData.BIKER_HOME, "echo $PYTHONPATH", "cd $PYTHONPATH/main", "python " + CrokageStaticData.BIKER_RUNNER_PATH);
+			}
+			
+			
 			Files.write(scriptFile, lines, Charset.forName("UTF-8"));
 			File file = new File(CrokageStaticData.BIKER_SCRIPT_FILE);
 			file.setExecutable(true);
@@ -2083,7 +2112,7 @@ public class CrokageApp {
 
 	}
 
-	private void getPropertyValueFromLocalFile() {
+	/*private void getPropertyValueFromLocalFile() {
 		Properties prop = new Properties();
 		InputStream input = null;
 		useProxy = false;
@@ -2099,6 +2128,8 @@ public class CrokageApp {
 			if (!StringUtils.isBlank(useProxyStr)) {
 				useProxy = new Boolean(useProxyStr);
 			}
+			bikerHome = prop.getProperty("BIKER_HOME");
+			virutalPythonEnv= prop.getProperty("virutalPythonEnv");
 			environment = prop.getProperty("environment");
 			
 			String msg = "\nEnvironment property (useProxy): ";
@@ -2121,7 +2152,7 @@ public class CrokageApp {
 				}
 			}
 		}
-	}
+	}*/
 	
 	
 	private Map<Integer, Set<String>> getCrokageGoldSetByEvaluations(Map<Integer, Set<String>> goldSetMap, List<UserEvaluation> evaluationsWithBothUsersScales) throws FileNotFoundException {
