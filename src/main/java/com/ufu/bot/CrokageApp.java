@@ -142,6 +142,12 @@ public class CrokageApp {
 	@Value("${BIKER_HOME}")
 	public String bikerHome;
 	
+	@Value("${CROKAGE_HOME}")
+	public String crokageHome;
+	
+	@Value("${TMP_DIR}")
+	public String tmpDir;
+	
 	@Value("${virutalPythonEnv}")
 	public String virutalPythonEnv;
 	
@@ -181,7 +187,7 @@ public class CrokageApp {
 		// initializeVariables();
 		// botUtils.initializeConfigs();
 		//getPropertyValueFromLocalFile();
-		replaceStaticDataConfigs();
+		configureEnvironmentVariables();
 		subAction = subAction !=null ? subAction.toLowerCase().trim(): null;
 		dataSet = dataSet !=null ? dataSet.toLowerCase().trim(): null;
 		soIDFVocabularyMap = new HashMap<>();
@@ -345,9 +351,15 @@ public class CrokageApp {
 	
 	
 
-	private void replaceStaticDataConfigs() {
+	private void configureEnvironmentVariables() {
 		if(!StringUtils.isBlank(bikerHome)) {
 			CrokageStaticData.BIKER_HOME=bikerHome;
+		}
+		if(!StringUtils.isBlank(crokageHome)) {
+			CrokageStaticData.CROKAGE_HOME=crokageHome;
+		}
+		if(!StringUtils.isBlank(tmpDir)) {
+			CrokageStaticData.TMP_DIR=tmpDir;
 		}
 		
 		
