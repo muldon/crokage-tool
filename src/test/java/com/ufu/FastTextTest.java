@@ -13,8 +13,8 @@ public class FastTextTest {
 		
 		
 		String sumQueries = String.join(" ",query1,query2 );
-		/*String modelPath = CrokageStaticData.FAST_TEXT_MODEL_PATH;
-		String fastTextIntallationDir = CrokageStaticData.FAST_TEXT_INSTALLATION_DIR;
+		/*String modelPath = CrokageStaticDataOld.FAST_TEXT_MODEL_PATH;
+		String fastTextIntallationDir = CrokageStaticDataOld.FAST_TEXT_INSTALLATION_DIR;
 		
 		
 		// echo "java filewriter file" | ./fasttext print-word-vectors

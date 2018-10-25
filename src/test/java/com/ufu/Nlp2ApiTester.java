@@ -3,7 +3,7 @@ package com.ufu;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.ufu.crokage.config.CrokageStaticData;
+import com.ufu.bot.config.CrokageStaticDataOld;
 import com.ufu.crokage.util.CrokageUtils;
 import com.ufu.crokage.util.TextNormalizer;
 
@@ -18,10 +18,10 @@ public class Nlp2ApiTester {
 		int caseNo = 31;
 		//String suggested = new CodeSearchBDAReformulator(caseNo, searchQuery, TOPK, "both").provideRelevantAPIs();
 		//System.out.println(suggested);
-		
+		String CROKAGE_HOME = "/home/rodrigo/Dropbox/Doutorado/projects/bot";
 		
 		try {
-			String jarPath = CrokageStaticData.CROKAGE_HOME;
+			String jarPath = CROKAGE_HOME;
 			//String command = "java -jar "+jarPath+ "/myNlp2Api.jar "+ "-K 10 -task reformulate -query How do I send an HTML email?";
 			List<String> command = new ArrayList<String>();
 		    

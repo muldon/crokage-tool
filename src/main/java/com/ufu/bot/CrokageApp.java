@@ -38,6 +38,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Charsets;
+import com.ufu.bot.config.CrokageStaticDataOld;
 import com.ufu.bot.googleSearch.GoogleWebSearch;
 import com.ufu.bot.googleSearch.SearchQuery;
 import com.ufu.bot.googleSearch.SearchResult;
@@ -49,7 +50,6 @@ import com.ufu.bot.to.Post;
 import com.ufu.bot.util.BotComposer;
 import com.ufu.bot.util.BotUtils;
 import com.ufu.bot.util.Matrix;
-import com.ufu.crokage.config.CrokageStaticData;
 import com.ufu.crokage.to.MetricResult;
 import com.ufu.crokage.to.UserEvaluation;
 import com.ufu.crokage.util.CrokageUtils;
@@ -72,6 +72,120 @@ public class CrokageApp {
 	
 	@Autowired
 	private TFIDFCalculator tfidfCalculator;
+	
+	
+	//app variables
+
+	@Value("${useProxy}")
+	public Boolean useProxy;
+	
+	@Value("${environment}")
+	public String environment;
+	
+	@Value("${BIKER_HOME}")
+	public String bikerHome;
+	
+	@Value("${CROKAGE_HOME}")
+	public String crokageHome;
+	
+	@Value("${TMP_DIR}")
+	public String tmpDir;
+	
+	@Value("${virutalPythonEnv}")
+	public String virutalPythonEnv;
+	
+	@Value("${BIKER_HOME}")
+	public String BIKER_HOME;
+	
+	@Value("${CROKAGE_HOME}")
+	public String CROKAGE_HOME;
+	
+	@Value("${TMP_DIR}")
+	public String TMP_DIR;
+	
+	@Value("${FAST_TEXT_INSTALLATION_DIR}")
+	public String FAST_TEXT_INSTALLATION_DIR;
+	
+	@Value("${BIKER_RUNNER_PATH}")
+	public String BIKER_RUNNER_PATH;
+	
+	
+	
+	@Value("${BIG_MAP_INVERTED_INDEX_APIS_FILE_PATH}")
+	public String BIG_MAP_INVERTED_INDEX_APIS_FILE_PATH;
+	
+	@Value("${REDUCED_MAP_INVERTED_INDEX_APIS_FILE_PATH}")
+	public String REDUCED_MAP_INVERTED_INDEX_APIS_FILE_PATH;
+	
+	@Value("${DISCONSIDERED_POSTS_FILE_PATH}")
+	public String DISCONSIDERED_POSTS_FILE_PATH;
+	
+	@Value("${SO_ANSWERS_IDS_PARENT_IDS_MAP}")
+	public String SO_ANSWERS_IDS_PARENT_IDS_MAP;
+	
+	@Value("${SO_QUESTIONS_IDS_TITLES_MAP}")
+	public String SO_QUESTIONS_IDS_TITLES_MAP;
+	
+	@Value("${SO_CONTENT_FILE}")
+	public String SO_CONTENT_FILE;
+	
+	@Value("${SO_IDF_VOCABULARY}")
+	public String SO_IDF_VOCABULARY;
+	
+	@Value("${SO_SET_OF_WORDS}")
+	public String SO_SET_OF_WORDS;
+	
+	@Value("${SO_CONTENT_WORD_VECTORS}")
+	public String SO_CONTENT_WORD_VECTORS;
+	
+	@Value("${SO_DIRECTORY_FILES}")
+	public String SO_DIRECTORY_FILES;
+	
+	@Value("${SO_DIRECTORY_INDEX}")
+	public String SO_DIRECTORY_INDEX;
+	
+	@Value("${GOOGLE_TOP_RESULTS_FOR_NLP2API}")
+	public String GOOGLE_TOP_RESULTS_FOR_NLP2API;
+	
+	@Value("${GOOGLE_EXCEPTIONS_FOR_NLP2API}")
+	public String GOOGLE_EXCEPTIONS_FOR_NLP2API;
+	
+	@Value("${NLP2API_QUERIES_AND_SO_QUESTIONS_TO_EVALUATE}")
+	public String NLP2API_QUERIES_AND_SO_QUESTIONS_TO_EVALUATE;
+	
+	@Value("${NLP2API_GOLD_SET_FILE}")
+	public String NLP2API_GOLD_SET_FILE;
+	
+	@Value("${INPUT_QUERIES_FILE_CROKAGE}")
+	public String INPUT_QUERIES_FILE_CROKAGE;
+	
+	@Value("${INPUT_QUERIES_FILE_NLP2API}")
+	public String INPUT_QUERIES_FILE_NLP2API;
+	
+	@Value("${BIKER_INPUT_QUERIES_FILE}")
+	public String BIKER_INPUT_QUERIES_FILE;
+	
+	@Value("${BIKER_OUTPUT_QUERIES_FILE}")
+	public String BIKER_OUTPUT_QUERIES_FILE;
+	
+	@Value("${BIKER_SCRIPT_FILE}")
+	public String BIKER_SCRIPT_FILE;
+	
+	@Value("${RACK_INPUT_QUERIES_FILE}")
+	public String RACK_INPUT_QUERIES_FILE;
+	
+	@Value("${RACK_OUTPUT_QUERIES_FILE}")
+	public String RACK_OUTPUT_QUERIES_FILE;
+	
+	@Value("${NLP2API_INPUT_QUERIES_FILE}")
+	public String NLP2API_INPUT_QUERIES_FILE;
+	
+	
+	@Value("${NLP2API_OUTPUT_QUERIES_FILE}")
+	public String NLP2API_OUTPUT_QUERIES_FILE;
+	
+	
+	
 	
 	@Value("${action}")
 	public String action;
@@ -122,26 +236,7 @@ public class CrokageApp {
 	public Integer numberOfGoogleResults;  
 	
 	
-	/*
-	 * Stores the value obtained from the pathFileEnvFlag file
-	 */
-	@Value("${useProxy}")
-	public Boolean useProxy;
 	
-	@Value("${environment}")
-	public String environment;
-	
-	@Value("${BIKER_HOME}")
-	public String bikerHome;
-	
-	@Value("${CROKAGE_HOME}")
-	public String crokageHome;
-	
-	@Value("${TMP_DIR}")
-	public String tmpDir;
-	
-	@Value("${virutalPythonEnv}")
-	public String virutalPythonEnv;
 	
 	private long initTime;
 	private long endTime;
@@ -211,10 +306,10 @@ public class CrokageApp {
 				+ "\n dataSet: " + dataSet
 				+ "\n iHaveALotOfMemory: " + iHaveALotOfMemory
 				
-				+ "\n BIKER_HOME: " + CrokageStaticData.BIKER_HOME
-				+ "\n CROKAGE_HOME: " + CrokageStaticData.CROKAGE_HOME
-				+ "\n TMP_DIR: " + CrokageStaticData.TMP_DIR
-				+ "\n FAST_TEXT_INSTALLATION_DIR: " + CrokageStaticData.FAST_TEXT_INSTALLATION_DIR
+				+ "\n BIKER_HOME: " + BIKER_HOME
+				+ "\n CROKAGE_HOME: " + CROKAGE_HOME
+				+ "\n TMP_DIR: " + TMP_DIR
+				+ "\n FAST_TEXT_INSTALLATION_DIR: " + FAST_TEXT_INSTALLATION_DIR
 				
 				+ "\n obs: " + obs
 				+ "\n action: " + action 
@@ -429,10 +524,10 @@ public class CrokageApp {
 			 
 		}
 		
-		crokageUtils.writeStringContentToFile(lines.toString(), CrokageStaticData.GOOGLE_EXCEPTIONS_FOR_NLP2API);
+		crokageUtils.writeStringContentToFile(lines.toString(), GOOGLE_EXCEPTIONS_FOR_NLP2API);
 	
 		//build an excel file 
-		crokageUtils.buildCsvQuestionsForEvaluation(CrokageStaticData.NLP2API_QUERIES_AND_SO_QUESTIONS_TO_EVALUATE,googleQueriesAndSOIds);
+		crokageUtils.buildCsvQuestionsForEvaluation(NLP2API_QUERIES_AND_SO_QUESTIONS_TO_EVALUATE,googleQueriesAndSOIds);
 		
 		
 	}
@@ -442,7 +537,7 @@ public class CrokageApp {
 
 	private void readGoogleRelatedQuestionsIdsForNLP2Api() throws IOException {
 		long initTime = System.currentTimeMillis();
-		List<String> queriesAndGoogleSOIds = Files.readAllLines(Paths.get(CrokageStaticData.GOOGLE_TOP_RESULTS_FOR_NLP2API));
+		List<String> queriesAndGoogleSOIds = Files.readAllLines(Paths.get(GOOGLE_TOP_RESULTS_FOR_NLP2API));
 		String[] parts;
 		for(String line: queriesAndGoogleSOIds) {
 			parts = line.split(" >> ");
@@ -462,9 +557,9 @@ public class CrokageApp {
 
 
 	private void generateGoogleRelatedQuestionsIdsForNLP2Api() throws Exception {
-		List<String> queries = Files.readAllLines(Paths.get(CrokageStaticData.CROKAGE_HOME+"/data/inputQueriesNlp2Api-1-100.txt"));
+		List<String> queries = Files.readAllLines(Paths.get(CROKAGE_HOME+"/data/inputQueriesNlp2Api-1-100.txt"));
 		
-		try (PrintWriter out = new PrintWriter(CrokageStaticData.CROKAGE_HOME+"/data/googleNLP2ApiResults-1-100.txt")) {
+		try (PrintWriter out = new PrintWriter(CROKAGE_HOME+"/data/googleNLP2ApiResults-1-100.txt")) {
 			for(String query: queries) {
 				Set<Integer> soQuestionsIds = executeGoogleSearch(prepareGoogleQuery(query),numberOfGoogleResults);
 				out.print("\n"+query+ " >> ");
@@ -518,19 +613,19 @@ public class CrokageApp {
 
 
 	private void checkConditions() throws Exception {
-		File file1 = new File(CrokageStaticData.BIKER_OUTPUT_QUERIES_FILE);
+		File file1 = new File(BIKER_OUTPUT_QUERIES_FILE);
 		boolean exists1 = file1.exists();
 		if(!exists1) {
 			throw new Exception("File "+file1.getAbsolutePath()+ " must exist. Has it been provided ? ");
 		}
 		
-		File file2 = new File(CrokageStaticData.NLP2API_OUTPUT_QUERIES_FILE);
+		File file2 = new File(NLP2API_OUTPUT_QUERIES_FILE);
 		boolean exists2 = file2.exists();
 		if(!exists1) {
 			throw new Exception("File "+file2.getAbsolutePath()+ " must exist. Has it been provided ? ");
 		}
 		
-		File file3 = new File(CrokageStaticData.RACK_OUTPUT_QUERIES_FILE);
+		File file3 = new File(RACK_OUTPUT_QUERIES_FILE);
 		boolean exists3 = file3.exists();
 		if(!exists1) {
 			throw new Exception("File "+file3.getAbsolutePath()+ " must exist. Has it been provided ? ");
@@ -543,7 +638,7 @@ public class CrokageApp {
 
 	private void readAnswersIdsParentsMap() throws IOException {
 		long initTime = System.currentTimeMillis();
-		List<String> idsAndids = Files.readAllLines(Paths.get(CrokageStaticData.SO_ANSWERS_IDS_PARENT_IDS_MAP));
+		List<String> idsAndids = Files.readAllLines(Paths.get(SO_ANSWERS_IDS_PARENT_IDS_MAP));
 		allAnswersWithUpvotesIdsParentIdsMap = new HashMap<>();
 		crokageUtils.readWordsFromFileToMap2(allAnswersWithUpvotesIdsParentIdsMap, idsAndids);
 		crokageUtils.reportElapsedTime(initTime,"readAnswersIdsParentsMap");
@@ -555,7 +650,7 @@ public class CrokageApp {
 	private void generateAnswersIdsParentsMap() throws FileNotFoundException {
 		long initTime = System.currentTimeMillis();
 		loadAllAnswersIdsParentIds();
-		crokageUtils.writeMapToFile3(allAnswersWithUpvotesIdsParentIdsMap, CrokageStaticData.SO_ANSWERS_IDS_PARENT_IDS_MAP);
+		crokageUtils.writeMapToFile3(allAnswersWithUpvotesIdsParentIdsMap, SO_ANSWERS_IDS_PARENT_IDS_MAP);
 		crokageUtils.reportElapsedTime(initTime,"generateAnswersIdsParentsMap");
 	}
 
@@ -564,7 +659,7 @@ public class CrokageApp {
 
 	private void readQuestionsIdsTitlesMap() throws IOException {
 		long initTime = System.currentTimeMillis();
-		List<String> idsAndWords = Files.readAllLines(Paths.get(CrokageStaticData.SO_QUESTIONS_IDS_TITLES_MAP));
+		List<String> idsAndWords = Files.readAllLines(Paths.get(SO_QUESTIONS_IDS_TITLES_MAP));
 		crokageUtils.readWordsFromFileToMap(allQuestionsIdsTitlesMap,idsAndWords);
 		/*String titleTest = allQuestionsIdsTitlesMap.get(43966301);
 		System.out.println(titleTest);*/
@@ -577,7 +672,7 @@ public class CrokageApp {
 	private void generateQuestionsIdsTitlesMap() throws FileNotFoundException {
 		long initTime = System.currentTimeMillis();
 		loadAllQuestionsIdsTitles();
-		crokageUtils.writeMapToFile2(allQuestionsIdsTitlesMap, CrokageStaticData.SO_QUESTIONS_IDS_TITLES_MAP);
+		crokageUtils.writeMapToFile2(allQuestionsIdsTitlesMap, SO_QUESTIONS_IDS_TITLES_MAP);
 		crokageUtils.reportElapsedTime(initTime,"generateQuestionsIdsTitlesMap");
 	}
 
@@ -588,7 +683,7 @@ public class CrokageApp {
 		long start = System.currentTimeMillis();
 		//String docs = "/home/rodrigo/tmp/sodirectory";
 		//String index = "/home/rodrigo/tmp/sodirindex";
-		IndexLucene indexer = new IndexLucene(CrokageStaticData.SO_DIRECTORY_INDEX, CrokageStaticData.SO_DIRECTORY_FILES);
+		IndexLucene indexer = new IndexLucene(SO_DIRECTORY_INDEX, SO_DIRECTORY_FILES);
 		indexer.indexCorpusFiles();
 		crokageUtils.reportElapsedTime(start, "buildLuceneIndex");
 		
@@ -617,7 +712,7 @@ public class CrokageApp {
 		System.out.println("Reading all words from IDFs file...");
 		String[] parts;
 		StringBuilder str = new StringBuilder();
-		List<String> wordsAndIDFs = Files.readAllLines(Paths.get(CrokageStaticData.SO_IDF_VOCABULARY));
+		List<String> wordsAndIDFs = Files.readAllLines(Paths.get(SO_IDF_VOCABULARY));
 		for(String line: wordsAndIDFs) {
 			parts = line.split(" ");
 			str.append(parts[0]);
@@ -625,7 +720,7 @@ public class CrokageApp {
 		}
 		wordsAndIDFs = null;
 		System.out.println("Done reading idf words. Now writing them to a file");
-		CrokageUtils.writeStringContentToFile(str.toString(), CrokageStaticData.SO_SET_OF_WORDS);
+		CrokageUtils.writeStringContentToFile(str.toString(), SO_SET_OF_WORDS);
 		crokageUtils.reportElapsedTime(initTime,"readSoContentWordVectors");
 		
 	}
@@ -637,18 +732,18 @@ public class CrokageApp {
 		//each post has been saved in each line
 		Set<String> wordsSet = new HashSet<>();
 		System.out.println("reading contents lines...");
-		List<String> contentLines = Files.readAllLines(Paths.get(CrokageStaticData.SO_CONTENT_FILE));
+		List<String> contentLines = Files.readAllLines(Paths.get(SO_CONTENT_FILE));
 		System.out.println("lines:  "+contentLines.size());
 		for(String line: contentLines) {
 			wordsSet.addAll(Arrays.stream(line.split(" +")).collect(Collectors.toSet()));
 		}
 		contentLines=null;
 		System.out.println("Wordset built. Now calculating idfs for "+wordsSet.size()+ " words");
-		Map<String, Double> idfs = new IDFCalc(CrokageStaticData.SO_DIRECTORY_INDEX, wordsSet).calculateIDFOnly();
+		Map<String, Double> idfs = new IDFCalc(SO_DIRECTORY_INDEX, wordsSet).calculateIDFOnly();
 		
 		//all file into a String
 		System.out.println("writing idfs to file...");
-		crokageUtils.writeMapToFile(idfs,CrokageStaticData.SO_IDF_VOCABULARY );
+		crokageUtils.writeMapToFile(idfs,SO_IDF_VOCABULARY );
 		
 	}
 
@@ -659,7 +754,7 @@ public class CrokageApp {
 		Set<String> wordsSet = new HashSet<>();
 		System.out.println("reading contents lines...");
 		
-		List<String> contentLines = Files.readAllLines(Paths.get(CrokageStaticData.SO_CONTENT_FILE));
+		List<String> contentLines = Files.readAllLines(Paths.get(SO_CONTENT_FILE));
 		for(String line: contentLines) {
 			wordsSet.addAll(Arrays.stream(line.split(" +")).collect(Collectors.toSet()));
 		}
@@ -681,7 +776,7 @@ public class CrokageApp {
 			}
 		}
 		System.out.println("writing idf...");
-		crokageUtils.writeStringContentToFile(idfContent.toString(),CrokageStaticData.SO_IDF_VOCABULARY );
+		crokageUtils.writeStringContentToFile(idfContent.toString(),SO_IDF_VOCABULARY );
 		
 	}
 
@@ -702,7 +797,7 @@ public class CrokageApp {
 
 	private void readSOContentWordAndVectorsLines() throws IOException {
 		long initTime = System.currentTimeMillis();
-		wordsAndVectorsLines.addAll(Files.readAllLines(Paths.get(CrokageStaticData.SO_CONTENT_WORD_VECTORS)));
+		wordsAndVectorsLines.addAll(Files.readAllLines(Paths.get(SO_CONTENT_WORD_VECTORS)));
 		crokageUtils.reportElapsedTime(initTime,"readSOContentWordAndVectorsLines. Total number of words: "+wordsAndVectorsLines.size());
 		
 		
@@ -746,7 +841,7 @@ public class CrokageApp {
 	private void generateTrainingFileToFastText() throws FileNotFoundException {
 		//load all SO questions
 		List<Integer> allJavaPostsIds = crokageService.findAllPostsIds();
-		try (PrintWriter out = new PrintWriter(CrokageStaticData.SO_CONTENT_FILE)) {
+		try (PrintWriter out = new PrintWriter(SO_CONTENT_FILE)) {
 			List<Integer> somePostsIds=null; 
 			int maxQuestions = 1000;
 			
@@ -797,7 +892,7 @@ public class CrokageApp {
 		for (Post post : some) {
 			String postContent = getPostContent(post);
 			if(!StringUtils.isBlank(postContent)) {
-				try (PrintWriter out = new PrintWriter(CrokageStaticData.SO_DIRECTORY_FILES+"/"+post.getId()+".txt")) {
+				try (PrintWriter out = new PrintWriter(SO_DIRECTORY_FILES+"/"+post.getId()+".txt")) {
 					out.println(postContent);
 				}
 			}
@@ -844,7 +939,7 @@ public class CrokageApp {
 		//filteredSortedMapAnswersIds.remove("String");
 		
 		//generate reduced map
-		//CrokageUtils.printMapInfosIntoCVSFile(filteredSortedMapAnswersIds,CrokageStaticData.REDUCED_MAP_INVERTED_INDEX_APIS_FILE_PATH);
+		//CrokageUtils.printMapInfosIntoCVSFile(filteredSortedMapAnswersIds,REDUCED_MAP_INVERTED_INDEX_APIS_FILE_PATH);
 		crokageUtils.reportElapsedTime(initTime,"reduceBigMapFileToMininumAPIsCount");
 	}
 
@@ -1456,7 +1551,7 @@ public class CrokageApp {
 			String[] parts;
 			String[] ids;
 			bigMapApisAnswersIds = new HashMap<>();
-			List<String> apisAndSOIds = Files.readAllLines(Paths.get(CrokageStaticData.BIG_MAP_INVERTED_INDEX_APIS_FILE_PATH), Charsets.UTF_8);
+			List<String> apisAndSOIds = Files.readAllLines(Paths.get(BIG_MAP_INVERTED_INDEX_APIS_FILE_PATH), Charsets.UTF_8);
 			for(String line: apisAndSOIds) {
 				parts = line.split(":\t");
 				ids = parts[1].split(" ");
@@ -1539,17 +1634,17 @@ public class CrokageApp {
 		
 		System.out.println("Done processing posts to generate inverted index file.");
 		System.out.println("Number of posts containing API calls: "+bigMapApisAnswersIds.size()+ ". Now printing files...");
-		CrokageUtils.printBigMapIntoFile(bigMapApisAnswersIds,CrokageStaticData.BIG_MAP_INVERTED_INDEX_APIS_FILE_PATH);
-		CrokageUtils.writeStringContentToFile(postsWithoutAPICalls,CrokageStaticData.DISCONSIDERED_POSTS_FILE_PATH);
+		CrokageUtils.printBigMapIntoFile(bigMapApisAnswersIds,BIG_MAP_INVERTED_INDEX_APIS_FILE_PATH);
+		CrokageUtils.writeStringContentToFile(postsWithoutAPICalls,DISCONSIDERED_POSTS_FILE_PATH);
 		System.out.println("Done printing files.");
 		crokageUtils.reportElapsedTime(initTime,"generateInvertedIndexFileFromSOPosts");
 	}
 
 
 	private void generateInputQueriesFromNLP2ApiGroudTruth() throws Exception {
-		List<String> inputQueries = getQueriesFromFile(CrokageStaticData.NLP2API_GOLD_SET_FILE);
+		List<String> inputQueries = getQueriesFromFile(NLP2API_GOLD_SET_FILE);
 		
-		Path queriesFile = Paths.get(CrokageStaticData.INPUT_QUERIES_FILE_NLP2API);
+		Path queriesFile = Paths.get(INPUT_QUERIES_FILE_NLP2API);
 		Files.write(queriesFile, inputQueries, Charset.forName("UTF-8"));
 		
 	}
@@ -1567,7 +1662,7 @@ public class CrokageApp {
 			if(callNLP2ApiProcess) {
 				//queries = queries.subList(0, 5);
 				//First generate inputQueries file in a format NLP2Api understand
-				FileWriter fw = new FileWriter(CrokageStaticData.NLP2API_INPUT_QUERIES_FILE);
+				FileWriter fw = new FileWriter(NLP2API_INPUT_QUERIES_FILE);
 				for (String query: queries) {
 					fw.write(query+"\n--\n"); //specific format to NLP2API understand
 					
@@ -1578,7 +1673,7 @@ public class CrokageApp {
 		 		//call jar with parameters
 			 	//java -jar /home/rodrigo/projects/bot/myNlp2Api.jar -K 10 -task reformulate -queryFile /home/rodrigo/projects/NLP2API-Replication-Package/NL-Query+GroundTruth.txt -outputFile /home/rodrigo/projects/NLP2API-Replication-Package/nlp2apiQueriesOutput.txt
 				
-			 	String jarPath = CrokageStaticData.CROKAGE_HOME;
+			 	String jarPath = CROKAGE_HOME;
 				List<String> command = new ArrayList<String>();
 			    
 			    command.add("java");
@@ -1589,9 +1684,9 @@ public class CrokageApp {
 			    command.add("-task");
 			    command.add("reformulate");
 			    command.add("-queryFile");
-			    command.add(CrokageStaticData.NLP2API_INPUT_QUERIES_FILE);
+			    command.add(NLP2API_INPUT_QUERIES_FILE);
 			    command.add("-outputFile");
-			    command.add(CrokageStaticData.NLP2API_OUTPUT_QUERIES_FILE);
+			    command.add(NLP2API_OUTPUT_QUERIES_FILE);
 				
 				ProcessBuilder pb = new ProcessBuilder(command);
 				Process p = pb.start();
@@ -1612,7 +1707,7 @@ public class CrokageApp {
 		}
 		
 		nlp2ApiQueriesApisMap = new LinkedHashMap<>();
-		getQueriesAndApisFromFileMayContainDupes(nlp2ApiQueriesApisMap,CrokageStaticData.NLP2API_OUTPUT_QUERIES_FILE);
+		getQueriesAndApisFromFileMayContainDupes(nlp2ApiQueriesApisMap,NLP2API_OUTPUT_QUERIES_FILE);
 		
 		
 	}
@@ -1626,7 +1721,7 @@ public class CrokageApp {
 			
 			if(callRACKApiProcess) {
 				//First generate inputQueries file in a format NLP2Api understand
-				FileWriter fw = new FileWriter(CrokageStaticData.RACK_INPUT_QUERIES_FILE);
+				FileWriter fw = new FileWriter(RACK_INPUT_QUERIES_FILE);
 				for (String query: queries) {
 					fw.write(query+"\n--\n"); //specific format to NLP2API understand
 					
@@ -1636,7 +1731,7 @@ public class CrokageApp {
 				
 			 	//call jar with parameters
 			 	
-			 	String jarPath = CrokageStaticData.CROKAGE_HOME;
+			 	String jarPath = CROKAGE_HOME;
 			 	List<String> command = new ArrayList<String>();
 			
 			 	command.add("java");
@@ -1647,9 +1742,9 @@ public class CrokageApp {
 			    command.add("-task");
 			    command.add("suggestAPI");
 			    command.add("-queryFile");
-			    command.add(CrokageStaticData.RACK_INPUT_QUERIES_FILE);
+			    command.add(RACK_INPUT_QUERIES_FILE);
 			    command.add("-resultFile");
-			    command.add(CrokageStaticData.RACK_OUTPUT_QUERIES_FILE);
+			    command.add(RACK_OUTPUT_QUERIES_FILE);
 				
 				ProcessBuilder pb = new ProcessBuilder(command);
 				Process p = pb.start();
@@ -1670,7 +1765,7 @@ public class CrokageApp {
 		}
 		
 		rackQueriesApisMap = new LinkedHashMap<>();
-		getQueriesAndApisFromFileMayContainDupes(rackQueriesApisMap,CrokageStaticData.RACK_OUTPUT_QUERIES_FILE);
+		getQueriesAndApisFromFileMayContainDupes(rackQueriesApisMap,RACK_OUTPUT_QUERIES_FILE);
 		
 	}
 	
@@ -1684,28 +1779,28 @@ public class CrokageApp {
 	
 		if(callBIKERProcess) {
 			// writing queries to be read by biker
-			Path bikerQueriesFile = Paths.get(CrokageStaticData.BIKER_INPUT_QUERIES_FILE);
+			Path bikerQueriesFile = Paths.get(BIKER_INPUT_QUERIES_FILE);
 			Files.write(bikerQueriesFile, queries, Charset.forName("UTF-8"));
 
 			// writing script to be called
-			Path scriptFile = Paths.get(CrokageStaticData.BIKER_SCRIPT_FILE);
+			Path scriptFile = Paths.get(BIKER_SCRIPT_FILE);
 			List<String> lines=null;
 			
 			if(!StringUtils.isBlank(virutalPythonEnv)) { //specific env
-				lines = Arrays.asList("export PYTHONPATH=" + CrokageStaticData.BIKER_HOME, "echo $PYTHONPATH", "cd $PYTHONPATH/main", virutalPythonEnv,"python " + CrokageStaticData.BIKER_RUNNER_PATH);
+				lines = Arrays.asList("export PYTHONPATH=" + BIKER_HOME, "echo $PYTHONPATH", "cd $PYTHONPATH/main", virutalPythonEnv,"python " + BIKER_RUNNER_PATH);
 			}else {
-				lines = Arrays.asList("export PYTHONPATH=" + CrokageStaticData.BIKER_HOME, "echo $PYTHONPATH", "cd $PYTHONPATH/main", "python " + CrokageStaticData.BIKER_RUNNER_PATH);
+				lines = Arrays.asList("export PYTHONPATH=" + BIKER_HOME, "echo $PYTHONPATH", "cd $PYTHONPATH/main", "python " + BIKER_RUNNER_PATH);
 			}
 			
 			
 			Files.write(scriptFile, lines, Charset.forName("UTF-8"));
-			File file = new File(CrokageStaticData.BIKER_SCRIPT_FILE);
+			File file = new File(BIKER_SCRIPT_FILE);
 			file.setExecutable(true);
 			file.setReadable(true);
 			file.setWritable(true);
 			
 			try {
-				ProcessBuilder pb = new ProcessBuilder(CrokageStaticData.BIKER_SCRIPT_FILE);
+				ProcessBuilder pb = new ProcessBuilder(BIKER_SCRIPT_FILE);
 				Process p = pb.start();
 				p.waitFor();
 				String output = CrokageUtils.loadStream(p.getInputStream());
@@ -1723,7 +1818,7 @@ public class CrokageApp {
 		
 		int key = 1;
 		// reading output from BIKER
-		List<String> queriesWithApis = Files.readAllLines(Paths.get(CrokageStaticData.BIKER_OUTPUT_QUERIES_FILE), Charsets.UTF_8);
+		List<String> queriesWithApis = Files.readAllLines(Paths.get(BIKER_OUTPUT_QUERIES_FILE), Charsets.UTF_8);
 		if(limitQueries!=null) {
 			queriesWithApis = queriesWithApis.subList(0, limitQueries);
 		}
@@ -2017,7 +2112,7 @@ public class CrokageApp {
 			getCrokageGoldSetByEvaluations(goldSetQueriesApis,evaluationsList);
 	
 		}else if(dataSet.equals("nlp2api")) {
-			getQueriesAndApisFromFileMayContainDupes(goldSetQueriesApis,CrokageStaticData.NLP2API_GOLD_SET_FILE);
+			getQueriesAndApisFromFileMayContainDupes(goldSetQueriesApis,NLP2API_GOLD_SET_FILE);
 		}
 		
 		return goldSetQueriesApis;
@@ -2041,7 +2136,7 @@ public class CrokageApp {
 		crokageUtils.readXlsxToEvaluationList(evaluationsList,file1,likertsResearcher1AfterAgreementColumn,likertsResearcher2AfterAgreementColumn,inputQueries);
 		//System.out.println(inputQueries);
 		
-		try (PrintWriter out = new PrintWriter(CrokageStaticData.INPUT_QUERIES_FILE_CROKAGE)) {
+		try (PrintWriter out = new PrintWriter(INPUT_QUERIES_FILE_CROKAGE)) {
 		    for(String query: inputQueries) {
 		    	out.println(query);
 		    }
@@ -2084,10 +2179,10 @@ public class CrokageApp {
 		long initTime = System.currentTimeMillis();
 		String fileName = "";
 		if(dataSet.equals("crokage")) {
-			fileName = CrokageStaticData.INPUT_QUERIES_FILE_CROKAGE;
+			fileName = INPUT_QUERIES_FILE_CROKAGE;
 	
 		}else if(dataSet.equals("nlp2api")) {
-			fileName = CrokageStaticData.INPUT_QUERIES_FILE_NLP2API;
+			fileName = INPUT_QUERIES_FILE_NLP2API;
 		}
 		
 		
@@ -2215,7 +2310,7 @@ public class CrokageApp {
 		
 		
 		//update input queries to be used by approaches
-		try (PrintWriter out = new PrintWriter(CrokageStaticData.INPUT_QUERIES_FILE_CROKAGE)) {
+		try (PrintWriter out = new PrintWriter(INPUT_QUERIES_FILE_CROKAGE)) {
 		    for(String query: keySet) {
 		    	out.println(query);
 		    }

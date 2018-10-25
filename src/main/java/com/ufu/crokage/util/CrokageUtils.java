@@ -70,12 +70,12 @@ import org.springframework.stereotype.Component;
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import com.ufu.bot.PitBotApp2;
+import com.ufu.bot.config.CrokageStaticDataOld;
 import com.ufu.bot.repository.GenericRepository;
 import com.ufu.bot.to.Evaluation;
 import com.ufu.bot.to.ExternalQuestion;
 import com.ufu.bot.to.Post;
 import com.ufu.bot.util.CosineSimilarity;
-import com.ufu.crokage.config.CrokageStaticData;
 import com.ufu.crokage.to.UserEvaluation;
 
 
@@ -107,6 +107,18 @@ public class CrokageUtils {
 	
 	@Value("${virutalPythonEnv}")
 	public String virutalPythonEnv;
+	
+	@Value("${FAST_TEXT_INSTALLATION_DIR}")
+	public String FAST_TEXT_INSTALLATION_DIR;
+	
+	@Value("${FAST_TEXT_MODEL_PATH}")
+	public String FAST_TEXT_MODEL_PATH;
+	
+	@Value("${SO_IDF_VOCABULARY}")
+	public String SO_IDF_VOCABULARY;
+	
+	@Value("${STOP_WORDS_FILE_PATH}")
+	public String STOP_WORDS_FILE_PATH;
 	
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 	private static Map<String, String> sourceToMaster;
@@ -240,7 +252,7 @@ public class CrokageUtils {
 		parentPostsCache = new HashMap<Integer, Post>();
 		answerPostsCache = new HashMap<Integer, Post>();
 		
-		stopWordsList = Files.readAllLines(Paths.get(CrokageStaticData.STOP_WORDS_FILE_PATH)); 
+		stopWordsList = Files.readAllLines(Paths.get(STOP_WORDS_FILE_PATH)); 
 		
 	}
 	
@@ -248,13 +260,13 @@ public class CrokageUtils {
 
 	/*private void configureEnvironmentVariables() {
 		if(!StringUtils.isBlank(bikerHome)) {
-			CrokageStaticData.BIKER_HOME=bikerHome;
+			BIKER_HOME=bikerHome;
 		}
 		if(!StringUtils.isBlank(crokageHome)) {
-			CrokageStaticData.CROKAGE_HOME=crokageHome;
+			CROKAGE_HOME=crokageHome;
 		}
 		if(!StringUtils.isBlank(tmpDir)) {
-			CrokageStaticData.TMP_DIR=tmpDir;
+			TMP_DIR=tmpDir;
 		}
 		
 		
@@ -1546,8 +1558,8 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 
 
 	public Map<String, double[]> readVectorsForQuery(String word) throws Exception {
-		String modelPath = CrokageStaticData.FAST_TEXT_MODEL_PATH;
-		String fastTextIntallationDir = CrokageStaticData.FAST_TEXT_INSTALLATION_DIR;
+		String modelPath = FAST_TEXT_MODEL_PATH;
+		String fastTextIntallationDir = FAST_TEXT_INSTALLATION_DIR;
 		
 		//build a temporary file with words --size issues
 		File tmpFile = new File("/home/rodrigo/tmp/tempWordsFile.txt");
@@ -1644,7 +1656,7 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 			long initTime = System.currentTimeMillis();
 			System.out.println("Reading all idfs from file...");
 			String[] parts;
-			List<String> wordsAndIDFs = Files.readAllLines(Paths.get(CrokageStaticData.SO_IDF_VOCABULARY));
+			List<String> wordsAndIDFs = Files.readAllLines(Paths.get(SO_IDF_VOCABULARY));
 			for(String line: wordsAndIDFs) {
 				parts = line.split(" ");
 				soIDFVocabularyMap.put(parts[0], Double.parseDouble(parts[1]));

@@ -7,14 +7,19 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 
-import com.ufu.crokage.config.CrokageStaticData;
+import com.ufu.bot.config.CrokageStaticDataOld;
 import com.ufu.crokage.util.CrokageUtils;
 
 
 
 
 public class RackTest {
-
+	public static String CROKAGE_HOME = "/home/rodrigo/Dropbox/Doutorado/projects/bot";
+	public static String INPUT_QUERIES_FILE_CROKAGE = CROKAGE_HOME+"/data/inputQueriesCrokage.txt";
+	public static String RACK_INPUT_QUERIES_FILE = CROKAGE_HOME+"data/rackApiQueriesInput.txt";    
+	public static String RACK_OUTPUT_QUERIES_FILE = CROKAGE_HOME+"data/rackApiQueriesOutput.txt";
+	 	
+	
 	public static void main(String[] args) {
 		
 		//CodeTokenProvider ctProvider = new CodeTokenProvider(query,TOPK);
@@ -40,19 +45,19 @@ public class RackTest {
 	private static void testFileQueries() {
 		try {
 			
-			List<String> queries = FileUtils.readLines(new File(CrokageStaticData.INPUT_QUERIES_FILE_CROKAGE), "utf-8");
+			List<String> queries = FileUtils.readLines(new File(INPUT_QUERIES_FILE_CROKAGE), "utf-8");
 			queries = queries.subList(0, 10);
 			
 			
 			//First generate inputQueries file in a format NLP2Api understand
-			FileWriter fw = new FileWriter(CrokageStaticData.RACK_INPUT_QUERIES_FILE);
+			FileWriter fw = new FileWriter(RACK_INPUT_QUERIES_FILE);
 			for (String query: queries) {
 				fw.write(query+"\n--\n"); //specific format to NLP2API understand
 				
 			}
 		 	fw.close();
 			
-			String jarPath = CrokageStaticData.CROKAGE_HOME;
+			String jarPath = CROKAGE_HOME;
 			//String command = "java -jar "+jarPath+ "/myNlp2Api.jar "+ "-K 10 -task reformulate -query How do I send an HTML email?";
 			List<String> command = new ArrayList<String>();
 		    
@@ -64,9 +69,9 @@ public class RackTest {
 		    command.add("-task");
 		    command.add("suggestAPI");
 		    command.add("-queryFile");
-		    command.add(CrokageStaticData.RACK_INPUT_QUERIES_FILE);
+		    command.add(RACK_INPUT_QUERIES_FILE);
 		    command.add("-resultFile");
-		    command.add(CrokageStaticData.RACK_OUTPUT_QUERIES_FILE);
+		    command.add(RACK_OUTPUT_QUERIES_FILE);
 			
 			ProcessBuilder pb = new ProcessBuilder(command);
 			Process p = pb.start();
@@ -92,7 +97,7 @@ public class RackTest {
 		String searchQuery = "How to send email in Java?";
 		try {
 			
-			String jarPath = CrokageStaticData.CROKAGE_HOME;
+			String jarPath = CROKAGE_HOME;
 			//String command = "java -jar "+jarPath+ "/myNlp2Api.jar "+ "-K 10 -task reformulate -query How do I send an HTML email?";
 			List<String> command = new ArrayList<String>();
 		    

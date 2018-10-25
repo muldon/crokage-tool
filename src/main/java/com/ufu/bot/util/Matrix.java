@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.stream.DoubleStream;
 
 import com.google.common.primitives.Doubles;
-import com.ufu.crokage.config.CrokageStaticData;
+import com.ufu.bot.config.CrokageStaticDataOld;
 
 public class Matrix {
 	
@@ -297,7 +297,7 @@ public class Matrix {
 	    
 	/*private static double[][] readMatrix(String string) {
 		List<String[]> data = new ArrayList<String[]>();
-		List<String> wordsAndVectors = Files.readAllLines(Paths.get(CrokageStaticData.SO_CONTENT_WORD_VECTORS));
+		List<String> wordsAndVectors = Files.readAllLines(Paths.get(CrokageStaticDataOld.SO_CONTENT_WORD_VECTORS));
 		for(String line: wordsAndVectors) {
 		  String[] values = new String[5];
 		  String[] pieces = line.split(",");

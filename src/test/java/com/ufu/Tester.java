@@ -38,13 +38,13 @@ import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 import com.ufu.bot.CrokageApp;
 import com.ufu.bot.PitBotApp2;
+import com.ufu.bot.config.CrokageStaticDataOld;
 import com.ufu.bot.tfidf.TfIdf;
 import com.ufu.bot.tfidf.ngram.NgramTfIdf;
 import com.ufu.bot.to.BucketOld;
 import com.ufu.bot.to.Post;
 import com.ufu.bot.util.BotComposer;
 import com.ufu.bot.util.BotUtils;
-import com.ufu.crokage.config.CrokageStaticData;
 import com.ufu.survey.service.PitSurveyService;
 
 public class Tester {
@@ -55,7 +55,7 @@ public class Tester {
 		System.out.println(crokageApp.prepareGoogleQuery("How can I insert an element in array at a given position?"));
 		
 		
-		//stripDuplicatesFromFile(CrokageStaticData.INPUT_QUERIES_FILE_NLP2API);
+		//stripDuplicatesFromFile(CrokageStaticDataOld.INPUT_QUERIES_FILE_NLP2API);
 		
 		
 		String str = "How do I send an HTML email? javascript javac dd JAVA";
