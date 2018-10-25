@@ -86,6 +86,28 @@ public class CrokageUtils {
 	@Value("${minTokenSize}")
 	public Integer minTokenSize;
 	
+
+	/*
+	 * Stores the value obtained from the pathFileEnvFlag file
+	 */
+	@Value("${useProxy}")
+	public Boolean useProxy;
+	
+	@Value("${environment}")
+	public String environment;
+	
+	@Value("${BIKER_HOME}")
+	public String bikerHome;
+	
+	@Value("${CROKAGE_HOME}")
+	public String crokageHome;
+	
+	@Value("${TMP_DIR}")
+	public String tmpDir;
+	
+	@Value("${virutalPythonEnv}")
+	public String virutalPythonEnv;
+	
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 	private static Map<String, String> sourceToMaster;
 	private static CharArraySet stopWords;
@@ -205,7 +227,7 @@ public class CrokageUtils {
 			
 			standardTokenizer.close();
 			//loadTagSynonyms();
-			
+			configureEnvironmentVariables();
 		}
 		
 		if(minTokenSize==null) {
@@ -221,6 +243,24 @@ public class CrokageUtils {
 		stopWordsList = Files.readAllLines(Paths.get(CrokageStaticData.STOP_WORDS_FILE_PATH)); 
 		
 	}
+	
+	
+
+	private void configureEnvironmentVariables() {
+		if(!StringUtils.isBlank(bikerHome)) {
+			CrokageStaticData.BIKER_HOME=bikerHome;
+		}
+		if(!StringUtils.isBlank(crokageHome)) {
+			CrokageStaticData.CROKAGE_HOME=crokageHome;
+		}
+		if(!StringUtils.isBlank(tmpDir)) {
+			CrokageStaticData.TMP_DIR=tmpDir;
+		}
+		
+		
+	}
+
+
 	
 	
 	 public static double round(double pNumero, int pCantidadDecimales) {

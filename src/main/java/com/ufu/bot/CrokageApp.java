@@ -121,15 +121,7 @@ public class CrokageApp {
 	@Value("${numberOfGoogleResults}")
 	public Integer numberOfGoogleResults;  
 	
-	/*
-	 * Path to a file which contains a FLAG indicating if the environment is test or
-	 * production. This file (environmentFlag.properties) contains only one line
-	 * with a boolean value (useProxy = true|false) If useProxy = true, the proxy is
-	 * not applied for the google search engine. Otherwise, proxy is set.
-	 */
-	/*@Value("${pathFileEnvFlag}")
-	public String pathFileEnvFlag;*/
-
+	
 	/*
 	 * Stores the value obtained from the pathFileEnvFlag file
 	 */
@@ -187,7 +179,7 @@ public class CrokageApp {
 		// initializeVariables();
 		// botUtils.initializeConfigs();
 		//getPropertyValueFromLocalFile();
-		configureEnvironmentVariables();
+		
 		subAction = subAction !=null ? subAction.toLowerCase().trim(): null;
 		dataSet = dataSet !=null ? dataSet.toLowerCase().trim(): null;
 		soIDFVocabularyMap = new HashMap<>();
@@ -350,21 +342,6 @@ public class CrokageApp {
 
 	
 	
-
-	private void configureEnvironmentVariables() {
-		if(!StringUtils.isBlank(bikerHome)) {
-			CrokageStaticData.BIKER_HOME=bikerHome;
-		}
-		if(!StringUtils.isBlank(crokageHome)) {
-			CrokageStaticData.CROKAGE_HOME=crokageHome;
-		}
-		if(!StringUtils.isBlank(tmpDir)) {
-			CrokageStaticData.TMP_DIR=tmpDir;
-		}
-		
-		
-	}
-
 
 
 
