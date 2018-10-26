@@ -1787,12 +1787,12 @@ public class CrokageApp {
 			List<String> lines=null;
 			
 			if(!StringUtils.isBlank(virutalPythonEnv)) { //specific env
-				lines = Arrays.asList("export PYTHONPATH=" + BIKER_HOME, "echo $PYTHONPATH", "cd $PYTHONPATH/main", virutalPythonEnv,"python " + BIKER_RUNNER_PATH);
+				lines = Arrays.asList("#!/bin/bash","export PYTHONPATH=" + BIKER_HOME, "echo $PYTHONPATH", "cd $PYTHONPATH/../","virtualenv "+virutalPythonEnv,"source "+virutalPythonEnv+"/bin/activate","cd $PYTHONPATH/main","python " + BIKER_RUNNER_PATH);
+				//lines = Arrays.asList("#!/bin/bash", "export PYTHONPATH=" + BIKER_HOME, "echo $PYTHONPATH","echo $PYTHONPATH","echo $PYTHONPATH", "cd $PYTHONPATH/../","virtualenv "+virutalPythonEnv,"source "+virutalPythonEnv+"/bin/activate","./test.sh");
 			}else {
-				lines = Arrays.asList("export PYTHONPATH=" + BIKER_HOME, "echo $PYTHONPATH", "cd $PYTHONPATH/main", "python " + BIKER_RUNNER_PATH);
+				lines = Arrays.asList("#!/bin/bash","export PYTHONPATH=" + BIKER_HOME, "echo $PYTHONPATH", "cd $PYTHONPATH/main", "python " + BIKER_RUNNER_PATH);
 			}
-			
-			
+						
 			Files.write(scriptFile, lines, Charset.forName("UTF-8"));
 			File file = new File(BIKER_SCRIPT_FILE);
 			file.setExecutable(true);
