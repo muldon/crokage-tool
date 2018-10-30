@@ -44,5 +44,18 @@ and po.code != ''
 order by po.score desc
 limit 150
 
-select * from postsmin where processedcode is not null limit 100
-  
+select * 
+from postsmin po
+where po.processedcode != '' 
+--d po.id in (2369483)  
+limit 100
+
+
+select p.* 
+from postsmin p
+where p.parentid = 40439065
+and p.score>0  
+and p.processedcode!= ''
+order by p.id
+--586182
+ select *  from postsmin po where po.id in ( 11638123,7074402,7384908,15899699,19956225,16211139,10778744,8514046,9823503,10629803,7679819,586182,13776593,5061721,18148160,9008532,23160832,642897,8920654,22123489)

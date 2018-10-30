@@ -1,4 +1,10 @@
-insert element array given position
+How can I insert an element in array at a given position?
 --
-compress zip directory recursively
+How do I compress or zip a directory recursively?
+--
+How do I decompress a GZip file in Java?
+--
+How do I compress a file in GZip format?
+--
+How do I use PriorityBlockingQueue class?
 --

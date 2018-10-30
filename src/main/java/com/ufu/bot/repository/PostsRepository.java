@@ -23,6 +23,15 @@ public interface PostsRepository extends CrudRepository<Post, Integer> {
 			  + " order by p.id",nativeQuery=true)
 	List<Post> findUpVotedAnswersByQuestionId(Integer questionId);
 
+	@Query(value="select p.* "
+			  + " from postsmin p"
+			  + " where p.parentid = ?1"
+			  + " and p.score>0  "
+			  + " and p.processedcode!= ''"
+			  + " order by p.id",nativeQuery=true)
+	List<Post> findUpVotedAnswersWithCodeByQuestionId(Integer id);
+
+	
 	@Query(value="select p.id "
 			  + " from postsmin p"
 			  + " where p.posttypeid = 1",nativeQuery=true)
@@ -32,6 +41,7 @@ public interface PostsRepository extends CrudRepository<Post, Integer> {
 			  + " from postsmin p",nativeQuery=true)
 	List<Integer> findAllPostsIds();
 
+	
 	
 	
 

@@ -1528,6 +1528,24 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 		    out.println(linesStr);
 		}
 	}
+	
+	public static void printMapToFile(Map<String, Set<Integer>> queriesAndSOIdsMap, String filePath) throws FileNotFoundException {
+		StringBuilder lines = new StringBuilder("");
+		Set<String> keys = queriesAndSOIdsMap.keySet();
+		for(String key: keys) {
+			Set<Integer> soQuestionsIds = queriesAndSOIdsMap.get(key);
+			lines.append("\n"+key+ " >> ");
+			for(Integer id: soQuestionsIds) {
+				lines.append(id+ " ");
+			}
+		}
+		String linesStr = lines.toString();
+		try (PrintWriter out = new PrintWriter(filePath)) {
+		    out.println(linesStr);
+		}
+	}
+	
+	
 
 
 	public static void writeStringContentToFile(String content, String file) throws IOException {
@@ -1828,19 +1846,23 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 	    return (Math.log(n) / Math.log(2));
 	}
 	
-	public void buildCsvQuestionsForEvaluation(String fileName,Map<String, Set<Integer>> queriesSOQuestionIds) throws IOException {
+	public void buildCsvQuestionsForEvaluation(String fileName,Map<String, List<Post>> allQueriesAndPostsMap) throws IOException {
 		BufferedWriter bw =null;
 		try {
 			bw = new BufferedWriter(new FileWriter(fileName));
-			bw.write(";Rodrigo;Klerisson;Rodrigo agreement;Klerisson agreement\n\n");
-			Set<String> queries = queriesSOQuestionIds.keySet(); 
+			bw.write(";Link;Rodrigo;Klerisson;Rodrigo agreement;Klerisson agreement\n\n");
+			Set<String> queries = allQueriesAndPostsMap.keySet(); 
 						
 			for(String query:queries){
 				
 				bw.write("\n"+query+"\n\n");
-				Set<Integer> ids = queriesSOQuestionIds.get(query);					
-				for(Integer id: ids) {
-					bw.write("https://stackoverflow.com/questions/"+id+"/\n");
+				List<Post> questions = allQueriesAndPostsMap.get(query);					
+				for(Post question: questions) {
+					String title = question.getTitle().replaceAll(";", "");
+					title = title.replaceAll("\"", "");
+					title = title.replaceAll("\'", "");
+					bw.write(title+";");
+					bw.write("https://stackoverflow.com/questions/"+question.getId()+"/\n");
 				}
 				
 				bw.write("\n\n");

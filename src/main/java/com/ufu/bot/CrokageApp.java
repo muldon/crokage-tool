@@ -1,11 +1,9 @@
 package com.ufu.bot;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.PrintWriter;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
@@ -21,7 +19,6 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -30,15 +27,19 @@ import javax.annotation.PostConstruct;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.assertj.core.util.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.google.code.stackexchange.client.query.StackExchangeApiQueryFactory;
+import com.google.code.stackexchange.common.PagedList;
+import com.google.code.stackexchange.schema.Paging;
+import com.google.code.stackexchange.schema.Question;
+import com.google.code.stackexchange.schema.StackExchangeSite;
+import com.google.code.stackexchange.schema.User.QuestionSortOrder;
 import com.google.common.base.Charsets;
-import com.ufu.bot.config.CrokageStaticDataOld;
 import com.ufu.bot.googleSearch.GoogleWebSearch;
 import com.ufu.bot.googleSearch.SearchQuery;
 import com.ufu.bot.googleSearch.SearchResult;
@@ -47,10 +48,12 @@ import com.ufu.bot.tfidf.TFIDFCalculator;
 import com.ufu.bot.to.Bucket;
 import com.ufu.bot.to.BucketOld;
 import com.ufu.bot.to.Post;
+import com.ufu.bot.util.BingWebSearch;
 import com.ufu.bot.util.BotComposer;
 import com.ufu.bot.util.BotUtils;
 import com.ufu.bot.util.Matrix;
 import com.ufu.crokage.to.MetricResult;
+import com.ufu.crokage.to.SearchResults;
 import com.ufu.crokage.to.UserEvaluation;
 import com.ufu.crokage.util.CrokageUtils;
 import com.ufu.crokage.util.IDFCalc;
@@ -147,8 +150,29 @@ public class CrokageApp {
 	@Value("${GOOGLE_TOP_RESULTS_FOR_NLP2API}")
 	public String GOOGLE_TOP_RESULTS_FOR_NLP2API;
 	
-	@Value("${GOOGLE_EXCEPTIONS_FOR_NLP2API}")
-	public String GOOGLE_EXCEPTIONS_FOR_NLP2API;
+	@Value("${GOOGLE_TOP_RESULTS_FOR_CROKAGE}")
+	public String GOOGLE_TOP_RESULTS_FOR_CROKAGE;
+	
+	@Value("${SE_TOP_RESULTS_FOR_NLP2API}")
+	public String SE_TOP_RESULTS_FOR_NLP2API;
+	
+	@Value("${SE_TOP_RESULTS_FOR_CROKAGE}")
+	public String SE_TOP_RESULTS_FOR_CROKAGE;
+	
+	@Value("${BING_TOP_RESULTS_FOR_NLP2API_RAW_JSON}")
+	public String BING_TOP_RESULTS_FOR_NLP2API_RAW_JSON;
+	
+	@Value("${BING_TOP_RESULTS_FOR_CROKAGE_RAW_JSON}")
+	public String BING_TOP_RESULTS_FOR_CROKAGE_RAW_JSON;
+	
+	@Value("${BING_TOP_RESULTS_FOR_NLP2API}")
+	public String BING_TOP_RESULTS_FOR_NLP2API;
+	
+	@Value("${BING_TOP_RESULTS_FOR_CROKAGE}")
+	public String BING_TOP_RESULTS_FOR_CROKAGE;
+	
+	@Value("${ALL_QUESTIONS_EXCEPTIONS_FOR_NLP2API}")
+	public String ALL_QUESTIONS_EXCEPTIONS_FOR_NLP2API;
 	
 	@Value("${NLP2API_QUERIES_AND_SO_QUESTIONS_TO_EVALUATE}")
 	public String NLP2API_QUERIES_AND_SO_QUESTIONS_TO_EVALUATE;
@@ -161,6 +185,9 @@ public class CrokageApp {
 	
 	@Value("${INPUT_QUERIES_FILE_NLP2API}")
 	public String INPUT_QUERIES_FILE_NLP2API;
+	
+	@Value("${INPUT_QUERIES_FILE_SELECTED_QUERIES}")
+	public String INPUT_QUERIES_FILE_SELECTED_QUERIES;
 	
 	@Value("${BIKER_INPUT_QUERIES_FILE}")
 	public String BIKER_INPUT_QUERIES_FILE;
@@ -264,7 +291,7 @@ public class CrokageApp {
 	private Set<String> bikerTopClasses;
 	private Map<String,Integer> methodsCounterMap;
 	private Map<String,Integer> classesCounterMap;
-	private Map<String,Set<Integer>> googleQueriesAndSOIds;
+	
 	
 
 	@PostConstruct
@@ -286,7 +313,7 @@ public class CrokageApp {
 		allWordsSetForBuckets = new HashSet<>();
 		methodsCounterMap = new HashMap<>();
 		classesCounterMap = new HashMap<>();
-		googleQueriesAndSOIds = new LinkedHashMap<>();
+		
 		processedQueries = new ArrayList<>();
 		
 		System.out.println("\nConsidering parameters: \n" 
@@ -322,17 +349,38 @@ public class CrokageApp {
 			runApproach();
 			break;
 			
-		case "generateGoogleRelatedQuestionsIdsForEvaluation":
-			generateGoogleRelatedQuestionsIdsForEvaluation();
+		case "processCrawledQuestionsIDsAndBuilExcelFileForEvaluation":
+			processCrawledQuestionsIDsAndBuilExcelFileForEvaluation();
 			break;
 		
-		case "generateGoogleRelatedQuestionsIdsForNLP2Api":
-			generateGoogleRelatedQuestionsIdsForNLP2Api();
+		case "crawlGoogleForRelatedQuestionsIdsDatasetNLP2Api":
+			crawlGoogleForRelatedQuestionsIdsDatasetNLP2Api();
 			break;
 			
-		case "readGoogleRelatedQuestionsIdsForNLP2Api":
-			readGoogleRelatedQuestionsIdsForNLP2Api();
+		case "crawlGoogleForRelatedQuestionsIdsDatasetCrokage":
+			crawlGoogleForRelatedQuestionsIdsDatasetCrokage();
+			break;	
+			
+		case "crawlBingForRelatedQuestionsIdsDatasetNLP2Api":
+			crawlBingForRelatedQuestionsIdsDatasetNLP2Api();
 			break;
+			
+		case "crawlBingForRelatedQuestionsIdsDatasetCrokage":
+			crawlBingForRelatedQuestionsIdsDatasetCrokage();
+			break;	
+				
+				
+		case "processBingResultsToStandardFormat":
+			processBingResultsToStandardFormat();
+			break;		
+			
+		case "crawlStackExchangeForRelatedQuestionsIdsDatasetNLP2Api":
+			crawlStackExchangeForRelatedQuestionsIdsDatasetNLP2Api();
+			break;	
+			
+		case "crawlStackExchangeForRelatedQuestionsIdsDatasetCrokage":
+			crawlStackExchangeForRelatedQuestionsIdsDatasetCrokage();
+			break;	
 			
 		case "readAnswersIdsParentsMap":
 			readAnswersIdsParentsMap();
@@ -442,57 +490,137 @@ public class CrokageApp {
 	}
 
 	
-	
 
 
 
-	private void generateGoogleRelatedQuestionsIdsForEvaluation() throws Exception {
-		readGoogleRelatedQuestionsIdsForNLP2Api();
+
+
+
+
+
+
+
+
+
+
+
+	private void processBingResultsToStandardFormat() throws IOException {
+		List<String> allLinesCrokage = Files.readAllLines(Paths.get(BING_TOP_RESULTS_FOR_CROKAGE_RAW_JSON));
+		List<String> allLinesNLP2API = Files.readAllLines(Paths.get(BING_TOP_RESULTS_FOR_NLP2API_RAW_JSON));
+		
+		Map<String,Set<Integer>> queriesAndSOIdsMap = processBingResult(allLinesCrokage);
+		Map<String,Set<Integer>> queriesAndSOIdsMap2 = processBingResult(allLinesNLP2API);
+		
+		CrokageUtils.printMapToFile(queriesAndSOIdsMap,BING_TOP_RESULTS_FOR_CROKAGE);
+		CrokageUtils.printMapToFile(queriesAndSOIdsMap2,BING_TOP_RESULTS_FOR_NLP2API);
+				
+	}
+
+
+
+
+
+
+	private Map<String, Set<Integer>> processBingResult(List<String> allLinesCrokage) {
+		String[] parts;
+		String query="";
+		String questionId;
+		Set<Integer> questionsIds = new LinkedHashSet<>();
+		Map<String,Set<Integer>> queriesAndSOIdsMap = new LinkedHashMap<>();
+		
+		for(String line: allLinesCrokage) {
+			if(line.trim().startsWith("\"originalQuery\":")) {
+				if(!questionsIds.isEmpty()) {
+					queriesAndSOIdsMap.put(query, questionsIds);
+					questionsIds = new LinkedHashSet<>();
+				}
+				
+				parts = line.trim().split("\"originalQuery\": \"");
+				parts = parts[1].split(" site:stackoverflow.com\"");
+				query = parts[0].replace("java ", "");
+				
+			}
+			if(line.trim().startsWith("\"url\": \"https://stackoverflow.com/questions/")) {
+				parts = line.trim().split("\"url\": \"https://stackoverflow.com/questions/");
+				parts = parts[1].split("/");
+				questionId = parts[0];
+				if(crokageUtils.isNumeric(questionId)) {
+					questionsIds.add(new Integer(questionId));
+				}
+				
+			}
+			
+		}
+		return queriesAndSOIdsMap;
+	}
+
+
+
+
+
+
+
+	private void processCrawledQuestionsIDsAndBuilExcelFileForEvaluation() throws Exception {
+		Map<String,Set<Integer>> googleQueriesAndSOIdsMap = new LinkedHashMap<>();
+		Map<String,Set<Integer>> seQueriesAndSOIdsMap = new LinkedHashMap<>();
+		Map<String,Set<Integer>> bingQueriesAndSOIdsMap = new LinkedHashMap<>();
+		
+		Map<String,Set<Integer>> allQueriesAndSOIdsMap = new LinkedHashMap<>();
+		Map<String, Set<Integer>> exceptionQueriesSOQuestionIds = new LinkedHashMap<>();
+		
+		googleQueriesAndSOIdsMap = readCrawledQuestionsIds(GOOGLE_TOP_RESULTS_FOR_NLP2API);
+		//googleQueriesAndSOIdsMap.putAll(readCrawledQuestionsIds(GOOGLE_TOP_RESULTS_FOR_CROKAGE));
+		seQueriesAndSOIdsMap = readCrawledQuestionsIds(SE_TOP_RESULTS_FOR_NLP2API);
+		seQueriesAndSOIdsMap.putAll(readCrawledQuestionsIds(SE_TOP_RESULTS_FOR_CROKAGE));
+		bingQueriesAndSOIdsMap = readCrawledQuestionsIds(BING_TOP_RESULTS_FOR_NLP2API);
+		bingQueriesAndSOIdsMap.putAll(readCrawledQuestionsIds(BING_TOP_RESULTS_FOR_CROKAGE));
 		
 		queries = readInputQueries();
 		
-		//load apis considering approaches
-		getApisForApproaches();
-		
-		//combine state of art approaches considering the order in parameters
-		Map<Integer, Set<String>> recommendedApis = getRecommendedApis();
-		//Set<String> googleQueriesAndQuestionsIdsEntrySet = googleQueriesAndSOIds.keySet();
-		
-		Set<Integer> keys = recommendedApis.keySet();
-		String rawQuery;
-		Map<String, Set<Integer>> exceptionQueriesSOQuestionIds = new LinkedHashMap<>();
-		StringBuilder lines = new StringBuilder("");
-		
-		for(Integer key: keys) {  //for each query 
-			long initTime = System.currentTimeMillis();
-			rawQuery = queries.get(key-1);
-			System.out.println("\n\nQuery: "+rawQuery);
+		for(String query: queries) {  //for each query 
 			
-			//remove questions without answers, or without answers with upvotes or answers that do not contain recommended apis
-			Set<Integer> googleSOQuestionsIds = googleQueriesAndSOIds.get(rawQuery);
-			System.out.println(googleSOQuestionsIds);
+			//merge lists
+			Set<Integer> googleSOQuestionsIds = googleQueriesAndSOIdsMap.get(query);
+			Set<Integer> seSOQuestionsIds = seQueriesAndSOIdsMap.get(query);
+			Set<Integer> bingSOQuestionsIds = bingQueriesAndSOIdsMap.get(query);
 			
-			Set<String> topClasses = recommendedApis.get(key);
-			System.out.println("Top classes: "+topClasses);
+			Set<Integer> allSOQuestionsIds = new LinkedHashSet<>();
 			
-			List<Post> soQuestions = crokageService.findPostsById(new ArrayList(googleSOQuestionsIds));
+			if(googleSOQuestionsIds==null || googleSOQuestionsIds.isEmpty()) {
+				throw new Exception("Query not found for google ?!: "+query);
+			}
+			if(seSOQuestionsIds!=null && !seSOQuestionsIds.isEmpty()) {
+				throw new Exception("Query not found for SE ?!: "+query);
+			}
+			if(bingSOQuestionsIds==null || bingSOQuestionsIds.isEmpty()) {
+				throw new Exception("Query not found for bing ?!: "+query);
+			}
+			
+			allSOQuestionsIds.addAll(bingSOQuestionsIds);
+			allSOQuestionsIds.addAll(seSOQuestionsIds);
+			allSOQuestionsIds.addAll(googleSOQuestionsIds);
+			
+			allQueriesAndSOIdsMap.put(query,allSOQuestionsIds);
+			
+			List<Post> soQuestions = crokageService.findPostsById(new ArrayList(allSOQuestionsIds));
 			Set<Integer> exceptionIdsSet = new LinkedHashSet<>();
 			
 			outer:for(Post question:soQuestions) {
-				/*if(question.getId().equals(16693307)) {
+				/*if(question.getId().equals(40439065)) {
 					System.out.println();
 				}*/
-				if(question.getAnswerCount()==0) {
+				if(question.getAnswerCount()==null || question.getAnswerCount()==0 || question.getScore()<1) {
+					/*if(question.getScore()<1) {
+						System.out.println("Score < 1: "+question.getId());
+					}*/
 					exceptionIdsSet.add(question.getId());
 				}else {
-					List<Post> answers = crokageService.findUpVotedAnswersByQuestionId(question.getId());
+					
+					List<Post> answers = crokageService.findUpVotedAnswersWithCodeByQuestionId(question.getId());
 					if(answers.isEmpty()) {
 						exceptionIdsSet.add(question.getId());
-					}else {
+					}/*else {
 						inner:for(Post answer: answers) {
-							/*if(answer.getId().equals(30782740)) {
-								System.out.println();
-							}*/
 							for (String topClass : topClasses) {
 								if (answer.getCode().contains(topClass)) {
 									continue outer;
@@ -500,18 +628,18 @@ public class CrokageApp {
 							}
 						}
 						exceptionIdsSet.add(question.getId());
-					}
+					}*/
 				}
 				
 				if(!exceptionIdsSet.isEmpty()) {
-					exceptionQueriesSOQuestionIds.put(rawQuery, exceptionIdsSet);
-					
+					exceptionQueriesSOQuestionIds.put(query, exceptionIdsSet);
 				}
 				
 			}
-			System.out.println("Query: "+rawQuery + " - exceptions: "+exceptionQueriesSOQuestionIds.get(rawQuery));
+			//System.out.println("Exceptions: "+exceptionQueriesSOQuestionIds.get(query));
 		}
 		
+		StringBuilder lines = new StringBuilder("");
 		Set<String> queriesIdsSet = exceptionQueriesSOQuestionIds.keySet();
 		for(String query: queriesIdsSet) {
 			lines.append("\n"+query+" >> ");
@@ -519,15 +647,26 @@ public class CrokageApp {
 			 for(Integer id: ids) {
 				lines.append(id+" ");
 			}
-			//remove from googleQueriesAndSOIds, ids not relevant 
-			googleQueriesAndSOIds.get(query).removeAll(ids);
-			 
+			allQueriesAndSOIdsMap.get(query).removeAll(ids);
+			System.out.println("\n\nQuery: "+query);
+			System.out.println("\nExceptions: "+ids);
+			System.out.println("\nTotal ids after merge and without exceptions: "+allQueriesAndSOIdsMap.get(query).size()+ " - "+allQueriesAndSOIdsMap.get(query)); 
 		}
 		
-		crokageUtils.writeStringContentToFile(lines.toString(), GOOGLE_EXCEPTIONS_FOR_NLP2API);
+		Map<String,List<Post>> allQueriesAndPostsMap = new LinkedHashMap<>();
+		
+		Set<String> queries = allQueriesAndSOIdsMap.keySet(); 
+		for(String query:queries){
+			Set<Integer> ids = allQueriesAndSOIdsMap.get(query);					
+			List<Post> soQuestions = crokageService.findPostsById(new ArrayList(ids));
+			allQueriesAndPostsMap.put(query, soQuestions);
+		}
+		
+		
+		crokageUtils.writeStringContentToFile(lines.toString(), ALL_QUESTIONS_EXCEPTIONS_FOR_NLP2API);
 	
 		//build an excel file 
-		crokageUtils.buildCsvQuestionsForEvaluation(NLP2API_QUERIES_AND_SO_QUESTIONS_TO_EVALUATE,googleQueriesAndSOIds);
+		crokageUtils.buildCsvQuestionsForEvaluation(NLP2API_QUERIES_AND_SO_QUESTIONS_TO_EVALUATE,allQueriesAndPostsMap);
 		
 		
 	}
@@ -535,33 +674,96 @@ public class CrokageApp {
 
 
 
-	private void readGoogleRelatedQuestionsIdsForNLP2Api() throws IOException {
+	private Map<String,Set<Integer>> readCrawledQuestionsIds(String fileToRead) throws IOException {
 		long initTime = System.currentTimeMillis();
-		List<String> queriesAndGoogleSOIds = Files.readAllLines(Paths.get(GOOGLE_TOP_RESULTS_FOR_NLP2API));
+		Map<String,Set<Integer>> queriesAndSOIdsMap = new LinkedHashMap<>();
+		List<String> queriesAndGoogleSOIds = Files.readAllLines(Paths.get(fileToRead));
 		String[] parts;
 		for(String line: queriesAndGoogleSOIds) {
 			parts = line.split(" >> ");
-			String ids[] = parts[1].split(" ");
-			Set<Integer> idsInt = new LinkedHashSet<>();
-			for(String idStr: ids) {
-				idsInt.add(Integer.parseInt(idStr));
+			if(parts.length>1) {
+				String ids[]=null;
+				ids = parts[1].split(" ");
+				Set<Integer> idsInt = new LinkedHashSet<>();
+				for(String idStr: ids) {
+					idsInt.add(Integer.parseInt(idStr));
+				}
+				queriesAndSOIdsMap.put(parts[0], idsInt);
 			}
-			googleQueriesAndSOIds.put(parts[0], idsInt);
+			
 		}
 		
 		crokageUtils.reportElapsedTime(initTime,"readGoogleRelatedQuestionsIdsForNLP2Api");
-		System.out.println("Size of googleQueriesAndSOIds: "+googleQueriesAndSOIds.size());
+		System.out.println("Size of googleQueriesAndSOIds: "+queriesAndSOIdsMap.size() +" for file: "+fileToRead);
+		return queriesAndSOIdsMap;
+	}
+
+	
+	private void crawlBingForRelatedQuestionsIdsDatasetCrokage() throws Exception {
+		List<String> queries = Files.readAllLines(Paths.get(INPUT_QUERIES_FILE_CROKAGE));
+
+		try (PrintWriter out = new PrintWriter(BING_TOP_RESULTS_FOR_CROKAGE_RAW_JSON)) {
+			for (String query : queries) {
+				SearchResults result = BingWebSearch.SearchWeb(prepareQueryForBing(query));
+				out.println(BingWebSearch.prettify(result.jsonResponse));
+			}
+		}
+		
 	}
 
 
 
+	
+	private void crawlBingForRelatedQuestionsIdsDatasetNLP2Api() throws Exception {
+		List<String> queries = Files.readAllLines(Paths.get(INPUT_QUERIES_FILE_NLP2API));
 
-	private void generateGoogleRelatedQuestionsIdsForNLP2Api() throws Exception {
-		List<String> queries = Files.readAllLines(Paths.get(CROKAGE_HOME+"/data/inputQueriesNlp2Api-1-100.txt"));
+		try (PrintWriter out = new PrintWriter(BING_TOP_RESULTS_FOR_NLP2API_RAW_JSON)) {
+			for (String query : queries) {
+				SearchResults result = BingWebSearch.SearchWeb(prepareQueryForBing(query));
+				out.println(BingWebSearch.prettify(result.jsonResponse));
+			}
+		}
+	}
+	
+
+	private void crawlStackExchangeForRelatedQuestionsIdsDatasetNLP2Api() throws IOException {
+		List<String> queries = Files.readAllLines(Paths.get(INPUT_QUERIES_FILE_NLP2API));
 		
-		try (PrintWriter out = new PrintWriter(CROKAGE_HOME+"/data/googleNLP2ApiResults-1-100.txt")) {
+		try (PrintWriter out = new PrintWriter(SE_TOP_RESULTS_FOR_NLP2API)) {
 			for(String query: queries) {
-				Set<Integer> soQuestionsIds = executeGoogleSearch(prepareGoogleQuery(query),numberOfGoogleResults);
+				Set<Integer> soQuestionsIds = executeStackExchangeSearch(crokageUtils.processQuery(query),10);
+				out.print("\n"+query+ " >> ");
+				for(Integer soQuestionId: soQuestionsIds) {
+					out.print(soQuestionId+ " ");
+				}
+			}
+		}
+	}
+		
+	
+	private void crawlStackExchangeForRelatedQuestionsIdsDatasetCrokage() throws IOException {
+		List<String> queries = Files.readAllLines(Paths.get(INPUT_QUERIES_FILE_CROKAGE));
+		
+		try (PrintWriter out = new PrintWriter(SE_TOP_RESULTS_FOR_CROKAGE)) {
+			for(String query: queries) {
+				Set<Integer> soQuestionsIds = executeStackExchangeSearch(crokageUtils.processQuery(query),10);
+				out.print("\n"+query+ " >> ");
+				for(Integer soQuestionId: soQuestionsIds) {
+					out.print(soQuestionId+ " ");
+				}
+			}
+		}
+		
+	}
+
+
+
+	private void crawlGoogleForRelatedQuestionsIdsDatasetCrokage() throws Exception {
+		List<String> queries = Files.readAllLines(Paths.get(INPUT_QUERIES_FILE_CROKAGE));
+		
+		try (PrintWriter out = new PrintWriter(GOOGLE_TOP_RESULTS_FOR_CROKAGE)) {
+			for(String query: queries) {
+				Set<Integer> soQuestionsIds = executeGoogleSearch(prepareQueryForCrawler(query),10);
 				out.print("\n"+query+ " >> ");
 				for(Integer soQuestionId: soQuestionsIds) {
 					out.print(soQuestionId+ " ");
@@ -570,7 +772,29 @@ public class CrokageApp {
 		}
 	}
 	
-	public String prepareGoogleQuery(String query) {
+
+
+
+	
+	private void crawlGoogleForRelatedQuestionsIdsDatasetNLP2Api() throws Exception {
+		List<String> queries = Files.readAllLines(Paths.get(CROKAGE_HOME+"/data/inputQueriesNlp2Api-201-300.txt"));
+		
+		try (PrintWriter out = new PrintWriter(CROKAGE_HOME+"/data/googleNLP2ApiResults-201-300.txt")) {
+			for(String query: queries) {
+				Set<Integer> soQuestionsIds = executeGoogleSearch(prepareQueryForCrawler(query),10);
+				out.print("\n"+query+ " >> ");
+				for(Integer soQuestionId: soQuestionsIds) {
+					out.print(soQuestionId+ " ");
+				}
+			}
+		}
+	}
+	
+	
+	
+	
+	
+	public String prepareQueryForCrawler(String query) {
 		String completeQuery = "";
 		
 		Boolean containJavaToken = Pattern.compile(".*\\bjava\\b.*").matcher(query.toLowerCase()).find();
@@ -580,6 +804,20 @@ public class CrokageApp {
 		}
 		
 		completeQuery += query;
+		
+		return completeQuery;
+	}
+	
+	public String prepareQueryForBing(String query) {
+		String completeQuery = "";
+		
+		Boolean containJavaToken = Pattern.compile(".*\\bjava\\b.*").matcher(query.toLowerCase()).find();
+		
+		if(!containJavaToken) {
+			completeQuery += "java ";
+		}
+		
+		completeQuery += query + " site:stackoverflow.com";
 		
 		return completeQuery;
 	}
@@ -610,6 +848,39 @@ public class CrokageApp {
 		return soQuestionsIds;
 		
 	}
+	
+	private Set<Integer> executeStackExchangeSearch(String query, Integer numberOfGoogleResults2) {
+		 StackExchangeApiQueryFactory queryFactory = StackExchangeApiQueryFactory.newInstance("gJMxDoCH9XhURvF7a3F4Kg((",StackExchangeSite.STACK_OVERFLOW);  
+         Paging paging = new Paging(1, 20);  
+         String filterName = "default";  
+         List<String> tagged = new ArrayList<String>();  
+         tagged.add("java");  
+         List<String> nottagged = new ArrayList<String>();  
+         PagedList<Question> questions = queryFactory  
+                   .newAdvanceSearchApiQuery()
+                   .withFilter(filterName)
+                   .withSort(QuestionSortOrder.MOST_RELEVANT)
+                   .withQuery(query)
+                   .withMinAnswers(1)  
+                   .withMinViews(100)
+                   .withTags(tagged).list();  
+         
+         Set<Integer> soQuestionsIds = new LinkedHashSet<>();
+		
+         int i=0;
+         for(Question question:questions) {
+        	System.out.println(question.getQuestionId()+ " - "+question.getTitle());
+        	soQuestionsIds.add(((Long)(question.getQuestionId())).intValue());
+        	i++;
+        	if(i==20) {
+        		break;
+        	}
+         }
+		return soQuestionsIds;
+	}
+
+
+
 
 
 	private void checkConditions() throws Exception {
@@ -1653,58 +1924,60 @@ public class CrokageApp {
 
 	private void extractAPIsFromNLP2Api() throws Exception {
 		
-		try {
-			
-			if(queries==null) {
-				queries = readInputQueries();
-			}
-			
-			if(callNLP2ApiProcess) {
-				//queries = queries.subList(0, 5);
-				//First generate inputQueries file in a format NLP2Api understand
-				FileWriter fw = new FileWriter(NLP2API_INPUT_QUERIES_FILE);
-				for (String query: queries) {
-					fw.write(query+"\n--\n"); //specific format to NLP2API understand
-					
-				}
-			 	fw.close();
-				
-				
-		 		//call jar with parameters
-			 	//java -jar /home/rodrigo/projects/bot/myNlp2Api.jar -K 10 -task reformulate -queryFile /home/rodrigo/projects/NLP2API-Replication-Package/NL-Query+GroundTruth.txt -outputFile /home/rodrigo/projects/NLP2API-Replication-Package/nlp2apiQueriesOutput.txt
-				
-			 	String jarPath = CROKAGE_HOME;
-				List<String> command = new ArrayList<String>();
-			    
-			    command.add("java");
-			    command.add("-jar");
-			    command.add(jarPath+"/myNlp2Api.jar");
-			    command.add("-K");
-			    command.add(""+numberOfAPIClasses);
-			    command.add("-task");
-			    command.add("reformulate");
-			    command.add("-queryFile");
-			    command.add(NLP2API_INPUT_QUERIES_FILE);
-			    command.add("-outputFile");
-			    command.add(NLP2API_OUTPUT_QUERIES_FILE);
-				
-				ProcessBuilder pb = new ProcessBuilder(command);
-				Process p = pb.start();
-				p.waitFor();
-				String output = CrokageUtils.loadStream(p.getInputStream());
-				String error = CrokageUtils.loadStream(p.getErrorStream());
-				int rc = p.waitFor();
-				//System.out.println("Process ended with rc=" + rc);
-				//System.out.println("\nStandard Output:\n");
-				//System.out.println(output);
-				//String apis[] = output.replaceAll("\n", " ").split(" ");
-				//System.out.println(apis);
-				//System.out.println("\nStandard Error:\n");
-				//System.out.println(error);
-		 	}
-		} catch (Exception e) {
-			e.printStackTrace();
+
+		
+		if(queries==null) {
+			queries = readInputQueries();
 		}
+		
+		if(callNLP2ApiProcess) {
+			//queries = queries.subList(0, 5);
+			//First generate inputQueries file in a format NLP2Api understand
+			FileWriter fw = new FileWriter(NLP2API_INPUT_QUERIES_FILE);
+			for (String query: queries) {
+				fw.write(query+"\n--\n"); //specific format to NLP2API understand
+				
+			}
+		 	fw.close();
+			
+			
+	 		//call jar with parameters
+		 	//java -jar /home/rodrigo/projects/bot/myNlp2Api.jar -K 10 -task reformulate -queryFile /home/rodrigo/projects/NLP2API-Replication-Package/NL-Query+GroundTruth.txt -outputFile /home/rodrigo/projects/NLP2API-Replication-Package/nlp2apiQueriesOutput.txt
+			
+		 	String jarPath = CROKAGE_HOME;
+			List<String> command = new ArrayList<String>();
+		    
+		    command.add("java");
+		    command.add("-jar");
+		    command.add(jarPath+"/myNlp2Api.jar");
+		    command.add("-K");
+		    command.add(""+numberOfAPIClasses);
+		    command.add("-task");
+		    command.add("reformulate");
+		    command.add("-queryFile");
+		    command.add(NLP2API_INPUT_QUERIES_FILE);
+		    command.add("-outputFile");
+		    command.add(NLP2API_OUTPUT_QUERIES_FILE);
+			
+			ProcessBuilder pb = new ProcessBuilder(command);
+			Process p = pb.start();
+			p.waitFor();
+			String output = CrokageUtils.loadStream(p.getInputStream());
+			String error = CrokageUtils.loadStream(p.getErrorStream());
+			/*if(error.contains("error")) {
+				System.out.println(error);
+				throw new Exception(error);
+			}*/
+			//int rc = p.waitFor();
+			//System.out.println("Process ended with rc=" + rc);
+			//System.out.println("\nStandard Output:\n");
+			//System.out.println(output);
+			//String apis[] = output.replaceAll("\n", " ").split(" ");
+			//System.out.println(apis);
+			//System.out.println("\nStandard Error:\n");
+			//System.out.println(error);
+	 	}
+		
 		
 		nlp2ApiQueriesApisMap = new LinkedHashMap<>();
 		getQueriesAndApisFromFileMayContainDupes(nlp2ApiQueriesApisMap,NLP2API_OUTPUT_QUERIES_FILE);
@@ -1717,52 +1990,54 @@ public class CrokageApp {
 			queries = readInputQueries();
 		}
 		
-		try {	
+		
+		
+		if(callRACKApiProcess) {
+			//First generate inputQueries file in a format NLP2Api understand
+			FileWriter fw = new FileWriter(RACK_INPUT_QUERIES_FILE);
+			for (String query: queries) {
+				fw.write(query+"\n--\n"); //specific format to NLP2API understand
+				
+			}
+		 	fw.close();
 			
-			if(callRACKApiProcess) {
-				//First generate inputQueries file in a format NLP2Api understand
-				FileWriter fw = new FileWriter(RACK_INPUT_QUERIES_FILE);
-				for (String query: queries) {
-					fw.write(query+"\n--\n"); //specific format to NLP2API understand
-					
-				}
-			 	fw.close();
-				
-				
-			 	//call jar with parameters
-			 	
-			 	String jarPath = CROKAGE_HOME;
-			 	List<String> command = new ArrayList<String>();
 			
-			 	command.add("java");
-			    command.add("-jar");
-			    command.add(jarPath+"/rack-exec.jar");
-			    command.add("-K");
-			    command.add(""+numberOfAPIClasses);
-			    command.add("-task");
-			    command.add("suggestAPI");
-			    command.add("-queryFile");
-			    command.add(RACK_INPUT_QUERIES_FILE);
-			    command.add("-resultFile");
-			    command.add(RACK_OUTPUT_QUERIES_FILE);
-				
-				ProcessBuilder pb = new ProcessBuilder(command);
-				Process p = pb.start();
-				p.waitFor();
-				String output = CrokageUtils.loadStream(p.getInputStream());
-				String error = CrokageUtils.loadStream(p.getErrorStream());
-				int rc = p.waitFor();
-				//System.out.println("Process ended with rc=" + rc);
-				//System.out.println("\nStandard Output:\n");
-				//System.out.println(output);
-				//String apis[] = output.replaceAll("\n", " ").split(" ");
-				//System.out.println(apis);
-				//System.out.println("\nStandard Error:\n");
-				//System.out.println(error);
-		 	}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+		 	//call jar with parameters
+		 	
+		 	String jarPath = CROKAGE_HOME;
+		 	List<String> command = new ArrayList<String>();
+		
+		 	command.add("java");
+		    command.add("-jar");
+		    command.add(jarPath+"/rack-exec.jar");
+		    command.add("-K");
+		    command.add(""+numberOfAPIClasses);
+		    command.add("-task");
+		    command.add("suggestAPI");
+		    command.add("-queryFile");
+		    command.add(RACK_INPUT_QUERIES_FILE);
+		    command.add("-resultFile");
+		    command.add(RACK_OUTPUT_QUERIES_FILE);
+			
+			ProcessBuilder pb = new ProcessBuilder(command);
+			Process p = pb.start();
+			p.waitFor();
+			String output = CrokageUtils.loadStream(p.getInputStream());
+			String error = CrokageUtils.loadStream(p.getErrorStream());
+			if(error.contains("error")) {
+				System.out.println(error);
+				throw new Exception(error);
+			}
+			//int rc = p.waitFor();
+			//System.out.println("Process ended with rc=" + rc);
+			//System.out.println("\nStandard Output:\n");
+			//System.out.println(output);
+			//String apis[] = output.replaceAll("\n", " ").split(" ");
+			//System.out.println(apis);
+			//System.out.println("\nStandard Error:\n");
+			//System.out.println(error);
+	 	}
+		
 		
 		rackQueriesApisMap = new LinkedHashMap<>();
 		getQueriesAndApisFromFileMayContainDupes(rackQueriesApisMap,RACK_OUTPUT_QUERIES_FILE);
@@ -1799,21 +2074,23 @@ public class CrokageApp {
 			file.setReadable(true);
 			file.setWritable(true);
 			
-			try {
-				ProcessBuilder pb = new ProcessBuilder(BIKER_SCRIPT_FILE);
-				Process p = pb.start();
-				p.waitFor();
-				String output = CrokageUtils.loadStream(p.getInputStream());
-				String error = CrokageUtils.loadStream(p.getErrorStream());
-				int rc = p.waitFor();
-				//System.out.println("Process ended with rc=" + rc);
-				//System.out.println("\nStandard Output:\n");
-				//System.out.println(output);
-				//System.out.println("\nStandard Error:\n");
-				//System.out.println(error);
-			} catch (Exception e) {
-				e.printStackTrace();
+		
+			ProcessBuilder pb = new ProcessBuilder(BIKER_SCRIPT_FILE);
+			Process p = pb.start();
+			p.waitFor();
+			String output = CrokageUtils.loadStream(p.getInputStream());
+			String error = CrokageUtils.loadStream(p.getErrorStream());
+			if(error.contains("error")) {
+				System.out.println(error);
+				throw new Exception(error);
 			}
+			//int rc = p.waitFor();
+			//System.out.println("Process ended with rc=" + rc);
+			//System.out.println("\nStandard Output:\n");
+			//System.out.println(output);
+			//System.out.println("\nStandard Error:\n");
+			//System.out.println(error);
+			
 		}
 		
 		int key = 1;
@@ -2183,6 +2460,8 @@ public class CrokageApp {
 	
 		}else if(dataSet.equals("nlp2api")) {
 			fileName = INPUT_QUERIES_FILE_NLP2API;
+		}else if(dataSet.equals("selectedQueries")) {
+			fileName = INPUT_QUERIES_FILE_SELECTED_QUERIES;
 		}
 		
 		

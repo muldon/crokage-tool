@@ -98,4 +98,3 @@ Count xml nodes under specific node
 How to Create Universal Namespace Resolver
 XML How to Append new Element to Document end
 XML How to Duplicate Element
-

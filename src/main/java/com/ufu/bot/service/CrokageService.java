@@ -58,6 +58,11 @@ public class CrokageService extends AbstractService{
 		return genericRepository.getAnswersIdsParentIds();
 	}
 
+	@Transactional(readOnly = true)
+	public List<Post> findUpVotedAnswersWithCodeByQuestionId(Integer id) {
+		return postsRepository.findUpVotedAnswersWithCodeByQuestionId(id);
+	}
+
 	
 	
 	

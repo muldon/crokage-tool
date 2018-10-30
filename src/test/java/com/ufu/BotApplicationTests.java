@@ -4,6 +4,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -26,6 +27,7 @@ import com.google.code.stackexchange.common.PagedList;
 import com.google.code.stackexchange.schema.Paging;
 import com.google.code.stackexchange.schema.Question;
 import com.google.code.stackexchange.schema.StackExchangeSite;
+import com.google.code.stackexchange.schema.User.QuestionSortOrder;
 import com.ufu.bot.service.PitBotService;
 import com.ufu.bot.to.Comment;
 import com.ufu.bot.to.Evaluation;
@@ -75,9 +77,9 @@ public class BotApplicationTests extends AbstractService{
 	}
 	*/
 	
-	//@Test
+	@Test
 	public void testSoSearch(){
-		StackExchangeApiQueryFactory queryFactory = StackExchangeApiQueryFactory
+		/*StackExchangeApiQueryFactory queryFactory = StackExchangeApiQueryFactory
 		        .newInstance("applicationKey", 
 		        StackExchangeSite.STACK_OVERFLOW);
 
@@ -98,10 +100,50 @@ public class BotApplicationTests extends AbstractService{
 		     .withPaging(paging).withFilter(filter)
 		     .withSort(Question.SortOrder.MOST_RECENTLY_CREATED)
 		     .withTags(tag).withAnswerIds(answerId).listQuestionsByAnswer();
+		*/
 		
+		   StackExchangeApiQueryFactory queryFactory = StackExchangeApiQueryFactory  
+                   .newInstance("gJMxDoCH9XhURvF7a3F4Kg((",  
+                             StackExchangeSite.STACK_OVERFLOW);  
+         Paging paging = new Paging(1, 15);  
+         int minViews = 0;  
+         int minAnswers = 0;  
+         String filterName = "default";  
+         String query = "Read JSON Array";  
+         List<String> tagged = new ArrayList<String>();  
+         tagged.add("java");  
+         List<String> nottagged = new ArrayList<String>();  
+         PagedList<Question> questions = queryFactory  
+                   .newAdvanceSearchApiQuery().withFilter(filterName).withSort(QuestionSortOrder.MOST_RELEVANT).withQuery(query).
+                   withMinAnswers(1)  
+                   .withTags(tagged).list();  
+		
+		
+         for(Question question:questions) {
+        	 System.out.println(question.getQuestionId()+ " - "+question.getTitle());
+         }
+         
 		System.out.println();
 		
 	}
+	
+	
+	/*@Test
+	public void testExchange2() {
+		StackOverflowApiQueryFactory queryFactory = StackOverflowApiQueryFactory.newInstance("appKey",StackExchangeSite.STACK_OVERFLOW);  
+		 QuestionApiQuery query = queryFactory.newQuestionApiQuery();  
+		 PagedList<Question> questions = query  
+		 .withSort(Question.SortOrder.HOT)  
+		 .withPaging(new Paging(1, 10))  
+		 .withTimePeriod(new TimePeriod(LAST_WEEK_DATE, CURRENT_DATE))  
+		 .withFilter("default")  
+		 .list();  
+		 while (questions.hasMore()) {  
+		  questions = query.withPaging(new Paging(questions.getPage() + 1, questions.getPageSize())).list();  
+		  // do something with questions  
+		 }  
+
+	}*/
 	
 	
 
@@ -174,7 +216,7 @@ public class BotApplicationTests extends AbstractService{
 	
 	
 	
-	@Test
+	//@Test
 	public void testGetClassesFromCodes1() throws Exception {
 		logger.info("testStemStop....");
 		Integer questionId = 4352901;
@@ -199,7 +241,7 @@ public class BotApplicationTests extends AbstractService{
 	}
 	
 	
-	@Test
+	//@Test
 	public void testCamelCase() throws Exception {
 		logger.info("testStemStop....");
 		Integer questionId = 37505462;
@@ -433,7 +475,7 @@ public class BotApplicationTests extends AbstractService{
 		
 	}
 	
-	@Test
+	//@Test
 	public void testMethodCallsCapture() {
 		Integer answersIds[] = {910522,45960571,2900755,1053475,1911947,34959450,1921200,34959470,1928690,1928707,1928778,1969067,34959570};
 		for(Integer postId:answersIds) {
