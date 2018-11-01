@@ -16,8 +16,6 @@ How to monitor file or directory changes?
 How do I move a file in JDK 7?
 How do I create and delete a file in JDK 7?
 How to recursively list all text files in a directory?
-How to verify digital signature of a signed data?
-How to create a digital signature and sign data?
 How do I generate public and private keys?
 How do I copy a file in JDK 7?
 How do I set the value of file attributes?
@@ -74,9 +72,6 @@ How do I ping a host?
 Append string to a text file
 Reads a text file and displays it line by line
 Insert images in mongoDB
-Convert an XML file to CSV file
-XML How to Duplicate Element
-XML How to Get element by ID
 How do I pause the current thread?
 Java Program to Calculate average of numbers using Array
 Java Program to display first 100 prime numbers
@@ -93,8 +88,13 @@ Java Program to Get IP Address
 Load an Image from a JAR file
 Call a procedure with one IN/OUT parameter
 HSQL Delete With Parameter
-Get Servlet Context InitParameter
 Java Program to find Factorial of a number using Recursion
 Java Program to get Input From User
 Java Program to Check Even or Odd Number
 How do I get MAC address of a host?
+How do I convert number into Roman Numerals?
+How do I extend classes in Java?
+Java Program to check Prime Number
+Java Program to Convert Decimal to Binary
+How do I open a file using the default registered application?
+How do I convert angle from radians to degrees?
