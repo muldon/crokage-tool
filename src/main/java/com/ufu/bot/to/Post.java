@@ -94,6 +94,9 @@ public class Post {
 	private User user;
 	
 	@Transient
+	private Post parent;
+	
+	@Transient
 	private String titleVectors,tagVectors,bodyVectors, topicVectors;
 	
 	@Transient
@@ -443,6 +446,14 @@ public class Post {
 
 	public void setProcessedCode(String processedCode) {
 		this.processedCode = processedCode;
+	}
+
+	public Post getParent() {
+		return parent;
+	}
+
+	public void setParent(Post parent) {
+		this.parent = parent;
 	}
 
 	

@@ -1846,23 +1846,23 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 	    return (Math.log(n) / Math.log(2));
 	}
 	
-	public void buildCsvQuestionsForEvaluation(String fileName,Map<String, List<Post>> allQueriesAndPostsMap) throws IOException {
+	public void buildCsvQuestionsForEvaluation(String fileName,Map<String, List<Post>> allQueriesAndUpVotedCodedAnswersMap) throws IOException {
 		BufferedWriter bw =null;
 		try {
 			bw = new BufferedWriter(new FileWriter(fileName));
-			bw.write(";Link;Rodrigo;Klerisson;Rodrigo agreement;Klerisson agreement\n\n");
-			Set<String> queries = allQueriesAndPostsMap.keySet(); 
+			bw.write("Parent Title;Link;Rodrigo;Klerisson;Rodrigo agreement;Klerisson agreement\n\n");
+			Set<String> queries = allQueriesAndUpVotedCodedAnswersMap.keySet(); 
 						
 			for(String query:queries){
 				
 				bw.write("\n"+query+"\n\n");
-				List<Post> questions = allQueriesAndPostsMap.get(query);					
-				for(Post question: questions) {
-					String title = question.getTitle().replaceAll(";", "");
+				List<Post> answers = allQueriesAndUpVotedCodedAnswersMap.get(query);					
+				for(Post answer: answers) {
+					String title = answer.getParent().getTitle().replaceAll(";", "");
 					title = title.replaceAll("\"", "");
 					title = title.replaceAll("\'", "");
 					bw.write(title+";");
-					bw.write("https://stackoverflow.com/questions/"+question.getId()+"/\n");
+					bw.write("https://stackoverflow.com/questions/"+answer.getId()+"/\n");
 				}
 				
 				bw.write("\n\n");

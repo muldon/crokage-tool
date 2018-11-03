@@ -2,10 +2,11 @@ package com.ufu;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.FileNotFoundException;
+import java.io.FileInputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.math.BigInteger;
 import java.net.URL;
@@ -26,10 +27,12 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.zip.GZIPInputStream;
 
 import org.apache.commons.io.IOUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.json.simple.JSONArray;
-import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
@@ -38,7 +41,6 @@ import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 import com.ufu.bot.CrokageApp;
 import com.ufu.bot.PitBotApp2;
-import com.ufu.bot.config.CrokageStaticDataOld;
 import com.ufu.bot.tfidf.TfIdf;
 import com.ufu.bot.tfidf.ngram.NgramTfIdf;
 import com.ufu.bot.to.BucketOld;
@@ -50,6 +52,25 @@ import com.ufu.survey.service.PitSurveyService;
 public class Tester {
 
 	public Tester() throws Exception {
+		
+		
+		String someJsonString = "{name:\"MyNode\", width:200, height:100}";
+		JSONObject jsonObj = new JSONObject(someJsonString);
+		//System.out.println(jsonObj.get);
+		
+		
+		String path = "/home/rodrigo/tmp/disconsideredPostsBigMap.txt.gz";
+		
+		GZIPInputStream gzip = new GZIPInputStream(new FileInputStream(path));
+		BufferedReader br = new BufferedReader(new InputStreamReader(gzip));
+		br.readLine();
+		
+		/*Archiver archiver = ArchiverFactory.createArchiver("zip", "gz");
+		archiver.extract(new File(path), new File("/home/rodrigo/tmp") );
+		*/
+		
+		
+		
 		
 		CrokageApp crokageApp = new CrokageApp();
 		System.out.println(crokageApp.prepareQueryForCrawler("How can I insert an element in array at a given position?"));
@@ -242,7 +263,7 @@ public class Tester {
 
 
 
-	private void testReadJson() throws IOException, ParseException {
+	private void testReadJson() throws IOException, ParseException, JSONException {
 		
 		URL url = Resources.getResource("jsonExample.json");
 		String json = Resources.toString(url, Charsets.UTF_8);

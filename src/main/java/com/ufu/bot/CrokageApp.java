@@ -165,23 +165,33 @@ public class CrokageApp {
 	@Value("${BING_TOP_RESULTS_FOR_CROKAGE_RAW_JSON}")
 	public String BING_TOP_RESULTS_FOR_CROKAGE_RAW_JSON;
 	
+	@Value("${BING_TOP_RESULTS_FOR_BIKER_RAW_JSON}")
+	public String BING_TOP_RESULTS_FOR_BIKER_RAW_JSON;
+		
+	
 	@Value("${BING_TOP_RESULTS_FOR_NLP2API}")
 	public String BING_TOP_RESULTS_FOR_NLP2API;
 	
 	@Value("${BING_TOP_RESULTS_FOR_CROKAGE}")
 	public String BING_TOP_RESULTS_FOR_CROKAGE;
 	
+	@Value("${BING_TOP_RESULTS_FOR_BIKER}")
+	public String BING_TOP_RESULTS_FOR_BIKER;
+	
 	@Value("${ALL_QUESTIONS_EXCEPTIONS_FOR_NLP2API}")
 	public String ALL_QUESTIONS_EXCEPTIONS_FOR_NLP2API;
 	
-	@Value("${NLP2API_QUERIES_AND_SO_QUESTIONS_TO_EVALUATE}")
-	public String NLP2API_QUERIES_AND_SO_QUESTIONS_TO_EVALUATE;
+	@Value("${QUERIES_AND_SO_QUESTIONS_TO_EVALUATE}")
+	public String QUERIES_AND_SO_QUESTIONS_TO_EVALUATE;
 	
 	@Value("${NLP2API_GOLD_SET_FILE}")
 	public String NLP2API_GOLD_SET_FILE;
 	
 	@Value("${INPUT_QUERIES_FILE_CROKAGE}")
 	public String INPUT_QUERIES_FILE_CROKAGE;
+	
+	@Value("${INPUT_QUERIES_FILE_BIKER}")
+	public String INPUT_QUERIES_FILE_BIKER;
 	
 	@Value("${INPUT_QUERIES_FILE_NLP2API}")
 	public String INPUT_QUERIES_FILE_NLP2API;
@@ -368,7 +378,12 @@ public class CrokageApp {
 		case "crawlBingForRelatedQuestionsIdsDatasetCrokage":
 			crawlBingForRelatedQuestionsIdsDatasetCrokage();
 			break;	
-				
+		
+		case "crawlBingForRelatedQuestionsIdsDatasetBIKER":
+			crawlBingForRelatedQuestionsIdsDatasetBIKER();
+			break;	
+		
+			
 				
 		case "processBingResultsToStandardFormat":
 			processBingResultsToStandardFormat();
@@ -504,15 +519,26 @@ public class CrokageApp {
 
 
 
+
+
+
+
+
+
+
+
 	private void processBingResultsToStandardFormat() throws IOException {
-		List<String> allLinesCrokage = Files.readAllLines(Paths.get(BING_TOP_RESULTS_FOR_CROKAGE_RAW_JSON));
-		List<String> allLinesNLP2API = Files.readAllLines(Paths.get(BING_TOP_RESULTS_FOR_NLP2API_RAW_JSON));
+		//List<String> allLinesCrokage = Files.readAllLines(Paths.get(BING_TOP_RESULTS_FOR_CROKAGE_RAW_JSON));
+		//List<String> allLinesNLP2API = Files.readAllLines(Paths.get(BING_TOP_RESULTS_FOR_NLP2API_RAW_JSON));
+		List<String> allLinesBiker = Files.readAllLines(Paths.get(BING_TOP_RESULTS_FOR_BIKER_RAW_JSON));
 		
-		Map<String,Set<Integer>> queriesAndSOIdsMap = processBingResult(allLinesCrokage);
-		Map<String,Set<Integer>> queriesAndSOIdsMap2 = processBingResult(allLinesNLP2API);
+		//Map<String,Set<Integer>> queriesAndSOIdsMap = processBingResult(allLinesCrokage);
+		//Map<String,Set<Integer>> queriesAndSOIdsMap2 = processBingResult(allLinesNLP2API);
+		Map<String,Set<Integer>> queriesAndSOIdsMap3 = processBingResult(allLinesBiker);
 		
-		CrokageUtils.printMapToFile(queriesAndSOIdsMap,BING_TOP_RESULTS_FOR_CROKAGE);
-		CrokageUtils.printMapToFile(queriesAndSOIdsMap2,BING_TOP_RESULTS_FOR_NLP2API);
+		//CrokageUtils.printMapToFile(queriesAndSOIdsMap,BING_TOP_RESULTS_FOR_CROKAGE);
+		//CrokageUtils.printMapToFile(queriesAndSOIdsMap2,BING_TOP_RESULTS_FOR_NLP2API);
+		CrokageUtils.printMapToFile(queriesAndSOIdsMap3,BING_TOP_RESULTS_FOR_BIKER);
 				
 	}
 
@@ -568,8 +594,10 @@ public class CrokageApp {
 		Map<String,Set<Integer>> allQueriesAndSOIdsMap = new LinkedHashMap<>();
 		Map<String, Set<Integer>> exceptionQueriesSOQuestionIds = new LinkedHashMap<>();
 		
+		Map<String,List<Post>> allQueriesAndUpVotedCodedAnswersMap = new LinkedHashMap<>();
+		
 		googleQueriesAndSOIdsMap = readCrawledQuestionsIds(GOOGLE_TOP_RESULTS_FOR_NLP2API);
-		//googleQueriesAndSOIdsMap.putAll(readCrawledQuestionsIds(GOOGLE_TOP_RESULTS_FOR_CROKAGE));
+		googleQueriesAndSOIdsMap.putAll(readCrawledQuestionsIds(GOOGLE_TOP_RESULTS_FOR_CROKAGE));
 		seQueriesAndSOIdsMap = readCrawledQuestionsIds(SE_TOP_RESULTS_FOR_NLP2API);
 		seQueriesAndSOIdsMap.putAll(readCrawledQuestionsIds(SE_TOP_RESULTS_FOR_CROKAGE));
 		bingQueriesAndSOIdsMap = readCrawledQuestionsIds(BING_TOP_RESULTS_FOR_NLP2API);
@@ -585,58 +613,52 @@ public class CrokageApp {
 			Set<Integer> bingSOQuestionsIds = bingQueriesAndSOIdsMap.get(query);
 			
 			Set<Integer> allSOQuestionsIds = new LinkedHashSet<>();
+			Set<Integer> soQuestionsExceptionsIds = new LinkedHashSet<>();
 			
 			if(googleSOQuestionsIds==null || googleSOQuestionsIds.isEmpty()) {
 				throw new Exception("Query not found for google ?!: "+query);
+				//continue;
 			}
-			if(seSOQuestionsIds!=null && !seSOQuestionsIds.isEmpty()) {
-				throw new Exception("Query not found for SE ?!: "+query);
+			if(seSOQuestionsIds==null || seSOQuestionsIds.isEmpty()) {
+				System.out.println("Query not found for SE ?!: "+query);
 			}
 			if(bingSOQuestionsIds==null || bingSOQuestionsIds.isEmpty()) {
 				throw new Exception("Query not found for bing ?!: "+query);
 			}
 			
-			allSOQuestionsIds.addAll(bingSOQuestionsIds);
-			allSOQuestionsIds.addAll(seSOQuestionsIds);
-			allSOQuestionsIds.addAll(googleSOQuestionsIds);
+			if(seSOQuestionsIds!=null) {
+				allSOQuestionsIds.addAll(seSOQuestionsIds);
+			}
+			if(googleSOQuestionsIds!=null) {
+				allSOQuestionsIds.addAll(googleSOQuestionsIds);
+			}
+			if(bingSOQuestionsIds!=null) {
+				allSOQuestionsIds.addAll(bingSOQuestionsIds);
+			}
+			
 			
 			allQueriesAndSOIdsMap.put(query,allSOQuestionsIds);
 			
-			List<Post> soQuestions = crokageService.findPostsById(new ArrayList(allSOQuestionsIds));
-			Set<Integer> exceptionIdsSet = new LinkedHashSet<>();
+			List<Post> soQuestionsForQuery = crokageService.findPostsById(new ArrayList(allSOQuestionsIds));
+			List<Post> upVotedAnswersWithCode = new ArrayList<>();
 			
-			outer:for(Post question:soQuestions) {
+			for(Post question:soQuestionsForQuery) {
 				/*if(question.getId().equals(40439065)) {
 					System.out.println();
 				}*/
-				if(question.getAnswerCount()==null || question.getAnswerCount()==0 || question.getScore()<1) {
-					/*if(question.getScore()<1) {
-						System.out.println("Score < 1: "+question.getId());
-					}*/
-					exceptionIdsSet.add(question.getId());
-				}else {
-					
+				if(question.getAnswerCount()!=null && question.getAnswerCount()>0 && question.getScore()>0) {
 					List<Post> answers = crokageService.findUpVotedAnswersWithCodeByQuestionId(question.getId());
-					if(answers.isEmpty()) {
-						exceptionIdsSet.add(question.getId());
-					}/*else {
-						inner:for(Post answer: answers) {
-							for (String topClass : topClasses) {
-								if (answer.getCode().contains(topClass)) {
-									continue outer;
-								}
-							}
-						}
-						exceptionIdsSet.add(question.getId());
-					}*/
+					for(Post answer:answers) {
+						Post parent = crokageService.findPostById(answer.getParentId());
+						answer.setParent(parent);
+					}
+					upVotedAnswersWithCode.addAll(answers);
+				}else {
+					soQuestionsExceptionsIds.add(question.getId());
 				}
-				
-				if(!exceptionIdsSet.isEmpty()) {
-					exceptionQueriesSOQuestionIds.put(query, exceptionIdsSet);
-				}
-				
 			}
-			//System.out.println("Exceptions: "+exceptionQueriesSOQuestionIds.get(query));
+			allQueriesAndUpVotedCodedAnswersMap.put(query, upVotedAnswersWithCode);	
+			exceptionQueriesSOQuestionIds.put(query, soQuestionsExceptionsIds);
 		}
 		
 		StringBuilder lines = new StringBuilder("");
@@ -653,20 +675,12 @@ public class CrokageApp {
 			System.out.println("\nTotal ids after merge and without exceptions: "+allQueriesAndSOIdsMap.get(query).size()+ " - "+allQueriesAndSOIdsMap.get(query)); 
 		}
 		
-		Map<String,List<Post>> allQueriesAndPostsMap = new LinkedHashMap<>();
-		
-		Set<String> queries = allQueriesAndSOIdsMap.keySet(); 
-		for(String query:queries){
-			Set<Integer> ids = allQueriesAndSOIdsMap.get(query);					
-			List<Post> soQuestions = crokageService.findPostsById(new ArrayList(ids));
-			allQueriesAndPostsMap.put(query, soQuestions);
-		}
 		
 		
 		crokageUtils.writeStringContentToFile(lines.toString(), ALL_QUESTIONS_EXCEPTIONS_FOR_NLP2API);
 	
 		//build an excel file 
-		crokageUtils.buildCsvQuestionsForEvaluation(NLP2API_QUERIES_AND_SO_QUESTIONS_TO_EVALUATE,allQueriesAndPostsMap);
+		crokageUtils.buildCsvQuestionsForEvaluation(QUERIES_AND_SO_QUESTIONS_TO_EVALUATE,allQueriesAndUpVotedCodedAnswersMap);
 		
 		
 	}
@@ -697,6 +711,23 @@ public class CrokageApp {
 		System.out.println("Size of googleQueriesAndSOIds: "+queriesAndSOIdsMap.size() +" for file: "+fileToRead);
 		return queriesAndSOIdsMap;
 	}
+
+	
+
+
+
+	private void crawlBingForRelatedQuestionsIdsDatasetBIKER() throws Exception {
+		List<String> queries = Files.readAllLines(Paths.get(INPUT_QUERIES_FILE_BIKER));
+
+		try (PrintWriter out = new PrintWriter(BING_TOP_RESULTS_FOR_BIKER_RAW_JSON)) {
+			for (String query : queries) {
+				SearchResults result = BingWebSearch.SearchWeb(prepareQueryForBing(query));
+				out.println(BingWebSearch.prettify(result.jsonResponse));
+			}
+		}
+		
+	}
+
 
 	
 	private void crawlBingForRelatedQuestionsIdsDatasetCrokage() throws Exception {
@@ -2460,7 +2491,7 @@ public class CrokageApp {
 	
 		}else if(dataSet.equals("nlp2api")) {
 			fileName = INPUT_QUERIES_FILE_NLP2API;
-		}else if(dataSet.equals("selectedQueries")) {
+		}else if(dataSet.equals("selectedqueries")) {
 			fileName = INPUT_QUERIES_FILE_SELECTED_QUERIES;
 		}
 		
