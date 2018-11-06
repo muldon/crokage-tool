@@ -12,6 +12,7 @@ import java.math.BigInteger;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.BitSet;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -22,7 +23,11 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.StringTokenizer;
+import java.util.TreeSet;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -37,6 +42,7 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import com.google.common.base.Charsets;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 import com.ufu.bot.CrokageApp;
@@ -116,7 +122,17 @@ public class Tester {
 
 		// repeat only the following part:
 		//String output = p.matcher(input).replaceAll("");
-				
+		SortedSet<String> set = new TreeSet<>();
+        set.add("One");
+        set.add("Two");
+        set.add("Three");
+        set.add("Four");
+        set.add("Five");
+		System.out.println(getLastElement(set));
+		System.out.println(set.last());
+		Iterables.get(set, 3);
+		//System.out.println(set.pollLast());
+        //set.get(set.size()-1);
 		
 		String s = " just looking guidance code     calling given web service look like sample web service chosen example  ";
 		//System.out.println(StringUtils.normalizeSpace(s));
@@ -124,10 +140,43 @@ public class Tester {
 		Set<String> wordsSet = new HashSet<>();
 		wordsSet.addAll(Arrays.stream(s.split(" +")).collect(Collectors.toSet()));
 		System.out.println(wordsSet);
-		
-		
+		Thread.getAllStackTraces().keySet().forEach((t) -> System.out.println(t.getName() + "\nIs Daemon " + t.isDaemon() + "\nIs Alive " + t.isAlive()));
+		ExecutorService e = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+		// Do work using something like either
+		e.execute(new Runnable() {
+		        public void run() {
+		            // do one task
+		        }
+		    });
 	}
 	
+	public Object getLastElement(final Collection c) {
+	    final Iterator itr = c.iterator();
+	    Object lastElement = itr.next();
+	    while(itr.hasNext()) {
+	        lastElement = itr.next();
+	    }
+	    return lastElement;
+	}
+	
+	public static BitSet computePrimes(int limit)
+	{
+	    final BitSet primes = new BitSet();
+	    primes.set(0, false);
+	    primes.set(1, false);
+	    primes.set(2, limit, true);
+	    for (int i = 0; i * i < limit; i++)
+	    {
+	        if (primes.get(i))
+	        {
+	            for (int j = i * i; j < limit; j += i)
+	            {
+	                primes.clear(j);
+	            }
+	        }
+	    }
+	    return primes;
+	}
 	
 	public static double log2(int n)
 	{

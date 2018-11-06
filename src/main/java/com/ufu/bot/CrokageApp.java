@@ -1466,6 +1466,9 @@ public class CrokageApp {
 				
 				simPair+= methodFreqScore*0.75;
 				
+				//pontuar substring comum entre a maoiria dos códigos ?
+				
+				
 				/*double codeScore = BotComposer.calculateCodeSizeScore(CrokageUtils.getPreCodes(bucket.getBody()));
 				
 				simPair+= codeScore;*/
@@ -1477,6 +1480,11 @@ public class CrokageApp {
 				double upScore = BotComposer.calculateUpScore(bucket.getUpVotesScore());
 				
 				simPair+= upScore*0.5;
+				
+				
+				//**pontuar intercecao de substrings entrey a query e o body ou codigo da resposta
+				//ex, query "Use Scanner to read a list of comma-separated values" Respsotas boas contem "comma" ou "scanner"
+				
 				
 				simPair = crokageUtils.round(simPair,6);
 				
