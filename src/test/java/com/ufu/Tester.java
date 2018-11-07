@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringReader;
 import java.math.BigInteger;
+import java.net.NetworkInterface;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,6 +17,7 @@ import java.util.BitSet;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -42,7 +44,6 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import com.google.common.base.Charsets;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 import com.ufu.bot.CrokageApp;
@@ -75,7 +76,13 @@ public class Tester {
 		archiver.extract(new File(path), new File("/home/rodrigo/tmp") );
 		*/
 		
-		
+		 for(Enumeration<NetworkInterface> e
+                 = NetworkInterface.getNetworkInterfaces();
+            e.hasMoreElements(); )
+	    {
+	        NetworkInterface ni = e.nextElement();
+	        System.out.println(ni.getName() + " - " + formatMac(ni.getHardwareAddress()));
+	    }
 		
 		
 		CrokageApp crokageApp = new CrokageApp();
@@ -118,6 +125,8 @@ public class Tester {
 		System.out.println(query.contains("java"));*/
 		
 		
+		
+		
 		Pattern p = Pattern.compile("[,. ]+");
 
 		// repeat only the following part:
@@ -130,7 +139,7 @@ public class Tester {
         set.add("Five");
 		System.out.println(getLastElement(set));
 		System.out.println(set.last());
-		Iterables.get(set, 3);
+		
 		//System.out.println(set.pollLast());
         //set.get(set.size()-1);
 		
@@ -149,6 +158,17 @@ public class Tester {
 		        }
 		    });
 	}
+	
+	
+	 protected static String formatMac(byte[] mac) {
+	        if (mac == null)
+	            return "UNKNOWN";
+	        StringBuilder sb = new StringBuilder();
+	        for (int i = 0; i < mac.length; i++) {
+	            sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? "-" : ""));
+	        }
+	        return sb.toString();
+	    }
 	
 	public Object getLastElement(final Collection c) {
 	    final Iterator itr = c.iterator();
