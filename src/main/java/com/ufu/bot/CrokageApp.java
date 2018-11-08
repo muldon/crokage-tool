@@ -19,6 +19,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -59,6 +60,8 @@ import com.ufu.crokage.to.UserEvaluation;
 import com.ufu.crokage.util.CrokageUtils;
 import com.ufu.crokage.util.IDFCalc;
 import com.ufu.crokage.util.IndexLucene;
+
+import antlr.collections.impl.LList;
 
 @Component
 @SuppressWarnings("unused")
@@ -295,6 +298,7 @@ public class CrokageApp {
 	private Map<Integer,Set<String>> nlp2ApiQueriesApisMap;
 	private Map<String,Set<Integer>> bigMapApisAnswersIds;
 	private Map<String,Set<Integer>> filteredSortedMapAnswersIds;
+	private Map<String,Set<Integer>> groundTruthSelectedQueriesAnswersIdsMap;
 	private Map<String,double[]> soContentWordVectorsMap;
 	private Map<String,Double> soIDFVocabularyMap;
 	private Map<String,Double> queryIDFVectorsMap;
@@ -331,6 +335,7 @@ public class CrokageApp {
 		allWordsSetForBuckets = new HashSet<>();
 		methodsCounterMap = new HashMap<>();
 		classesCounterMap = new HashMap<>();
+		groundTruthSelectedQueriesAnswersIdsMap = new LinkedHashMap<>();
 		
 		processedQueries = new ArrayList<>();
 		
@@ -368,7 +373,7 @@ public class CrokageApp {
 			break;
 		
 		case "readGroundTruthSelectedQueries":
-			readGroundTruthSelectedQueries();
+			loadGroundTruthSelectedQueries();
 			break;	
 			
 		case "buildMatrixForKappaBeforeAgreement":
@@ -406,7 +411,6 @@ public class CrokageApp {
 		case "crawlBingForRelatedQuestionsIdsDatasetBIKER":
 			crawlBingForRelatedQuestionsIdsDatasetBIKER();
 			break;	
-		
 			
 				
 		case "processBingResultsToStandardFormat":
@@ -495,6 +499,11 @@ public class CrokageApp {
 			generateInputQueriesFromExcelGroudTruth();
 			break;
 		
+				
+		case "getApisForApproaches":
+			getApisForApproaches();
+			break;
+			
 		case "extractAPIsFromRACK":
 			extractAPIsFromRACK();
 			break;
@@ -531,9 +540,11 @@ public class CrokageApp {
 	
 
 
-	private void readGroundTruthSelectedQueries() {
+	private void loadGroundTruthSelectedQueries() throws Exception {
 		List<UserEvaluation> evaluationsWithBothUsersScales = new ArrayList<>();
 		crokageUtils.readGroundTruthFile(evaluationsWithBothUsersScales,QUERIES_AND_SO_ANSWERS_AGREEMENT,4,5);
+		logger.info("Number of analyzed posts: "+evaluationsWithBothUsersScales.size());
+		
 		List<UserEvaluation> validEvaluations = new ArrayList<>();
 		for(UserEvaluation userEvaluation:evaluationsWithBothUsersScales) {
 			int likert1 = userEvaluation.getLikertScaleUser1();
@@ -552,14 +563,25 @@ public class CrokageApp {
 			if(meanLikert>=4) { 
 				validEvaluations.add(userEvaluation);
 			}
-			//parei aqui
 		}
 		
+		logger.info("Number of posts containing correct answers: "+validEvaluations.size());
 		
+		//Map<String,Set<Integer>> goldSet = new LinkedHashMap<>();
+		queries = readInputQueries(); //selectedQueries
 		
+		for(String query: queries) {
+			
+			Map<String,Set<Integer>> strIdsMap = validEvaluations.stream()
+					.filter(e -> Objects.equals(e.getQuery(), query))
+					.collect(Collectors.groupingBy(e -> new String(e.getQuery()),
+			         	     Collectors.mapping(UserEvaluation::getPostId, Collectors.toSet())));
+					
+							
+			groundTruthSelectedQueriesAnswersIdsMap.putAll(strIdsMap);		
+			
+		}
 	}
-
-
 
 
 	private void processBingResultsToStandardFormat() throws IOException {
@@ -1283,6 +1305,12 @@ public class CrokageApp {
 
 	
 	private void runApproach() throws Exception {
+		//load input queries considering dataset
+		processInputQueries();
+		
+		//load ground truth
+		loadGroundTruthSelectedQueries();
+		
 		if(iHaveALotOfMemory) { //load all word vectors only once
 			readSoContentWordVectorsForAllWords();
 		}
@@ -1292,9 +1320,6 @@ public class CrokageApp {
 		
 		//load so content word vectors to a list of strings representing posts (each line is a post)
 		readSOContentWordAndVectorsLines();
-		
-		//load input queries considering dataset
-		processInputQueries();
 		
 		//load apis considering approaches
 		getApisForApproaches();
@@ -1324,6 +1349,8 @@ public class CrokageApp {
 		String rawQuery;
 		Set<Integer> candidateQuestionsIds=null;
 		Set<Integer> topKRelevantQuestionsIds=null;
+		
+		Map<String, Set<Integer>> recommendedResults = new LinkedHashMap<>();
 		
 		for(Integer key: keys) {  //for each query 
 			long initTime = System.currentTimeMillis();
@@ -1357,9 +1384,24 @@ public class CrokageApp {
 			
 			Set<Integer> topKRelevantAnswersIds = getTopKRelevantAnswers(candidateAnswersIds,bikerTopMethods,matrix1,idf1,key,processedQuery,topClasses);
 		
+			recommendedResults.put(rawQuery, topKRelevantAnswersIds);
+			
 			crokageUtils.reportElapsedTime(initTime,"total time spent for query "+key);
 			
 		}
+		
+		
+		/*List<Integer> ks = new ArrayList<>();
+		ks.add(10); ks.add(5); ks.add(1);
+		MetricResult metricResult = new MetricResult();
+		for(int k: ks) {
+			numberOfAPIClasses = k;
+			crokageUtils.reduceSet(goldSetQueriesApis,k);
+			crokageUtils.reduceSet(recommendedApis, k);
+			analyzeResults(recommendedApis,goldSetQueriesApis,metricResult);
+		}*/
+		
+		
 	}
 
 	
@@ -2948,6 +2990,82 @@ public class CrokageApp {
 	}
 
 
+	public void analyzeResultsV2(Map<String, Set<Integer>> recommended,Map<String, Set<Integer>> goldSet, MetricResult metricResult) {
+		int hitK = 0;
+		int correct_sum = 0;
+		double rrank_sum = 0;
+		double precision_sum = 0;
+		double preck_sum = 0;
+		double recall_sum = 0;
+		double fmeasure_sum = 0;
+		
+		int k = numberOfAPIClasses;
+		
+		try {
+			
+			for (String keyQuery : goldSet.keySet()) {
+				
+				ArrayList<Integer> rapis = new ArrayList<>(recommended.get(keyQuery));
+				ArrayList<Integer> gapis = new ArrayList<>(goldSet.get(keyQuery));
+			
+				
+				hitK = hitK + isFound_K(rapis, gapis);
+				rrank_sum = rrank_sum + getRRankV2(rapis, gapis);
+				double preck = 0;
+				preck = getAvgPrecisionKV2(rapis, gapis);
+				preck_sum = preck_sum + preck;
+				double recall = 0;
+				recall = getRecallKV2(rapis, gapis);
+				recall_sum = recall_sum + recall;
+				//System.out.println(hitK);
+				/*if(keyQuery==308) {
+					System.out.println();
+				}*/
+				//System.out.println("query="+keyQuery+" -hitk="+hitK+" -rrank_sum:"+rrank_sum+" -preck:"+preck+ " -recall:"+recall );
+			}
+
+			double hit_k= CrokageUtils.round((double) hitK / goldSet.size(),4);
+			double mrr = CrokageUtils.round(rrank_sum / goldSet.size(),4);
+			double map = CrokageUtils.round(preck_sum / goldSet.size(),4);
+			double mr = CrokageUtils.round(recall_sum / goldSet.size(),4);
+			
+			if(metricResult!=null) {
+				if(k==10) {
+					metricResult.setHitK10(""+hit_k);
+					metricResult.setMrrK10(""+mrr);
+					metricResult.setMapK10(""+map);
+					metricResult.setMrK10(""+mr);
+				}else if(k==5) {
+					metricResult.setHitK5(""+hit_k);
+					metricResult.setMrrK5(""+mrr);
+					metricResult.setMapK5(""+map);
+					metricResult.setMrK5(""+mr);
+				}else {
+					metricResult.setHitK1(""+hit_k);
+					metricResult.setMrrK1(""+mrr);
+					metricResult.setMapK1(""+map);
+					metricResult.setMrK1(""+mr);
+				}
+			}
+			
+			
+			System.out.println("Results: \n"
+					+"\nHit@" + k + ": " + hit_k
+					+ "\nMRR@" + k + ": " + mrr
+					+ "\nMAP@" + k + ": " + map
+					+ "\nMR@" + k + ": " + mr
+					+ "");
+			
+			
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+	}
+
+
+	
 
 
 
@@ -3070,6 +3188,17 @@ public class CrokageApp {
 		return found;
 	}
 	
+	private int isFound_K(ArrayList<Integer> recommendedIds, ArrayList<Integer> goldSetIds) {
+		int found = 0;
+		outer: for (int i = 0; i < recommendedIds.size(); i++) {
+			Integer id = recommendedIds.get(i);
+			if(goldSetIds.contains(id)) {
+				found = 1;
+				break outer;
+			}
+		}
+		return found;
+	}
 
 	/*protected int isApiFound_K(List<String> rapis, ArrayList<String> gapis, int K) {
 		// check if correct API is found
@@ -3122,12 +3251,28 @@ public class CrokageApp {
 		return false;
 	}
 	
+	protected boolean isFound(Integer id, List<Integer> goldSetIds) {
+		return goldSetIds.contains(id);
+	}
+	
 	
 	protected double getRRank(List<String> rapis, ArrayList<String> gapis) {
 		double rrank = 0;
 		for (int i = 0; i < rapis.size(); i++) {
 			String api = rapis.get(i);
 			if (isApiFound(api, gapis)) {
+				rrank = 1.0 / (i + 1);
+				break;
+			}
+		}
+		return rrank;
+	}
+	
+	protected double getRRankV2(List<Integer> recommendedIds, ArrayList<Integer> goldSetIds) {
+		double rrank = 0;
+		for (int i = 0; i < recommendedIds.size(); i++) {
+			Integer id = recommendedIds.get(i);
+			if (goldSetIds.contains(id)) {
 				rrank = 1.0 / (i + 1);
 				break;
 			}
@@ -3152,6 +3297,22 @@ public class CrokageApp {
 
 		return linePrec / found;
 	}
+	
+	protected double getAvgPrecisionKV2(List<Integer> recommendedIds, ArrayList<Integer> goldSetIds) {
+		double linePrec = 0;
+		double found = 0;
+		for (int index = 0; index < recommendedIds.size(); index++) {
+			Integer id = recommendedIds.get(index);
+			if (goldSetIds.contains(id)) {
+				found++;
+				linePrec += (found / (index + 1));
+			}
+		}
+		if (found == 0)
+			return 0;
+
+		return linePrec / found;
+	}
 
 	protected double getRecallK(List<String> rapis, ArrayList<String> gapis) {
 		// getting recall at K
@@ -3163,6 +3324,18 @@ public class CrokageApp {
 			}
 		}
 		return found / gapis.size();
+	}
+	
+	protected double getRecallKV2(List<Integer> recommendedIds, ArrayList<Integer> goldSetIds) {
+		// getting recall at K
+		double found = 0;
+		for (int index = 0; index < recommendedIds.size(); index++) {
+			Integer id = recommendedIds.get(index);
+			if (goldSetIds.contains(id)) {
+				found++;
+			}
+		}
+		return found / goldSetIds.size();
 	}
 
 

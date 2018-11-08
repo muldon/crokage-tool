@@ -1362,27 +1362,34 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 			while (iterator.hasNext()) {
 				Row currentRow = iterator.next();
 				Cell currentCellColumnA = currentRow.getCell(0);
-				Cell currentCellColumnC = currentRow.getCell(firstColumn);
-				Cell currentCellColumnD = currentRow.getCell(secondColumn);
+				Cell currentCellColumnB = currentRow.getCell(1);
+				Cell firstEvaluationCell = currentRow.getCell(firstColumn);
+				Cell secondEvaluationCell = currentRow.getCell(secondColumn);
 				
-				if(currentCellColumnA!=null && currentCellColumnC==null) {
+				
+				if(currentCellColumnA!=null && firstEvaluationCell==null) {
 					
 					String currentAValue = currentCellColumnA.getStringCellValue();
 					query = currentAValue.trim();
 				
 				}else {
-					if (currentCellColumnC != null && currentCellColumnC.getCellTypeEnum() == CellType.NUMERIC
-						&& currentCellColumnD != null && currentCellColumnD.getCellTypeEnum() == CellType.NUMERIC) {
+					if (firstEvaluationCell != null && firstEvaluationCell.getCellTypeEnum() == CellType.NUMERIC
+						&& secondEvaluationCell != null && secondEvaluationCell.getCellTypeEnum() == CellType.NUMERIC) {
 						
-						Integer currentCValue = (int) (currentCellColumnC.getNumericCellValue());
-						Integer currentDValue = (int) (currentCellColumnD.getNumericCellValue());
+						String currentBValue = (String) (currentCellColumnB.getStringCellValue());
+						Integer currentFirstEvalValue = (int) (firstEvaluationCell.getNumericCellValue());
+						Integer currentSecondEvalValue = (int) (secondEvaluationCell.getNumericCellValue());
+						
 						//System.out.println("Scales: " + currentBValue + " - " + currentCValue);
-	
+						Integer postId = identifyQuestionIdFromUrl(currentBValue);
+						
 						UserEvaluation eval = new UserEvaluation();
 						eval.setExternalQuestionId(++externalQuestionId);
-						eval.setLikertScaleUser1(currentCValue);
-						eval.setLikertScaleUser2(currentDValue);
+						eval.setLikertScaleUser1(currentFirstEvalValue);
+						eval.setLikertScaleUser2(currentSecondEvalValue);
 						eval.setQuery(query);
+						eval.setPostId(postId);
+						
 						evaluationsWithBothUsersScales.add(eval);
 					}
 				
