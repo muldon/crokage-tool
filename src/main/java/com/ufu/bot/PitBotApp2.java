@@ -58,7 +58,7 @@ public class PitBotApp2 {
 	private PitSurveyService pitSurveyService;
 	
 	@Autowired
-	private BotUtils botUtils;
+	public BotUtils botUtils;
 	
 		
 	@Autowired
@@ -468,12 +468,12 @@ public class PitBotApp2 {
 		}else if(section==2) { //Use previous xlsx spreedShed to build a matrix of values for the scales - before agreement 
 			List<Evaluation> evaluationsWithBothUsersScales = new ArrayList<>();
 			botUtils.readXlsxToEvaluationList(evaluationsWithBothUsersScales,fileName,likertsResearcher1BeforeAgreementColumn,likertsResearcher2BeforeAgreementColumn);
-			botUtils.buildMatrixForKappa(this, evaluationsWithBothUsersScales,fileNameMatrixKappaBeforeAgreement); 
+			botUtils.buildMatrixForKappa(evaluationsWithBothUsersScales, fileNameMatrixKappaBeforeAgreement); 
 		
 		}else if(section==3) { //Use previous xlsx spreedShed to build a matrix of values for the scales - after agreement
 			List<Evaluation> evaluationsWithBothUsersScales = new ArrayList<>();
 			botUtils.readXlsxToEvaluationList(evaluationsWithBothUsersScales,fileName,likertsResearcher1AfterAgreementColumn,likertsResearcher2AfterAgreementColumn);
-			botUtils.buildMatrixForKappa(this, evaluationsWithBothUsersScales,fileNameMatrixKappaAfterAgreement);
+			botUtils.buildMatrixForKappa(evaluationsWithBothUsersScales, fileNameMatrixKappaAfterAgreement);
 		
 		}
 		
@@ -1515,20 +1515,6 @@ public class PitBotApp2 {
 				
 		tmpList = null;
 	}*/
-
-	
-	public int getCellNumber(int i, int j, List<Evaluation> allEvaluations) {
-		int sum=0;
-		for(Evaluation evaluation: allEvaluations) {
-			if(evaluation.getLikertScaleUser1()==i && evaluation.getLikertScaleUser2()==j) {
-				sum+=1;				
-			}
-			
-			
-		}
-		
-		return sum;
-	}
 
 
 	

@@ -58,7 +58,6 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
-import com.ufu.bot.PitBotApp2;
 import com.ufu.bot.repository.GenericRepository;
 import com.ufu.bot.to.BucketOld;
 import com.ufu.bot.to.Evaluation;
@@ -1263,7 +1262,7 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 	}
 
 
-	public void buildMatrixForKappa(PitBotApp2 pitBotApp2, List<Evaluation> evaluationsWithBothUsersScales, String fileNameGeneratedMatrix) throws IOException {
+	public void buildMatrixForKappa(List<Evaluation> evaluationsWithBothUsersScales, String fileNameGeneratedMatrix) throws IOException {
 		BufferedWriter bw =null;
 		try {
 		
@@ -1277,7 +1276,7 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 				bw.write("\n;"+(i+1)+";");
 				for(int j=0; j<5; j++) {
 					//System.out.println(cells[i][j]);
-					cells[i][j] = pitBotApp2.getCellNumber(i+1,j+1,evaluationsWithBothUsersScales);
+					cells[i][j] = getCellNumber(i+1,j+1,evaluationsWithBothUsersScales);
 					//System.out.println("cell "+i+"-"+j+"= "+cells[i][j]);
 					bw.write(cells[i][j]+";");
 				}
@@ -1292,6 +1291,20 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 			bw.close();
 		}
 		
+	}
+
+
+	public int getCellNumber(int i, int j, List<Evaluation> allEvaluations) {
+		int sum=0;
+		for(Evaluation evaluation: allEvaluations) {
+			if(evaluation.getLikertScaleUser1()==i && evaluation.getLikertScaleUser2()==j) {
+				sum+=1;				
+			}
+			
+			
+		}
+		
+		return sum;
 	}
 
 

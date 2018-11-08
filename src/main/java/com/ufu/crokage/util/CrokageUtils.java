@@ -5,6 +5,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -70,7 +71,6 @@ import org.springframework.stereotype.Component;
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import com.ufu.bot.PitBotApp2;
-import com.ufu.bot.config.CrokageStaticDataOld;
 import com.ufu.bot.repository.GenericRepository;
 import com.ufu.bot.to.Evaluation;
 import com.ufu.bot.to.ExternalQuestion;
@@ -1288,7 +1288,115 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 	}
 	
 	
+	public void buildFileForAgreementPhaseHighlightingDifferences(String evaluationsFileBeforeAgreement, String agreementFile) {
+		try {
+			FileInputStream excelFile = new FileInputStream(new File(evaluationsFileBeforeAgreement));
+			Workbook workbook = new XSSFWorkbook(excelFile);
+			Sheet datatypeSheet = workbook.getSheetAt(0);
+			Iterator<Row> iterator = datatypeSheet.iterator();
+			iterator.next();
+			
+			Integer externalQuestionId=0;
+			String query=null;
+			while (iterator.hasNext()) {
+				Row currentRow = iterator.next();
+				Cell currentCellColumnA = currentRow.getCell(0);
+				Cell currentCellColumnC = currentRow.getCell(2);
+				Cell currentCellColumnD = currentRow.getCell(3);
+				
+				if(currentCellColumnA!=null && currentCellColumnC==null) {
+					
+					String currentAValue = currentCellColumnA.getStringCellValue();
+					query = currentAValue.trim();
+				
+				}else {
+					if (currentCellColumnC != null && currentCellColumnC.getCellTypeEnum() == CellType.NUMERIC
+						&& currentCellColumnD != null && currentCellColumnD.getCellTypeEnum() == CellType.NUMERIC) {
+						
+						Integer currentCValue = (int) (currentCellColumnC.getNumericCellValue());
+						Integer currentDValue = (int) (currentCellColumnD.getNumericCellValue());
+						//System.out.println("Scales: " + currentBValue + " - " + currentCValue);
+	
+						Cell cellE = currentRow.createCell(4);
+						Cell cellF = currentRow.createCell(5);
+						
+						int diff = Math.abs(currentCValue - currentDValue);
+						if(diff>1 && ((currentCValue>3) || (currentDValue>3)) ) {
+							cellE.setCellValue("XXX");
+							cellF.setCellValue("XXX");
+						}else {
+							cellE.setCellValue(currentCValue);
+							cellF.setCellValue(currentDValue);
+						}
+						
+						
+					}
+				
+				}
+			}
+				
+			FileOutputStream outputStream = new FileOutputStream(agreementFile);
+	        workbook.write(outputStream);
+	        workbook.close();
+			
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+	}
+	
 
+	public void readGroundTruthFile(List<UserEvaluation> evaluationsWithBothUsersScales, String fileName, Integer firstColumn, Integer secondColumn) {
+		try {
+			
+			FileInputStream excelFile = new FileInputStream(new File(fileName));
+			Workbook workbook = new XSSFWorkbook(excelFile);
+			Sheet datatypeSheet = workbook.getSheetAt(0);
+			Iterator<Row> iterator = datatypeSheet.iterator();
+			iterator.next();
+			
+			Integer externalQuestionId=0;
+			String query=null;
+			while (iterator.hasNext()) {
+				Row currentRow = iterator.next();
+				Cell currentCellColumnA = currentRow.getCell(0);
+				Cell currentCellColumnC = currentRow.getCell(firstColumn);
+				Cell currentCellColumnD = currentRow.getCell(secondColumn);
+				
+				if(currentCellColumnA!=null && currentCellColumnC==null) {
+					
+					String currentAValue = currentCellColumnA.getStringCellValue();
+					query = currentAValue.trim();
+				
+				}else {
+					if (currentCellColumnC != null && currentCellColumnC.getCellTypeEnum() == CellType.NUMERIC
+						&& currentCellColumnD != null && currentCellColumnD.getCellTypeEnum() == CellType.NUMERIC) {
+						
+						Integer currentCValue = (int) (currentCellColumnC.getNumericCellValue());
+						Integer currentDValue = (int) (currentCellColumnD.getNumericCellValue());
+						//System.out.println("Scales: " + currentBValue + " - " + currentCValue);
+	
+						UserEvaluation eval = new UserEvaluation();
+						eval.setExternalQuestionId(++externalQuestionId);
+						eval.setLikertScaleUser1(currentCValue);
+						eval.setLikertScaleUser2(currentDValue);
+						eval.setQuery(query);
+						evaluationsWithBothUsersScales.add(eval);
+					}
+				
+				}
+			}
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+	}
+	
+	
 	
 	public void readXlsxToEvaluationList(List<UserEvaluation> evaluationsWithBothUsersScales, String fileName, Integer firstColumn, Integer secondColumn, List<String> queries) {
 		try {
@@ -1365,7 +1473,7 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 				bw.write("\n;"+(i+1)+";");
 				for(int j=0; j<5; j++) {
 					//System.out.println(cells[i][j]);
-					cells[i][j] = pitBotApp2.getCellNumber(i+1,j+1,evaluationsWithBothUsersScales);
+					cells[i][j] = pitBotApp2.botUtils.getCellNumber(i+1,j+1,evaluationsWithBothUsersScales);
 					//System.out.println("cell "+i+"-"+j+"= "+cells[i][j]);
 					bw.write(cells[i][j]+";");
 				}
@@ -1380,6 +1488,51 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 			bw.close();
 		}
 		
+	}
+	
+	public void buildMatrixForKappa(List<UserEvaluation> evaluationsWithBothUsersScales, String fileNameGeneratedMatrix) throws IOException {
+		BufferedWriter bw =null;
+		try {
+		
+			bw = new BufferedWriter(new FileWriter(fileNameGeneratedMatrix));
+			bw.write(";;1;2;3;4;5");
+			
+			//Matrix map
+			int[] cells[] = new int[5][5];
+			
+			for(int i=0; i<5; i++) {
+				bw.write("\n;"+(i+1)+";");
+				for(int j=0; j<5; j++) {
+					//System.out.println(cells[i][j]);
+					cells[i][j] = getCellNumber(i+1,j+1,evaluationsWithBothUsersScales);
+					//System.out.println("cell "+i+"-"+j+"= "+cells[i][j]);
+					bw.write(cells[i][j]+";");
+				}
+			}
+			
+			
+			
+		
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			bw.close();
+		}
+		
+	}
+
+
+	public int getCellNumber(int i, int j, List<UserEvaluation> allEvaluations) {
+		int sum=0;
+		for(UserEvaluation evaluation: allEvaluations) {
+			if(evaluation.getLikertScaleUser1()==i && evaluation.getLikertScaleUser2()==j) {
+				sum+=1;				
+			}
+			
+			
+		}
+		
+		return sum;
 	}
 
 
@@ -1875,6 +2028,10 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 		}
 		
 	}
+
+	
+
+	
 	
 	
 }

@@ -47,6 +47,7 @@ import com.ufu.bot.service.CrokageService;
 import com.ufu.bot.tfidf.TFIDFCalculator;
 import com.ufu.bot.to.Bucket;
 import com.ufu.bot.to.BucketOld;
+import com.ufu.bot.to.Evaluation;
 import com.ufu.bot.to.Post;
 import com.ufu.bot.util.BingWebSearch;
 import com.ufu.bot.util.BotComposer;
@@ -181,9 +182,12 @@ public class CrokageApp {
 	@Value("${ALL_QUESTIONS_EXCEPTIONS_FOR_NLP2API}")
 	public String ALL_QUESTIONS_EXCEPTIONS_FOR_NLP2API;
 	
-	@Value("${QUERIES_AND_SO_QUESTIONS_TO_EVALUATE}")
-	public String QUERIES_AND_SO_QUESTIONS_TO_EVALUATE;
+	@Value("${QUERIES_AND_SO_ANSWERS_TO_EVALUATE}")
+	public String QUERIES_AND_SO_ANSWERS_TO_EVALUATE;
 	
+	@Value("${QUERIES_AND_SO_ANSWERS_AGREEMENT}")
+	public String QUERIES_AND_SO_ANSWERS_AGREEMENT;
+		
 	@Value("${NLP2API_GOLD_SET_FILE}")
 	public String NLP2API_GOLD_SET_FILE;
 	
@@ -221,7 +225,11 @@ public class CrokageApp {
 	@Value("${NLP2API_OUTPUT_QUERIES_FILE}")
 	public String NLP2API_OUTPUT_QUERIES_FILE;
 	
+	@Value("${MATRIX_KAPPA_BEFORE_AGREEMENT}")
+	public String MATRIX_KAPPA_BEFORE_AGREEMENT;
 	
+	@Value("${MATRIX_KAPPA_AFTER_AGREEMENT}")
+	public String MATRIX_KAPPA_AFTER_AGREEMENT;
 	
 	
 	@Value("${action}")
@@ -358,6 +366,22 @@ public class CrokageApp {
 		case "runApproach":
 			runApproach();
 			break;
+		
+		case "readGroundTruthSelectedQueries":
+			readGroundTruthSelectedQueries();
+			break;	
+			
+		case "buildMatrixForKappaBeforeAgreement":
+			buildMatrixForKappaBeforeAgreement();
+			break;	
+				
+		case "buildFileForAgreementPhaseHighlightingDifferences":
+			buildFileForAgreementPhaseHighlightingDifferences();
+			break;		
+			
+		case "buildMatrixForKappaAfterAgreement":
+			buildMatrixForKappaAfterAgreement();
+			break;		
 			
 		case "processCrawledQuestionsIDsAndBuilExcelFileForEvaluation":
 			processCrawledQuestionsIDsAndBuilExcelFileForEvaluation();
@@ -507,22 +531,33 @@ public class CrokageApp {
 	
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+	private void readGroundTruthSelectedQueries() {
+		List<UserEvaluation> evaluationsWithBothUsersScales = new ArrayList<>();
+		crokageUtils.readGroundTruthFile(evaluationsWithBothUsersScales,QUERIES_AND_SO_ANSWERS_AGREEMENT,4,5);
+		List<UserEvaluation> validEvaluations = new ArrayList<>();
+		for(UserEvaluation userEvaluation:evaluationsWithBothUsersScales) {
+			int likert1 = userEvaluation.getLikertScaleUser1();
+			int likert2 = userEvaluation.getLikertScaleUser2();
+			
+			int diff = Math.abs(likert1 - likert2);
+			if(diff>1) {
+				continue;
+			}
+			
+			double meanFull = (likert1+likert2)/(double)2;
+			double meanLikert=0d;
+			meanLikert = BotUtils.round(meanFull,2);
+			userEvaluation.setMeanLikert(meanLikert);
+			
+			if(meanLikert>=4) { 
+				validEvaluations.add(userEvaluation);
+			}
+			//parei aqui
+		}
+		
+		
+		
+	}
 
 
 
@@ -680,7 +715,7 @@ public class CrokageApp {
 		crokageUtils.writeStringContentToFile(lines.toString(), ALL_QUESTIONS_EXCEPTIONS_FOR_NLP2API);
 	
 		//build an excel file 
-		crokageUtils.buildCsvQuestionsForEvaluation(QUERIES_AND_SO_QUESTIONS_TO_EVALUATE,allQueriesAndUpVotedCodedAnswersMap);
+		crokageUtils.buildCsvQuestionsForEvaluation(QUERIES_AND_SO_ANSWERS_TO_EVALUATE+".csv",allQueriesAndUpVotedCodedAnswersMap);
 		
 		
 	}
@@ -1320,7 +1355,7 @@ public class CrokageApp {
 			
 			Set<Integer> candidateAnswersIds = getCandidateAnswersIds(topKRelevantQuestionsIds);
 			
-			List<Bucket> topKRelevantAnswers = getTopKRelevantAnswers(candidateAnswersIds,bikerTopMethods,matrix1,idf1,key,processedQuery,topClasses);
+			Set<Integer> topKRelevantAnswersIds = getTopKRelevantAnswers(candidateAnswersIds,bikerTopMethods,matrix1,idf1,key,processedQuery,topClasses);
 		
 			crokageUtils.reportElapsedTime(initTime,"total time spent for query "+key);
 			
@@ -1398,7 +1433,7 @@ public class CrokageApp {
 
 
 
-	private List<Bucket> getTopKRelevantAnswers(Set<Integer> candidateAnswersIds, List<String> topMethods, double[][] matrix1, double[][] idf1, Integer key, String query, Set<String> topClasses) throws IOException {
+	private Set<Integer> getTopKRelevantAnswers(Set<Integer> candidateAnswersIds, List<String> topMethods, double[][] matrix1, double[][] idf1, Integer key, String query, Set<String> topClasses) throws IOException {
 		
 		//fetch answers fields
 		long initTime = System.currentTimeMillis();
@@ -1543,7 +1578,7 @@ public class CrokageApp {
 			}
 		}
 		*/
-		return answerBuckets;
+		return candidateAnswersIds;
 	}
 
 
@@ -2429,16 +2464,13 @@ public class CrokageApp {
 	
 		}else if(dataSet.equals("nlp2api")) {
 			getQueriesAndApisFromFileMayContainDupes(goldSetQueriesApis,NLP2API_GOLD_SET_FILE);
+		
 		}
+		
+		
 		
 		return goldSetQueriesApis;
 	}
-
-
-
-
-
-
 
 
 
@@ -3134,8 +3166,34 @@ public class CrokageApp {
 	}
 
 
+	private void buildMatrixForKappaAfterAgreement() throws IOException {
+		List<UserEvaluation> evaluationsWithBothUsersScales = new ArrayList<>();
+		crokageUtils.readGroundTruthFile(evaluationsWithBothUsersScales,QUERIES_AND_SO_ANSWERS_AGREEMENT,4,5);
+		crokageUtils.buildMatrixForKappa(evaluationsWithBothUsersScales, MATRIX_KAPPA_AFTER_AGREEMENT);
+		
+	}
 
-	private void reportTest(String msg, Set<Integer> candidateQuestionsIds, Integer key) {
+
+
+
+
+	private void buildMatrixForKappaBeforeAgreement() throws IOException {
+		List<UserEvaluation> evaluationsWithBothUsersScales = new ArrayList<>();
+		crokageUtils.readGroundTruthFile(evaluationsWithBothUsersScales,QUERIES_AND_SO_ANSWERS_TO_EVALUATE+".xlsx",2,3);
+		crokageUtils.buildMatrixForKappa(evaluationsWithBothUsersScales, MATRIX_KAPPA_BEFORE_AGREEMENT);
+		
+	}
+
+
+
+	private void buildFileForAgreementPhaseHighlightingDifferences() {
+		crokageUtils.buildFileForAgreementPhaseHighlightingDifferences(QUERIES_AND_SO_ANSWERS_TO_EVALUATE+".xlsx",QUERIES_AND_SO_ANSWERS_AGREEMENT);
+		
+	}
+
+
+
+	/*private void reportTest(String msg, Set<Integer> candidateQuestionsIds, Integer key) {
 		if(key==1) {
 			if(candidateQuestionsIds.contains(7384908)) {
 				System.out.println(msg);
@@ -3160,6 +3218,6 @@ public class CrokageApp {
 		}
 		
 	}
-
+*/
 
 }
