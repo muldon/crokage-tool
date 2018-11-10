@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -13,8 +14,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.ufu.bot.to.Bucket;
 import com.ufu.bot.to.BucketOld;
 import com.ufu.bot.to.RelatedPost.RelationTypeEnum;
+import com.ufu.crokage.util.CrokageUtils;
 
 @Component
 public class BotComposer {
@@ -49,6 +52,14 @@ public class BotComposer {
 	
 	@Value("${relationType_RELATED_DUPE}")
 	public Double relationTypeRelatedDupe; 
+	
+	
+	public static double classFreqWeight;
+	public static double methodFreqWeight;
+	public static double repWeight;
+	public static double simWeight;
+	public static double upWeight;
+
 	
 	
 	
@@ -351,6 +362,109 @@ public class BotComposer {
 		}
 		return getDotProduct(query, weights2) / (getMagnitude(query) * getMagnitude(weights2));
 	}
+
+
+	
+	
+	public static double calculateScoreForPresentClasses(String code, Set<String> topClasses) {
+		
+		double i = 0;
+		for (String topClass : topClasses) {
+			if (code.contains(topClass)) {
+				return 1 - i;
+			}
+			i += 0.1;
+		}
+
+		return 0;
+	}
+	
+
+	public static double calculateScoreForCommonMethods(String code, Map<String, Integer> methodsCounterMap) {
+		for(String topMethod:methodsCounterMap.keySet()) {
+			if(code.contains(topMethod)) {
+				int topMethodFrequency = methodsCounterMap.get(topMethod);
+				double score = CrokageUtils.log2(topMethodFrequency)/10;
+				return score;
+			}
+		}
+		return 0;
+	}
+
+
+	public static double calculateFinalScore(double simPair, Set<String> topClasses, Bucket bucket,	Map<String, Integer> methodsCounterMap) {
+		double finalScore;
+		
+		double classFreqScore = calculateScoreForPresentClasses(bucket.getCode(),topClasses);
+		
+		double methodFreqScore = calculateScoreForCommonMethods(bucket.getCode(),methodsCounterMap);
+		
+		//pontuar substring comum entre a maoiria dos códigos ?
+		
+		/*double codeScore = BotComposer.calculateCodeSizeScore(CrokageUtils.getPreCodes(bucket.getBody()));
+		
+		simPair+= codeScore;*/
+		
+		double repScore = calculateRepScore(bucket.getUserReputation());
+	
+		double upScore = calculateUpScore(bucket.getUpVotesScore());
+		
+		finalScore = simPair*simWeight + classFreqScore*classFreqWeight + repScore*repWeight + upScore*upWeight + methodFreqScore*methodFreqWeight;
+		
+		return finalScore;
+		
+	}
+
+
+	public static double getClassFreqWeight() {
+		return classFreqWeight;
+	}
+
+
+	public static void setClassFreqWeight(double classFreqWeight) {
+		BotComposer.classFreqWeight = classFreqWeight;
+	}
+
+
+	public static double getMethodFreqWeight() {
+		return methodFreqWeight;
+	}
+
+
+	public static void setMethodFreqWeight(double methodFreqWeight) {
+		BotComposer.methodFreqWeight = methodFreqWeight;
+	}
+
+
+	public static double getRepWeight() {
+		return repWeight;
+	}
+
+
+	public static void setRepWeight(double repWeight) {
+		BotComposer.repWeight = repWeight;
+	}
+
+
+	public static double getSimWeight() {
+		return simWeight;
+	}
+
+
+	public static void setSimWeight(double simWeight) {
+		BotComposer.simWeight = simWeight;
+	}
+
+
+	public static double getUpWeight() {
+		return upWeight;
+	}
+
+
+	public static void setUpWeight(double upWeight) {
+		BotComposer.upWeight = upWeight;
+	}
+	
 	
 	
 	

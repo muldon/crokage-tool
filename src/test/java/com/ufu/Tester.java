@@ -692,5 +692,17 @@ public class Tester {
 	}
 	
 	
+	/*protected double getRecallK(ArrayList<String> recommended, ArrayList<String> goldSet, int K) {
+		K = recommended.size() < K ? recommended.size() : K;
+		double found = 0;
+		for (int index = 0; index < K; index++) {
+			String id = recommended.get(index);
+			if (contains(id, goldSet)) {
+					found++;
+			}
+		}
+		return found / goldSet.size();
+	}*/
+	
 	
 }

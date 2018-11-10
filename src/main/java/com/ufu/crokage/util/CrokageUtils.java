@@ -96,6 +96,9 @@ public class CrokageUtils {
 	@Value("${environment}")
 	public String environment;
 	
+	@Value("${productionEnvironment}")
+	public Boolean productionEnvironment;  
+	
 	@Value("${BIKER_HOME}")
 	public String bikerHome;
 	
@@ -276,10 +279,15 @@ public class CrokageUtils {
 	
 	
 	 public static double round(double pNumero, int pCantidadDecimales) {
-	    // the function is call with the values Redondear(625.3f, 2)
-	    BigDecimal value = new BigDecimal(pNumero);
-	    value = value.setScale(pCantidadDecimales, RoundingMode.HALF_EVEN); // here the value is correct (625.30)
-	    return value.doubleValue(); // but here the values is 625.3
+	    BigDecimal value=null;
+		try {
+			value = new BigDecimal(pNumero);
+		} catch (Exception e) {
+			System.out.println();
+		} 
+	   
+	    value = value.setScale(pCantidadDecimales, RoundingMode.HALF_EVEN); 
+	    return value.doubleValue(); 
 	}
 	
 	
@@ -1617,7 +1625,14 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 		return textNormalizer.normalizeSimpleCodeDiscardSmall();
 	}
 
-	
+	public void reduceSetV2(Map<String, Set<Integer>> goldSetQueriesApis, int k) {
+		Set<String> keys = goldSetQueriesApis.keySet();
+		for(String key: keys) {
+			Set<Integer> goldSetApis = goldSetQueriesApis.get(key);
+			setLimitV2(goldSetApis, k);
+			
+		}
+	}
 
 	public void reduceSet(Map<Integer, Set<String>> goldSetQueriesApis, int k) {
 		Set<Integer> keys = goldSetQueriesApis.keySet();
@@ -1625,8 +1640,6 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 			Set<String> goldSetApis = goldSetQueriesApis.get(key);
 			setLimit(goldSetApis, k);
 		}
-		
-		
 	}
 
 
@@ -1647,6 +1660,25 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 	    int trim = k>items.size() ? items.size() : k;
 	    set.addAll(items.subList(0,trim));
 		items = null;
+	}
+	
+	public static void setLimitV2(Set<Integer> set, int k) {
+		Set<Integer> tmp = new HashSet<>(set);
+		
+		if(k<set.size()) {
+			List<Integer> items = new ArrayList<Integer>();
+		    items.addAll(set);
+		    int trim = k>items.size() ? items.size() : k;
+		    items = items.subList(0,trim);
+			
+		    for(Integer id: tmp) {
+		    	if(!items.contains(id)) {
+		    		set.remove(id);
+		    	}
+		    }
+			
+		}
+				
 	}
 
 
@@ -1914,7 +1946,9 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 			soContentWordVectorsMap.put(parts[0], vectors);
 		}
 		//System.out.println(bigMapApisIds);
-		reportElapsedTime(initTime,"readVectorsFromSOMapForWords");
+		if(!productionEnvironment) {
+			reportElapsedTime(initTime,"readVectorsFromSOMapForWords");
+		}
 		return soContentWordVectorsMap;
 	}
 
