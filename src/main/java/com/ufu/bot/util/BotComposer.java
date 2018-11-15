@@ -59,7 +59,7 @@ public class BotComposer {
 	public static double repWeight;
 	public static double simWeight;
 	public static double upWeight;
-
+	
 	
 	
 	
@@ -393,6 +393,7 @@ public class BotComposer {
 
 
 	public static double calculateFinalScore(double simPair, Set<String> topClasses, Bucket bucket,	Map<String, Integer> methodsCounterMap) {
+		
 		double finalScore;
 		
 		double classFreqScore = calculateScoreForPresentClasses(bucket.getCode(),topClasses);
@@ -464,7 +465,8 @@ public class BotComposer {
 	public static void setUpWeight(double upWeight) {
 		BotComposer.upWeight = upWeight;
 	}
-	
+
+ 
 	
 	
 	

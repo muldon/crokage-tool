@@ -10,6 +10,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.ufu.bot.to.Bucket;
 import com.ufu.bot.to.Post;
 import com.ufu.bot.util.AbstractService;
+import com.ufu.bot.util.BotComposer;
+import com.ufu.crokage.to.MetricResult;
 
 
 @Service
@@ -65,7 +67,27 @@ public class CrokageService extends AbstractService{
 
 	
 	
-	
+
+	public void saveMetricResult(MetricResult metricResult, Boolean useCodeInSimCalculus, String obs, Integer topSimilarQuestionsNumber, Integer cutoff) {
+		metricResult.setClassFreqWeight(BotComposer.getClassFreqWeight());
+		metricResult.setMethodFreqWeight(BotComposer.getMethodFreqWeight());
+		metricResult.setRepWeight(BotComposer.getRepWeight());
+		metricResult.setSimWeight(BotComposer.getSimWeight());
+		metricResult.setUpWeight(BotComposer.getUpWeight());
+		metricResult.setUseCodeInSimCalculus(useCodeInSimCalculus);
+		metricResult.setObs(obs);
+		metricResult.setTopSimilarAnswersNumber(0);
+		metricResult.setTopSimilarQuestionsNumber(topSimilarQuestionsNumber);
+		metricResult.setCutoff(cutoff);
+		
+		metricResultRepository.save(metricResult);
+	}
+
+	public Integer getMostUpvotedAnswerForQuestion(Integer questionId) {
+		List<Integer> ids = postsRepository.MostUpvotedAnswerForQuestion(questionId);
+		return ids.isEmpty() ? null: ids.get(0);
+	}
+
 	
 	
 	

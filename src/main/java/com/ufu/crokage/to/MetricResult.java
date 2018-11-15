@@ -1,115 +1,236 @@
 package com.ufu.crokage.to;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.SequenceGenerator;
+import javax.persistence.Table;
+import javax.xml.bind.annotation.XmlRootElement;
+
+@XmlRootElement
+@Entity
+@Table(name = "metricsresults")
 public class MetricResult {
-	private String hitK10;
-	private String hitK5;
-	private String hitK1;
+	@Id
+    @SequenceGenerator(name="metricsresults_id_seq", sequenceName="metricsresults_id_seq",allocationSize=1)
+    @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="metricsresults_id_seq")
+    private Integer id;
+	@Column(name="hitk10")
+	private Double hitK10;
 	
-	private String mrrK10;
-	private String mrrK5;
-	private String mrrK1;
+	@Column(name="hitk5")
+	private Double hitK5;
 	
-	private String mapK10;
-	private String mapK5;
-	private String mapK1;
+	@Column(name="hitk1")
+	private Double hitK1;
 	
-	private String mrK10;
-	private String mrK5;
-	private String mrK1;
+	@Column(name="mrrk10")
+	private Double mrrK10;
 	
+	@Column(name="mrrk5")
+	private Double mrrK5;
 	
+	@Column(name="mrrk1")
+	private Double mrrK1;
 	
+	@Column(name="mapk10")
+	private Double mapK10;
 	
-	public MetricResult() {
-		this.hitK10 = "";
-		this.hitK5 = "";
-		this.hitK1 = "";
-		this.mrrK10 = "";
-		this.mrrK5 = "";
-		this.mrrK1 = "";
-		this.mapK10 = "";
-		this.mapK5 = "";
-		this.mapK1 = "";
-		this.mrK10 = "";
-		this.mrK5 = "";
-		this.mrK1 = "";
-	}
-	public String getHitK10() {
+	@Column(name="mapk5")
+	private Double mapK5;
+	
+	@Column(name="mapk1")
+	private Double mapK1;
+	
+	@Column(name="mrk10")
+	private Double mrK10;
+	
+	@Column(name="mrk5")
+	private Double mrK5;
+	
+	@Column(name="mrk1")
+	private Double mrK1;
+	
+	@Column(name="topsimilarquestionsnumber")
+	private Integer topSimilarQuestionsNumber;
+	
+	@Column(name="topsimilaranswersnumber")
+	private Integer topSimilarAnswersNumber;
+	
+	@Column(name="usecodeinsimcalculus")
+	private Boolean useCodeInSimCalculus;
+	
+	private Integer cutoff;
+	
+	private String obs;
+	
+	@Column(name="classfreqweight")
+	public Double classFreqWeight;
+	
+	@Column(name="methodfreqweight")
+	public Double methodFreqWeight;
+	
+	@Column(name="repweight")
+	public Double repWeight;
+	
+	@Column(name="simweight")
+	public Double simWeight;
+	
+	@Column(name="upweight")
+	public Double upWeight;
+	
+	public String approach;
+	
+	public Double getHitK10() {
 		return hitK10;
 	}
-	public void setHitK10(String hitK10) {
+	public void setHitK10(Double hitK10) {
 		this.hitK10 = hitK10;
 	}
-	public String getHitK5() {
+	public Double getHitK5() {
 		return hitK5;
 	}
-	public void setHitK5(String hitK5) {
+	public void setHitK5(Double hitK5) {
 		this.hitK5 = hitK5;
 	}
-	public String getHitK1() {
+	public Double getHitK1() {
 		return hitK1;
 	}
-	public void setHitK1(String hitK1) {
+	public void setHitK1(Double hitK1) {
 		this.hitK1 = hitK1;
 	}
-	public String getMrrK10() {
+	public Double getMrrK10() {
 		return mrrK10;
 	}
-	public void setMrrK10(String mrrK10) {
+	public void setMrrK10(Double mrrK10) {
 		this.mrrK10 = mrrK10;
 	}
-	public String getMrrK5() {
+	public Double getMrrK5() {
 		return mrrK5;
 	}
-	public void setMrrK5(String mrrK5) {
+	public void setMrrK5(Double mrrK5) {
 		this.mrrK5 = mrrK5;
 	}
-	public String getMrrK1() {
+	public Double getMrrK1() {
 		return mrrK1;
 	}
-	public void setMrrK1(String mrrK1) {
+	public void setMrrK1(Double mrrK1) {
 		this.mrrK1 = mrrK1;
 	}
-	public String getMapK10() {
+	public Double getMapK10() {
 		return mapK10;
 	}
-	public void setMapK10(String mapK10) {
+	public void setMapK10(Double mapK10) {
 		this.mapK10 = mapK10;
 	}
-	public String getMapK5() {
+	public Double getMapK5() {
 		return mapK5;
 	}
-	public void setMapK5(String mapK5) {
+	public void setMapK5(Double mapK5) {
 		this.mapK5 = mapK5;
 	}
-	public String getMapK1() {
+	public Double getMapK1() {
 		return mapK1;
 	}
-	public void setMapK1(String mapK1) {
+	public void setMapK1(Double mapK1) {
 		this.mapK1 = mapK1;
 	}
-	public String getMrK10() {
+	public Double getMrK10() {
 		return mrK10;
 	}
-	public void setMrK10(String mrK10) {
+	public void setMrK10(Double mrK10) {
 		this.mrK10 = mrK10;
 	}
-	public String getMrK5() {
+	public Double getMrK5() {
 		return mrK5;
 	}
-	public void setMrK5(String mrK5) {
+	public void setMrK5(Double mrK5) {
 		this.mrK5 = mrK5;
 	}
-	public String getMrK1() {
+	public Double getMrK1() {
 		return mrK1;
 	}
-	public void setMrK1(String mrK1) {
+	public void setMrK1(Double mrK1) {
 		this.mrK1 = mrK1;
 	}
 	@Override
 	public String toString() {
 		return " & " + hitK10 + " & " + hitK5 + " & " + hitK1 + " & " + mrrK10 + " & " + mrrK5 + " & " + mrrK1 + " & " + mapK10 + " & " + mapK5 + " & "
 				+ mapK1 + " & " + mrK10 + " & " + mrK5 + " & " + mrK1 + " \\\\";
+	}
+	public Integer getId() {
+		return id;
+	}
+	public void setId(Integer id) {
+		this.id = id;
+	}
+	public Integer getTopSimilarQuestionsNumber() {
+		return topSimilarQuestionsNumber;
+	}
+	public void setTopSimilarQuestionsNumber(Integer topSimilarQuestionsNumber) {
+		this.topSimilarQuestionsNumber = topSimilarQuestionsNumber;
+	}
+	public Integer getTopSimilarAnswersNumber() {
+		return topSimilarAnswersNumber;
+	}
+	public void setTopSimilarAnswersNumber(Integer topSimilarAnswersNumber) {
+		this.topSimilarAnswersNumber = topSimilarAnswersNumber;
+	}
+	public Boolean getUseCodeInSimCalculus() {
+		return useCodeInSimCalculus;
+	}
+	public void setUseCodeInSimCalculus(Boolean useCodeInSimCalculus) {
+		this.useCodeInSimCalculus = useCodeInSimCalculus;
+	}
+	public Integer getCutoff() {
+		return cutoff;
+	}
+	public void setCutoff(Integer cutoff) {
+		this.cutoff = cutoff;
+	}
+	public String getObs() {
+		return obs;
+	}
+	public void setObs(String obs) {
+		this.obs = obs;
+	}
+	public double getClassFreqWeight() {
+		return classFreqWeight;
+	}
+	public void setClassFreqWeight(double classFreqWeight) {
+		this.classFreqWeight = classFreqWeight;
+	}
+	public double getMethodFreqWeight() {
+		return methodFreqWeight;
+	}
+	public void setMethodFreqWeight(double methodFreqWeight) {
+		this.methodFreqWeight = methodFreqWeight;
+	}
+	public double getRepWeight() {
+		return repWeight;
+	}
+	public void setRepWeight(double repWeight) {
+		this.repWeight = repWeight;
+	}
+	public double getSimWeight() {
+		return simWeight;
+	}
+	public void setSimWeight(double simWeight) {
+		this.simWeight = simWeight;
+	}
+	public double getUpWeight() {
+		return upWeight;
+	}
+	public void setUpWeight(double upWeight) {
+		this.upWeight = upWeight;
+	}
+	public String getApproach() {
+		return approach;
+	}
+	public void setApproach(String approach) {
+		this.approach = approach;
 	}
 	
 	

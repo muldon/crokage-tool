@@ -41,6 +41,7 @@ import com.ufu.bot.to.SurveyUser;
 import com.ufu.bot.to.User;
 import com.ufu.bot.util.AbstractService;
 import com.ufu.bot.util.Matrix;
+import com.ufu.crokage.to.MetricResult;
 import com.ufu.crokage.util.CrokageUtils;
 import com.ufu.crokage.util.TextNormalizer;
 
@@ -77,7 +78,7 @@ public class BotApplicationTests extends AbstractService{
 	}
 	*/
 	
-	@Test
+	//@Test
 	public void testSoSearch(){
 		/*StackExchangeApiQueryFactory queryFactory = StackExchangeApiQueryFactory
 		        .newInstance("applicationKey", 
@@ -263,7 +264,7 @@ public class BotApplicationTests extends AbstractService{
 	
 	}
 	
-	@Test
+	//@Test
 	public void testExtractClassesFromCode() {
 		Integer answersIds[] = {910522,45960571,2900755,1053475,1911947,34959450,1921200,34959470,1928690,1928707,1928778,1969067,34959570};
 		for(Integer postId:answersIds) {
@@ -495,5 +496,23 @@ public class BotApplicationTests extends AbstractService{
 	}
 	
 	
+	@Test
+	public void saveMetric() {
+		MetricResult metricResult = new MetricResult();
+		metricResult.setHitK1(52.12);
+		metricResult.setHitK10(32.24);
+		metricResult.setHitK5(14.24);
+		metricResult.setClassFreqWeight(12.14);
+		metricResult.setCutoff(70);
+		metricResult.setObs("test");
+		metricResult.setTopSimilarAnswersNumber(200);
+		metricResult.setUpWeight(8.11);
+		metricResult.setUseCodeInSimCalculus(true);
+		metricResultRepository.save(metricResult);
+		
+		System.out.println(metricResultRepository.findAll());
+
+	}
+
 
 }

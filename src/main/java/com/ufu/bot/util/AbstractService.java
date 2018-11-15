@@ -18,6 +18,7 @@ import com.ufu.bot.repository.EvaluationRepository;
 import com.ufu.bot.repository.ExperimentRepository;
 import com.ufu.bot.repository.ExternalQuestionRepository;
 import com.ufu.bot.repository.GenericRepository;
+import com.ufu.bot.repository.MetricResultRepository;
 import com.ufu.bot.repository.PostsRepository;
 import com.ufu.bot.repository.RankRepository;
 import com.ufu.bot.repository.RelatedPostRepository;
@@ -70,6 +71,11 @@ public abstract class AbstractService {
 	
 	@Autowired
 	protected SurveyUserRepository surveyUserRepository;
+	
+	@Autowired
+	protected MetricResultRepository metricResultRepository;
+	
+	
 		
 	@Autowired
 	protected BotUtils botUtils;

@@ -54,12 +54,27 @@ import com.ufu.bot.to.BucketOld;
 import com.ufu.bot.to.Post;
 import com.ufu.bot.util.BotComposer;
 import com.ufu.bot.util.BotUtils;
+import com.ufu.crokage.util.CrokageUtils;
 import com.ufu.survey.service.PitSurveyService;
 
 public class Tester {
 
 	public Tester() throws Exception {
 		
+		String s2 = "// There is something wrong with MailCap, javamail can not find a handler for the multipart/mixed part, so this bit needs to be added. \n" + 
+				"    MailcapCommandMap mc = (MailcapCommandMap) CommandMap.getDefaultCommandMap(); \n" + 
+				"    mc.addMailcap(\"text/html;; x-java-content-handler=com.sun.mail.handlers.text_html\"); \n" + 
+				"    mc.addMailcap(\"text/xml;; x-java-content-handler=com.sun.mail.handlers.text_xml\"); \n" + 
+				"    mc.addMailcap(\"text/plain;; x-java-content-handler=com.sun.mail.handlers.text_plain\"); \n" + 
+				"    mc.addMailcap(\"multipart/*;; x-java-content-handler=com.sun.mail.handlers.multipart_mixed\"); \n" + 
+				"    mc.addMailcap(\"message/rfc822;; x-java-content-handler=com.sun.mail.handlers.message_rfc822\"); \n" + 
+				"    CommandMap.setDefaultCommandMap(mc);";
+		
+		s2= s2.replaceAll("\\/\\*;","");
+		System.out.println(s2);
+		
+		
+		System.out.println(CrokageUtils.round((double) 0 / 100,4)*100);
 		
 		String someJsonString = "{name:\"MyNode\", width:200, height:100}";
 		JSONObject jsonObj = new JSONObject(someJsonString);

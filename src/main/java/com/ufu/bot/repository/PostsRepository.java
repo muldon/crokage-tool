@@ -42,6 +42,15 @@ public interface PostsRepository extends CrudRepository<Post, Integer> {
 	List<Integer> findAllPostsIds();
 
 	
+	 
+	 @Query(value="select id " + 
+	 		"	 from postsmin " + 
+	 		"	 where parentid = ?" + 
+	 		"	 order by score desc" + 
+	 		"	 limit 1",nativeQuery=true)
+	 List<Integer> MostUpvotedAnswerForQuestion(Integer questionId);
+
+	
 	
 	
 

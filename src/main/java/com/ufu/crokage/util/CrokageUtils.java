@@ -359,7 +359,7 @@ public class CrokageUtils {
 	
 	
 	
-	public void reportElapsedTime(long initTime, String processName) {
+	public static void reportElapsedTime(long initTime, String processName) {
 		Integer phaseExceptions[] = {6};
 		//if(!Arrays.asList(phaseExceptions).contains(phaseNumber)) {
 			endTime = System.currentTimeMillis();
@@ -1721,7 +1721,7 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 		}
 	}
 	
-	public static void printMapToFile(Map<String, Set<Integer>> queriesAndSOIdsMap, String filePath) throws FileNotFoundException {
+	public static void writeMapToFile4(Map<String, Set<Integer>> queriesAndSOIdsMap, String filePath) throws FileNotFoundException {
 		StringBuilder lines = new StringBuilder("");
 		Set<String> keys = queriesAndSOIdsMap.keySet();
 		for(String key: keys) {
@@ -2068,6 +2068,30 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 			bw.close();
 		}
 		
+	}
+
+	public static Map<String,Set<Integer>> readCrawledQuestionsIds(String fileToRead) throws IOException {
+		long initTime = System.currentTimeMillis();
+		Map<String,Set<Integer>> queriesAndSOIdsMap = new LinkedHashMap<>();
+		List<String> queriesAndGoogleSOIds = Files.readAllLines(Paths.get(fileToRead));
+		String[] parts;
+		for(String line: queriesAndGoogleSOIds) {
+			parts = line.split(" >> ");
+			if(parts.length>1) {
+				String ids[]=null;
+				ids = parts[1].split(" ");
+				Set<Integer> idsInt = new LinkedHashSet<>();
+				for(String idStr: ids) {
+					idsInt.add(Integer.parseInt(idStr));
+				}
+				queriesAndSOIdsMap.put(parts[0], idsInt);
+			}
+			
+		}
+		
+		reportElapsedTime(initTime,"readGoogleRelatedQuestionsIdsForNLP2Api");
+		System.out.println("Size of googleQueriesAndSOIds: "+queriesAndSOIdsMap.size() +" for file: "+fileToRead);
+		return queriesAndSOIdsMap;
 	}
 
 	
