@@ -21,7 +21,7 @@ import com.ufu.bot.to.Evaluation;
 import com.ufu.bot.to.ExternalQuestion;
 import com.ufu.bot.to.Post;
 import com.ufu.bot.to.PostLink;
-import com.ufu.bot.util.BotUtils;
+import com.ufu.crokage.util.CrokageUtils;
 
 @Repository
 public class GenericRepositoryImpl implements GenericRepository {
@@ -112,7 +112,7 @@ public class GenericRepositoryImpl implements GenericRepository {
 		String sql = " select * from postsmin  p " 
 				+ " WHERE   1=1 ";
 		
-		sql += BotUtils.getQueryComplementByTag(tagFilter);
+		sql += CrokageUtils.getQueryComplementByTag(tagFilter);
 				
 		sql += " order by p.id ";
 		
@@ -348,6 +348,99 @@ public class GenericRepositoryImpl implements GenericRepository {
 	}
 
 
+	
+	
+
+	@Override
+	public Map<Integer, String> getQuestionsIdsTitles() {
+		String sql = " select po.id,po.processedTitle "
+				+ " from postsmin po"
+				+ " where po.posttypeid=1"
+				+ " and po.processedTitle != ''"
+				+ " and po.answercount>0 "
+				+ " and po.score>0";
+			
+		Query q = em.createNativeQuery(sql);
+		List<Object[]> rows = q.getResultList();
+		Map<Integer, String> questionsIdsTitles = new HashMap<>();
+		for (Object[] row : rows) {
+			questionsIdsTitles.put((Integer)row[0], (String)row[1]);
+		}
+		
+		return questionsIdsTitles;
+	}
+
+
+	@Override
+	public List<Bucket> getQuestionsProcessedTitlesBodiesCodes() {
+		String sql = " select po.id,po.processedtitle,po.processedbody,po.processedcode,po.acceptedanswerid "
+				+ " from postsmin po"
+				+ " where po.posttypeid=1"
+				+ " and po.processedTitle != ''"
+				+ " and po.answercount>0 "
+				+ " and po.score>0";
+		
+			
+		Query q = em.createNativeQuery(sql);
+		List<Object[]> rows = q.getResultList();
+		List<Bucket> result = new ArrayList<>(rows.size());
+		for (Object[] row : rows) {
+			Bucket bucket = new Bucket();
+			bucket.setId((Integer) row[0]);
+			bucket.setProcessedTitle((String) row[1]);
+			bucket.setProcessedBody((String) row[2]);
+			bucket.setProcessedCode((String) row[3]);
+			bucket.setAcceptedAnswerId((Integer) row[4]);
+			result.add(bucket);			
+		}
+		
+		return result;
+	}
+
+
+	@Override
+	public Map<Integer, Integer> getAnswersIdsParentIds() {
+		String sql = " select po.id,po.parentid "
+				+ " from postsmin po"
+				+ " where po.posttypeid=2"
+				+ " and po.score>0";  
+			
+			
+		Query q = em.createNativeQuery(sql);
+		List<Object[]> rows = q.getResultList();
+		Map<Integer, Integer> answersIdsParentIds = new HashMap<>();
+		for (Object[] row : rows) {
+			answersIdsParentIds.put((Integer)row[0], (Integer)row[1]);
+		}
+		
+		return answersIdsParentIds;
+	}
+
+
+
+	
+
+
+	@Override
+	public List<Post> getUpvotedPostsWithCode(String startDate) {
+		String sql = " select * "
+				+ " from postsmin po"  
+				+ " where po.score>0 "
+				+ " and po.body like '%<pre><code>%' ";
+				
+		
+		if(!StringUtils.isBlank(startDate)) {
+			sql += " and po.creationdate > '" + startDate + "'";
+		}
+			
+		Query q = em.createNativeQuery(sql, Post.class);
+		List<Post> posts = (List<Post>) q.getResultList();
+		logger.info("getUpvotedPostsWithCode: "+posts.size()+ " posts retrieved");
+		return posts;
+	}
+
+
+
 	@Override
 	public List<Bucket> getBucketsByIds(Set<Integer> soAnswerIds) {
 		String idsIn = " ";
@@ -357,7 +450,7 @@ public class GenericRepositoryImpl implements GenericRepository {
 		idsIn+= "#end";
 		idsIn = idsIn.replace(",#end", "");
 		
-		String sql = " select po.id,po.body,po.code,u.reputation,po.commentcount,po.viewcount,po.score,parent.acceptedanswerid, parent.score as parentscore,po.processedbody,po.processedcode,parent.id as parentid "  
+		String sql = " select po.id,po.body,po.code,u.reputation,po.commentcount,po.viewcount,po.score,parent.acceptedanswerid, parent.score as parentscore,po.processedbody,po.processedcode,parent.id as parentid,parent.processedtitle,parent.processedbody as parentBody,parent.processedcode as parentCode "  
 				+ " from postsmin po, usersmin u, postsmin parent  "  
 				+ " where po.owneruserid=u.id" 
 				+ " and po.parentid = parent.id"  
@@ -382,6 +475,9 @@ public class GenericRepositoryImpl implements GenericRepository {
 			bucket.setProcessedBody((String) row[9]);
 			bucket.setProcessedCode((String) row[10]);
 			bucket.setParentId((Integer) row[11]);
+			bucket.setParentProcessedTitle((String) row[12]);
+			bucket.setParentProcessedBody((String) row[13]);
+			bucket.setParentProcessedCode((String) row[14]);
 			result.add(bucket);			
 		}
 		
@@ -390,45 +486,34 @@ public class GenericRepositoryImpl implements GenericRepository {
 
 
 
-	@Override
-	public Map<Integer, String> getQuestionsIdsTitles() {
-		String sql = " select po.id,po.processedTitle "
-				+ " from postsmin po"
-				+ " where po.posttypeid=1"
-				+ " and po.processedTitle != ''"
-				+ " and po.answercount>0 ";
-			
-		Query q = em.createNativeQuery(sql);
-		List<Object[]> rows = q.getResultList();
-		Map<Integer, String> questionsIdsTitles = new HashMap<>();
-		for (Object[] row : rows) {
-			questionsIdsTitles.put((Integer)row[0], (String)row[1]);
-		}
-		
-		return questionsIdsTitles;
-	}
-
-
-
-
 
 	@Override
-	public Map<Integer, Integer> getAnswersIdsParentIds() {
-		String sql = " select po.id,po.parentid "
-				+ " from postsmin po"
+	public List<Bucket> getUpvotedAnswersIdsContentsAndParentContents() {
+		System.out.println("getUpvotedAnswersIdsContentsAndParentContents ...");
+		String sql = " select po.id,parent.processedtitle,parent.processedbody as parentBody,parent.processedcode as parentCode,po.processedbody,po.processedcode "
+				+ " from postsmin po, postsmin parent"
 				+ " where po.posttypeid=2"
-				+ " and po.score>0";  
-			
+				+ " and po.parentid = parent.id"  
+				+ " and po.score>0";
+		
 			
 		Query q = em.createNativeQuery(sql);
 		List<Object[]> rows = q.getResultList();
-		Map<Integer, Integer> answersIdsParentIds = new HashMap<>();
+		List<Bucket> result = new ArrayList<>(rows.size());
 		for (Object[] row : rows) {
-			answersIdsParentIds.put((Integer)row[0], (Integer)row[1]);
+			Bucket bucket = new Bucket();
+			bucket.setId((Integer) row[0]);
+			bucket.setParentProcessedTitle((String) row[1]);
+			bucket.setParentProcessedBody((String) row[2]);
+			bucket.setParentProcessedCode((String) row[3]);
+			bucket.setProcessedBody((String) row[4]);
+			bucket.setProcessedCode((String) row[5]);
+			result.add(bucket);			
 		}
 		
-		return answersIdsParentIds;
+		return result;
 	}
+
 
 
 

@@ -18,7 +18,6 @@ import com.ufu.bot.googleSearch.SearchQuery;
 import com.ufu.bot.googleSearch.SearchResult;
 import com.ufu.bot.service.PitBotService;
 import com.ufu.bot.util.AbstractService;
-import com.ufu.bot.util.BotUtils;
 import com.ufu.crokage.util.CrokageUtils;
 
 @RunWith(SpringRunner.class)
@@ -54,7 +53,7 @@ public class GoogleApplicationTests extends AbstractService{
 			        //.site("https://stackoverflow.com")
 			SearchResult result = googleWebSearch.search(searchQuery,false);
 			List<String> urls = result.getUrls();
-			BotUtils.identifyQuestionsIdsFromUrls(urls,soQuestionsIds);
+			CrokageUtils.identifyQuestionsIdsFromUrls(urls,soQuestionsIds);
 						
 		} catch (Exception e) {
 			System.out.println("Error ... "+e);

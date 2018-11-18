@@ -217,14 +217,13 @@ public class BotApplicationTests extends AbstractService{
 	
 	
 	
-	//@Test
+	@Test
 	public void testGetClassesFromCodes1() throws Exception {
 		logger.info("testStemStop....");
-		Integer questionId = 4352901;
+		Integer questionId = 1953693;
 		
 		Post post = pitBotService.findPostById(questionId);
 		String body = post.getBody();
-		
 		
 		Set<String> codeSet = crokageUtils.extractClassesFromCode(body);
 		System.out.println(codeSet);
@@ -266,7 +265,7 @@ public class BotApplicationTests extends AbstractService{
 	
 	//@Test
 	public void testExtractClassesFromCode() {
-		Integer answersIds[] = {910522,45960571,2900755,1053475,1911947,34959450,1921200,34959470,1928690,1928707,1928778,1969067,34959570};
+		Integer answersIds[] = {12967896,910522,45960571,2900755,1053475,1911947,34959450,1921200,34959470,1928690,1928707,1928778,1969067,34959570};
 		for(Integer postId:answersIds) {
 			Post post = postsRepository.findOne(postId);
 			System.out.println("id: "+post.getId()+ " \n- code: "+post.getCode()+ " \n\nClasses found: ");
@@ -279,7 +278,7 @@ public class BotApplicationTests extends AbstractService{
 	}
 	
 	
-	
+	/*
 
 	//@Test
 	public void testStemStop() throws Exception {
@@ -295,7 +294,7 @@ public class BotApplicationTests extends AbstractService{
 		
 
 	}
-		
+		*/
 	//@Test
 	public void testExternalQuestions() {
 		ExternalQuestion externalQuestion = new ExternalQuestion(1,"queryLine","googlequery","classes",true,"obs","linkLine");
@@ -496,7 +495,7 @@ public class BotApplicationTests extends AbstractService{
 	}
 	
 	
-	@Test
+	//@Test
 	public void saveMetric() {
 		MetricResult metricResult = new MetricResult();
 		metricResult.setHitK1(52.12);
@@ -505,7 +504,7 @@ public class BotApplicationTests extends AbstractService{
 		metricResult.setClassFreqWeight(12.14);
 		metricResult.setCutoff(70);
 		metricResult.setObs("test");
-		metricResult.setTopSimilarAnswersNumber(200);
+		metricResult.setTopApisScoredPairsPercent(20);
 		metricResult.setUpWeight(8.11);
 		metricResult.setUseCodeInSimCalculus(true);
 		metricResultRepository.save(metricResult);

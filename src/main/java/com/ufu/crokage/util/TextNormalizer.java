@@ -38,6 +38,7 @@ public class TextNormalizer {
 	public Set<String> normalizeSimpleCodeDiscardSmall() {
 		Set<String> validTokens = new LinkedHashSet<>();
 		try {
+		content = CrokageUtils.translateHTMLSimbols(content);	
 			
 		//remove public static void main(String[] args) {
 		content = content.replaceAll("public static void main\\(String\\[\\] args\\)", " ");
@@ -50,6 +51,18 @@ public class TextNormalizer {
 				
 		//remove comments
 		content= content.replaceAll("\\/\\*;","");
+		content= content.replaceAll("\\/\\*\"","");
+		content= content.replaceAll("\\/\\*\\.","");
+		content= content.replaceAll("\\/\\*<","");
+		content= content.replaceAll("\\/\\*\\*\"","");
+		content= content.replaceAll("\\/\\*\\*\'","");
+		
+		/*content= content.replaceAll("\\/\\*;","");
+		content= content.replaceAll("\\/\\*;","");
+		content= content.replaceAll("\\/\\*;","");
+		content= content.replaceAll("\\/\\*;","");*/
+		
+		
 		content = content.replaceAll("(?:/\\*(?:[^*]|(?:\\*+[^*/]))*\\*+/)|(?://.*)","");
 				
 		//remove exceptions
@@ -90,10 +103,10 @@ public class TextNormalizer {
 		
 			
 		} catch(StackOverflowError t) {
-			System.out.println("Error when trying to parse: "+content);
+			//System.out.println("Error when trying to parse: "+content);
 			throw t;
 		}catch (Exception e) {
-			System.out.println("Error when trying to parse: "+content);
+			//System.out.println("Error when trying to parse: "+content);
 			throw e;
 		}
 		

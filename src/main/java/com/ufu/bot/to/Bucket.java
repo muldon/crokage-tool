@@ -5,33 +5,45 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
 public class Bucket {
-	private static final long serialVersionUID = -11118191211815641L;
+	protected static final long serialVersionUID = -11118191211815641L;
 	@Id
-	private Integer id;
+	protected Integer id;
 	
-	private String body;
+	protected String body;
 	
-	private String processedBody;
+	protected String processedTitle;
 	
-	private String code;
+	protected String title;
 	
-	private String processedCode;
+	protected String processedBody;
 	
-	private Integer upVotesScore;
+	protected String code;
 	
-	private Integer userReputation;
+	protected String processedCode;
 	
-	private Integer commentCount;
+	protected Integer upVotesScore;
 	
-	private Integer viewCount;
+	protected Integer userReputation;
 	
-	private Boolean acceptedAnswer;
+	protected Integer commentCount;
 	
-	private Integer parentId;
+	protected Integer viewCount;
 	
-	private Integer parentUpVotesScore;
+	protected Boolean acceptedAnswer;
 	
-	private Double calculatedScore;
+	protected Integer acceptedAnswerId;
+	
+	protected Integer parentId;
+	
+	protected Integer parentUpVotesScore;
+	
+	protected Double calculatedScore;
+	
+	protected String parentProcessedTitle;
+	
+	protected String parentProcessedBody;
+	
+	protected String parentProcessedCode;
 	
 	
 	public Integer getId() {
@@ -185,7 +197,56 @@ public class Bucket {
 	public void setParentId(Integer parentId) {
 		this.parentId = parentId;
 	}
-	
+
+	public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
+	public Integer getAcceptedAnswerId() {
+		return acceptedAnswerId;
+	}
+
+	public void setAcceptedAnswerId(Integer acceptedAnswerId) {
+		this.acceptedAnswerId = acceptedAnswerId;
+	}
+
+	public String getProcessedTitle() {
+		return processedTitle;
+	}
+
+	public void setProcessedTitle(String processedTitle) {
+		this.processedTitle = processedTitle;
+	}
+
+	public String getParentProcessedTitle() {
+		return parentProcessedTitle;
+	}
+
+	public void setParentProcessedTitle(String parentProcessedTitle) {
+		this.parentProcessedTitle = parentProcessedTitle;
+	}
+
+	public String getParentProcessedBody() {
+		return parentProcessedBody;
+	}
+
+	public void setParentProcessedBody(String parentProcessedBody) {
+		this.parentProcessedBody = parentProcessedBody;
+	}
+
+	public String getParentProcessedCode() {
+		return parentProcessedCode;
+	}
+
+	public void setParentProcessedCode(String parentProcessedCode) {
+		this.parentProcessedCode = parentProcessedCode;
+	}
+
+ 
 	
 
 	

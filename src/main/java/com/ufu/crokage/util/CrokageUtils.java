@@ -70,9 +70,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
-import com.ufu.bot.PitBotApp2;
 import com.ufu.bot.repository.GenericRepository;
-import com.ufu.bot.to.Evaluation;
 import com.ufu.bot.to.ExternalQuestion;
 import com.ufu.bot.to.Post;
 import com.ufu.bot.util.CosineSimilarity;
@@ -83,10 +81,6 @@ import com.ufu.crokage.to.UserEvaluation;
 @Component
 public class CrokageUtils {
 	
-	@Value("${minTokenSize}")
-	public Integer minTokenSize;
-	
-
 	/*
 	 * Stores the value obtained from the pathFileEnvFlag file
 	 */
@@ -140,11 +134,7 @@ public class CrokageUtils {
 	private static DCG_TYPE dcgType = DCG_TYPE.COMB;
 	private static List<String> stopWordsList;
 
-	@Value("${phaseNumber}")
-	public Integer phaseNumber; 
 	
-	@Value("${section}")
-	public Integer section;  
 	
 	@Autowired
 	private CosineSimilarity cs1;
@@ -244,13 +234,13 @@ public class CrokageUtils {
 			//loadTagSynonyms();
 			//configureEnvironmentVariables();
 		}
-		
+		/*
 		if(minTokenSize==null) {
 			Properties prop = new Properties();
 			prop.load(CrokageUtils.class.getClassLoader().getResourceAsStream("application.properties")); 
 			minTokenSize = new Integer(prop.getProperty("minTokenSize"));
 			
-		}
+		}*/
 		parentPostsCache = new HashMap<>();
 		parentPostsCache = new HashMap<Integer, Post>();
 		answerPostsCache = new HashMap<Integer, Post>();
@@ -280,17 +270,12 @@ public class CrokageUtils {
 	
 	 public static double round(double pNumero, int pCantidadDecimales) {
 	    BigDecimal value=null;
-		try {
-			value = new BigDecimal(pNumero);
-		} catch (Exception e) {
-			System.out.println();
-		} 
-	   
+		value = new BigDecimal(pNumero);
 	    value = value.setScale(pCantidadDecimales, RoundingMode.HALF_EVEN); 
 	    return value.doubleValue(); 
 	}
 	
-	
+	/*
 	public String tokenizeStopStem(String input) throws Exception {
 		String token;
 		if (StringUtils.isBlank(input)) {
@@ -322,8 +307,8 @@ public class CrokageUtils {
 		sr = null;
 		return sb.toString();
 	}
-	
-	
+	*/
+	/*
 	public String removeStopWords(String textFile) throws Exception {
 		String token;
 		if (StringUtils.isBlank(textFile)) {
@@ -355,18 +340,14 @@ public class CrokageUtils {
 		sr = null;
 		return sb.toString();
 	}
-	
+	*/
 	
 	
 	
 	public static void reportElapsedTime(long initTime, String processName) {
-		Integer phaseExceptions[] = {6};
-		//if(!Arrays.asList(phaseExceptions).contains(phaseNumber)) {
-			endTime = System.currentTimeMillis();
-			String duration = DurationFormatUtils.formatDuration(endTime-initTime, "HH:mm:ss,SSS");
-			System.out.println("Done with "+processName+", duration: "+duration);
-			
-		//}
+		endTime = System.currentTimeMillis();
+		String duration = DurationFormatUtils.formatDuration(endTime-initTime, "HH:mm:ss,SSS");
+		System.out.println("Done with "+processName+", duration: "+duration);
 	}
 	
 	
@@ -398,7 +379,7 @@ public class CrokageUtils {
 		return body;
 	}
 	
-	private static String translateHTMLSimbols(String finalContent) {
+	public static String translateHTMLSimbols(String finalContent) {
 		finalContent = finalContent.replaceAll("&amp;","&");
 		finalContent = finalContent.replaceAll("&lt;", "<");
 		finalContent = finalContent.replaceAll("&gt;", ">");
@@ -514,7 +495,7 @@ public class CrokageUtils {
 		
 	}
 	
-
+/*
 	public String buildProcessedBodyStemmedStopped(String presentingBody, boolean isAnswer) throws Exception {
 		
 		String finalStr = presentingBody.replaceAll(LINK_TARGET_EXPRESSION_OUT, "");
@@ -580,9 +561,9 @@ public class CrokageUtils {
 		finalStr = StringUtils.normalizeSpace(finalStr);
 		
 		return finalStr;
-	}
+	}*/
 
-	
+	/*
 	public String[] separateWordsCodePerformStemmingStopWords(String content, boolean isAnswer) throws Exception {
 		String[] finalContent = new String[4];
 		
@@ -621,10 +602,10 @@ public class CrokageUtils {
 		//String codeToBeJoinedInBody = retiraSimbolosCodeParaBody(codeContent);
 				
 		//String bloquesAndLinks = blockquoteContent+ " "+linksContent;
-		/*String bloquesAndLinks = blockquoteContent;
+		String bloquesAndLinks = blockquoteContent;
 		bloquesAndLinks = bloquesAndLinks.replaceAll("\n", " ");
 		bloquesAndLinks = retiraHtmlTags(bloquesAndLinks);
-		bloquesAndLinks += " "+codeContent;*/
+		bloquesAndLinks += " "+codeContent;
 		
 		
 		textWithoutCodesLinksAndBlackquotes = textWithoutCodesLinksAndBlackquotes.replaceAll(PRE_CODE_REGEX_EXPRESSION, " ");
@@ -636,10 +617,10 @@ public class CrokageUtils {
 		
 		
 		String onlyWords = getOnlyWords(separated);
-		/*List<String> palavras = getWords(ONLY_WORDS_PATTERN, separated);
+		List<String> palavras = getWords(ONLY_WORDS_PATTERN, separated);
 		for(String word: palavras){
 			somentePalavras+= word+ " ";
-		}*/
+		}
 		onlyWords = onlyWords.toLowerCase()+ " ";
 		
 		String specificTerms = "";
@@ -662,7 +643,7 @@ public class CrokageUtils {
 
 	}
 	
-	
+	*/
 	
 	
 	
@@ -1106,87 +1087,6 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 	}
 	
 	
-	public List<ExternalQuestion> readExternalQuestionsAndAnswers(Boolean runRack, String obs) throws IOException {
-		List<ExternalQuestion> externalQuestionAnswers = new ArrayList<>();
-		
-		URL url;
-		String fileContent="";
-		System.out.println("...reading external questions");		
-		url = Resources.getResource("external_questions.txt");
-		fileContent = Resources.toString(url, Charsets.UTF_8);
-		
-		List<String> lines = IOUtils.readLines(new StringReader(fileContent));
-		
-		Iterator it = lines.iterator();
-		//int externalId=1;
-		Integer fileReferenceId=0;
-		
-		while(it.hasNext()){
-			String numberLine = (String)it.next();
-			
-			if(numberLine.startsWith("----------------- No.")) {
-				Pattern pattern = Pattern.compile(CrokageUtils.NUMBERS_REGEX_EXPRESSION);
-				Matcher matcher = pattern.matcher(numberLine);
-				while (matcher.find()) {
-					fileReferenceId = new Integer(matcher.group(0));
-				}
-				
-				if(!it.hasNext()) {
-					logger.error("Error when reading query from file: ");
-				}	
-				String queryLine = (String)it.next();
-			
-				if(queryLine.startsWith("query:")) {
-					queryLine= queryLine.replace("query:", "").trim();
-					//System.out.println(queryLine);
-					
-					if(!it.hasNext()) {
-						logger.error("Error when reading link from query: "+queryLine);
-					}else {
-						String linkLine = (String)it.next();
-						if(linkLine.startsWith("link:")) {
-							linkLine= linkLine.replace("link:", "").trim();
-							
-							if( (phaseNumber==1 && section==11) || (phaseNumber==2 && section==11) || phaseNumber==3) {  //1/3 of questions, first lot
-							
-								if(fileReferenceId<=11 || (fileReferenceId>=34 && fileReferenceId<=44) || (fileReferenceId>=67 && fileReferenceId<=77)) {
-									ExternalQuestion externalQuestion = new ExternalQuestion(fileReferenceId,queryLine,null,null,runRack,obs,linkLine);
-									externalQuestionAnswers.add(externalQuestion);
-								}
-								
-							}else if( (phaseNumber==1 && section==12) || (phaseNumber==2 && section==12) || phaseNumber==4 || phaseNumber==5) {  //1/3 of questions, second lot
-								
-								if((fileReferenceId>=12 && fileReferenceId<=22) || (fileReferenceId>=45 && fileReferenceId<=55) || (fileReferenceId>=78 && fileReferenceId<=88)) {
-									ExternalQuestion externalQuestion = new ExternalQuestion(fileReferenceId,queryLine,null,null,runRack,obs,linkLine);
-									externalQuestionAnswers.add(externalQuestion);
-								}
-							}else if(phaseNumber==7 || phaseNumber==8) {  //1/3 of questions, third lot
-								
-								if((fileReferenceId>=23 && fileReferenceId<=33) || (fileReferenceId>=56 && fileReferenceId<=66) || (fileReferenceId>=89 && fileReferenceId<=99)) { //third lot
-									ExternalQuestion externalQuestion = new ExternalQuestion(fileReferenceId,queryLine,null,null,runRack,obs,linkLine);
-									externalQuestionAnswers.add(externalQuestion);
-								}
-							}
-							
-							//phase 10 to define yet... external survey... 
-							//externalId++;
-							
-							
-						}
-						
-					}
-					
-				}
-			}
-		}
-		
-		
-		
-		return externalQuestionAnswers;
-		
-	}
-	
-	
 	
 	public void storeParentPostInCache(Post post) {
 		if(!parentPostsCache.containsKey(post.getId())) {
@@ -1474,36 +1374,6 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 	
 	
 	
-	public void buildMatrixForKappa(PitBotApp2 pitBotApp2, List<Evaluation> evaluationsWithBothUsersScales, String fileNameGeneratedMatrix) throws IOException {
-		BufferedWriter bw =null;
-		try {
-		
-			bw = new BufferedWriter(new FileWriter(fileNameGeneratedMatrix));
-			bw.write(";;1;2;3;4;5");
-			
-			//Matrix map
-			int[] cells[] = new int[5][5];
-			
-			for(int i=0; i<5; i++) {
-				bw.write("\n;"+(i+1)+";");
-				for(int j=0; j<5; j++) {
-					//System.out.println(cells[i][j]);
-					cells[i][j] = pitBotApp2.botUtils.getCellNumber(i+1,j+1,evaluationsWithBothUsersScales);
-					//System.out.println("cell "+i+"-"+j+"= "+cells[i][j]);
-					bw.write(cells[i][j]+";");
-				}
-			}
-			
-			
-			
-		
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			bw.close();
-		}
-		
-	}
 	
 	public void buildMatrixForKappa(List<UserEvaluation> evaluationsWithBothUsersScales, String fileNameGeneratedMatrix) throws IOException {
 		BufferedWriter bw =null;
@@ -1615,7 +1485,7 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 		Document doc = Jsoup.parse(content);
 		Elements elems = doc.select("code,pre");
 		String codeText = elems.text();
-		textNormalizer.setContent(content);
+		textNormalizer.setContent(codeText);
 		return textNormalizer.normalizeSimpleCodeDiscardSmall();
 		
 	}
@@ -1953,18 +1823,17 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 	}
 
 
-	public void readWordsFromFileToMap(Map<Integer, String> soIdsTitlesMap, List<String> idsAndWords) throws IOException {
+	public void readWordsFromFileToMap(Map<Integer, String> idsAndContentsMap, List<String> idsAndWords) throws IOException {
 		long initTime = System.currentTimeMillis();
-		System.out.println("Reading all ids and titles from file...");
 		String[] parts;
-		String title;
+		String content;
 		for(String line: idsAndWords) {
 			parts = line.split(" ");
-			title = line.replace(parts[0], "").trim();
-			soIdsTitlesMap.put(Integer.parseInt(parts[0]), title);
+			content = line.replace(parts[0], "").trim();
+			idsAndContentsMap.put(Integer.parseInt(parts[0]), content);
 		}
 		//System.out.println(bigMapApisIds);
-		reportElapsedTime(initTime,"readVectorsFromSOMapForWords");
+		reportElapsedTime(initTime,"readWordsFromFileToMap");
 		
 	}
 	
@@ -1978,7 +1847,7 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 			soIdsIds.put(Integer.parseInt(parts[0]), Integer.parseInt(parts[1]));
 		}
 		//System.out.println(bigMapApisIds);
-		reportElapsedTime(initTime,"readVectorsFromSOMapForWords");
+		reportElapsedTime(initTime,"readWordsFromFileToMap2");
 		
 	}
 
@@ -2093,10 +1962,33 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 		System.out.println("Size of googleQueriesAndSOIds: "+queriesAndSOIdsMap.size() +" for file: "+fileToRead);
 		return queriesAndSOIdsMap;
 	}
-
 	
-
 	
+	public static Map<Integer,Set<String>> readPostsIdsApisMap(String fileToRead) throws IOException {
+		long initTime = System.currentTimeMillis();
+		Map<Integer,Set<String>> postsIdsApisMap = new HashMap<>();
+		List<String> lines = Files.readAllLines(Paths.get(fileToRead));
+		String[] parts;
+		for(String line: lines) {
+			parts = line.split(" >> ");
+			if(parts.length>1) {
+				String apis[]=null;
+				apis = parts[1].split(" ");
+				Set<String> apisStr = new LinkedHashSet<>();
+				for(String idStr: apis) {
+					apisStr.add(idStr);
+				}
+				postsIdsApisMap.put(Integer.parseInt(parts[0]), apisStr);
+			}
+			
+		}
+		
+		reportElapsedTime(initTime,"readPostsIdsApisMap");
+		System.out.println("Size of postsIdsApisMap: "+postsIdsApisMap.size() +" for file: "+fileToRead);
+		return postsIdsApisMap;
+	}
+
+	 
 	
 	
 }

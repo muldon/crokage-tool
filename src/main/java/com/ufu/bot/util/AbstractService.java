@@ -76,10 +76,6 @@ public abstract class AbstractService {
 	protected MetricResultRepository metricResultRepository;
 	
 	
-		
-	@Autowired
-	protected BotUtils botUtils;
-	
 	protected int countExcludedPosts;
 	protected int countPostIsAnAnswer;
 	
@@ -89,93 +85,6 @@ public abstract class AbstractService {
 	}
 	
 
-	@Transactional(readOnly = true)
-	public Set<SoThread> assembleListOfThreads(Set<Integer> soPostsIds, Integer relationTypeId) {
-		//allQuestionsIds.addAll(soQuestionsIds);
-		Set<SoThread> threads = new LinkedHashSet<>();
-		boolean postIsQuestion = true;		
-		for(Integer questionId: soPostsIds) {
-			Post post = findPostById(questionId);
-			if(post==null) {
-				countExcludedPosts++;
-				continue; //could have been excluded 
-			}
-			
-			if(post.getPostTypeId().equals(2)) { //answer
-				postIsQuestion=false;
-				countPostIsAnAnswer++;
-				//fetch the parent only once
-				if(!soPostsIds.contains(post.getParentId())) {
-					post = findPostById(post.getParentId());
-				}else {
-					//parent is already present in the list and will be processed later
-					continue;
-				}
-				
-			}
-			
-			if(post.getOwnerUserId()!=null) {
-				post.setUser(findUserById(post.getOwnerUserId()));
-			}
-			
-			List<Comment> questionComments = getCommentsByPostId(questionId);
-			setCommentsUsers(questionComments);
-			post.setComments(questionComments);
-			
-			botUtils.storeParentPostInCache(post);
-			
-			List<Post> answers = findUpVotedAnswersByQuestionId(post.getId());
-			List<Post> validAnswers = new ArrayList<Post>();
-			
-			for(Post answer: answers) {
-				if(answer.getScore()<1) {
-					continue;    //disconsider posts without positive scores
-				}
-				if(answer.getOwnerUserId()!=null) {
-					answer.setUser(findUserById(answer.getOwnerUserId()));
-				}
-				boolean containCode = BotUtils.containCode(answer.getBody());
-				boolean containLink = BotUtils.testContainLinkToSo(answer.getBody());
-				if(!containCode) {
-					if(!containLink) {
-						logger.info("Disconsidering post without any code and without any link :"+answer.getId());
-						continue;    //disconsider posts without any code and without any link to another post
-					}else {
-						logger.info("Answer has no code, but has link and will be cut off later in step 7."+answer.getId());
-					}
-					
-				}
-				
-				List<Comment> answerComments = getCommentsByPostId(answer.getId());
-				setCommentsUsers(answerComments);
-				answer.setComments(answerComments);
-				if(relationTypeId.equals(RelationTypeEnum.FROM_GOOGLE_QUESTION_OR_ANSWER_T5.getId())) {
-					if(postIsQuestion) {
-						answer.setRelationTypeId(RelationTypeEnum.FROM_GOOGLE_QUESTION_T1.getId());
-					}else {
-						answer.setRelationTypeId(RelationTypeEnum.FROM_GOOGLE_ANSWER_T4.getId());
-					}
-				}else {
-					answer.setRelationTypeId(relationTypeId);
-				}
-				botUtils.storeAnswerPostInCache(answer);
-				validAnswers.add(answer);
-			}
-			
-			if(!validAnswers.isEmpty()) {
-				SoThread soThread = new SoThread(post,validAnswers);
-				threads.add(soThread);
-			}
-			
-			
-		}
-		
-		
-		logger.info("Number of posts that has been excluded, or is not present in dataset because it is not a java post, or is newer than the dataset: "+countExcludedPosts);
-		
-		return threads;
-		
-	}
 	
 	private void setCommentsUsers(List<Comment> questionComments) {
 		for(Comment comment: questionComments) {

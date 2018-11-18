@@ -56,8 +56,8 @@ public class MetricResult {
 	@Column(name="topsimilarquestionsnumber")
 	private Integer topSimilarQuestionsNumber;
 	
-	@Column(name="topsimilaranswersnumber")
-	private Integer topSimilarAnswersNumber;
+	@Column(name="topapisscoredpairspercent")
+	private Integer topApisScoredPairsPercent;
 	
 	@Column(name="usecodeinsimcalculus")
 	private Boolean useCodeInSimCalculus;
@@ -82,6 +82,9 @@ public class MetricResult {
 	public Double upWeight;
 	
 	public String approach;
+	
+	@Column(name="topclasses")
+	private Integer topClasses;
 	
 	public Double getHitK10() {
 		return hitK10;
@@ -172,12 +175,7 @@ public class MetricResult {
 	public void setTopSimilarQuestionsNumber(Integer topSimilarQuestionsNumber) {
 		this.topSimilarQuestionsNumber = topSimilarQuestionsNumber;
 	}
-	public Integer getTopSimilarAnswersNumber() {
-		return topSimilarAnswersNumber;
-	}
-	public void setTopSimilarAnswersNumber(Integer topSimilarAnswersNumber) {
-		this.topSimilarAnswersNumber = topSimilarAnswersNumber;
-	}
+	 
 	public Boolean getUseCodeInSimCalculus() {
 		return useCodeInSimCalculus;
 	}
@@ -231,6 +229,18 @@ public class MetricResult {
 	}
 	public void setApproach(String approach) {
 		this.approach = approach;
+	}
+	public Integer getTopClasses() {
+		return topClasses;
+	}
+	public void setTopClasses(Integer topClasses) {
+		this.topClasses = topClasses;
+	}
+	public Integer getTopApisScoredPairsPercent() {
+		return topApisScoredPairsPercent;
+	}
+	public void setTopApisScoredPairsPercent(Integer topApisScoredPairsPercent) {
+		this.topApisScoredPairsPercent = topApisScoredPairsPercent;
 	}
 	
 	

@@ -47,15 +47,12 @@ import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import com.google.common.io.Resources;
 import com.ufu.bot.CrokageApp;
-import com.ufu.bot.PitBotApp2;
 import com.ufu.bot.tfidf.TfIdf;
 import com.ufu.bot.tfidf.ngram.NgramTfIdf;
 import com.ufu.bot.to.BucketOld;
-import com.ufu.bot.to.Post;
 import com.ufu.bot.util.BotComposer;
-import com.ufu.bot.util.BotUtils;
 import com.ufu.crokage.util.CrokageUtils;
-import com.ufu.survey.service.PitSurveyService;
+
 
 public class Tester {
 
@@ -245,7 +242,7 @@ public class Tester {
 
 
 	private void testContainLinkToSo(String text) {
-		boolean contain = BotUtils.testContainLinkToSo(text);
+		boolean contain = CrokageUtils.testContainLinkToSo(text);
 		System.out.println(contain);
 		
 	}
@@ -254,7 +251,7 @@ public class Tester {
 
 	private void testContainCode(String another7Code) {
 		// TODO Auto-generated method stub
-		boolean containCode = BotUtils.containCode(another7Code);
+		boolean containCode = CrokageUtils.containCode(another7Code);
 		System.out.println(containCode);
 		
 	}
@@ -277,9 +274,9 @@ public class Tester {
 
 
 	private void testReadAnswerBotQuestions() throws Exception {
-		BotUtils botUtils = new BotUtils();
-		botUtils.initializeConfigs();
-		//List<ExternalQuestion> answerBotQuestionAnswers = botUtils.readExternalQuestionsAndAnswers(true);
+		CrokageUtils CrokageUtils = new CrokageUtils();
+		CrokageUtils.initializeConfigs();
+		//List<ExternalQuestion> answerBotQuestionAnswers = CrokageUtils.readExternalQuestionsAndAnswers(true);
 		//System.out.println(answerBotQuestionAnswers);
 		
 	}
@@ -321,7 +318,7 @@ public class Tester {
 		String titleParent = "Convert Iterator to ArrayList";
 		
 		
-		PitBotApp2 app = new PitBotApp2();
+		/*PitBotApp2 app = new PitBotApp2();
 		Post answer = new Post();
 		answer.setId(28491752);
 		answer.setBody(bodyAnswer2);
@@ -330,7 +327,7 @@ public class Tester {
 		Post parent = new Post();
 		parent.setId(10117026);
 		parent.setTitle(titleParent);
-		parent.setBody(bodyParent);
+		parent.setBody(bodyParent);*/
 		
 		//app.storeInCache(parent);
 		
@@ -382,7 +379,7 @@ public class Tester {
 				"Data scientists");
 		
 		//PitBotApp2 app = new PitBotApp2();
-		PitSurveyService pitSurveyService = new PitSurveyService();
+		//PitSurveyService pitSurveyService = new PitSurveyService();
 		//app.setMainBucket(main);
 		
 		for(int i=0; i<fileNames.length; i++){
@@ -427,7 +424,7 @@ public class Tester {
 			tfIdfOtherBucket = (HashMap)TfIdf.tfIdf(tfsMap, idfAll);
 			BucketOld postBucket = bucketsList.get(pos);
 			double cosine = BotComposer.cosineSimilarity(tfIdfMainBucket, tfIdfOtherBucket);
-			postBucket.setCosSim(BotUtils.round(cosine,4));
+			postBucket.setCosSim(CrokageUtils.round(cosine,4));
 			pos++;
 		}
 				
@@ -496,12 +493,12 @@ public class Tester {
 				"		BucketOld mainBucket = new BucketOld();\n" + 
 				"		mainBucket.setClassesNames(apis);\n" + 
 				"		\n" + 
-				"		String presentingBody = botUtils.buildPresentationBody(googleQuery);\n" + 
+				"		String presentingBody = CrokageUtils.buildPresentationBody(googleQuery);\n" + 
 				"		\n" + 
-				"		List<String> codes = botUtils.getCodes(presentingBody);\n" + 
+				"		List<String> codes = CrokageUtils.getCodes(presentingBody);\n" + 
 				"		mainBucket.setCodes(codes);\n" + 
 				"		\n" + 
-				"		String processedBodyStemmedStopped = botUtils.buildProcessedBodyStemmedStopped(presentingBody,false);\n" + 
+				"		String processedBodyStemmedStopped = CrokageUtils.buildProcessedBodyStemmedStopped(presentingBody,false);\n" + 
 				"		mainBucket.setProcessedBodyStemmedStopped(processedBodyStemmedStopped+apisNames);\n" + 
 				"		\n" + 
 				"		System.out.println(mainBucket);\n" + 
@@ -550,13 +547,13 @@ public class Tester {
 		
 	
 		//remove java keywords
-		for(String keyword: BotUtils.keywords){
+		for(String keyword: CrokageUtils.keywords){
 			code1= code1.replaceAll(keyword,"");
 		}
 		
 		//remove double quotes
-		code1= code1.replaceAll(BotUtils.DOUBLE_QUOTES_REGEX_EXPRESSION,"");
-		/*Pattern pattern0 = Pattern.compile(BotUtils.DOUBLE_QUOTES_REGEX_EXPRESSION);
+		code1= code1.replaceAll(CrokageUtils.DOUBLE_QUOTES_REGEX_EXPRESSION,"");
+		/*Pattern pattern0 = Pattern.compile(CrokageUtils.DOUBLE_QUOTES_REGEX_EXPRESSION);
 		Matcher matcher0 = pattern0.matcher(code1);
 		while (matcher0.find()) {
 			System.out.println(matcher0.group(0));

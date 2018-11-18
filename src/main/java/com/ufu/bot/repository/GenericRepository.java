@@ -50,6 +50,12 @@ public interface GenericRepository {
 
 	public Map<Integer, Integer> getAnswersIdsParentIds();
 
+	List<Bucket> getQuestionsProcessedTitlesBodiesCodes();
+
+	public List<Post> getUpvotedPostsWithCode(String startDate);
+
+	public List<Bucket> getUpvotedAnswersIdsContentsAndParentContents();
+
 	
 	
     

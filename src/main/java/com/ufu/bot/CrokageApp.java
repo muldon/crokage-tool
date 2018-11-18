@@ -26,7 +26,6 @@ import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -46,15 +45,14 @@ import com.google.common.base.Charsets;
 import com.ufu.bot.googleSearch.GoogleWebSearch;
 import com.ufu.bot.googleSearch.SearchQuery;
 import com.ufu.bot.googleSearch.SearchResult;
-import com.ufu.bot.repository.PostsRepository;
 import com.ufu.bot.service.CrokageService;
 import com.ufu.bot.tfidf.TFIDFCalculator;
+import com.ufu.bot.to.AnswerParentPair;
 import com.ufu.bot.to.Bucket;
 import com.ufu.bot.to.BucketOld;
 import com.ufu.bot.to.Post;
 import com.ufu.bot.util.BingWebSearch;
 import com.ufu.bot.util.BotComposer;
-import com.ufu.bot.util.BotUtils;
 import com.ufu.bot.util.Matrix;
 import com.ufu.crokage.to.MetricResult;
 import com.ufu.crokage.to.SearchResults;
@@ -62,6 +60,7 @@ import com.ufu.crokage.to.UserEvaluation;
 import com.ufu.crokage.util.CrokageUtils;
 import com.ufu.crokage.util.IDFCalc;
 import com.ufu.crokage.util.IndexLucene;
+import com.ufu.crokage.util.LuceneSearcherBM25;
 
 @Component
 @SuppressWarnings("unused")
@@ -80,6 +79,11 @@ public class CrokageApp {
 	@Autowired
 	private TFIDFCalculator tfidfCalculator;
 	
+	@Autowired
+	private BotComposer botComposer;
+	
+	@Autowired
+	protected LuceneSearcherBM25 luceneSearcherBM25;
 	
 	//app variables
 
@@ -124,8 +128,8 @@ public class CrokageApp {
 	@Value("${REDUCED_MAP_INVERTED_INDEX_APIS_FILE_PATH}")
 	public String REDUCED_MAP_INVERTED_INDEX_APIS_FILE_PATH;
 	
-	@Value("${DISCONSIDERED_POSTS_FILE_PATH}")
-	public String DISCONSIDERED_POSTS_FILE_PATH;
+	@Value("${SO_UPVOTED_POSTS_WITH_CODE_APIS_FILE}")
+	public String SO_UPVOTED_POSTS_WITH_CODE_APIS_FILE;
 	
 	@Value("${SO_ANSWERS_IDS_PARENT_IDS_MAP}")
 	public String SO_ANSWERS_IDS_PARENT_IDS_MAP;
@@ -133,8 +137,8 @@ public class CrokageApp {
 	@Value("${SO_QUESTIONS_IDS_TITLES_MAP}")
 	public String SO_QUESTIONS_IDS_TITLES_MAP;
 	
-	@Value("${SO_QUESTIONS_IDS_CONTENT_MAP}")
-	public String SO_QUESTIONS_IDS_CONTENT_MAP;
+	@Value("${SO_ANSWERS_IDS_CONTENTS_PARENT_CONTENTS_MAP}")
+	public String SO_ANSWERS_IDS_CONTENTS_PARENT_CONTENTS_MAP;
 	
 	@Value("${SO_CONTENT_FILE}")
 	public String SO_CONTENT_FILE;
@@ -276,6 +280,9 @@ public class CrokageApp {
 	@Value("${topSimilarQuestionsNumber}")
 	public Integer topSimilarQuestionsNumber;
 	
+	@Value("${topApisScoredPairsPercent}")
+	public Integer topApisScoredPairsPercent;
+	
 	/*@Value("${topSimilarAnswersNumber}")
 	public Integer topSimilarAnswersNumber;*/
 	
@@ -313,8 +320,9 @@ public class CrokageApp {
 	private Map<String,Double> soIDFVocabularyMap;
 	private Map<String,Double> queryIDFVectorsMap;
 	private Map<Integer,String> allQuestionsIdsTitlesMap;
-	private Map<Integer,String> allQuestionsIdsContentsMap;
+	private Map<Integer,String> allAnswersIdsContentsParentContentsMap;
 	private Map<Integer,Integer> allAnswersWithUpvotesIdsParentIdsMap;
+	private Map<Integer,Bucket> allAnswersWithUpvotesBucketsMap;
 	private Set<Integer> topClassesRelevantAnswersIds;
 	private List<String> wordsAndVectorsLines;
 	private Map<Integer,Double> questionsIdsScores;
@@ -324,9 +332,11 @@ public class CrokageApp {
 	private Set<String> bikerTopClasses;
 	private Map<String,Integer> methodsCounterMap;
 	private Map<String,Integer> classesCounterMap;
+	private Map<Integer,Double> topAnswerParentPairsAnswerIdScoreMap; 
 	
-	private Map<String,Set<Integer>> recommendedQueriesThreadsIdsMap;
-
+	private Map<String,Set<Integer>> queriesThreadsIdsMap;
+	private Map<Integer,Set<String>> upvotedPostsIdsWithCodeApisMap;
+	
 	@PostConstruct
 	public void init() throws Exception {
 		long initTime = System.currentTimeMillis();
@@ -341,19 +351,22 @@ public class CrokageApp {
 		wordsAndVectorsLines = new ArrayList<>();
 		soContentWordVectorsMap = new HashMap<>();
 		allQuestionsIdsTitlesMap = new HashMap<>();
-		allQuestionsIdsContentsMap= new HashMap<>();
+		allAnswersIdsContentsParentContentsMap= new HashMap<>();
 		questionsIdsScores = new HashMap<>();
 		answersIdsScores = new HashMap<>();
 		allWordsSetForBuckets = new HashSet<>();
 		methodsCounterMap = new HashMap<>();
 		classesCounterMap = new HashMap<>();
+		topAnswerParentPairsAnswerIdScoreMap = new HashMap<>(); 
 		groundTruthSelectedQueriesAnswersIdsMap = new LinkedHashMap<>();
-		recommendedQueriesThreadsIdsMap = new LinkedHashMap<>();
+		allAnswersWithUpvotesBucketsMap = new HashMap<>(); 
 		topClassesRelevantAnswersIds = new HashSet<>();
 		rackQueriesApisMap = new LinkedHashMap<>();
 		bikerQueriesApisClassesMap = new LinkedHashMap<>();
 		bikerQueriesApisClassesAndMethodsMap = new LinkedHashMap<>();
 		nlp2ApiQueriesApisMap = new LinkedHashMap<>();
+		queriesThreadsIdsMap = new LinkedHashMap<>();
+		upvotedPostsIdsWithCodeApisMap = new HashMap<>();
 		
 		processedQueries = new ArrayList<>();
 		
@@ -372,7 +385,7 @@ public class CrokageApp {
 				+ "\n cutoff: " + cutoff
 				+ "\n useCodeInSimCalculus: " + useCodeInSimCalculus
 				+ "\n topSimilarQuestionsNumber: " + topSimilarQuestionsNumber
-				//+ "\n topSimilarAnswersNumber: " + topSimilarAnswersNumber
+				+ "\n topApisScoredPairsPercent: " + topApisScoredPairsPercent
 				+ "\n dataSet: " + dataSet
 				+ "\n iHaveALotOfMemory: " + iHaveALotOfMemory
 				+ "\n productionEnvironment: " + productionEnvironment
@@ -390,7 +403,11 @@ public class CrokageApp {
 		case "runApproach":
 			runApproach();
 			break;
-		
+				
+		case "generateMetricsForApiExtractorsGroundTruth":
+			generateMetricsForApiExtractorsGroundTruth();
+			break;	
+			
 		case "compareCrokageWithGoogleThreads":
 			compareCrokageWithGoogleThreads();
 			break;
@@ -522,6 +539,14 @@ public class CrokageApp {
 			generateInvertedIndexFileFromSOPosts();
 			break;
 		
+		case "generatePostsApisMap":
+			generatePostsApisMap();
+			break;	
+			
+		case "loadPostsApisMap":
+			loadUpvotedPostsWithCodeApisMap();
+			break;	
+			
 		case "generateMetricsForApiExtractors":
 			generateMetricsForApiExtractors(null);
 			break;	
@@ -568,13 +593,16 @@ public class CrokageApp {
 
 	}
 
-	
+
+	private void loadUpvotedPostsWithCodeApisMap() throws Exception {
+		long initTime = System.currentTimeMillis();
+		upvotedPostsIdsWithCodeApisMap.putAll(CrokageUtils.readPostsIdsApisMap(SO_UPVOTED_POSTS_WITH_CODE_APIS_FILE));
+		crokageUtils.reportElapsedTime(initTime,"loadUpvotedPostsWithCodeApisMap");
+	}
 
 
 	private void compareCrokageWithGoogleThreads() throws Exception {
 		Map<String,Set<Integer>> googleQueriesAndSOIdsMap = new LinkedHashMap<>();
-		
-		
 		Map<String, Set<Integer>> googleRecommendedResults = new LinkedHashMap<>();
 		
 		googleQueriesAndSOIdsMap = CrokageUtils.readCrawledQuestionsIds(GOOGLE_TOP_RESULTS_FOR_NLP2API);
@@ -583,7 +611,19 @@ public class CrokageApp {
 		//load recommended 
 		runApproach();
 		
-		loadGroundTruthSelectedQueries();
+		//Map<String, Set<Integer>> groundTruthSelectedQueriesQuestionsIdsMap = getGroundTruthSelectedQueriesQuestionsIdsMap();
+		
+		MetricResult metricResult = new MetricResult();
+		metricResult.setApproach("crokage stage1 x google");
+		analyzeResults(queriesThreadsIdsMap,googleQueriesAndSOIdsMap,metricResult);
+		
+	}
+
+
+
+
+
+	private Map<String, Set<Integer>> getGroundTruthSelectedQueriesQuestionsIdsMap() {
 		Map<String, Set<Integer>> groundTruthSelectedQueriesQuestionsIdsMap = new LinkedHashMap<>();
 		
 		for(String query: groundTruthSelectedQueriesAnswersIdsMap.keySet()) {
@@ -600,19 +640,230 @@ public class CrokageApp {
 			groundTruthSelectedQueriesQuestionsIdsMap.put(query, parentIds); 
 			
 		}
+		return groundTruthSelectedQueriesQuestionsIdsMap;
+	}
+
+
+
+
+	private void generateMetricsForApiExtractorsGroundTruth() throws Exception {
+		String processedQuery;
+		String rawQuery;
+		Set<Integer> answersWithTopFrequentAPIs=null;
+		Set<Integer> luceneAnswersSearchResult=null;
+		Set<Integer> topKRelevantQuestionsIds=null;
+		Map<String, Set<Integer>> recommendedResults = new LinkedHashMap<>();
 		
+		//load input queries considering dataset
+		processInputQueries();
 		
+		//load ground truth
+		loadGroundTruthSelectedQueries();
 		
+		//load answers map (id,parentId)
+		readAnswersIdsParentsMap();
 		
+		//load the inverted index (api, postsSet)
+		loadInvertedIndexFile();
+		
+		//filter by cutoff and sort in descending order
+		reduceBigMapFileToMininumAPIsCount();
+				
+		resetAPIExtractors();
+		
+		//load apis considering approaches
+		getApisForApproaches();
+		
+		//load <postId,Set<Apis>> map
+		loadUpvotedPostsWithCodeApisMap();
+		
+		long initTime2 = System.currentTimeMillis();
+		List<Bucket> buckets = crokageService.getUpvotedAnswersIdsContentsAndParentContents();
+		for(Bucket bucket:buckets) {
+			allAnswersWithUpvotesBucketsMap.put(bucket.getId(), bucket);
+		}
+		crokageUtils.reportElapsedTime(initTime2,"getUpvotedAnswersIdsContentsAndParentContents");
+		
+		//combine state of art approaches considering the order in parameters
+		Map<Integer, Set<String>> recommendedApis = getRecommendedApis();
+		
+		Set<Integer> keys = recommendedApis.keySet();
+		
+		int count = 1;
+		double sum=0;
+		for(Integer key: keys) {  //for each query 
+			initTime2 = System.currentTimeMillis();
+			
+			rawQuery = queries.get(key-1);
+			System.out.println("\n\nQuery: "+count+" "+rawQuery);
+			count++;
+			processedQuery = processedQueries.get(key-1);
+			System.out.println("Processed query: "+processedQuery);
+			
+			Set<String> topClasses = recommendedApis.get(key);
+			
+			/*if(rawQuery.contains("How to implement the hashCode and equals method using Apache Commons?")) {
+				System.out.println("Top classes: "+topClasses);
+			}*/
+			
+			//first filter, APIs
+			answersWithTopFrequentAPIs = getAnswersForTopFrequentAPIs(topClasses);
+			
+			//second filter, lucene search
+			luceneAnswersSearchResult = performLuceneSearch(answersWithTopFrequentAPIs,processedQuery);
+			
+			
+			queriesThreadsIdsMap.put(rawQuery, luceneAnswersSearchResult);
+			sum+=answersWithTopFrequentAPIs.size();
+			crokageUtils.reportElapsedTime(initTime2,"for query");
+		}
+		
+		//Map<String, Set<Integer>> groundTruthSelectedQueriesQuestionsIdsMap = getGroundTruthSelectedQueriesQuestionsIdsMap();
 		
 		MetricResult metricResult = new MetricResult();
-		metricResult.setApproach("crokage stage1 x google");
-		analyzeResults(recommendedQueriesThreadsIdsMap,groundTruthSelectedQueriesQuestionsIdsMap,metricResult);
+		metricResult.setApproach("crokage");
+		analyzeResults(queriesThreadsIdsMap,groundTruthSelectedQueriesAnswersIdsMap,metricResult);
+		String obsComp = "Average top frequent apis: "+sum/keys.size()+ " for topClasses: "+numberOfAPIClasses;
+		System.out.println(obsComp);
+		crokageService.saveMetricResult(metricResult,useCodeInSimCalculus,"crokage stage1 x verifying recall for api extractors. "+obsComp,topSimilarQuestionsNumber,cutoff,numberOfAPIClasses,topApisScoredPairsPercent);
+		
+	}
+
+	
+	
+
+
+	private Set<Integer> performLuceneSearch(Set<Integer> answersWithTopFrequentAPIs, String processedQuery) throws Exception {
+		//List<Bucket> buckets = crokageService.getUpvotedAnswersIdsContentsAndParentContents();
+		
+		
+		List<Bucket> upvotedScoredAnswers = new ArrayList<>();
+		for(Integer answerId: answersWithTopFrequentAPIs) {
+			upvotedScoredAnswers.add(allAnswersWithUpvotesBucketsMap.get(answerId));
+		}
+
+		luceneSearcherBM25.buildSearchManager(upvotedScoredAnswers);
+		
+		Set<Integer> answersIds = luceneSearcherBM25.search(processedQuery, 20000);
+		luceneSearcherBM25.finalize();
+		
+		return answersIds;
 		
 	}
 
 
-	
+	private void calculateApiScore(AnswerParentPair answerParentPair, Set<String> topClasses) {
+		Set<String> allApis = new HashSet<>();
+		ArrayList<String> arr = new ArrayList<>(topClasses);
+		double rrank=0;
+		
+		Set<String> parentApis = upvotedPostsIdsWithCodeApisMap.get(answerParentPair.getParentId());
+		Set<String> answerApis = upvotedPostsIdsWithCodeApisMap.get(answerParentPair.getAnswerId());
+		if(parentApis!=null) {
+			allApis.addAll(parentApis);
+		}
+		if(answerApis!=null) {
+			allApis.addAll(answerApis);
+		}
+		
+		/*
+		for (int i = 0; i < rapis.size(); i++) {
+			String api = rapis.get(i);
+			if (isApiFound(api, gapis)) {
+				rrank = 1.0 / (i + 1);
+				break;
+			}
+		}*/
+		
+		for (int i = 0; i < arr.size(); i++) {
+			String api = arr.get(i);
+			if(allApis.contains(api)) {
+				rrank += 1.0 / (i + 1);
+			}
+		}
+		answerParentPair.setApiScore(rrank);
+		arr= null;
+		allApis=null;
+	}
+
+
+
+
+
+	private Set<Integer> getCandidateQuestionsFromTopApisOld(Set<String> topClasses) throws Exception {
+		//get ids from reducedMap for top classes
+		topClassesRelevantAnswersIds.clear();
+		Set<Integer> candidateQuestionsIds = new HashSet<>();
+		List<Integer> answersWithNoUpvotes = new ArrayList<>();  //allAnswersWithUpvotesIdsParentIdsMap is filled with previou process that fetches answers with upvotes
+		
+		for(String topClass:topClasses) {
+			Set<Integer> answersIdsFromBigMap = filteredSortedMapAnswersIds.get(topClass);
+			if(answersIdsFromBigMap!=null) {
+				topClassesRelevantAnswersIds.addAll(answersIdsFromBigMap);
+			}else {
+				if(!productionEnvironment) {
+					System.out.println("*** Class not found in bigMap: "+topClass);
+				}
+			}
+		}
+		
+		if(!productionEnvironment) {
+			System.out.println("At least "+topClassesRelevantAnswersIds.size()+ " answers contain those classes. Filtering relevants...");
+		}
+		
+		for(Integer answerId: topClassesRelevantAnswersIds) {
+			if(allAnswersWithUpvotesIdsParentIdsMap.containsKey(answerId)) {
+				int questionId = allAnswersWithUpvotesIdsParentIdsMap.get(answerId);
+				candidateQuestionsIds.add(questionId);
+			}else {
+				answersWithNoUpvotes.add(answerId);
+			}
+		}
+		
+		topClassesRelevantAnswersIds.removeAll(answersWithNoUpvotes);
+		
+		int listSize = answersWithNoUpvotes.size();
+		int k = listSize > 10? 10:listSize; 
+		
+		String answersWithNoUpvotesStr = StringUtils.join(answersWithNoUpvotes.subList(0, k), ',');
+		
+		if(!productionEnvironment) {
+			System.out.println("Candidate questions to top classes relevant answers: "+candidateQuestionsIds.size()+ " - no upvotes: "+answersWithNoUpvotes.size()+ " - remaining: "+topClassesRelevantAnswersIds.size());
+		}
+		//System.out.println("Number of discarded answers because they have no upvotes: "+answersWithNoUpvotes.size()+ " showing "+k+": "+answersWithNoUpvotesStr);
+		//System.out.println("Number of candidate answers left - stage 1: "+topClassesRelevantAnswersIds.size());
+		answersWithNoUpvotes=null;
+		
+		
+		return candidateQuestionsIds;
+	}
+
+
+
+
+	private Set<Integer> getCandidateAnswersIdsOld(Set<Integer> topKRelevantQuestionsIds) {
+		//fetch again the answers related to those questions
+		Set<Integer> candidateAnswersIds = new LinkedHashSet<>();
+		
+		for(Integer quesitonId: topKRelevantQuestionsIds) {
+			if(allAnswersWithUpvotesIdsParentIdsMap.containsValue(quesitonId)) {
+				Set<Integer> keys = CrokageUtils.getKeysByValue(allAnswersWithUpvotesIdsParentIdsMap, quesitonId);
+				for(Integer id: keys) {
+					if(topClassesRelevantAnswersIds.contains(id)) {
+						candidateAnswersIds.add(id);
+					}
+				}
+			}
+		}
+		
+		if(!productionEnvironment) {
+			reportSimilarRelatedPosts(candidateAnswersIds,"answers","End of Ranking phase 2: ");
+		}
+		return candidateAnswersIds;
+	}
+
+
+
 	private void runApproach() throws Exception {
 		String processedQuery;
 		String rawQuery;
@@ -626,12 +877,16 @@ public class CrokageApp {
 		//load ground truth
 		loadGroundTruthSelectedQueries();
 		
+		List<Bucket> buckets = crokageService.getUpvotedAnswersIdsContentsAndParentContents();
+		luceneSearcherBM25.buildSearchManager(buckets);
+		
 		if(iHaveALotOfMemory) { //load all word vectors only once
 			readSoContentWordVectorsForAllWords();
 		}
 		
 		//load questions map (id,title)
-		readQuestionsIdsTitlesMap();
+		//readQuestionsIdsTitlesMap();
+		//readAllAnswersIdsContentsParentContentsMap();
 		
 		//load so content word vectors to a list of strings representing posts (each line is a post)
 		if(wordsAndVectorsLines.isEmpty()) {
@@ -655,7 +910,6 @@ public class CrokageApp {
 		//read idf vocabulary map (word, idf)
 		crokageUtils.readIDFVocabulary(soIDFVocabularyMap);
 		
-		
 		/*String subActions[] = {
 				//"rack",
 				//"biker",
@@ -674,95 +928,226 @@ public class CrokageApp {
 				"nlp2api|biker|rack"
 		}; */
 		
-		String subActions[] = {
+		/*String subActions[] = {
 				"rack|biker|nlp2api",
-		}; 
+		}; */
 		
-		for(String subActionTmp: subActions) {
-			this.subAction = subActionTmp;
-			resetAPIExtractors();
-			
-			//load apis considering approaches
-			getApisForApproaches();
-			
-			//combine state of art approaches considering the order in parameters
-			Map<Integer, Set<String>> recommendedApis = getRecommendedApis();
-			
-			Set<Integer> keys = recommendedApis.keySet();
-			
-			/*double simWeights[] = {0.9, 1.0};
-			double classFreqWeights[] = {0.7, 0.8, 0.9};
-			double methodFreqWeights[] = {0.7, 0.8, 0.9};
-			double repWeights[] = {0.4, 0.5, 0.6};
-			double upWeights[] = {0.4, 0.5, 0.6};*/
-			
-			double simWeights[] = {0.9};
-			double classFreqWeights[] = {0.9};
-			double methodFreqWeights[] = {0.7};
-			double repWeights[] = {0.4};
-			//double repWeights[] = {0};
-			double upWeights[] = {0.6};
-			//double upWeights[] = {0};
-			
-			
-			int topSimilarQuestionsNumbers[] = {120};
-			
-			
-			//boolean useCodeInSimCalculusArr[] = {true,false};
-			String obsTmp;
-			int count=0;
-			
-			for(int topSimilarQuestionsNumberValue: topSimilarQuestionsNumbers) {
-				for(double simWeight: simWeights) {
-					for(double classFreqWeight: classFreqWeights) {
-						for(double methodFreqWeight: methodFreqWeights) {
-							for(double repWeight: repWeights) {
-								for(double upWeight: upWeights) {
-									BotComposer.setSimWeight(simWeight);
-									BotComposer.setClassFreqWeight(classFreqWeight);
-									BotComposer.setMethodFreqWeight(methodFreqWeight);
-									BotComposer.setRepWeight(repWeight);
-									BotComposer.setUpWeight(upWeight);
-									this.topSimilarQuestionsNumber = topSimilarQuestionsNumberValue;
-									
-									obsTmp = "APIExtractor: "+subAction+ " - "+obs;
-									System.out.println(obsTmp);
-									count++;
-									performSearch(recommendedApis, keys, recommendedResults);
-									
-									MetricResult metricResult = new MetricResult();
-									metricResult.setApproach("crokage");
-									crokageUtils.reduceSetV2(recommendedResults, 10);
-									analyzeResults(recommendedResults,groundTruthSelectedQueriesAnswersIdsMap,metricResult);
-									crokageService.saveMetricResult(metricResult,useCodeInSimCalculus,obsTmp,topSimilarQuestionsNumber,cutoff);
-									
-								}
+		//for(String subActionTmp: subActions) {
+			//this.subAction = subActionTmp;
+		resetAPIExtractors();
+		
+		//load apis considering approaches
+		getApisForApproaches();
+		
+		//load <postId,Set<Apis>> map
+		loadUpvotedPostsWithCodeApisMap();
+		
+		//combine state of art approaches considering the order in parameters
+		Map<Integer, Set<String>> recommendedApis = getRecommendedApis();
+		
+		Set<Integer> keys = recommendedApis.keySet();
+		
+		/*double simWeights[] = {0.9, 1.0};
+		double classFreqWeights[] = {0.7, 0.8, 0.9};
+		double methodFreqWeights[] = {0.7, 0.8, 0.9};
+		double repWeights[] = {0.4, 0.5, 0.6};
+		double upWeights[] = {0.4, 0.5, 0.6};*/
+		
+		double simWeights[] = {0.9};
+		double classFreqWeights[] = {0.9};
+		double methodFreqWeights[] = {0.7};
+		double repWeights[] = {0.3};
+		//double repWeights[] = {0};
+		double upWeights[] = {0.3};
+		//double upWeights[] = {0};
+		
+		
+		int topSimilarQuestionsNumbers[] = {120};
+		
+		
+		//boolean useCodeInSimCalculusArr[] = {true,false};
+		String obsTmp;
+		int count=0;
+		
+		for(int topSimilarQuestionsNumberValue: topSimilarQuestionsNumbers) {
+			for(double simWeight: simWeights) {
+				for(double classFreqWeight: classFreqWeights) {
+					for(double methodFreqWeight: methodFreqWeights) {
+						for(double repWeight: repWeights) {
+							for(double upWeight: upWeights) {
+								BotComposer.setSimWeight(simWeight);
+								BotComposer.setClassFreqWeight(classFreqWeight);
+								BotComposer.setMethodFreqWeight(methodFreqWeight);
+								BotComposer.setRepWeight(repWeight);
+								BotComposer.setUpWeight(upWeight);
+								this.topSimilarQuestionsNumber = topSimilarQuestionsNumberValue;
+								
+								obsTmp = "testando apenas as TopClassesRelevantAnswersIdsMap com o ground truth- APIExtractor: "+subAction+ " - "+obs;
+								System.out.println(obsTmp);
+								count++;
+								performSearch(recommendedApis, keys, recommendedResults);
+								
+								MetricResult metricResult = new MetricResult();
+								metricResult.setApproach("crokage");
+								crokageUtils.reduceSetV2(recommendedResults, topk);
+								analyzeResults(recommendedResults,groundTruthSelectedQueriesAnswersIdsMap,metricResult);
+								crokageService.saveMetricResult(metricResult,useCodeInSimCalculus,obsTmp,topSimilarQuestionsNumber,cutoff,numberOfAPIClasses,topApisScoredPairsPercent);
+								
 							}
 						}
 					}
 				}
 			}
-			/*BotComposer.setSimWeight(0.9);
-			BotComposer.setClassFreqWeight(0.75);
-			BotComposer.setMethodFreqWeight(0.75);
-			BotComposer.setRepWeight(0.5);
-			BotComposer.setUpWeight(0.5);
-			
-			performSearch(recommendedApis, keys, recommendedResults);
-			MetricResult metricResult = new MetricResult();
-			crokageUtils.reduceSetV2(recommendedResults, 10);
-			analyzeResultsV2(recommendedResults,groundTruthSelectedQueriesAnswersIdsMap,metricResult);
-			
-			crokageService.saveMetricResult(metricResult,useCodeInSimCalculus,obs,topSimilarAnswersNumber,topSimilarQuestionsNumber,cutoff);*/
-			
-			System.out.println("Number of searches: "+count);
-			
 		}
+		/*BotComposer.setSimWeight(0.9);
+		BotComposer.setClassFreqWeight(0.75);
+		BotComposer.setMethodFreqWeight(0.75);
+		BotComposer.setRepWeight(0.5);
+		BotComposer.setUpWeight(0.5);
+		
+		performSearch(recommendedApis, keys, recommendedResults);
+		MetricResult metricResult = new MetricResult();
+		crokageUtils.reduceSetV2(recommendedResults, 10);
+		analyzeResultsV2(recommendedResults,groundTruthSelectedQueriesAnswersIdsMap,metricResult);
+		
+		crokageService.saveMetricResult(metricResult,useCodeInSimCalculus,obs,topSimilarAnswersNumber,topSimilarQuestionsNumber,cutoff);*/
+		
+		System.out.println("Number of searches: "+count);
+		
+		//}
 		
 		//System.out.println(metricResult.toString());
 	}
 
 
+	private void performSearch(Map<Integer, Set<String>> recommendedApis, Set<Integer> keys, Map<String, Set<Integer>> recommendedResults) throws Exception, IOException {
+		long initTime = System.currentTimeMillis();
+		String processedQuery;
+		String rawQuery;
+		Set<Integer> answersWithTopFrequentAPIs=null;
+		Set<Integer> candidateQuestionsIds;
+		Set<Integer> topKRelevantQuestionsIds;
+		int count = 1;
+		for(Integer key: keys) {  //for each query 
+			long initTime2 = System.currentTimeMillis();
+			
+			rawQuery = queries.get(key-1);
+			System.out.println("\n\nQuery: "+count+" "+rawQuery);
+			count++;
+			
+			//remove stop words, punctuations, etc. The same process applied to preprocess all SO titles.
+			processedQuery = processedQueries.get(key-1);
+			if(!productionEnvironment) {
+				System.out.println("Processed query: "+processedQuery);
+			}
+			Set<String> topClasses = recommendedApis.get(key);
+			if(!productionEnvironment) {
+				System.out.println("Top classes: "+topClasses);
+			}
+			
+			answersWithTopFrequentAPIs = getAnswersForTopFrequentAPIs(topClasses);
+			System.out.println("Size of answersWithTopFrequentAPIs: "+answersWithTopFrequentAPIs.size());
+			//queriesThreadsIdsMap.put(rawQuery, answersWithTopFrequentAPIs);
+			
+			//crokageUtils.reportElapsedTime(initTime2,"for query 1");
+			//get vectors for query words
+			double[][] matrix1 = CrokageUtils.getMatrixVectorsForQuery(processedQuery,soContentWordVectorsMap);
+			
+			//get idfs for query
+			double[][] idf1 = CrokageUtils.getIDFMatrixForQuery(processedQuery, soIDFVocabularyMap);
+			//crokageUtils.reportElapsedTime(initTime2,"for query 2");
+			
+			//add vectors for all retrieved answers
+			if(!iHaveALotOfMemory) {
+				addVectorsToSoContentWordVectorsMap(answersWithTopFrequentAPIs);
+			}	
+			
+			
+			//crokageUtils.reportElapsedTime(initTime,"for loop query 2");
+			//reportTest("here 1",candidateQuestionsIds,key);
+			Set<Integer> topKRelevantAnswersIds = getTopKRelevantAnswers(answersWithTopFrequentAPIs,bikerTopMethods,matrix1,idf1,key,processedQuery,topClasses);
+			recommendedResults.put(rawQuery, topKRelevantAnswersIds);
+			crokageUtils.reportElapsedTime(initTime2," query 3");
+			//crokageUtils.reportElapsedTime(initTime2," query "+key);
+			
+			/*topKRelevantQuestionsIds = getTopKRelevantQuestionsIds(candidateQuestionsIds,bikerTopMethods,matrix1,idf1,key,processedQuery);
+			
+			Set<Integer> candidateAnswersIds = getCandidateAnswersIdsOld(topKRelevantQuestionsIds);
+			
+			Set<Integer> topKRelevantAnswersIds = new LinkedHashSet<>();
+			
+			if(!CollectionUtils.isEmpty(candidateAnswersIds)) {
+				topKRelevantAnswersIds = getTopKRelevantAnswers(candidateAnswersIds,bikerTopMethods,matrix1,idf1,key,processedQuery,topClasses);
+			}else {
+				System.out.println("Empty candidateAnswersIds for query: "+rawQuery+ " - processed: "+processedQuery
+						+ " -\n topKRelevantQuestionsIds: "+topKRelevantQuestionsIds
+						+ " -\n candidateQuestionsIds: "+candidateQuestionsIds
+						+ " -\n topClasses: "+topClasses);
+			}
+			
+			recommendedResults.put(rawQuery, topKRelevantAnswersIds);
+			
+			crokageUtils.reportElapsedTime(initTime2," query "+key);*/
+			
+			
+		}
+		crokageUtils.reportElapsedTime(initTime,"all "+keys.size() +" queries.");
+		
+	}
+
+	private Set<Integer> getAnswersForTopFrequentAPIs(Set<String> topClasses) {
+		//long initTime = System.currentTimeMillis();
+		
+		//Set<Integer> answersWithTopFrequentAPIs = new HashSet<>();
+		Set<AnswerParentPair> answerParentThreads = new HashSet<>(); 
+		//List<AnswerParentPair> sortedPairs = new ArrayList<>();
+		List<Integer> topNAnswersIds = new ArrayList<>();
+		//Set<Integer> topNAnswersIds = new LinkedHashSet<>();
+		
+		for(String topClass:topClasses) {
+			Set<Integer> answersIdsFromBigMap = filteredSortedMapAnswersIds.get(topClass);
+			if(answersIdsFromBigMap==null) {
+				//System.out.println("Answers not found for topClass: "+topClass);
+				continue;
+			}	
+			for(Integer answerId: answersIdsFromBigMap) {
+				if(allAnswersWithUpvotesIdsParentIdsMap.containsKey(answerId)) { //is upvoted answer
+					//answersWithTopFrequentAPIs.add(answerId);
+					AnswerParentPair answerParentPair = new AnswerParentPair(answerId, allAnswersWithUpvotesIdsParentIdsMap.get(answerId));
+					calculateApiScore(answerParentPair,topClasses);
+					answerParentThreads.add(answerParentPair);
+					topAnswerParentPairsAnswerIdScoreMap.put(answerId, answerParentPair.getApiScore());
+				}
+			}
+		}
+		
+		if(!productionEnvironment) {
+			System.out.println("Number of pairs(answer+parent) containing topClasses: "+answerParentThreads.size());
+		}
+		
+		
+		int topApisScoredPairs = answerParentThreads.size()*topApisScoredPairsPercent/100;
+		
+		//sort by apiScore desc
+		topNAnswersIds= answerParentThreads.stream()
+				.sorted(Comparator.reverseOrder())
+				.limit(topApisScoredPairs)
+				.map(x -> x.getAnswerId())
+				.collect(Collectors.toList());
+		
+		/*sortedPairs= topAnswerParentPairs.stream()
+				.sorted(Comparator.comparing(AnswerParentPair::getApiScore).reversed())
+				.limit(topApisScoredPairsPercent)
+				//.map(x -> x.getAnswerId())
+				.collect(Collectors.toList());*/
+		
+		Set<Integer> topNAnswersIdsSet = new LinkedHashSet<>(topNAnswersIds);
+		topNAnswersIds=null;
+		answerParentThreads=null;
+		//crokageUtils.reportElapsedTime(initTime,"getAnswersForTopFrequentAPIs");
+		
+		return topNAnswersIdsSet;
+	}
 
 
 	private void generateMetricsForBaselineApproaches() throws Exception {
@@ -804,7 +1189,7 @@ public class CrokageApp {
 				}else if(question.getAcceptedAnswerId()!=null) {
 					acceptedOrMostUpvotedAnswersIds.add(question.getAcceptedAnswerId());
 				}else { //get answer with most upvotes
-					Integer mostUpvotedAnswer = crokageService.getMostUpvotedAnswerForQuestion(questionId);
+					Integer mostUpvotedAnswer = crokageService.getMostUpvotedAnswerForQuestionId(questionId);
 					acceptedOrMostUpvotedAnswersIds.add(mostUpvotedAnswer);
 				}
 				
@@ -819,7 +1204,7 @@ public class CrokageApp {
 		MetricResult metricResult = new MetricResult();
 		metricResult.setApproach("google");
 		analyzeResults(recommendedResults,groundTruthSelectedQueriesAnswersIdsMap,metricResult);
-		crokageService.saveMetricResult(metricResult,useCodeInSimCalculus,"metrics for google with accepted answers or most upvoted answers",10,cutoff);
+		crokageService.saveMetricResult(metricResult,useCodeInSimCalculus,"metrics for google with accepted answers or most upvoted answers",10,cutoff,numberOfAPIClasses,topApisScoredPairsPercent);
 		
 		
 		
@@ -848,11 +1233,17 @@ public class CrokageApp {
 			
 			double meanFull = (likert1+likert2)/(double)2;
 			double meanLikert=0d;
-			meanLikert = BotUtils.round(meanFull,2);
+			meanLikert = CrokageUtils.round(meanFull,2);
 			userEvaluation.setMeanLikert(meanLikert);
 			
 			if(meanLikert>=4) { 
-				validEvaluations.add(userEvaluation);
+				
+				//verify if post contain APIs
+				Post answer = crokageService.findPostById(userEvaluation.getPostId());
+				Set<String> classes = crokageUtils.extractClassesFromProcessedCode(answer.getCode());
+				if(!classes.isEmpty()) {
+					validEvaluations.add(userEvaluation);
+				}
 			}
 		}
 		
@@ -865,7 +1256,9 @@ public class CrokageApp {
 		}
 				
 		for(String query: queries) {
-			
+			if(query.contains("How to implement the hashCode and equals method using Apache Commons?")) {
+				System.out.println("");
+			}
 			Map<String,Set<Integer>> strIdsMap = validEvaluations.stream()
 					.filter(e -> Objects.equals(e.getQuery(), query))
 					.collect(Collectors.groupingBy(e -> new String(e.getQuery()),
@@ -1195,7 +1588,7 @@ public class CrokageApp {
 			        //.site("https://stackoverflow.com")
 			SearchResult result = googleWebSearch.search(searchQuery,useProxy);
 			List<String> urls = result.getUrls();
-			BotUtils.identifyQuestionsIdsFromUrls(urls,soQuestionsIds);
+			CrokageUtils.identifyQuestionsIdsFromUrls(urls,soQuestionsIds);
 						
 		} catch (Exception e) {
 			System.out.println("Error ... "+e);
@@ -1294,22 +1687,25 @@ public class CrokageApp {
 		crokageUtils.reportElapsedTime(initTime,"readQuestionsIdsTitlesMap");
 	}
 
-
-
+	
+	private void readAllAnswersIdsContentsParentContentsMap() throws IOException {
+		long initTime = System.currentTimeMillis();
+		System.out.println("Reading all answers ids and contents and their parent contents from file...");
+		List<String> idsAndContents = Files.readAllLines(Paths.get(SO_ANSWERS_IDS_CONTENTS_PARENT_CONTENTS_MAP));
+		crokageUtils.readWordsFromFileToMap(allAnswersIdsContentsParentContentsMap,idsAndContents);
+		/*String titleTest = allQuestionsIdsTitlesMap.get(43966301);
+		System.out.println(titleTest);*/
+		crokageUtils.reportElapsedTime(initTime,"readAllAnswersIdsContentsParentContentsMap");
+	}
 
 	private void generateQuestionsIdsContentMap() throws FileNotFoundException {
 		long initTime = System.currentTimeMillis();
-		loadAllQuestionsIdsContents();
-		crokageUtils.writeMapToFile2(allQuestionsIdsContentsMap, SO_QUESTIONS_IDS_CONTENT_MAP);
+		//loadAllQuestionsIdsContentsAndAcceptedOrMostUpvotedAnswerContentsMap();
+		loadAllAnswersIdsContentsAndParentContentsMap();
+		crokageUtils.writeMapToFile2(allAnswersIdsContentsParentContentsMap, SO_ANSWERS_IDS_CONTENTS_PARENT_CONTENTS_MAP);
 		crokageUtils.reportElapsedTime(initTime,"generateQuestionsIdsTitlesMap");
 		
 	}
-
-
-
-
-
-
 
 
 	private void generateQuestionsIdsTitlesMap() throws FileNotFoundException {
@@ -1319,7 +1715,94 @@ public class CrokageApp {
 		crokageUtils.reportElapsedTime(initTime,"generateQuestionsIdsTitlesMap");
 	}
 
+	
+	private void loadAllAnswersIdsContentsAndParentContentsMap() {
+		//load threads whose questions has score > 0 
+		List<Bucket> buckets = crokageService.getUpvotedAnswersIdsContentsAndParentContents();
+		System.out.println("buckets recuperados: "+buckets.size());
+		int count=0;
+		for(Bucket bucket: buckets) {
+			count++;
+			if(count%10000==0) {
+				System.out.println(count+" buckets processed...");
+			}
+			StringBuffer stringBuffer = new StringBuffer();
+			if(!StringUtils.isBlank(bucket.getParentProcessedTitle())) {
+				stringBuffer.append(bucket.getParentProcessedTitle());
+			}
+			if(!StringUtils.isBlank(bucket.getParentProcessedBody())) {
+				stringBuffer.append(" ");
+				stringBuffer.append(bucket.getParentProcessedBody());
+			}
+			if(!StringUtils.isBlank(bucket.getParentProcessedCode())) {
+				stringBuffer.append(" ");
+				stringBuffer.append(bucket.getParentProcessedCode());
+			}
+			if(!StringUtils.isBlank(bucket.getProcessedBody())) {
+				stringBuffer.append(" ");
+				stringBuffer.append(bucket.getProcessedBody());
+			}
+			if(!StringUtils.isBlank(bucket.getProcessedCode())) {
+				stringBuffer.append(" ");
+				stringBuffer.append(bucket.getProcessedCode());
+			}
+			
+			allAnswersIdsContentsParentContentsMap.put(bucket.getId(), stringBuffer.toString());
+			
+		}
+		
+	}
 
+	/*
+	private void loadAllQuestionsIdsContentsAndAcceptedOrMostUpvotedAnswerContentsMap() {
+		//load threads whose questions has score > 0 
+		List<Bucket> buckets = crokageService.getQuestionsProcessedTitlesBodiesCodes();
+		for(Bucket bucket: buckets) {
+			StringBuffer stringBuffer = new StringBuffer();
+			if(!StringUtils.isBlank(bucket.getProcessedTitle())) {
+				stringBuffer.append(bucket.getProcessedTitle());
+			}
+			if(!StringUtils.isBlank(bucket.getProcessedBody())) {
+				stringBuffer.append(" ");
+				stringBuffer.append(bucket.getProcessedBody());
+			}
+			if(!StringUtils.isBlank(bucket.getProcessedCode())) {
+				stringBuffer.append(" ");
+				stringBuffer.append(bucket.getProcessedCode());
+			}
+			
+			Post answer=null;
+			//append content of accepted answer or most upvoted answer
+			if(bucket.getAcceptedAnswerId()!=null) {
+				answer = crokageService.findPostById(bucket.getAcceptedAnswerId());
+				if(answer!=null) {
+					if(StringUtils.isBlank(answer.getProcessedCode())){
+						answer=null;
+					}
+				}
+			}	
+			if(answer==null) {	
+			    //get answer with most upvotes
+				answer = crokageService.getMostUpvotedAnswerWithCodeForQuestion(bucket.getId());
+			}
+			if(answer==null) {
+				System.out.println("no answer with code for question: "+bucket.getId());
+				continue;
+			}
+			if(!StringUtils.isBlank(answer.getProcessedBody())) {
+				stringBuffer.append(" ");
+				stringBuffer.append(answer.getProcessedBody());
+			}
+			
+			if(!StringUtils.isBlank(answer.getProcessedCode())) {
+				stringBuffer.append(" ");
+				stringBuffer.append(answer.getProcessedCode());
+			}
+			allAnswersIdsContentsParentContentsMap.put(bucket.getId(), stringBuffer.toString());
+			
+		}
+		
+	}*/
 
 
 	private void buildLuceneIndex() {
@@ -1603,146 +2086,8 @@ public class CrokageApp {
 
 
 
-	private void performSearch(Map<Integer, Set<String>> recommendedApis, Set<Integer> keys, Map<String, Set<Integer>> recommendedResults) throws Exception, IOException {
-		long initTime = System.currentTimeMillis();
-		String processedQuery;
-		String rawQuery;
-		Set<Integer> candidateQuestionsIds;
-		Set<Integer> topKRelevantQuestionsIds;
-		int count = 1;
-		for(Integer key: keys) {  //for each query 
-			long initTime2 = System.currentTimeMillis();
-			
-			rawQuery = queries.get(key-1);
-			System.out.println("\n\nQuery: "+count+" "+rawQuery);
-			
-			//remove stop words, punctuations, etc. The same process applied to preprocess all SO titles.
-			processedQuery = processedQueries.get(key-1);
-			if(!productionEnvironment) {
-				System.out.println("Processed query: "+processedQuery);
-			}
-			Set<String> topClasses = recommendedApis.get(key);
-			if(!productionEnvironment) {
-				System.out.println("Top classes: "+topClasses);
-			}
-			//get vectors for query words
-			double[][] matrix1 = CrokageUtils.getMatrixVectorsForQuery(processedQuery,soContentWordVectorsMap);
-			
-			//get idfs for query
-			double[][] idf1 = CrokageUtils.getIDFMatrixForQuery(processedQuery, soIDFVocabularyMap);
-			//crokageUtils.reportElapsedTime(initTime,"for loop query 1");
-			//get biker methods and classes
-			//bikerTopMethods = getBikerTopMethods(key);
-			//bikerTopClasses = bikerQueriesApisClassesMap.get(key);
-			//System.out.println("Top classes from biker: "+bikerTopClasses);
-			
-			candidateQuestionsIds = getCandidateQuestionsFromTopApis(topClasses);
-			
-			//crokageUtils.reportElapsedTime(initTime,"for loop query 2");
-			//reportTest("here 1",candidateQuestionsIds,key);
-			recommendedQueriesThreadsIdsMap.put(rawQuery, candidateQuestionsIds);
-			/*
-			topKRelevantQuestionsIds = getTopKRelevantQuestionsIds(candidateQuestionsIds,bikerTopMethods,matrix1,idf1,key,processedQuery);
-			
-			
-		
-			Set<Integer> candidateAnswersIds = getCandidateAnswersIds(topKRelevantQuestionsIds);
-			
-			
-			Set<Integer> topKRelevantAnswersIds = new LinkedHashSet<>();
-			
-			if(!CollectionUtils.isEmpty(candidateAnswersIds)) {
-				topKRelevantAnswersIds = getTopKRelevantAnswers(candidateAnswersIds,bikerTopMethods,matrix1,idf1,key,processedQuery,topClasses);
-			}else {
-				System.out.println("Empty candidateAnswersIds for query: "+rawQuery+ " - processed: "+processedQuery
-						+ " -\n topKRelevantQuestionsIds: "+topKRelevantQuestionsIds
-						+ " -\n candidateQuestionsIds: "+candidateQuestionsIds
-						+ " -\n topClasses: "+topClasses);
-			}
-			
-			recommendedResults.put(rawQuery, topKRelevantAnswersIds);
-			
-			crokageUtils.reportElapsedTime(initTime2," query "+key);
-			count++;*/
-		}
-		crokageUtils.reportElapsedTime(initTime,"all "+keys.size() +" queries.");
-		
-	}
-
 	
-
-	private Set<Integer> getCandidateQuestionsFromTopApis(Set<String> topClasses) throws Exception {
-		//get ids from reducedMap for top classes
-		topClassesRelevantAnswersIds.clear();
-		Set<Integer> candidateQuestionsIds = new HashSet<>();
-		List<Integer> answersWithNoUpvotes = new ArrayList<>();  //allAnswersWithUpvotesIdsParentIdsMap is filled with previou process that fetches answers with upvotes
-		
-		for(String topClass:topClasses) {
-			Set<Integer> answersIdsFromBigMap = filteredSortedMapAnswersIds.get(topClass);
-			if(answersIdsFromBigMap!=null) {
-				topClassesRelevantAnswersIds.addAll(answersIdsFromBigMap);
-			}else {
-				if(!productionEnvironment) {
-					System.out.println("*** Class not found in bigMap: "+topClass);
-				}
-			}
-		}
-		
-		if(!productionEnvironment) {
-			System.out.println("At least "+topClassesRelevantAnswersIds.size()+ " answers contain those classes. Filtering relevants...");
-		}
-		
-		for(Integer answerId: topClassesRelevantAnswersIds) {
-			if(allAnswersWithUpvotesIdsParentIdsMap.get(answerId)!=null) {
-				int questionId = allAnswersWithUpvotesIdsParentIdsMap.get(answerId);
-				candidateQuestionsIds.add(questionId);
-			}else {
-				answersWithNoUpvotes.add(answerId);
-			}
-		}
-		
-		topClassesRelevantAnswersIds.removeAll(answersWithNoUpvotes);
-		
-		int listSize = answersWithNoUpvotes.size();
-		int k = listSize > 10? 10:listSize; 
-		
-		String answersWithNoUpvotesStr = StringUtils.join(answersWithNoUpvotes.subList(0, k), ',');
-		
-		if(!productionEnvironment) {
-			System.out.println("Candidate questions to top classes relevant answers: "+candidateQuestionsIds.size()+ " - no upvotes: "+answersWithNoUpvotes.size()+ " - remaining: "+topClassesRelevantAnswersIds.size());
-		}
-		//System.out.println("Number of discarded answers because they have no upvotes: "+answersWithNoUpvotes.size()+ " showing "+k+": "+answersWithNoUpvotesStr);
-		//System.out.println("Number of candidate answers left - stage 1: "+topClassesRelevantAnswersIds.size());
-		answersWithNoUpvotes=null;
-		//add vectors for all retrieved questions titles
-		addVectorsToSoContentWordVectorsMap(candidateQuestionsIds);
-		
-		return candidateQuestionsIds;
-	}
-
-
-
-
-	private Set<Integer> getCandidateAnswersIds(Set<Integer> topKRelevantQuestionsIds) {
-		//fetch again the answers related to those questions
-		Set<Integer> candidateAnswersIds = new LinkedHashSet<>();
-		
-		for(Integer quesitonId: topKRelevantQuestionsIds) {
-			if(allAnswersWithUpvotesIdsParentIdsMap.containsValue(quesitonId)) {
-				Set<Integer> keys = CrokageUtils.getKeysByValue(allAnswersWithUpvotesIdsParentIdsMap, quesitonId);
-				for(Integer id: keys) {
-					if(topClassesRelevantAnswersIds.contains(id)) {
-						candidateAnswersIds.add(id);
-					}
-				}
-			}
-		}
-		
-		if(!productionEnvironment) {
-			reportSimilarRelatedPosts(candidateAnswersIds,"answers","End of Ranking phase 2: ");
-		}
-		return candidateAnswersIds;
-	}
+	
 
 
 
@@ -1786,9 +2131,149 @@ public class CrokageApp {
 		return topKRelevantQuestionsIds;
 	}
 
-
-
+	
+	
 	private Set<Integer> getTopKRelevantAnswers(Set<Integer> candidateAnswersIds, List<String> topMethods, double[][] matrix1, double[][] idf1, Integer key, String query, Set<String> topClasses) throws IOException {
+		//fetch answers fields
+		long initTime = System.currentTimeMillis();
+		List<Bucket> answerBuckets = crokageService.getBucketsByIds(new HashSet(candidateAnswersIds));
+		crokageUtils.reportElapsedTime(initTime,"getBucketsByIds");
+		initTime = System.currentTimeMillis();
+		
+		if(!iHaveALotOfMemory) {
+			allWordsSetForBuckets = getAllWordsForBuckets(answerBuckets);
+			crokageUtils.readVectorsFromSOMapForWords(soContentWordVectorsMap,allWordsSetForBuckets,wordsAndVectorsLines);
+		}
+		
+		String parentTitle;
+		String comparingContent;
+		answersIdsScores.clear();
+		double maxSimPair=0;
+		double maxApiScore=0;
+		methodsCounterMap.clear();
+		classesCounterMap.clear();
+		//answers with code
+		for(Bucket bucket:answerBuckets) {
+			
+			//second ranking
+			try {
+				
+				//parentTitle =  allQuestionsIdsTitlesMap.get(bucket.getParentId());
+				
+				comparingContent =  bucket.getParentProcessedTitle()+" "+bucket.getParentProcessedBody()+" "+bucket.getParentProcessedCode()+" "+bucket.getProcessedBody();
+				if(useCodeInSimCalculus) {
+					comparingContent += " "+bucket.getProcessedCode();
+				}
+				
+				
+				//get vectors for query2 words
+				double[][] matrix2 = CrokageUtils.getMatrixVectorsForQuery(comparingContent,soContentWordVectorsMap);
+				
+				//get idfs for query2
+				double[][] idf2 = CrokageUtils.getIDFMatrixForQuery(comparingContent, soIDFVocabularyMap);
+				
+				double simPair = CrokageUtils.round(Matrix.simDocPair(matrix1,matrix2,idf1,idf2),6);
+				
+				if(simPair>maxSimPair) {
+					maxSimPair=simPair;
+				}
+				
+				double apiAnswerPairScore = topAnswerParentPairsAnswerIdScoreMap.get(bucket.getId());
+				
+				if(apiAnswerPairScore>maxApiScore) {
+					maxApiScore=apiAnswerPairScore;
+				}
+				
+				//countClasses(bucket.getCode()); //use recommended to score
+				countMethods(bucket.getCode());
+				
+				answersIdsScores.put(bucket.getId(), simPair);
+				
+			} catch (Exception e) {
+				System.out.println(e.getMessage()+ " post: "+bucket);
+			}
+			
+		}
+		
+		crokageUtils.reportElapsedTime(initTime,"getTopKRelevantAnswers 1");
+		initTime = System.currentTimeMillis();
+		
+		if(!productionEnvironment) {
+			reportCommonMethods();
+		}
+		
+		//normalization and other relevance boosts
+		for(Bucket bucket:answerBuckets) {
+				double simPair = answersIdsScores.get(bucket.getId());
+				simPair = (simPair / maxSimPair); //normalization
+				
+				double apiAnswerPairScore = topAnswerParentPairsAnswerIdScoreMap.get(bucket.getId());
+				apiAnswerPairScore = (apiAnswerPairScore/maxApiScore); //normalization
+				
+				
+				double finalScore = BotComposer.calculateFinalScore(simPair,topClasses,bucket,methodsCounterMap,apiAnswerPairScore);
+				
+				
+				//**pontuar intercecao de substrings entrey a query e o body ou codigo da resposta
+				//ex, query "Use Scanner to read a list of comma-separated values" Respsotas boas contem "comma" ou "scanner"
+				
+				
+				
+				//not good results yet...
+				/*String processedCode = bucket.getProcessedCode();
+				for(int i=0; i<numberOfAPIClasses;i++) {
+					String bikerMethod = bikerTopMethods.get(i);
+					if(processedCode.contains(bikerMethod) && codeContainAnyClass(processedCode)) {
+						double methodBoost = (float)1/((bikerTopMethods.indexOf(bikerMethod)+1));
+						simPair += crokageUtils.round(methodBoost,6);
+						break; //only once
+					}
+				}*/
+				
+				
+				answersIdsScores.put(bucket.getId(), finalScore);
+				
+				//observar ex: https://stackoverflow.com/questions/1053467/how-do-i-save-a-string-to-a-text-file-using-java
+				
+				//score da pergunta : parentUpVotesScore
+				
+				//codigo deve ter chamada de método com ponto *.*
+				
+				//poucas linhas de codigo (desconsiderar imports . pontuar imports )
+				
+				
+				//comentarios com sentimento positivo
+		
+			
+		}
+		
+		crokageUtils.reportElapsedTime(initTime,"getTopKRelevantAnswers 2");
+		initTime = System.currentTimeMillis();
+		//sort scores in descending order 
+		Map<Integer,Double> topSimilarAnswers = answersIdsScores.entrySet().stream()
+			       .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+			       //.limit(topSimilarAnswersNumber)
+			       .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+		
+		if(!productionEnvironment) {
+			reportSimilarRelatedPosts(topSimilarAnswers.keySet(),"answers","End of Ranking phase 3: ");
+		}
+		candidateAnswersIds = topSimilarAnswers.keySet();
+		if(!productionEnvironment) {
+			reportAnswers(candidateAnswersIds,topSimilarAnswers);
+		}
+		
+		crokageUtils.reportElapsedTime(initTime,"getTopKRelevantAnswers 3");
+		
+		answerBuckets=null;
+		return candidateAnswersIds;
+	}
+
+
+	
+
+
+	private Set<Integer> getTopKRelevantAnswersOld(Set<Integer> candidateAnswersIds, List<String> topMethods, double[][] matrix1, double[][] idf1, Integer key, String query, Set<String> topClasses) throws IOException {
 		//fetch answers fields
 		//long initTime = System.currentTimeMillis();
 		List<Bucket> answerBuckets = crokageService.getBucketsByIds(new HashSet(candidateAnswersIds));
@@ -1855,7 +2340,7 @@ public class CrokageApp {
 				double simPair = answersIdsScores.get(bucket.getId());
 				simPair = (simPair / maxSimPair); //normalization
 				
-				double finalScore = BotComposer.calculateFinalScore(simPair,topClasses,bucket,methodsCounterMap);
+				double finalScore = BotComposer.calculateFinalScore(simPair,topClasses,bucket,methodsCounterMap,1000000);
 				
 				
 				//**pontuar intercecao de substrings entrey a query e o body ou codigo da resposta
@@ -2039,16 +2524,30 @@ public class CrokageApp {
 
 
 
-	private void addVectorsToSoContentWordVectorsMap(Set<Integer> relevantQuestionsIds) throws Exception {
-		Set<String> titles = new LinkedHashSet<>();
-		String title;
+	private void addVectorsToSoContentWordVectorsMap(Set<Integer> answersWithTopFrequentAPIsIds) throws Exception {
+		Set<String> contents = new LinkedHashSet<>();
+		String content;
+		for(Integer answerId:answersWithTopFrequentAPIsIds) {
+			content = allAnswersIdsContentsParentContentsMap.get(answerId);
+			contents.add(content);
+		}
+		crokageUtils.readVectorsFromSOMapForWords(soContentWordVectorsMap,contents,wordsAndVectorsLines);
+		
+		contents=null;
+				
+	}
+	
+
+	private void addVectorsToSoContentWordVectorsMapOld(Set<Integer> answersWithTopFrequentAPIsIds) throws Exception {
+		Set<String> contents = new LinkedHashSet<>();
+		String content;
 		Set<Integer> irrelevantQuestionsIds = new HashSet<>();
-		for(Integer questionId:relevantQuestionsIds) {
-			title = allQuestionsIdsTitlesMap.get(questionId);
-			if(!StringUtils.isBlank(title)) {
-				titles.add(title);
+		for(Integer answerId:answersWithTopFrequentAPIsIds) {
+			content = allAnswersIdsContentsParentContentsMap.get(answerId);
+			if(!StringUtils.isBlank(content)) {
+				contents.add(content);
 			}else {
-				irrelevantQuestionsIds.add(questionId);
+				irrelevantQuestionsIds.add(answerId);
 			}
 		}
 		
@@ -2056,12 +2555,12 @@ public class CrokageApp {
 		for(Integer irrelevantQuestionId: irrelevantQuestionsIds) {
 			allQuestionsIdsTitlesMap.remove(irrelevantQuestionId);
 		}
-		relevantQuestionsIds.removeAll(irrelevantQuestionsIds);
+		answersWithTopFrequentAPIsIds.removeAll(irrelevantQuestionsIds);
 		
 		if(!iHaveALotOfMemory) {
-			crokageUtils.readVectorsFromSOMapForWords(soContentWordVectorsMap,titles,wordsAndVectorsLines);
+			crokageUtils.readVectorsFromSOMapForWords(soContentWordVectorsMap,contents,wordsAndVectorsLines);
 		}
-		titles=null;
+		contents=null;
 		irrelevantQuestionsIds=null;
 		
 	}
@@ -2077,16 +2576,14 @@ public class CrokageApp {
 
 
 
-	private void loadAllQuestionsIdsContents() {
-		
-		
-	}
 
 	private void loadAllQuestionsIdsTitles() {
 		long initTime = System.currentTimeMillis();
 		allQuestionsIdsTitlesMap.putAll(crokageService.getQuestionsIdsTitles());
 		crokageUtils.reportElapsedTime(initTime,"loadAllQuestionsIdsTitles");
 	}
+	
+	
 
 
 
@@ -2132,6 +2629,66 @@ public class CrokageApp {
 		
 	}
 
+	
+
+
+
+	private void generatePostsApisMap() throws IOException {
+		//get posts containing code. Date parameter is optional for tests purpose.
+		//String startDate = "2016-01-01"; 
+		String startDate = null;
+		long initTime = System.currentTimeMillis();
+		System.out.println("Processing posts to generate index file...");
+		List<Post> upvotedPostsWithCode =  crokageService.getUpvotedPostsWithCode(startDate);
+		
+		String postsWithoutAPICalls = "";
+		int postsWithoutAPICallsCounter=0;
+		
+		StringBuilder content = new StringBuilder();
+		
+		int i=0;
+		for(Post post:upvotedPostsWithCode) {
+			i++;
+			if(i%10000==0) {
+				System.out.println("Processing post "+i);
+			}
+			
+			//extract apis from answer. For each api, add the api in a map, together with the other references for that post
+			Set<String> codeSet=null;
+			try {
+				codeSet = crokageUtils.extractClassesFromCode(post.getBody());
+			} catch(StackOverflowError e){
+				System.out.println("Error in post "+post.getId()+ " - disconsidering...");
+				continue;
+	        } catch (Exception e) {
+				System.out.println("Exception in post "+post.getId()+ " - disconsidering...");
+				continue;
+			}
+			
+			//ArrayList<String> codeClasses = new ArrayList(codeSet);
+			if(codeSet.isEmpty()) {
+				continue;
+			}
+			
+			content.append(post.getId()+" >> ");
+			for(String api: codeSet) {
+				content.append(api+" ");
+			}
+			content.append("\n");
+			
+		}
+		content.append("end@");
+		String contentStr = content.toString().replace("\nend@", "");
+		
+		System.out.println("Done processing posts to generate index file.");
+		System.out.println("Number of processed posts containing API calls: "+i+ ". Now printing files...");
+		CrokageUtils.writeStringContentToFile(contentStr,SO_UPVOTED_POSTS_WITH_CODE_APIS_FILE);
+		System.out.println("Done printing files.");
+		crokageUtils.reportElapsedTime(initTime,"generatePostsApisMap");
+		
+	}
+
+
 
 	/*
 	 * Set -Xss200m in VM parameters or java.lang.StackOverflowError: null is thrown 
@@ -2163,7 +2720,10 @@ public class CrokageApp {
 			Set<String> codeSet=null;
 			try {
 				codeSet = crokageUtils.extractClassesFromCode(answer.getBody());
-			} catch (Exception e) {
+			} catch(StackOverflowError e){
+				System.out.println("Error in post "+answer.getId()+ " - disconsidering...");
+				continue;
+	        } catch (Exception e) {
 				System.out.println("Exception here: "+answer);
 				e.printStackTrace();
 			}
@@ -2189,8 +2749,8 @@ public class CrokageApp {
 					/*if(api.equals("MainActivity")) {
 						System.out.println();
 					}*/
-					Set<Integer> currentApis = bigMapApisAnswersIds.get(api);
-					currentApis.add(answer.getId());
+					Set<Integer> currentIds = bigMapApisAnswersIds.get(api);
+					currentIds.add(answer.getId());
 				}
 				
 			}
@@ -2200,7 +2760,6 @@ public class CrokageApp {
 		System.out.println("Done processing posts to generate inverted index file.");
 		System.out.println("Number of posts containing API calls: "+bigMapApisAnswersIds.size()+ ". Now printing files...");
 		CrokageUtils.printBigMapIntoFile(bigMapApisAnswersIds,BIG_MAP_INVERTED_INDEX_APIS_FILE_PATH);
-		CrokageUtils.writeStringContentToFile(postsWithoutAPICalls,DISCONSIDERED_POSTS_FILE_PATH);
 		System.out.println("Done printing files.");
 		crokageUtils.reportElapsedTime(initTime,"generateInvertedIndexFileFromSOPosts");
 	}
@@ -2795,7 +3354,7 @@ public class CrokageApp {
 				
 				double meanFull = (likert1+likert2)/(double)2;
 				double meanLikert=0d;
-				meanLikert = BotUtils.round(meanFull,2);
+				meanLikert = CrokageUtils.round(meanFull,2);
 				
 				if(meanLikert>=4) { 
 					
@@ -3152,6 +3711,9 @@ public class CrokageApp {
 				preck_sum = preck_sum + preck;
 				double recall = 0;
 				recall = getRecallKV2(rapis, gapis);
+				/*if(recall<1) {
+					System.out.println("here: "+keyQuery);
+				}*/
 				recall_sum = recall_sum + recall;
 				//System.out.println(hitK);
 				/*if(keyQuery==308) {
@@ -3471,7 +4033,9 @@ public class CrokageApp {
 			Integer id = recommendedIds.get(index);
 			if (goldSetIds.contains(id)) {
 				found++;
-			}
+			}/*else {
+				System.out.println("not found: "+id);
+			}*/
 		}
 		return found / goldSetIds.size();
 	}
@@ -3530,5 +4094,8 @@ public class CrokageApp {
 		
 	}
 */
+
+	
+	
 
 }

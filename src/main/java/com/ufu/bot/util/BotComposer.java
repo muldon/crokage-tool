@@ -23,7 +23,7 @@ import com.ufu.crokage.util.CrokageUtils;
 public class BotComposer {
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 	
-	@Value("${alphaCosSim}")
+	/*@Value("${alphaCosSim}")
 	public Double alphaCosSim; 
 	
 	@Value("${betaCoverageScore}")
@@ -52,7 +52,7 @@ public class BotComposer {
 	
 	@Value("${relationType_RELATED_DUPE}")
 	public Double relationTypeRelatedDupe; 
-	
+	*/
 	
 	public static double classFreqWeight;
 	public static double methodFreqWeight;
@@ -62,10 +62,10 @@ public class BotComposer {
 	
 	
 	
-	
+	/*
 	public void rankList(List<BucketOld> bucketsList) {
 		
-	/*	logger.info("Ranking with weights: "+
+		logger.info("Ranking with weights: "+
 				"\n alphaCosSim = "+alphaCosSim +
 				"\n betaCoverageScore = "+betaCoverageScore +
 				"\n gamaCodeSizeScore = "+gamaCodeSizeScore +
@@ -79,7 +79,7 @@ public class BotComposer {
 				"\n relationTypeLinksInsideTexts = "+relationTypeLinksInsideTexts +
 				"\n relationTypeRelatedDupe = "+relationTypeRelatedDupe 
 				);
-		*/
+		
 		//int count = 0;
 		
 		for(BucketOld bucketOld: bucketsList){
@@ -104,11 +104,11 @@ public class BotComposer {
 			double composedScore = adjuster*factorsScore;
 			
 			
-			/*if(count<50) {
+			if(count<50) {
 				logger.info("Composed score = "+composedScore+ " - adjuster: "+adjuster+ " - factorsScore: "+factorsScore);
 			}
-			count++;*/
-			bucketOld.setComposedScore(BotUtils.round(composedScore,5));
+			count++;
+			bucketOld.setComposedScore(CrokageUtils.round(composedScore,5));
 		}
 		
 		
@@ -119,31 +119,31 @@ public class BotComposer {
 		});
 
 	}
+*/
 
-
-	public void calculateScores(Double avgReputation, Double avgScore,HashMap<String, Double> tfIdfMainBucket, HashMap<String, Double> tfIdfOtherBucket, BucketOld mainBucket, BucketOld postBucket) {
+	/*public void calculateScores(Double avgReputation, Double avgScore,HashMap<String, Double> tfIdfMainBucket, HashMap<String, Double> tfIdfOtherBucket, BucketOld mainBucket, BucketOld postBucket) {
 		double cosine = cosineSimilarity(tfIdfMainBucket, tfIdfOtherBucket);
-		postBucket.setCosSim(BotUtils.round(cosine,4));
+		postBucket.setCosSim(CrokageUtils.round(cosine,4));
 		
 		double coverageScore = calculateCoverageScore(mainBucket.getClassesNames(),postBucket.getClassesNames());
-		postBucket.setCoverageScore(BotUtils.round(coverageScore,4));
+		postBucket.setCoverageScore(CrokageUtils.round(coverageScore,4));
 		
 		double codeScore = calculateCodeSizeScore(postBucket.getCodes());
-		postBucket.setCodeSizeScore(BotUtils.round(codeScore,4));
+		postBucket.setCodeSizeScore(CrokageUtils.round(codeScore,4));
 		
 		double repScore = calculateRepScore(postBucket.getUserReputation());
-		postBucket.setRepScore(BotUtils.round(repScore,4));
+		postBucket.setRepScore(CrokageUtils.round(repScore,4));
 		
 		double upScore = calculateUpScore(postBucket.getPostScore());
-		postBucket.setUpScore(BotUtils.round(upScore,4));
+		postBucket.setUpScore(CrokageUtils.round(upScore,4));
 		
-		/*if(postBucket.getPostId().equals(1323480)) {
+		if(postBucket.getPostId().equals(1323480)) {
 			System.out.println("here");
-		}*/
+		}
 	}
+	*/
 	
-	
-	private double calculateUpScoreOld(Double avgScore, Integer postScore) {
+	/*private double calculateUpScoreOld(Double avgScore, Integer postScore) {
 		if(postScore==null) {
 			return 0d;
 		}
@@ -165,7 +165,7 @@ public class BotComposer {
 		return repScore;
 	}
 	
-	
+	*/
 	
 	
 	public static double calculateUpScore(Integer upVotes) {
@@ -303,7 +303,7 @@ public class BotComposer {
 		if(cleanList.size()>0) {
 			int numberOfLines=0;
 			for(String code: cleanList) {
-				numberOfLines+= BotUtils.countLines(code);
+				numberOfLines+= CrokageUtils.countLines(code);
 			}
 			average = numberOfLines / cleanList.size();
 			totalSize = average;
@@ -392,13 +392,14 @@ public class BotComposer {
 	}
 
 
-	public static double calculateFinalScore(double simPair, Set<String> topClasses, Bucket bucket,	Map<String, Integer> methodsCounterMap) {
+	public static double calculateFinalScore(double simPair, Set<String> topClasses, Bucket bucket,	Map<String, Integer> methodsCounterMap, double apiAnswerPairScore) {
 		
 		double finalScore;
 		
-		double classFreqScore = calculateScoreForPresentClasses(bucket.getCode(),topClasses);
+		//double classFreqScore = calculateScoreForPresentClasses(bucket.getCode(),topClasses);
 		
-		double methodFreqScore = calculateScoreForCommonMethods(bucket.getCode(),methodsCounterMap);
+		//double methodFreqScore = calculateScoreForCommonMethods(bucket.getCode(),methodsCounterMap);
+		double methodFreqScore = 0;
 		
 		//pontuar substring comum entre a maoiria dos códigos ?
 		
@@ -410,7 +411,7 @@ public class BotComposer {
 	
 		double upScore = calculateUpScore(bucket.getUpVotesScore());
 		
-		finalScore = simPair*simWeight + classFreqScore*classFreqWeight + repScore*repWeight + upScore*upWeight + methodFreqScore*methodFreqWeight;
+		finalScore = simPair*simWeight + apiAnswerPairScore*classFreqWeight + repScore*repWeight + upScore*upWeight + methodFreqScore*methodFreqWeight;
 		
 		return finalScore;
 		

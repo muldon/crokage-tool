@@ -29,10 +29,20 @@ public class CrokageService extends AbstractService{
 		return genericRepository.getAnswersWithCode(startDate);
 		
 	}
+	
+	@Transactional(readOnly = true)
+	public List<Post> getUpvotedPostsWithCode(String startDate) {
+		return genericRepository.getUpvotedPostsWithCode(startDate);
+	}
 
 	@Transactional(readOnly = true)
 	public List<Bucket> getBucketsByIds(Set<Integer> postsListIds) {
 		return genericRepository.getBucketsByIds(postsListIds);
+	}
+	
+	@Transactional(readOnly = true)
+	public List<Bucket> getQuestionsProcessedTitlesBodiesCodes() {
+		return genericRepository.getQuestionsProcessedTitlesBodiesCodes();
 	}
 
 	@Transactional(readOnly = true)
@@ -68,7 +78,7 @@ public class CrokageService extends AbstractService{
 	
 	
 
-	public void saveMetricResult(MetricResult metricResult, Boolean useCodeInSimCalculus, String obs, Integer topSimilarQuestionsNumber, Integer cutoff) {
+	public void saveMetricResult(MetricResult metricResult, Boolean useCodeInSimCalculus, String obs, Integer topSimilarQuestionsNumber, Integer cutoff, Integer topClasses, Integer topApisScoredPairsPercent) {
 		metricResult.setClassFreqWeight(BotComposer.getClassFreqWeight());
 		metricResult.setMethodFreqWeight(BotComposer.getMethodFreqWeight());
 		metricResult.setRepWeight(BotComposer.getRepWeight());
@@ -76,16 +86,26 @@ public class CrokageService extends AbstractService{
 		metricResult.setUpWeight(BotComposer.getUpWeight());
 		metricResult.setUseCodeInSimCalculus(useCodeInSimCalculus);
 		metricResult.setObs(obs);
-		metricResult.setTopSimilarAnswersNumber(0);
+		metricResult.setTopSimilarQuestionsNumber(topSimilarQuestionsNumber);
+		metricResult.setTopApisScoredPairsPercent(topApisScoredPairsPercent);
 		metricResult.setTopSimilarQuestionsNumber(topSimilarQuestionsNumber);
 		metricResult.setCutoff(cutoff);
-		
+		metricResult.setTopClasses(topClasses);
 		metricResultRepository.save(metricResult);
 	}
 
-	public Integer getMostUpvotedAnswerForQuestion(Integer questionId) {
-		List<Integer> ids = postsRepository.MostUpvotedAnswerForQuestion(questionId);
+	public Integer getMostUpvotedAnswerForQuestionId(Integer questionId) {
+		List<Integer> ids = postsRepository.getMostUpvotedAnswerForQuestionId(questionId);
 		return ids.isEmpty() ? null: ids.get(0);
+	}
+
+	public Post getMostUpvotedAnswerWithCodeForQuestion(Integer questionId) {
+		List<Post> questions = postsRepository.getMostUpvotedAnswerWithCodeForQuestion(questionId);
+		return questions.isEmpty() ? null: questions.get(0);
+	}
+
+	public List<Bucket> getUpvotedAnswersIdsContentsAndParentContents() {
+		return genericRepository.getUpvotedAnswersIdsContentsAndParentContents();
 	}
 
 	
