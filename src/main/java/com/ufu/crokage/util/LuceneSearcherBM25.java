@@ -56,6 +56,9 @@ public class LuceneSearcherBM25 {
 	private IndexWriterConfig config;
 	
 	 
+	public LuceneSearcherBM25() throws Exception {
+		initializeConfigs();
+	}
 	
 	
 	@PostConstruct
@@ -72,7 +75,7 @@ public class LuceneSearcherBM25 {
 	}
 
 	public void buildSearchManager(List<Bucket> upvotedScoredAnswers) throws Exception {
-		//logger.info("LuceneSearcherBM25.buildSearchManager. Indexing all upvoted scored aswers ");
+		logger.info("LuceneSearcherBM25.buildSearchManager. Indexing all upvoted scored aswers with code: "+upvotedScoredAnswers.size());
 
 		indexedListSize = upvotedScoredAnswers.size();
 		//logger.info("Number of answers to index: " + upvotedScoredAnswers.size() + " \nIndexing.... ");
@@ -82,7 +85,7 @@ public class LuceneSearcherBM25 {
 		IndexWriter w = new IndexWriter(index, config);
 		for (int i = 0; i < upvotedScoredAnswers.size(); i++) {
 			Bucket answerBucket = upvotedScoredAnswers.get(i);
-			answersCache.put(answerBucket.getId(),answerBucket);
+			//answersCache.put(answerBucket.getId(),answerBucket);
 			String finalContent = answerBucket.getParentProcessedTitle()+" "+answerBucket.getParentProcessedBody()+" "+answerBucket.getParentProcessedCode()+" "+answerBucket.getProcessedBody()+ " "+answerBucket.getProcessedCode();			
 			
 			/*if(i%10000==0) {
@@ -178,9 +181,9 @@ public class LuceneSearcherBM25 {
 	}
 
 	
-	public Bucket getAnswer(Integer id) {
+	/*public Bucket getAnswer(Integer id) {
 		return answersCache.get(id);
-	}
+	}*/
 	
 
 	public void setSearchSimilarityParams(Float bm25ParameterK, Float bm25ParameterB) {

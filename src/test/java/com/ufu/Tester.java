@@ -57,7 +57,7 @@ import com.ufu.crokage.util.CrokageUtils;
 public class Tester {
 
 	public Tester() throws Exception {
-		
+		Integer a = -1;
 		String s2 = "// There is something wrong with MailCap, javamail can not find a handler for the multipart/mixed part, so this bit needs to be added. \n" + 
 				"    MailcapCommandMap mc = (MailcapCommandMap) CommandMap.getDefaultCommandMap(); \n" + 
 				"    mc.addMailcap(\"text/html;; x-java-content-handler=com.sun.mail.handlers.text_html\"); \n" + 

@@ -53,16 +53,21 @@ public class MetricResult {
 	@Column(name="mrk1")
 	private Double mrK1;
 	
-	@Column(name="topsimilarquestionsnumber")
-	private Integer topSimilarQuestionsNumber;
+	@Column(name="bm25topnresults")
+	private Integer bm25TopNResults;
 	
 	@Column(name="topapisscoredpairspercent")
 	private Integer topApisScoredPairsPercent;
+	
+	@Column(name="topsimilartitlespercent")
+	private Integer topSimilarTitlesPercent;
 	
 	@Column(name="usecodeinsimcalculus")
 	private Boolean useCodeInSimCalculus;
 	
 	private Integer cutoff;
+	
+	private Integer topk;
 	
 	private String obs;
 	
@@ -169,12 +174,7 @@ public class MetricResult {
 	public void setId(Integer id) {
 		this.id = id;
 	}
-	public Integer getTopSimilarQuestionsNumber() {
-		return topSimilarQuestionsNumber;
-	}
-	public void setTopSimilarQuestionsNumber(Integer topSimilarQuestionsNumber) {
-		this.topSimilarQuestionsNumber = topSimilarQuestionsNumber;
-	}
+	
 	 
 	public Boolean getUseCodeInSimCalculus() {
 		return useCodeInSimCalculus;
@@ -241,6 +241,33 @@ public class MetricResult {
 	}
 	public void setTopApisScoredPairsPercent(Integer topApisScoredPairsPercent) {
 		this.topApisScoredPairsPercent = topApisScoredPairsPercent;
+	}
+	public Integer getBm25TopNResults() {
+		return bm25TopNResults;
+	}
+	public void setBm25TopNResults(Integer bm25TopNResults) {
+		this.bm25TopNResults = bm25TopNResults;
+	}
+	public Integer getTopk() {
+		return topk;
+	}
+	public void setTopk(Integer topk) {
+		this.topk = topk;
+	}
+	
+	public MetricResult(String approach,Integer bm25TopNResults, Integer topApisScoredPairsPercent, Integer topSimilarTitlesPercent,
+			Integer cutoff, Integer topk, String obs) {
+		super();
+		this.bm25TopNResults = bm25TopNResults;
+		this.topApisScoredPairsPercent = topApisScoredPairsPercent;
+		this.topSimilarTitlesPercent = topSimilarTitlesPercent;
+		this.cutoff = cutoff;
+		this.topk = topk;
+		this.obs = obs;
+		this.approach = approach;
+	}
+	public MetricResult() {
+		super();
 	}
 	
 	

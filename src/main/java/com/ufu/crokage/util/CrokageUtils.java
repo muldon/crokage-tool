@@ -1678,7 +1678,8 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 			int vecCol = 0;
 			double[] vectors = new double[vecSize-1];
 			for(int i=1;i<vecSize;i++) {
-				vectors[vecCol] = CrokageUtils.round(Double.parseDouble(parts[i]),6);
+				//vectors[vecCol] = CrokageUtils.round(Double.parseDouble(parts[i]),6);
+				vectors[vecCol] = Double.parseDouble(parts[i]);
 				vecCol++;
 			}
 			vectorsMap.put(parts[0], vectors);
@@ -1838,8 +1839,8 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 	}
 	
 	public void readWordsFromFileToMap2(Map<Integer, Integer> soIdsIds, List<String> idsAndWords) throws IOException {
-		long initTime = System.currentTimeMillis();
-		System.out.println("Reading all ids and titles from file...");
+		//long initTime = System.currentTimeMillis();
+		//System.out.println("Reading all ids and titles from file...");
 		String[] parts;
 		String title;
 		for(String line: idsAndWords) {
@@ -1847,7 +1848,7 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 			soIdsIds.put(Integer.parseInt(parts[0]), Integer.parseInt(parts[1]));
 		}
 		//System.out.println(bigMapApisIds);
-		reportElapsedTime(initTime,"readWordsFromFileToMap2");
+		//reportElapsedTime(initTime,"readWordsFromFileToMap2");
 		
 	}
 

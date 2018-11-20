@@ -392,14 +392,14 @@ public class BotComposer {
 	}
 
 
-	public static double calculateFinalScore(double simPair, Set<String> topClasses, Bucket bucket,	Map<String, Integer> methodsCounterMap, double apiAnswerPairScore) {
+	public static double calculateFinalScore(double simPair, Bucket bucket,	Map<String, Integer> methodsCounterMap, double apiAnswerPairScore) {
 		
 		double finalScore;
 		
 		//double classFreqScore = calculateScoreForPresentClasses(bucket.getCode(),topClasses);
 		
-		//double methodFreqScore = calculateScoreForCommonMethods(bucket.getCode(),methodsCounterMap);
-		double methodFreqScore = 0;
+		double methodFreqScore = calculateScoreForCommonMethods(bucket.getCode(),methodsCounterMap);
+		//double methodFreqScore = 0;
 		
 		//pontuar substring comum entre a maoiria dos códigos ?
 		

@@ -45,6 +45,8 @@ public class Bucket {
 	
 	protected String parentProcessedCode;
 	
+	protected Double titleScore;
+	
 	
 	public Integer getId() {
 		return id;
@@ -244,6 +246,14 @@ public class Bucket {
 
 	public void setParentProcessedCode(String parentProcessedCode) {
 		this.parentProcessedCode = parentProcessedCode;
+	}
+
+	public Double getTitleScore() {
+		return titleScore;
+	}
+
+	public void setTitleScore(Double titleScore) {
+		this.titleScore = titleScore;
 	}
 
  
