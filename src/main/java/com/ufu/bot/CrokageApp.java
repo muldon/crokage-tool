@@ -671,10 +671,14 @@ public class CrokageApp {
 		Map<String, Set<Integer>> recommendedResults = new LinkedHashMap<>();
 		
 		//load input queries considering dataset
-		processInputQueries();
-		
+		queries = readInputQueries();
 		//load ground truth
 		loadGroundTruthSelectedQueries();
+		
+		for(String query: queries) {
+			processedQueries.add(crokageUtils.processQuery(query));
+		}
+		
 		
 		if(iHaveALotOfMemory) { //load all word vectors only once
 			readSoContentWordVectorsForAllWords();
@@ -1026,7 +1030,13 @@ public class CrokageApp {
 		Map<String, Set<Integer>> recommendedResults = new LinkedHashMap<>();
 		
 		//load input queries considering dataset
-		processInputQueries();
+		queries = readInputQueries();
+		//load ground truth
+		loadGroundTruthSelectedQueries();
+		
+		for(String query: queries) {
+			processedQueries.add(crokageUtils.processQuery(query));
+		}
 		
 		//load ground truth
 		loadGroundTruthSelectedQueries();
@@ -3394,13 +3404,7 @@ public class CrokageApp {
 
 	
 
-	private void processInputQueries() throws Exception {
-		queries = readInputQueries();
-		for(String query: queries) {
-			processedQueries.add(crokageUtils.processQuery(query));
-		}
-		
-	}
+	
 
 
 
@@ -3845,10 +3849,10 @@ public class CrokageApp {
 		Integer topk = metricResult.getTopk();
 		if(topk!=null && topk>0) {
 			crokageUtils.reduceSetV2(recommended, topk);
-		}if(topk==null) {
+		}else if(topk==null) {
 			topk=10000; //save in top1 
 		}
-		
+		//Integer topk = metricResult.getTopk();
 		//System.out.println("analyzeResults - considering topk= "+topk);
 		int maxSize = 0;
 		
