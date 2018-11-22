@@ -90,8 +90,6 @@ read JSON data to JSON Object Model
 --
 how to serialize JSON Object
 --
-execute the test cases using Test runner
---
 Java Compare file content
 --
 How to Sort a Map by values

@@ -86,6 +86,9 @@ public class MetricResult {
 	@Column(name="upweight")
 	public Double upWeight;
 	
+	@Column(name="tfidfcossimweight")
+	public Double tfIdfCosSimWeight;
+	
 	public String approach;
 	
 	@Column(name="topclasses")
@@ -269,7 +272,12 @@ public class MetricResult {
 	public MetricResult() {
 		super();
 	}
-	
+	public Double getTfIdfCosSimWeight() {
+		return tfIdfCosSimWeight;
+	}
+	public void setTfIdfCosSimWeight(Double tfIdfCosSimWeight) {
+		this.tfIdfCosSimWeight = tfIdfCosSimWeight;
+	}
 	
 	
 	

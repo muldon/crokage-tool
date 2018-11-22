@@ -14,6 +14,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.ufu.bot.tfidf.Document;
+import com.ufu.bot.tfidf.VectorSpaceModel;
 import com.ufu.bot.to.Bucket;
 import com.ufu.bot.to.BucketOld;
 import com.ufu.bot.to.RelatedPost.RelationTypeEnum;
@@ -56,6 +58,7 @@ public class BotComposer {
 	
 	public static double classFreqWeight;
 	public static double methodFreqWeight;
+	public static double cosSimWeight;
 	public static double repWeight;
 	public static double simWeight;
 	public static double upWeight;
@@ -392,7 +395,7 @@ public class BotComposer {
 	}
 
 
-	public static double calculateFinalScore(double simPair, Bucket bucket,	Map<String, Integer> methodsCounterMap, double apiAnswerPairScore) {
+	public static double calculateFinalScore(double simPair, Bucket bucket,	Map<String, Integer> methodsCounterMap, double apiAnswerPairScore,double tfIdfCosineSimScore) {
 		
 		double finalScore;
 		
@@ -411,7 +414,7 @@ public class BotComposer {
 	
 		double upScore = calculateUpScore(bucket.getUpVotesScore());
 		
-		finalScore = simPair*simWeight + apiAnswerPairScore*classFreqWeight + repScore*repWeight + upScore*upWeight + methodFreqScore*methodFreqWeight;
+		finalScore = simPair*simWeight + apiAnswerPairScore*classFreqWeight + repScore*repWeight + upScore*upWeight + methodFreqScore*methodFreqWeight + tfIdfCosineSimScore*cosSimWeight;
 		
 		return finalScore;
 		
@@ -465,6 +468,16 @@ public class BotComposer {
 
 	public static void setUpWeight(double upWeight) {
 		BotComposer.upWeight = upWeight;
+	}
+
+
+	public static double getCosSimWeight() {
+		return cosSimWeight;
+	}
+
+
+	public static void setCosSimWeight(double cosSimWeight) {
+		BotComposer.cosSimWeight = cosSimWeight;
 	}
 
  

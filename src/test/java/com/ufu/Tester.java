@@ -70,6 +70,13 @@ public class Tester {
 		s2= s2.replaceAll("\\/\\*;","");
 		System.out.println(s2);
 		
+		 
+		String str = "Hello I'm your     String";
+		String[] splited = str.split("\\s+");
+			
+		for(String token:splited) {
+			System.out.println(token);
+		}
 		
 		System.out.println(CrokageUtils.round((double) 0 / 100,4)*100);
 		
@@ -104,7 +111,7 @@ public class Tester {
 		//stripDuplicatesFromFile(CrokageStaticDataOld.INPUT_QUERIES_FILE_NLP2API);
 		
 		
-		String str = "How do I send an HTML email? javascript javac dd JAVA";
+		str = "How do I send an HTML email? javascript javac dd JAVA";
 		StringTokenizer st = new StringTokenizer(str);
 		Boolean containToken = Pattern.compile(".*\\bjava\\b.*").matcher(str.toLowerCase()).find();
 		String token;

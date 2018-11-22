@@ -3,6 +3,8 @@ package com.ufu.bot.to;
 import javax.persistence.Id;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import com.ufu.bot.tfidf.Document;
+
 @XmlRootElement
 public class Bucket {
 	protected static final long serialVersionUID = -11118191211815641L;
@@ -47,6 +49,11 @@ public class Bucket {
 	
 	protected Double titleScore;
 	
+	protected Document document;
+	
+	protected Double tfIdfCosineSimScore;
+	
+	protected Double simPair;
 	
 	public Integer getId() {
 		return id;
@@ -254,6 +261,30 @@ public class Bucket {
 
 	public void setTitleScore(Double titleScore) {
 		this.titleScore = titleScore;
+	}
+
+	public Document getDocument() {
+		return document;
+	}
+
+	public void setDocument(Document document) {
+		this.document = document;
+	}
+
+	public Double getTfIdfCosineSimScore() {
+		return tfIdfCosineSimScore;
+	}
+
+	public void setTfIdfCosineSimScore(Double tfIdfCosineSimScore) {
+		this.tfIdfCosineSimScore = tfIdfCosineSimScore;
+	}
+
+	public Double getSimPair() {
+		return simPair;
+	}
+
+	public void setSimPair(Double simPair) {
+		this.simPair = simPair;
 	}
 
  

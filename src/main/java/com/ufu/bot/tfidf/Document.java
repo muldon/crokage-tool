@@ -13,18 +13,15 @@ import java.util.Set;
  * @author swapneel
  *
  */
-public class Document implements Comparable<Document> {
+public class Document implements Comparable<Document>{
 	
 	/**
 	 * A hashmap for term frequencies.
 	 * Maps a term to the number of times this terms appears in this document. 
 	 */
 	private HashMap<String, Integer> termFrequency;
+	private Integer id;
 	
-	/**
-	 * The name of the file to read.
-	 */
-	private String filename;
 	
 	/**
 	 * The constructor.
@@ -32,11 +29,30 @@ public class Document implements Comparable<Document> {
 	 * It will read the file and pre-process it.
 	 * @param filename the name of the file
 	 */
-	public Document(String filename) {
+	/*public Document(String filename) {
 		this.filename = filename;
 		termFrequency = new HashMap<String, Integer>();
 		
 		readFileAndPreProcess();
+	}*/
+	
+	public Document(String content,Integer id) {
+		this.id= id;
+		termFrequency = new HashMap<String, Integer>();
+		
+		String[] splited = content.split("\\s+");
+		
+		for(int i=0; i<splited.length; i++) {
+			
+			String filteredWord = splited[i];
+			
+			if (termFrequency.containsKey(filteredWord)) {
+				int oldCount = termFrequency.get(filteredWord);
+				termFrequency.put(filteredWord, ++oldCount);
+			} else {
+				termFrequency.put(filteredWord, 1);
+			}
+		}
 	}
 	
 	/**
@@ -47,7 +63,7 @@ public class Document implements Comparable<Document> {
 	 * We don't do any stemming.
 	 * Once the pre-processing is done, we create and update the 
 	 */
-	private void readFileAndPreProcess() {
+	/*private void readFileAndPreProcess() {
 		try {
 			Scanner in = new Scanner(new File(filename));
 			System.out.println("Reading file: " + filename + " and preprocessing");
@@ -69,7 +85,7 @@ public class Document implements Comparable<Document> {
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
-	}
+	}*/
 	
 	/**
 	 * This method will return the term frequency for a given word.
@@ -93,26 +109,23 @@ public class Document implements Comparable<Document> {
 		return termFrequency.keySet();
 	}
 
+
+
 	@Override
-	/**
-	 * The overriden method from the Comparable interface.
-	 */
-	public int compareTo(Document other) {
-		return filename.compareTo(other.getFileName());
+	public int compareTo(Document o) {
+		return this.id.compareTo(o.getId());
+		
 	}
 
-	/**
-	 * @return the filename
-	 */
-	private String getFileName() {
-		return filename;
+	public Integer getId() {
+		return id;
 	}
+
+	public void setId(Integer id) {
+		this.id = id;
+	}
+
 	
-	/**
-	 * This method is used for pretty-printing a Document object.
-	 * @return the filename
-	 */
-	public String toString() {
-		return filename;
-	}
+	
+	
 }
