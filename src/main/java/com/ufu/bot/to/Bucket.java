@@ -55,6 +55,10 @@ public class Bucket {
 	
 	protected Double simPair;
 	
+	protected String acceptedOrMostUpvotedAnswerOfParentProcessedBody;
+	
+	protected String acceptedOrMostUpvotedAnswerOfParentProcessedCode;
+	
 	public Integer getId() {
 		return id;
 	}
@@ -285,6 +289,24 @@ public class Bucket {
 
 	public void setSimPair(Double simPair) {
 		this.simPair = simPair;
+	}
+
+	public String getAcceptedOrMostUpvotedAnswerOfParentProcessedBody() {
+		return acceptedOrMostUpvotedAnswerOfParentProcessedBody;
+	}
+
+	public void setAcceptedOrMostUpvotedAnswerOfParentProcessedBody(
+			String acceptedOrMostUpvotedAnswerOfParentProcessedBody) {
+		this.acceptedOrMostUpvotedAnswerOfParentProcessedBody = acceptedOrMostUpvotedAnswerOfParentProcessedBody;
+	}
+
+	public String getAcceptedOrMostUpvotedAnswerOfParentProcessedCode() {
+		return acceptedOrMostUpvotedAnswerOfParentProcessedCode;
+	}
+
+	public void setAcceptedOrMostUpvotedAnswerOfParentProcessedCode(
+			String acceptedOrMostUpvotedAnswerOfParentProcessedCode) {
+		this.acceptedOrMostUpvotedAnswerOfParentProcessedCode = acceptedOrMostUpvotedAnswerOfParentProcessedCode;
 	}
 
  

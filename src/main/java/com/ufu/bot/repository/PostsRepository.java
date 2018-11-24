@@ -52,11 +52,11 @@ public interface PostsRepository extends CrudRepository<Post, Integer> {
 
 	 @Query(value="select * " + 
 		 		"	 from postsmin " + 
-		 		"	 where parentid = ?" + 
-		 		"    and processedcode!= ''"+
+		 		"	 where parentid = ?1" + 
+		 		"    and id!= ?2"+
 		 		"	 order by score desc" + 
 		 		"	 limit 1",nativeQuery=true)
-	 List<Post> getMostUpvotedAnswerWithCodeForQuestion(Integer questionId);
+	 List<Post> getMostUpvotedAnswerForQuestion(Integer questionId,Integer currentAnswerId);
 	
 	
 

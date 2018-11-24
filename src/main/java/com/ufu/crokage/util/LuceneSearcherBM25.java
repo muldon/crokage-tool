@@ -73,7 +73,7 @@ public class LuceneSearcherBM25 {
 		config.setSimilarity(new BM25Similarity(0.05f, 0.03f));
 	
 	}
-
+	
 	public void buildSearchManager(List<Bucket> upvotedScoredAnswers) throws Exception {
 		logger.info("LuceneSearcherBM25.buildSearchManager. Indexing all upvoted scored aswers with code: "+upvotedScoredAnswers.size());
 
@@ -87,7 +87,7 @@ public class LuceneSearcherBM25 {
 			Bucket answerBucket = upvotedScoredAnswers.get(i);
 			//answersCache.put(answerBucket.getId(),answerBucket);
 			String finalContent = answerBucket.getParentProcessedTitle()+" "+answerBucket.getParentProcessedBody()+" "+answerBucket.getParentProcessedCode()+" "+answerBucket.getProcessedBody()+ " "+answerBucket.getProcessedCode();			
-			
+			//String finalContent = answerBucket.getParentProcessedTitle()+" "+answerBucket.getProcessedBody()+" "+answerBucket.getParentProcessedBody();
 			/*if(i%10000==0) {
 				System.out.println(i+ " indexed ...");
 			}*/

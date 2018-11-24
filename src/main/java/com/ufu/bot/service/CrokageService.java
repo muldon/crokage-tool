@@ -100,8 +100,8 @@ public class CrokageService extends AbstractService{
 		return ids.isEmpty() ? null: ids.get(0);
 	}
 
-	public Post getMostUpvotedAnswerWithCodeForQuestion(Integer questionId) {
-		List<Post> questions = postsRepository.getMostUpvotedAnswerWithCodeForQuestion(questionId);
+	public Post getMostUpvotedAnswerForQuestion(Integer questionId,Integer answerId) {
+		List<Post> questions = postsRepository.getMostUpvotedAnswerForQuestion(questionId,answerId);
 		return questions.isEmpty() ? null: questions.get(0);
 	}
 

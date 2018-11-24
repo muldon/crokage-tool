@@ -495,7 +495,8 @@ public class GenericRepositoryImpl implements GenericRepository {
 				+ " where po.posttypeid=2"
 				+ " and po.parentid = parent.id"  
 				+ " and po.score>0"
-				+ " and po.processedcode!=''";
+				+ " and po.processedcode!=''"
+				+ " ";
 		
 			
 		Query q = em.createNativeQuery(sql);
