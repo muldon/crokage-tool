@@ -437,7 +437,7 @@ public class CrokageApp extends AppAux{
 		
 		/*int bm25TopNResultsArr[] = {1000,2500,5000,10000,12500,15000,20000,25000,30000,35000};*/
 		int bm25TopNBigLimitArr[]   = {5000};
-		int bm25TopNSmallLimitArr[] = {80,100,120,150};
+		int bm25TopNSmallLimitArr[] = {100,120};
 		double simWeights[] 		= {1};
 		double classFreqWeights[]   = {0.25};
 		double methodFreqWeights[]  = {0.75};
@@ -447,7 +447,9 @@ public class CrokageApp extends AppAux{
 		int numberOfPostsInfoToMatchTFIDFArr[] = {3};
 		int numberOfPostsInfoToMatchAsymmetricSimRelevanceArr[] = {1};
 		//int topSimilarContentAsymRelevancePercentArr[] = {5,10,15,20,25,50};
-		int topSimilarContentAsymRelevancePercentArr[] = {50,75,100};
+		int topSimilarContentAsymRelevancePercentArr[] = {100};
+		int numberOfAPIClassesArr[] = {3,5,10,15};
+		
 		
 		
 		//int numberOfPostsInfoToMatchArr[] = {5};
@@ -473,7 +475,7 @@ public class CrokageApp extends AppAux{
 										for(double cosSimWeight: cosSimWeights) {
 											for(double repWeight: repWeights) {
 												for(double upWeight: upWeights) {
-				
+			
 		
 		
 			
@@ -489,6 +491,7 @@ public class CrokageApp extends AppAux{
 			this.numberOfPostsInfoToMatchTFIDF=numberOfPostsInfoToMatchTFIDF;
 			this.topSimilarContentsAsymRelevancePercent=topSimilarContentsAsymRelevancePercent;
 			this.numberOfPostsInfoToMatchAsymmetricSimRelevance=numberOfPostsInfoToMatchAsymmetricSimRelevance;
+			
 			//this.luceneMoreThreadsNumber=luceneMoreThreadsNumber;
 			
 			//Integer topNScoredTitles = 10;
