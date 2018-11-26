@@ -1989,7 +1989,31 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 		return postsIdsApisMap;
 	}
 
-	 
+
+	public static Map<String,Set<Integer>> readFileToMap(String fileToRead) throws IOException {
+		long initTime = System.currentTimeMillis();
+		Map<String,Set<Integer>> contentMap = new LinkedHashMap<>();
+		List<String> lines = Files.readAllLines(Paths.get(fileToRead));
+		String[] parts;
+		for(String line: lines) {
+			parts = line.split(":");
+			if(parts.length>1) {
+				String ids[]=null;
+				ids = parts[1].split(" ");
+				Set<Integer> intContent = new LinkedHashSet<>();
+				for(String idStr: ids) {
+					intContent.add(new Integer(idStr.trim()));
+				}
+				contentMap.put(parts[0], intContent);
+			}
+			
+		}
+		
+		reportElapsedTime(initTime,"readFileToMap");
+		System.out.println("Size of readFileToMap: "+contentMap.size() +" for file: "+fileToRead);
+		return contentMap;
+	}
+
 	
 	
 }

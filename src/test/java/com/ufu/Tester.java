@@ -57,6 +57,29 @@ import com.ufu.crokage.util.CrokageUtils;
 public class Tester {
 
 	public Tester() throws Exception {
+		
+		
+		Map<String, Set<Integer>> map1 = new HashMap<>();
+		Map<String, Set<Integer>> map2 = new HashMap<>();
+		Map<String, Set<Integer>> map3 = new HashMap<>();
+		
+		HashSet set1 = new LinkedHashSet<>();
+		HashSet set2 = new LinkedHashSet<>();
+		
+		set1.add(1);set1.add(2);set1.add(3);set1.add(4);set1.add(5);
+		/*set2.add(1);set2.add(2);set2.add(3);set2.add(4);*/
+		set2.add(5);set2.add(6);set2.add(7);set2.add(5);
+		
+		map1.put("a", set1);
+		map2.put("b", set2);
+		map2.put("a", set1);
+		
+		CrokageApp app = new CrokageApp();
+		app.mergeThreads(map3, map2, map1);
+		
+		System.out.println(map3);
+		
+		
 		Integer a = -1;
 		String s2 = "// There is something wrong with MailCap, javamail can not find a handler for the multipart/mixed part, so this bit needs to be added. \n" + 
 				"    MailcapCommandMap mc = (MailcapCommandMap) CommandMap.getDefaultCommandMap(); \n" + 

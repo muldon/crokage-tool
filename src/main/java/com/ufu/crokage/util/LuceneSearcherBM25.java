@@ -1,14 +1,17 @@
 package com.ufu.crokage.util;
 
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
@@ -55,6 +58,8 @@ public class LuceneSearcherBM25 {
 	
 	private IndexWriterConfig config;
 	
+	private Set<Integer> bigSetAnswersIds;
+	
 	 
 	public LuceneSearcherBM25() throws Exception {
 		initializeConfigs();
@@ -65,7 +70,7 @@ public class LuceneSearcherBM25 {
 	public void initializeConfigs() throws Exception {
 		parseErrosNum = 0;
 		standardAnalyzer = new StandardAnalyzer();
-		
+		bigSetAnswersIds = new LinkedHashSet<>();
 		// 1. create the index
 		index = new RAMDirectory();
 		answersCache = new HashMap<>();
@@ -74,19 +79,32 @@ public class LuceneSearcherBM25 {
 	
 	}
 	
-	public void buildSearchManager(List<Bucket> upvotedScoredAnswers) throws Exception {
-		logger.info("LuceneSearcherBM25.buildSearchManager. Indexing all upvoted scored aswers with code: "+upvotedScoredAnswers.size());
+	public void buildSearchManager(Map<Integer, Bucket> allAnswersWithUpvotesAndCodeBucketsMap) throws Exception {
+		logger.info("LuceneSearcherBM25.buildSearchManager. Indexing all upvoted scored aswers with code: "+allAnswersWithUpvotesAndCodeBucketsMap.size());
 
-		indexedListSize = upvotedScoredAnswers.size();
+		indexedListSize = allAnswersWithUpvotesAndCodeBucketsMap.size();
 		//logger.info("Number of answers to index: " + upvotedScoredAnswers.size() + " \nIndexing.... ");
 				
 		//String postsIds = "Indexing... \n";
 		IndexWriterConfig config = new IndexWriterConfig(standardAnalyzer);
 		IndexWriter w = new IndexWriter(index, config);
-		for (int i = 0; i < upvotedScoredAnswers.size(); i++) {
-			Bucket answerBucket = upvotedScoredAnswers.get(i);
+		
+		Set<Integer> bucketsIds = allAnswersWithUpvotesAndCodeBucketsMap.keySet();
+		
+		//for (int i = 0; i < allThreadsIdsContentsMap.size(); i++) {
+		for (Integer id: bucketsIds) {
+			Bucket answerBucket = allAnswersWithUpvotesAndCodeBucketsMap.get(id);
 			//answersCache.put(answerBucket.getId(),answerBucket);
 			String finalContent = answerBucket.getParentProcessedTitle()+" "+answerBucket.getParentProcessedBody()+" "+answerBucket.getParentProcessedCode()+" "+answerBucket.getProcessedBody()+ " "+answerBucket.getProcessedCode();			
+			/*String finalContent = answerBucket.getParentProcessedTitle()+" "+answerBucket.getParentProcessedBody()+" "+answerBucket.getParentProcessedCode()+" "+answerBucket.getProcessedBody()+ " "+answerBucket.getProcessedCode();
+			if(!StringUtils.isBlank(answerBucket.getAcceptedOrMostUpvotedAnswerOfParentProcessedBody())) {
+				finalContent+= " "+answerBucket.getAcceptedOrMostUpvotedAnswerOfParentProcessedBody();
+			}
+			if(!StringUtils.isBlank(answerBucket.getAcceptedOrMostUpvotedAnswerOfParentProcessedCode())) {
+				finalContent+= " "+answerBucket.getAcceptedOrMostUpvotedAnswerOfParentProcessedCode();
+			}*/
+			
+			
 			//String finalContent = answerBucket.getParentProcessedTitle()+" "+answerBucket.getProcessedBody()+" "+answerBucket.getParentProcessedBody();
 			/*if(i%10000==0) {
 				System.out.println(i+ " indexed ...");
@@ -96,7 +114,8 @@ public class LuceneSearcherBM25 {
 			/*if(i%20==0){
 				postsIds+="\n";
 			}*/
-			addDocument(w, finalContent, answerBucket.getId());
+			addDocument(w, finalContent, id);
+			//addDocument(w, allAnswersWithUpvotesAndCodeBucketsMap.get(id), id);
 		}
 		//logger.info(postsIds);
 		w.close();
@@ -111,28 +130,38 @@ public class LuceneSearcherBM25 {
 	
 	
 
-	public Set<Integer> search(String query, Integer maxConsideredSeachNumberForClassifier) throws Exception {
+	public Set<Integer> search(String query, Integer smallSetLimit, Integer bigSetLimit) throws Exception {
 		//logger.info("Searching por query: "+query);
-		Set<Integer> answersIds = new LinkedHashSet<>();
+		Set<Integer> smallSetAnswersIds = new LinkedHashSet<>();
+		bigSetAnswersIds.clear();
 		
 		QueryParser parser = new QueryParser("content", standardAnalyzer);
 		
 		Query myquery = parser.parse(query);
 		
-		TopDocs docs = searcher.search(myquery, maxConsideredSeachNumberForClassifier);
+		TopDocs docs = searcher.search(myquery, bigSetLimit);
 				
 		ScoreDoc[] hits = docs.scoreDocs;
-		if(hits.length<maxConsideredSeachNumberForClassifier) {
-			maxConsideredSeachNumberForClassifier=hits.length;
+		if(hits.length<bigSetLimit) {
+			bigSetLimit=hits.length;
 		}
-		
-		for (int i = 0; i < maxConsideredSeachNumberForClassifier; i++) {
+		if(hits.length<smallSetLimit) {
+			smallSetLimit=hits.length;
+		}
+			
+		for (int i = 0; i < bigSetLimit; i++) {
 			ScoreDoc item = hits[i];
 			Document doc = searcher.doc(item.doc);
-			answersIds.add(Integer.valueOf(doc.get("id")));
+			bigSetAnswersIds.add(Integer.valueOf(doc.get("id")));
 		}
 		
-		return answersIds;		
+		for (int i = 0; i < smallSetLimit; i++) {
+			ScoreDoc item = hits[i];
+			Document doc = searcher.doc(item.doc);
+			smallSetAnswersIds.add(Integer.valueOf(doc.get("id")));
+		}
+				
+		return smallSetAnswersIds;		
 		
 	}
 
@@ -191,6 +220,16 @@ public class LuceneSearcherBM25 {
 		config.setSimilarity(new BM25Similarity(bm25ParameterK, bm25ParameterB));
 		logger.info("Setting k: "+bm25ParameterK+ " b: "+bm25ParameterB);
 	}
+
+
+	public Set<Integer> getBigSetAnswersIds() {
+		return bigSetAnswersIds;
+	}
+
+
+	
+	
+	
 
 	
 }

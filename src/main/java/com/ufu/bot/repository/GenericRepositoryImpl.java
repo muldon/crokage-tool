@@ -519,7 +519,27 @@ public class GenericRepositoryImpl implements GenericRepository {
 	}
 
 
-
+	@Override
+	public Map<Integer,String> getThreadsIdsTitlesForUpvotedAnswersWithCode() {
+		System.out.println("getThreadsIdsForUpvotedAnswersWithCode ...");
+		String sql = " select parent.id as parentId, parent.processedtitle "
+				+ " from postsmin po, postsmin parent"
+				+ " where po.posttypeid=2"
+				+ " and po.parentid = parent.id"  
+				+ " and po.score>0"
+				+ " and po.processedcode!=''"
+				+ " ";
+		
+			
+		Query q = em.createNativeQuery(sql);
+		List<Object[]> rows = q.getResultList();
+		Map<Integer,String> result = new HashMap<>(rows.size());
+		for (Object[] row : rows) {
+			result.put(((Integer) row[0]),(String) row[1]);			
+		}
+		
+		return result;
+	}
 
 	
 }

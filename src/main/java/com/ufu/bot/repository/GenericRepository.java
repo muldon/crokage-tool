@@ -56,6 +56,8 @@ public interface GenericRepository {
 
 	public List<Bucket> getUpvotedAnswersIdsContentsAndParentContents();
 
+	Map<Integer, String> getThreadsIdsTitlesForUpvotedAnswersWithCode();
+
 	
 	
     

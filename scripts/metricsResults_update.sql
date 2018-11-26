@@ -26,3 +26,6 @@ ALTER TABLE public.metricsresults
 
 ALTER TABLE public.metricsresults
     ADD COLUMN topsimilartitlespercent integer;
+
+ALTER TABLE public.metricsresults
+    ADD COLUMN tfidfcossimweight double precision;

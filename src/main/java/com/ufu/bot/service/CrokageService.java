@@ -109,6 +109,10 @@ public class CrokageService extends AbstractService{
 		return genericRepository.getUpvotedAnswersIdsContentsAndParentContents();
 	}
 
+	public Map<Integer,String> getThreadsIdsTitlesForUpvotedAnswersWithCode() {
+		return genericRepository.getThreadsIdsTitlesForUpvotedAnswersWithCode();
+	}
+
 	
 	
 	
