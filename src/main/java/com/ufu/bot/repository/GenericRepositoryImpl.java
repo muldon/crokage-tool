@@ -496,7 +496,7 @@ public class GenericRepositoryImpl implements GenericRepository {
 				+ " and po.parentid = parent.id"  
 				+ " and po.score>0"
 				+ " and po.processedcode!=''"
-				+ " ";
+				+ " and parent.score>0";
 		
 			
 		Query q = em.createNativeQuery(sql);

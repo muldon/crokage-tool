@@ -332,7 +332,7 @@ public class CrokageApp extends AppAux{
 		
 		MetricResult metricResult = new MetricResult();
 		metricResult.setApproach("crokage stage1 x google");
-		analyzeResults(topScoredApiAnswersIdsMap,googleQueriesAndSOIdsMap,metricResult, " google ");
+		analyzeResults(filteredAnswersWithApisIdsMap,googleQueriesAndSOIdsMap,metricResult, " google ");
 		
 	}
 
@@ -345,6 +345,7 @@ public class CrokageApp extends AppAux{
 		String processedQuery;
 		String rawQuery;
 		Set<Integer> answersWithTopFrequentAPIs=null;
+		Set<Integer> filteredAnswersWithAPIs=null;
 		Set<Integer> luceneSmallSetIds=null;
 		Set<Integer> luceneBigSetIds=null;
 		Set<Integer> asymTopAnswersThreadsIds=null;
@@ -369,8 +370,9 @@ public class CrokageApp extends AppAux{
 		//loadAllThreadsIdsContentsMap();
 		loadUpvotedAnswersIdsWithCodeContentsAndParentContents();
 		luceneSearcherBM25.buildSearchManager(allAnswersWithUpvotesAndCodeBucketsMap);
+		//luceneSearcherBM25.buildSearchManager(allAnswersWithUpvotesAndCodeBucketsMap,allThreadsIdsContentsMap);
 		//allAnswersWithUpvotesAndCodeBucketsMap=null;
-		
+		//allThreadsIdsContentsMap=null;
 		
 		if(iHaveALotOfMemory) { //load all word vectors only once
 			readSoContentWordVectorsForAllWords();
@@ -422,7 +424,7 @@ public class CrokageApp extends AppAux{
 		}
 		crokageUtils.reportElapsedTime(initTime,"acceptedOrMostUpvotedAnswer info added");*/
 		
-		loadThreadsForUpvotedAnswersWithCodeIdsTitlesMap();
+		//loadThreadsForUpvotedAnswersWithCodeIdsTitlesMap();
 		
 		//load <postId,Set<Apis>> map
 		loadUpvotedPostsWithCodeApisMap();
@@ -437,18 +439,18 @@ public class CrokageApp extends AppAux{
 		
 		/*int bm25TopNResultsArr[] = {1000,2500,5000,10000,12500,15000,20000,25000,30000,35000};*/
 		int bm25TopNBigLimitArr[]   = {5000};
-		int bm25TopNSmallLimitArr[] = {100,120};
+		int bm25TopNSmallLimitArr[] = {100};
 		double simWeights[] 		= {1};
 		double classFreqWeights[]   = {0.25};
 		double methodFreqWeights[]  = {0.75};
-		double cosSimWeights[] 		= {0.25};
+		double cosSimWeights[] 		= {0.5};
 		double repWeights[] 		= {0.75};
 		double upWeights[] 			= {0.5};
 		int numberOfPostsInfoToMatchTFIDFArr[] = {3};
-		int numberOfPostsInfoToMatchAsymmetricSimRelevanceArr[] = {1};
+		int numberOfPostsInfoToMatchAsymmetricSimRelevanceArr[] = {1,2,3};
 		//int topSimilarContentAsymRelevancePercentArr[] = {5,10,15,20,25,50};
-		int topSimilarContentAsymRelevancePercentArr[] = {100};
-		int numberOfAPIClassesArr[] = {3,5,10,15};
+		int topSimilarContentAsymRelevanceNumberArr[] = {100};
+		//int numberOfAPIClassesArr[] = {3,5,10,15};
 		
 		
 		
@@ -466,7 +468,7 @@ public class CrokageApp extends AppAux{
 		
 		for(int numberOfPostsInfoToMatchTFIDF: numberOfPostsInfoToMatchTFIDFArr){
 			for(int numberOfPostsInfoToMatchAsymmetricSimRelevance: numberOfPostsInfoToMatchAsymmetricSimRelevanceArr){
-				for(int topSimilarContentsAsymRelevancePercent: topSimilarContentAsymRelevancePercentArr){
+				for(int topSimilarContentsAsymRelevanceNumber: topSimilarContentAsymRelevanceNumberArr){
 					for(int bm25TopNSmallLimit: bm25TopNSmallLimitArr) {
 						for(int bm25TopNBigLimit: bm25TopNBigLimitArr) {
 							for(double simWeight: simWeights) {
@@ -482,6 +484,7 @@ public class CrokageApp extends AppAux{
 			int sum1=0;
 			int sum2=0;
 			int sum3=0;
+			int sum4=0;
 			BotComposer.setSimWeight(simWeight);
 			BotComposer.setClassFreqWeight(classFreqWeight);
 			BotComposer.setMethodFreqWeight(methodFreqWeight);
@@ -489,14 +492,14 @@ public class CrokageApp extends AppAux{
 			BotComposer.setUpWeight(upWeight);
 			BotComposer.setCosSimWeight(cosSimWeight);
 			this.numberOfPostsInfoToMatchTFIDF=numberOfPostsInfoToMatchTFIDF;
-			this.topSimilarContentsAsymRelevancePercent=topSimilarContentsAsymRelevancePercent;
+			this.topSimilarContentsAsymRelevanceNumber=topSimilarContentsAsymRelevanceNumber;
 			this.numberOfPostsInfoToMatchAsymmetricSimRelevance=numberOfPostsInfoToMatchAsymmetricSimRelevance;
 			
 			//this.luceneMoreThreadsNumber=luceneMoreThreadsNumber;
 			
 			//Integer topNScoredTitles = 10;
 			initTime = System.currentTimeMillis();
-			firstObs = " - numberOfPostsInfoToMatchTFIDF: "+numberOfPostsInfoToMatchTFIDF+ " - topSimilarContentsAsymRelevancePercent: "+topSimilarContentsAsymRelevancePercent+" - bm25TopNSmallLimit: "+bm25TopNSmallLimit+  " - bm25TopNBigLimit: "+bm25TopNBigLimit+  " - numberOfPostsInfoToMatchAsymmetricSimRelevance:"+numberOfPostsInfoToMatchAsymmetricSimRelevance;
+			firstObs = " - numberOfPostsInfoToMatchTFIDF: "+numberOfPostsInfoToMatchTFIDF+ " - topSimilarContentsAsymRelevanceNumber: "+topSimilarContentsAsymRelevanceNumber+" - bm25TopNSmallLimit: "+bm25TopNSmallLimit+  " - bm25TopNBigLimit: "+bm25TopNBigLimit+  " - numberOfPostsInfoToMatchAsymmetricSimRelevance:"+numberOfPostsInfoToMatchAsymmetricSimRelevance;
 			System.out.println("\n\nRun: "+count+firstObs );
 			count++;
 			for(Integer key: keys) {  //for each query 
@@ -504,7 +507,7 @@ public class CrokageApp extends AppAux{
 				//long initTime2 = System.currentTimeMillis();
 				
 				rawQuery = queries.get(key-1);
-				//System.out.println("\n\nQuery: "+count+" "+rawQuery+ " - bm25TopNResults: "+bm25TopNResults+ " - topSimilarContentsAsymRelevancePercent: "+topSimilarContentsAsymRelevancePercent+ " - ");
+				//System.out.println("\n\nQuery: "+count+" "+rawQuery+ " - bm25TopNResults: "+bm25TopNResults+ " - topSimilarContentsAsymRelevanceNumber: "+topSimilarContentsAsymRelevanceNumber+ " - ");
 				
 				processedQuery = processedQueries.get(key-1);
 				//System.out.println("Processed query: "+processedQuery);
@@ -519,9 +522,9 @@ public class CrokageApp extends AppAux{
 				//crokageUtils.reportElapsedTime(initTime2,"for query 2");
 				
 				//add vectors for all retrieved answers
-				if(!iHaveALotOfMemory) {
+				/*if(!iHaveALotOfMemory) {
 					addVectorsToSoContentWordVectorsMap(answersWithTopFrequentAPIs);
-				}	
+				}	*/
 				
 				
 				//first filter, lucene
@@ -539,36 +542,32 @@ public class CrokageApp extends AppAux{
 				//asymTopAnswersThreadsIds = getTopRelevantThreads(matrix1,idf1,key,processedQuery,luceneBigSetIds);
 				//asymTopAnswersThreadsIds = getAnswersForTopThreads(luceneBigSetIds,matrix1,idf1);
 				
-				asymTopAnswersThreadsIds = getAnswersForTopThreads(luceneSmallSetIds,matrix1,idf1);
+				asymTopAnswersThreadsIds = getAnswersForTopThreads(luceneBigSetIds,matrix1,idf1);
 				topAsymIdsMap.put(rawQuery, asymTopAnswersThreadsIds);
 				sum2+=asymTopAnswersThreadsIds.size();
 				if(rawQuery.contains("How can I insert an element in array at a given position?")) {
 					System.out.println("Size of asymTopThreadsIds: "+asymTopAnswersThreadsIds.size());
 				}
 				
-				/*
+				
 				Set<Integer> mergeIds=new HashSet<>(luceneSmallSetIds);
 				mergeIds.addAll(asymTopAnswersThreadsIds);
 				topMergeIdsMap.put(rawQuery, mergeIds);
 				sum3+=mergeIds.size();
-				scoreAnswersByAPIs(topClasses,mergeIds);
 				if(rawQuery.contains("How can I insert an element in array at a given position?")) {
 					System.out.println("Size of mergeIds: "+mergeIds.size());
-				}*/
+				}
 				
 				
-				//sum2+=luceneSmallSetIds.size();
+				filteredAnswersWithAPIs = filterAnswersByAPIs(topClasses,mergeIds);
+				filteredAnswersWithApisIdsMap.put(rawQuery, filteredAnswersWithAPIs);
+				if(rawQuery.contains("How can I insert an element in array at a given position?")) {
+					System.out.println("Size of filteredAnswersWithAPIs: "+filteredAnswersWithAPIs.size());
+				}
+				sum4+=filteredAnswersWithAPIs.size();
+				
 				//mergeThreads(topMergeIdsMap,luceneTopIdsMap,topAsymIdsMap);
 				
-				
-				//score by api 
-				scoreAnswersByAPIs(topClasses,luceneSmallSetIds);
-				//System.out.println("Size of answersWithTopFrequentAPIs: "+answersWithTopFrequentAPIs.size());
-				//topScoredApiAnswersIdsMap.put(rawQuery, answersWithTopFrequentAPIs);
-				//sum2+=answersWithTopFrequentAPIs.size();
-				//crokageUtils.reportElapsedTime(initTime2,"topScoredApiAnswersIdsMap");
-				//initTime2 = System.currentTimeMillis();
-			
 				
 				/*
 				//third filter, threads
@@ -580,7 +579,7 @@ public class CrokageApp extends AppAux{
 				//initTime2 = System.currentTimeMillis();
 				*/
 				//last filter: relevance similarity
-				Set<Integer> topKRelevantAnswersIds = getTopKRelevantAnswers(asymTopAnswersThreadsIds,matrix1,idf1,key,processedQuery);
+				Set<Integer> topKRelevantAnswersIds = getTopKRelevantAnswers(filteredAnswersWithAPIs,matrix1,idf1,key,processedQuery);
 				//System.out.println("Size of topKRelevantAnswersIds: "+topKRelevantAnswersIds.size());
 				recommendedResults.put(rawQuery, topKRelevantAnswersIds);
 				//crokageUtils.reportElapsedTime(initTime2,"topKRelevantAnswersIds");
@@ -590,40 +589,39 @@ public class CrokageApp extends AppAux{
 			}
 			
 			System.out.println("\n");
-			String obsComp = obs + " - "+firstObs+ " luceneTopIdsMap (average): "+sum1/keys.size();
-			MetricResult metricResult = new MetricResult("luceneTopIdsMap",bm25TopNSmallLimit,topApisScoredPairsPercent,topSimilarContentsAsymRelevancePercent,cutoff,bm25TopNSmallLimit,obsComp);
+			String obsComp = obs + " - "+firstObs+ " luceneTopIdsMap (avg): "+sum1/keys.size();
+			MetricResult metricResult = new MetricResult("luceneTopIdsMap",bm25TopNSmallLimit,bm25TopNBigLimit,topApisScoredPairsPercent,topSimilarContentsAsymRelevanceNumber,cutoff,bm25TopNSmallLimit,obsComp,numberOfAPIClasses);
 			analyzeResults(luceneTopIdsMap,groundTruthSelectedQueriesAnswersIdsMap,metricResult,"luceneTopIdsMap");
-			crokageService.saveMetricResult(metricResult,useCodeInSimCalculus,obsComp,bm25TopNSmallLimit,cutoff,numberOfAPIClasses,topApisScoredPairsPercent);
+			crokageService.saveMetricResult(metricResult);
 			//System.out.println(obsComp);
 			
 			//System.out.println("\n");
-			obsComp = obs + " - "+firstObs+ " topAsymIdsMap (average): "+sum2/keys.size();
-			metricResult = new MetricResult("topAsymIdsMap",bm25TopNResults,topApisScoredPairsPercent,topSimilarContentsAsymRelevancePercent,cutoff,null,obsComp);
+			/*obsComp = obs + " - "+firstObs+ " topAsymIdsMap (avg): "+sum2/keys.size();
+			metricResult = new MetricResult("topAsymIdsMap",bm25TopNSmallLimit,bm25TopNBigLimit,topApisScoredPairsPercent,topSimilarContentsAsymRelevanceNumber,cutoff,null,obsComp,numberOfAPIClasses);
 			analyzeResults(topAsymIdsMap,groundTruthSelectedQueriesAnswersIdsMap,metricResult,"topAsymIdsMap");
-			crokageService.saveMetricResult(metricResult,useCodeInSimCalculus,obsComp,bm25TopNResults,cutoff,numberOfAPIClasses,topApisScoredPairsPercent);
+			crokageService.saveMetricResult(metricResult);*/
 			
 			
-			/*
-			System.out.println("\n");
-			obsComp = obs + " - "+firstObs+ " topMergeIdsMap (average): "+sum3/keys.size();
-			metricResult = new MetricResult("topMergeIdsMap",bm25TopNResults,topApisScoredPairsPercent,topSimilarContentsAsymRelevancePercent,cutoff,null,obsComp);
-			analyzeResults(topMergeIdsMap,groundTruthSelectedQueriesAnswersIdsMap,metricResult,"topMergeIdsMap");
-			crokageService.saveMetricResult(metricResult,useCodeInSimCalculus,obsComp,bm25TopNResults,cutoff,numberOfAPIClasses,topApisScoredPairsPercent);
-			System.out.println(obsComp);
-			*/
-			/*
+			
 			//System.out.println("\n");
-			obsComp = obs + " topScoredApiAnswersIdsMap filter (average): "+sum2/keys.size();
-			metricResult = new MetricResult("topScoredApiAnswersIdsMap",bm25TopNResults,topApisScoredPairsPercent,topSimilarContentsAsymRelevancePercent,cutoff,bm25TopNResults,obsComp);
-			analyzeResults(topScoredApiAnswersIdsMap,groundTruthSelectedQueriesAnswersIdsMap,metricResult,"topScoredApiAnswersIdsMap");
+			obsComp = obs + " - "+firstObs+ " topMergeIdsMap (avg): "+sum3/keys.size();
+			metricResult = new MetricResult("topMergeIdsMap",bm25TopNSmallLimit,bm25TopNBigLimit,topApisScoredPairsPercent,topSimilarContentsAsymRelevanceNumber,cutoff,null,obsComp,numberOfAPIClasses);
+			analyzeResults(topMergeIdsMap,groundTruthSelectedQueriesAnswersIdsMap,metricResult,"topMergeIdsMap");
+			crokageService.saveMetricResult(metricResult);
+			//System.out.println(obsComp);
+			
+			
+			obsComp = obs + " filteredAnswersWithApisIdsMap filter (avg): "+sum4/keys.size();
+			metricResult = new MetricResult("filteredAnswersWithApisIdsMap",bm25TopNSmallLimit,bm25TopNBigLimit,topApisScoredPairsPercent,topSimilarContentsAsymRelevanceNumber,cutoff,null,obsComp,numberOfAPIClasses);
+			analyzeResults(filteredAnswersWithApisIdsMap,groundTruthSelectedQueriesAnswersIdsMap,metricResult,"filteredAnswersWithApisIdsMap");
 			//System.out.println(obsComp);
 			//crokageService.saveMetricResult(metricResult,useCodeInSimCalculus,obsComp,bm25TopNResults,cutoff,numberOfAPIClasses,topApisScoredPairsPercent);
-			*/
+			
 			
 			/*
 			//System.out.println("\n");
-			obsComp = obs + " topThreadsAnswersIdsMap filter (average): "+sum3/keys.size();
-			metricResult = new MetricResult("topThreadsAnswersIdsMap",bm25TopNResults,topApisScoredPairsPercent,topSimilarContentsAsymRelevancePercent,cutoff,bm25TopNResults,obsComp);
+			obsComp = obs + " topThreadsAnswersIdsMap filter (avg): "+sum3/keys.size();
+			metricResult = new MetricResult("topThreadsAnswersIdsMap",bm25TopNResults,topApisScoredPairsPercent,topSimilarContentsAsymRelevanceNumber,cutoff,bm25TopNResults,obsComp);
 			analyzeResults(topThreadsAnswersIdsMap,groundTruthSelectedQueriesAnswersIdsMap,metricResult,"topThreadsAnswersIdsMap");
 			//System.out.println(obsComp);
 			//crokageService.saveMetricResult(metricResult,useCodeInSimCalculus,obsComp,bm25TopNResults,cutoff,numberOfAPIClasses,topApisScoredPairsPercent);
@@ -631,10 +629,10 @@ public class CrokageApp extends AppAux{
 			//System.out.println("\n");
 			//System.out.println("\n");
 			obsComp = firstObs+ " - final relevance. Size: "+topk;
-			metricResult = new MetricResult("final relevance",bm25TopNResults,topApisScoredPairsPercent,topSimilarContentsAsymRelevancePercent,cutoff,topk,obsComp);
+			metricResult = new MetricResult("final relevance",bm25TopNSmallLimit,bm25TopNBigLimit,topApisScoredPairsPercent,topSimilarContentsAsymRelevanceNumber,cutoff,topk,obsComp,numberOfAPIClasses);
 			analyzeResults(recommendedResults,groundTruthSelectedQueriesAnswersIdsMap,metricResult,"final relevance");
 			//System.out.println(obsComp);
-			crokageService.saveMetricResult(metricResult,useCodeInSimCalculus,obsComp,bm25TopNResults,cutoff,numberOfAPIClasses,topApisScoredPairsPercent);
+			crokageService.saveMetricResult(metricResult);
 			
 			crokageUtils.reportElapsedTime(initTime,"for run");
 		}
@@ -692,12 +690,12 @@ public class CrokageApp extends AppAux{
 			
 		}
 				
-		int topSimilarTitles = bucketsIdsScores.size()*topSimilarContentsAsymRelevancePercent/100;
+		//int topSimilarTitles = bucketsIdsScores.size()*topSimilarContentsAsymRelevanceNumber/100;
 		
 		//sort scores in descending order and consider the first topSimilarQuestionsNumber parameter
 		Map<Integer,Double> topKRelevantThreadsMap = bucketsIdsScores.entrySet().stream()
 			       .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
-			       .limit(topSimilarTitles)
+			       .limit(topSimilarContentsAsymRelevanceNumber)
 			       .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
 		
 		
@@ -741,12 +739,12 @@ public class CrokageApp extends AppAux{
 			
 		}
 				
-		int topSimilarContents = bucketsIdsScores.size()*topSimilarContentsAsymRelevancePercent/100;
+		//int topSimilarContents = bucketsIdsScores.size()*topSimilarContentsAsymRelevanceNumber/100;
 		
 		//sort scores in descending order and consider the first topSimilarQuestionsNumber parameter
 		Map<Integer,Double> topKRelevantAnswersBucketsMap = bucketsIdsScores.entrySet().stream()
 			       .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
-			       .limit(topSimilarContents)
+			       .limit(topSimilarContentsAsymRelevanceNumber)
 			       .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
 		
 		
@@ -851,7 +849,7 @@ public class CrokageApp extends AppAux{
 */
 
 
-	protected void scoreAnswersByAPIs(Set<String> topClasses, Set<Integer> relevantAnswersIds) {
+	protected Set<Integer> filterAnswersByAPIs(Set<String> topClasses, Set<Integer> relevantAnswersIds) {
 		//long initTime = System.currentTimeMillis();
 		
 		//Set<Integer> answersWithTopFrequentAPIs = new HashSet<>();
@@ -868,7 +866,7 @@ public class CrokageApp extends AppAux{
 			}	
 			for(Integer answerId: answersIdsFromBigMap) {
 				//if(relevantAnswersIds.contains(answerId) && allAnswersWithUpvotesAndCodeBucketsMap.containsKey(answerId)) { //filtered by lucene and is upvoted answer
-				if(relevantAnswersIds.contains(answerId)) { 
+				if(relevantAnswersIds.contains(answerId) && allAnswersWithUpvotesAndCodeBucketsMap.containsKey(answerId)) { //filtered by lucene and is upvoted answer 
 					//answersWithTopFrequentAPIs.add(answerId);
 					AnswerParentPair answerParentPair = new AnswerParentPair(answerId, allAnswersWithUpvotesAndCodeBucketsMap.get(answerId).getParentId());
 					calculateApiScore(answerParentPair,topClasses);
@@ -882,7 +880,7 @@ public class CrokageApp extends AppAux{
 			System.out.println("Number of pairs(answer+parent) containing topClasses: "+answerParentThreads.size());
 		}
 		
-		/*
+		
 		int topApisScoredPairs = answerParentThreads.size()*topApisScoredPairsPercent/100;
 		
 		//sort by apiScore desc
@@ -891,27 +889,27 @@ public class CrokageApp extends AppAux{
 				.limit(topApisScoredPairs)
 				.map(x -> x.getAnswerId())
 				.collect(Collectors.toList());
-		
+		/*
 		sortedPairs= topAnswerParentPairs.stream()
 				.sorted(Comparator.comparing(AnswerParentPair::getApiScore).reversed())
 				.limit(topApisScoredPairsPercent)
 				//.map(x -> x.getAnswerId())
 				.collect(Collectors.toList());
-		
+		*/
 		
 		Set<Integer> topNAnswersIdsSet = new LinkedHashSet<>(topNAnswersIds);
 		//topApiScoredAnswersIds.addAll(topNAnswersIdsSet);
 		
-		for(Integer topAnswerId: topNAnswersIdsSet) {
+		/*for(Integer topAnswerId: topNAnswersIdsSet) {
 			topAnswersWithUpvotesIdsParentIdsMap.put(topAnswerId, allAnswersWithUpvotesIdsParentIdsMap.get(topAnswerId));
-		}
+		}*/
 		
 		
 		topNAnswersIds=null;
 		answerParentThreads=null;
 		//crokageUtils.reportElapsedTime(initTime,"getAnswersForTopFrequentAPIs");
-		*/
-		//return topNAnswersIdsSet;
+		
+		return topNAnswersIdsSet;
 	}
 
 
@@ -938,16 +936,17 @@ public class CrokageApp extends AppAux{
 		//load ground truth
 		loadGroundTruthSelectedQueries();
 		
+		//getGroundTruthSelectedQueriesQuestionsIdsMap();
 		
 		for(String query: queries) {  //for each query 
-			/*Set<Integer> acceptedOrMostUpvotedAnswersIds = new LinkedHashSet<>();
+			Set<Integer> acceptedOrMostUpvotedAnswersIds = new LinkedHashSet<>();
 			Set<Integer> googleSOQuestionsIds = googleQueriesAndSOIdsMap.get(query);
 			if(googleSOQuestionsIds.size()>10) {
 				throw new Exception("size should be 10");
-			}*/
+			}
 			
 			//for SO
-			Set<Integer> groundTruthAnswers = groundTruthSelectedQueriesAnswersIdsMap.get(query);
+			/*Set<Integer> groundTruthAnswers = groundTruthSelectedQueriesAnswersIdsMap.get(query);
 			Set<Integer> acceptedAnswersIdsOrMostUpvoted = new HashSet<>();
 			for(Integer answerId: groundTruthAnswers) {
 				Integer parentId = crokageService.findPostById(answerId).getParentId();
@@ -959,10 +958,10 @@ public class CrokageApp extends AppAux{
 					acceptedAnswersIdsOrMostUpvoted.add(mostUpvotedAnswer);
 				}
 			}
-			soAcceptedOrMostUpvotedSOIdsMapRecommended.put(query,acceptedAnswersIdsOrMostUpvoted);
+			soAcceptedOrMostUpvotedSOIdsMapRecommended.put(query,acceptedAnswersIdsOrMostUpvoted);*/
 			
 			
-			/*for(Integer questionId: googleSOQuestionsIds) {
+			for(Integer questionId: googleSOQuestionsIds) {
 				Post question = crokageService.findPostById(questionId);
 				if(question==null) {
 					System.out.println("question not found. Not java or newer than the dataset or with no upvotes "+questionId);
@@ -984,7 +983,7 @@ public class CrokageApp extends AppAux{
 			
 			recommendedResults.put(query,acceptedOrMostUpvotedAnswersIds);
 			
-			*/
+			
 			
 			
 		}
@@ -992,10 +991,9 @@ public class CrokageApp extends AppAux{
 		//CrokageUtils.writeMapToFile4(groundTruthSelectedQueriesAnswersIdsMap,"./data/googleSelectedQueriesGroundTruthAnswersIds.txt");
 		//CrokageUtils.writeMapToFile4(recommendedResults,"./data/googleSelectedQueriesRecommendedAcceptedOrMostUpvotedAnswersIds.txt");
 		
-		MetricResult metricResult = new MetricResult();
-		metricResult.setApproach("google");
-		analyzeResults(soAcceptedOrMostUpvotedSOIdsMapRecommended,groundTruthSelectedQueriesAnswersIdsMap,metricResult, "so ");
-		//crokageService.saveMetricResult(metricResult,useCodeInSimCalculus,"metrics for google with accepted answers or most upvoted answers",10,cutoff,numberOfAPIClasses,topApisScoredPairsPercent);
+		MetricResult metricResult = new MetricResult("google",0,0,0,0,0,0,"only google for top10",0);
+		analyzeResults(recommendedResults,groundTruthSelectedQueriesAnswersIdsMap,metricResult, "google");
+		crokageService.saveMetricResult(metricResult);
 		
 		
 		

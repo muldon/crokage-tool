@@ -280,8 +280,8 @@ public class AppAux {
 	@Value("${topApisScoredPairsPercent}")
 	public Integer topApisScoredPairsPercent;
 	
-	@Value("${topSimilarContentsAsymRelevancePercent}")
-	public Integer topSimilarContentsAsymRelevancePercent;
+	@Value("${topSimilarContentsAsymRelevanceNumber}")
+	public Integer topSimilarContentsAsymRelevanceNumber;
 	
 	@Value("${useCodeInSimCalculus}")
 	public Boolean useCodeInSimCalculus;
@@ -323,6 +323,7 @@ public class AppAux {
 	protected Map<Integer,Integer> allAnswersWithUpvotesIdsParentIdsMap;
 	protected Map<Integer,Integer> topAnswersWithUpvotesIdsParentIdsMap;
 	protected Map<Integer,Bucket> allAnswersWithUpvotesAndCodeBucketsMap;
+	protected Map<Integer,Bucket> allThreadsForAnswersWithUpvotesAndCodeBucketsMap;
 	protected Set<Integer> topClassesRelevantAnswersIds;
 	protected Set<Integer> topApiScoredAnswersIds;
 	protected Map<Integer,String> threadsForUpvotedAnswersWithCodeIdsTitlesMap;
@@ -337,7 +338,7 @@ public class AppAux {
 	protected Map<String,Integer> classesCounterMap;
 	protected Map<Integer,Double> topAnswerParentPairsAnswerIdScoreMap; 
 	
-	protected Map<String,Set<Integer>> topScoredApiAnswersIdsMap;
+	protected Map<String,Set<Integer>> filteredAnswersWithApisIdsMap;
 	protected Map<String,Set<Integer>> luceneTopIdsMap;
 	protected Map<String,Set<Integer>> topThreadsAnswersIdsMap;
 	protected Map<String,Set<Integer>> topAsymIdsMap;
@@ -369,12 +370,13 @@ public class AppAux {
 		groundTruthSelectedQueriesAnswersIdsMap = new LinkedHashMap<>();
 		groundTruthSelectedQueriesQuestionsIdsMap = new LinkedHashMap<>();
 		allAnswersWithUpvotesAndCodeBucketsMap = new HashMap<>(); 
+		allThreadsForAnswersWithUpvotesAndCodeBucketsMap = new HashMap<>();
 		topClassesRelevantAnswersIds = new HashSet<>();
 		rackQueriesApisMap = new LinkedHashMap<>();
 		bikerQueriesApisClassesMap = new LinkedHashMap<>();
 		bikerQueriesApisClassesAndMethodsMap = new LinkedHashMap<>();
 		nlp2ApiQueriesApisMap = new LinkedHashMap<>();
-		topScoredApiAnswersIdsMap = new LinkedHashMap<>();
+		filteredAnswersWithApisIdsMap = new LinkedHashMap<>();
 		topThreadsAnswersIdsMap = new LinkedHashMap<>();
 		topAsymIdsMap = new LinkedHashMap<>();
 		topMergeIdsMap = new LinkedHashMap<>();
@@ -663,6 +665,15 @@ public class AppAux {
 		crokageUtils.reportElapsedTime(initTime2,"getUpvotedAnswersIdsContentsAndParentContents");
 		buckets=null;
 	}
+	
+	protected Set<Integer> getAllThreadsForAnswersWithUpvotesAndCodeBucketsMap() {
+		Set<Integer> keys = allAnswersWithUpvotesAndCodeBucketsMap.keySet();
+		Set<Integer> threadsIds = new HashSet<>();
+		for(Integer key: keys) {
+			threadsIds.add(allAnswersWithUpvotesAndCodeBucketsMap.get(key).getParentId());
+		}
+		return threadsIds;	
+	}
 
 
 	
@@ -706,8 +717,8 @@ public class AppAux {
 		outer:for (int i = 0; i < topClassesArray.size(); i++) {
 			String api = topClassesArray.get(i);
 			if(allApis.contains(api)) {
-				rrank += 1.0 / (i + 1);
-				//break outer;
+				rrank = 1.0 / (i + 1);
+				break outer;
 			}
 		}
 		answerParentPair.setApiScore(rrank);

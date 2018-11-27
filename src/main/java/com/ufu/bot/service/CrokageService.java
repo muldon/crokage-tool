@@ -78,20 +78,13 @@ public class CrokageService extends AbstractService{
 	
 	
 
-	public void saveMetricResult(MetricResult metricResult, Boolean useCodeInSimCalculus, String obs, Integer bm25TopNResults, Integer cutoff, Integer topClasses, Integer topApisScoredPairsPercent) {
+	public void saveMetricResult(MetricResult metricResult) {
 		metricResult.setClassFreqWeight(BotComposer.getClassFreqWeight());
 		metricResult.setMethodFreqWeight(BotComposer.getMethodFreqWeight());
 		metricResult.setRepWeight(BotComposer.getRepWeight());
 		metricResult.setSimWeight(BotComposer.getSimWeight());
 		metricResult.setUpWeight(BotComposer.getUpWeight());
 		metricResult.setTfIdfCosSimWeight(BotComposer.getCosSimWeight());
-		metricResult.setUseCodeInSimCalculus(useCodeInSimCalculus);
-		metricResult.setObs(obs);
-		metricResult.setBm25TopNResults(bm25TopNResults);
-		metricResult.setTopApisScoredPairsPercent(topApisScoredPairsPercent);
-		//metricResult.setTopSimilarQuestionsNumber(topSimilarQuestionsNumber);
-		metricResult.setCutoff(cutoff);
-		metricResult.setTopClasses(topClasses);
 		metricResultRepository.save(metricResult);
 	}
 

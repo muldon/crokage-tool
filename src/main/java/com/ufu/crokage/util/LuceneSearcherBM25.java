@@ -79,6 +79,26 @@ public class LuceneSearcherBM25 {
 	
 	}
 	
+	
+	public void buildSearchManager(Map<Integer, Bucket> allAnswersWithUpvotesAndCodeBucketsMap,	Map<Integer, String> allThreadsIdsContentsMap) throws Exception {
+		logger.info("LuceneSearcherBM25.buildSearchManager 2. Indexing all threads whose aswers have code: "+allAnswersWithUpvotesAndCodeBucketsMap.size());
+		indexedListSize = allThreadsIdsContentsMap.size();
+		IndexWriterConfig config = new IndexWriterConfig(standardAnalyzer);
+		IndexWriter w = new IndexWriter(index, config);
+		
+		for (Integer answerId: allAnswersWithUpvotesAndCodeBucketsMap.keySet()) {
+			int parentId = allAnswersWithUpvotesAndCodeBucketsMap.get(answerId).getParentId();
+			String finalContent = allThreadsIdsContentsMap.get(parentId);			
+			addDocument(w, finalContent, answerId);
+		}
+		w.close();
+		reader = DirectoryReader.open(index);
+		searcher = new IndexSearcher(reader);
+		
+		
+	}
+
+	
 	public void buildSearchManager(Map<Integer, Bucket> allAnswersWithUpvotesAndCodeBucketsMap) throws Exception {
 		logger.info("LuceneSearcherBM25.buildSearchManager. Indexing all upvoted scored aswers with code: "+allAnswersWithUpvotesAndCodeBucketsMap.size());
 

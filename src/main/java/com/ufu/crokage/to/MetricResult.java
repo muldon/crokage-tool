@@ -53,17 +53,17 @@ public class MetricResult {
 	@Column(name="mrk1")
 	private Double mrK1;
 	
-	@Column(name="bm25topnresults")
-	private Integer bm25TopNResults;
+	@Column(name="bm25topnsmallresults")
+	private Integer bm25TopNSmallResults;
+	
+	@Column(name="bm25topnbigresults")
+	private Integer bm25TopNBigResults;
 	
 	@Column(name="topapisscoredpairspercent")
 	private Integer topApisScoredPairsPercent;
 	
-	@Column(name="topsimilartitlespercent")
-	private Integer topSimilarTitlesPercent;
-	
-	@Column(name="usecodeinsimcalculus")
-	private Boolean useCodeInSimCalculus;
+	@Column(name="topsimilarcontentsasymrelevancenumber")
+	private Integer topSimilarContentsAsymRelevanceNumber;
 	
 	private Integer cutoff;
 	
@@ -178,13 +178,7 @@ public class MetricResult {
 		this.id = id;
 	}
 	
-	 
-	public Boolean getUseCodeInSimCalculus() {
-		return useCodeInSimCalculus;
-	}
-	public void setUseCodeInSimCalculus(Boolean useCodeInSimCalculus) {
-		this.useCodeInSimCalculus = useCodeInSimCalculus;
-	}
+	
 	public Integer getCutoff() {
 		return cutoff;
 	}
@@ -239,18 +233,7 @@ public class MetricResult {
 	public void setTopClasses(Integer topClasses) {
 		this.topClasses = topClasses;
 	}
-	public Integer getTopApisScoredPairsPercent() {
-		return topApisScoredPairsPercent;
-	}
-	public void setTopApisScoredPairsPercent(Integer topApisScoredPairsPercent) {
-		this.topApisScoredPairsPercent = topApisScoredPairsPercent;
-	}
-	public Integer getBm25TopNResults() {
-		return bm25TopNResults;
-	}
-	public void setBm25TopNResults(Integer bm25TopNResults) {
-		this.bm25TopNResults = bm25TopNResults;
-	}
+	
 	public Integer getTopk() {
 		return topk;
 	}
@@ -258,16 +241,18 @@ public class MetricResult {
 		this.topk = topk;
 	}
 	
-	public MetricResult(String approach,Integer bm25TopNResults, Integer topApisScoredPairsPercent, Integer topSimilarTitlesPercent,
-			Integer cutoff, Integer topk, String obs) {
+	public MetricResult(String approach,Integer bm25TopNSmallResults,Integer bm25TopNBigResults, Integer topApisScoredPairsPercent, Integer topSimilarTitlesPercent,
+			Integer cutoff, Integer topk, String obs,Integer numberofapiclasses) {
 		super();
-		this.bm25TopNResults = bm25TopNResults;
+		this.bm25TopNSmallResults = bm25TopNSmallResults;
+		this.bm25TopNBigResults = bm25TopNBigResults;
 		this.topApisScoredPairsPercent = topApisScoredPairsPercent;
-		this.topSimilarTitlesPercent = topSimilarTitlesPercent;
+		this.topSimilarContentsAsymRelevanceNumber = topSimilarTitlesPercent;
 		this.cutoff = cutoff;
 		this.topk = topk;
 		this.obs = obs;
 		this.approach = approach;
+		this.topClasses=numberofapiclasses;
 	}
 	public MetricResult() {
 		super();
@@ -277,6 +262,18 @@ public class MetricResult {
 	}
 	public void setTfIdfCosSimWeight(Double tfIdfCosSimWeight) {
 		this.tfIdfCosSimWeight = tfIdfCosSimWeight;
+	}
+	public Integer getBm25TopNSmallResults() {
+		return bm25TopNSmallResults;
+	}
+	public void setBm25TopNSmallResults(Integer bm25TopNSmallResults) {
+		this.bm25TopNSmallResults = bm25TopNSmallResults;
+	}
+	public Integer getBm25TopNBigResults() {
+		return bm25TopNBigResults;
+	}
+	public void setBm25TopNBigResults(Integer bm25TopNBigResults) {
+		this.bm25TopNBigResults = bm25TopNBigResults;
 	}
 	
 	

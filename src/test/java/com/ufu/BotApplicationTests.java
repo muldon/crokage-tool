@@ -504,9 +504,8 @@ public class BotApplicationTests extends AbstractService{
 		metricResult.setClassFreqWeight(12.14);
 		metricResult.setCutoff(70);
 		metricResult.setObs("test");
-		metricResult.setTopApisScoredPairsPercent(20);
+		//metricResult.setTopApisScoredPairsPercent(20);
 		metricResult.setUpWeight(8.11);
-		metricResult.setUseCodeInSimCalculus(true);
 		metricResultRepository.save(metricResult);
 		
 		System.out.println(metricResultRepository.findAll());
