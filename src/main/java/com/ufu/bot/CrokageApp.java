@@ -438,6 +438,9 @@ public class CrokageApp extends AppAux{
 		}
 		
 		/*int bm25TopNResultsArr[] = {1000,2500,5000,10000,12500,15000,20000,25000,30000,35000};*/
+		
+		/*
+		 * best parameters so far
 		int bm25TopNBigLimitArr[]   = {5000};
 		int bm25TopNSmallLimitArr[] = {100};
 		double simWeights[] 		= {1};
@@ -447,10 +450,21 @@ public class CrokageApp extends AppAux{
 		double repWeights[] 		= {0.75};
 		double upWeights[] 			= {0.5};
 		int numberOfPostsInfoToMatchTFIDFArr[] = {3};
-		int numberOfPostsInfoToMatchAsymmetricSimRelevanceArr[] = {1,2,3};
-		//int topSimilarContentAsymRelevancePercentArr[] = {5,10,15,20,25,50};
+		int numberOfPostsInfoToMatchAsymmetricSimRelevanceArr[] = {2};
 		int topSimilarContentAsymRelevanceNumberArr[] = {100};
-		//int numberOfAPIClassesArr[] = {3,5,10,15};
+		*/
+		int bm25TopNBigLimitArr[]   = {5000};
+		int bm25TopNSmallLimitArr[] = {100};
+		double simWeights[] 		= {1};
+		double classFreqWeights[]   = {0.25};
+		double methodFreqWeights[]  = {0.75};
+		double cosSimWeights[] 		= {0.5};
+		double repWeights[] 		= {0.75};
+		double upWeights[] 			= {0.5};
+		int numberOfPostsInfoToMatchTFIDFArr[] = {3};
+		int numberOfPostsInfoToMatchAsymmetricSimRelevanceArr[] = {2};
+		int topSimilarContentAsymRelevanceNumberArr[] = {50};
+		int numberOfAPIClassesArr[] = {20};
 		
 		
 		
@@ -477,8 +491,9 @@ public class CrokageApp extends AppAux{
 										for(double cosSimWeight: cosSimWeights) {
 											for(double repWeight: repWeights) {
 												for(double upWeight: upWeights) {
+													for(int numberOfAPIClasses: numberOfAPIClassesArr) {
 			
-		
+														
 		
 			
 			int sum1=0;
@@ -494,6 +509,7 @@ public class CrokageApp extends AppAux{
 			this.numberOfPostsInfoToMatchTFIDF=numberOfPostsInfoToMatchTFIDF;
 			this.topSimilarContentsAsymRelevanceNumber=topSimilarContentsAsymRelevanceNumber;
 			this.numberOfPostsInfoToMatchAsymmetricSimRelevance=numberOfPostsInfoToMatchAsymmetricSimRelevance;
+			this.numberOfAPIClasses=numberOfAPIClasses;
 			
 			//this.luceneMoreThreadsNumber=luceneMoreThreadsNumber;
 			
@@ -512,8 +528,12 @@ public class CrokageApp extends AppAux{
 				processedQuery = processedQueries.get(key-1);
 				//System.out.println("Processed query: "+processedQuery);
 				
-				Set<String> topClasses = recommendedApis.get(key);
-				//System.out.println("topClasses: "+topClasses);
+				Set<String> topClasses = new LinkedHashSet<>(recommendedApis.get(key));
+				crokageUtils.setLimitV2(topClasses, numberOfAPIClasses);
+				if(rawQuery.contains("How can I insert an element in array at a given position?")) {
+					System.out.println("topClasses number: "+topClasses.size()+ " >> "+topClasses);
+				}
+				
 				//get vectors for query words
 				double[][] matrix1 = CrokageUtils.getMatrixVectorsForQuery(processedQuery,soContentWordVectorsMap);
 				
@@ -533,7 +553,7 @@ public class CrokageApp extends AppAux{
 				luceneTopIdsMap.put(rawQuery, luceneSmallSetIds);
 				sum1+=luceneSmallSetIds.size();
 				if(rawQuery.contains("How can I insert an element in array at a given position?")) {
-				System.out.println("Size of luceneSmallSetThreadsIds: "+luceneSmallSetIds.size());
+					System.out.println("Size of luceneSmallSetThreadsIds: "+luceneSmallSetIds.size());
 				}
 			
 				//crokageUtils.reportElapsedTime(initTime2,"lucene");
@@ -583,7 +603,7 @@ public class CrokageApp extends AppAux{
 				//System.out.println("Size of topKRelevantAnswersIds: "+topKRelevantAnswersIds.size());
 				recommendedResults.put(rawQuery, topKRelevantAnswersIds);
 				//crokageUtils.reportElapsedTime(initTime2,"topKRelevantAnswersIds");
-				
+				topClasses=null;
 				//crokageUtils.reportElapsedTime(initTime,"for query");
 				
 			}
@@ -637,7 +657,7 @@ public class CrokageApp extends AppAux{
 			crokageUtils.reportElapsedTime(initTime,"for run");
 		}
 		
-		}}}}}}}}}}
+		}}}}}}}}}}}
 	}
 
 

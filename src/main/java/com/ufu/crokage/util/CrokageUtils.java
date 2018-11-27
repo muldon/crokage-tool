@@ -1532,16 +1532,16 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 		items = null;
 	}
 	
-	public static void setLimitV2(Set<Integer> set, int k) {
-		Set<Integer> tmp = new HashSet<>(set);
+	public static <K> void setLimitV2(Set<K> set, int k) {
+		Set<K> tmp = new HashSet<>(set);
 		
 		if(k<set.size()) {
-			List<Integer> items = new ArrayList<Integer>();
+			List<K> items = new ArrayList<K>();
 		    items.addAll(set);
 		    int trim = k>items.size() ? items.size() : k;
 		    items = items.subList(0,trim);
 			
-		    for(Integer id: tmp) {
+		    for(K id: tmp) {
 		    	if(!items.contains(id)) {
 		    		set.remove(id);
 		    	}
