@@ -29,3 +29,11 @@ ALTER TABLE public.metricsresults
 
 ALTER TABLE public.metricsresults
     ADD COLUMN tfidfcossimweight double precision;
+
+ALTER TABLE public.metricsresults DROP COLUMN usecodeinsimcalculus;
+
+ALTER TABLE public.metricsresults
+    RENAME bm25topnresults TO bm25topnsmallresults;
+
+ALTER TABLE public.metricsresults
+    ADD COLUMN bm25topnbigresults integer;
