@@ -236,7 +236,8 @@ public class AppAux {
 	@Value("${GROUND_TRUTH_THREADS_FOR_QUERIES}")
 	public String GROUND_TRUTH_THREADS_FOR_QUERIES;
 	
-	
+	@Value("${ANSWERS_DIRECTORY}")
+	public String ANSWERS_DIRECTORY;
 	
 	
 	@Value("${action}")
@@ -283,8 +284,8 @@ public class AppAux {
 	@Value("${topSimilarContentsAsymRelevanceNumber}")
 	public Integer topSimilarContentsAsymRelevanceNumber;
 	
-	@Value("${useCodeInSimCalculus}")
-	public Boolean useCodeInSimCalculus;
+	@Value("${numberOfComposedAnswers}")
+	public Integer numberOfComposedAnswers;
 	
 	@Value("${iHaveALotOfMemory}")
 	public Boolean iHaveALotOfMemory;
@@ -342,13 +343,16 @@ public class AppAux {
 	protected Map<String,Set<Integer>> luceneTopIdsMap;
 	protected Map<String,Set<Integer>> topThreadsAnswersIdsMap;
 	protected Map<String,Set<Integer>> topAsymIdsMap;
+	protected Map<String,Set<Integer>> topTFIDFAnswersIdsMap;
 	protected Map<String,Set<Integer>> topMergeIdsMap;
+	protected Map<String,Set<Integer>> topAnswersIdsMap;
 	protected Map<Integer,Set<String>> upvotedPostsIdsWithCodeApisMap;
 	protected ArrayList<Document> documents;
 	public Integer numberOfPostsInfoToMatchTFIDF;
 	public Integer luceneMoreThreadsNumber; 
 	public Integer numberOfPostsInfoToMatchAsymmetricSimRelevance;
 	protected String currentQuery;
+	protected Set<Bucket> candidateBuckets;
 	
 	protected void initializeVariables() {
 		subAction = subAction !=null ? subAction.toLowerCase().trim(): null;
@@ -379,12 +383,15 @@ public class AppAux {
 		filteredAnswersWithApisIdsMap = new LinkedHashMap<>();
 		topThreadsAnswersIdsMap = new LinkedHashMap<>();
 		topAsymIdsMap = new LinkedHashMap<>();
+		topTFIDFAnswersIdsMap = new LinkedHashMap<>();
 		topMergeIdsMap = new LinkedHashMap<>();
+		topAnswersIdsMap = new LinkedHashMap<>();
 		luceneTopIdsMap = new LinkedHashMap<>();
 		documents = new ArrayList<>();
 		threadsForUpvotedAnswersWithCodeIdsTitlesMap = new HashMap<>();
 		upvotedPostsIdsWithCodeApisMap = new HashMap<>();
 		processedQueries = new ArrayList<>();
+		candidateBuckets = new HashSet<>();
 		
 	}
 	
@@ -2464,6 +2471,26 @@ public class AppAux {
 		return groundTruthSelectedQueriesQuestionsIdsMap;
 	}
 
+
+	public void mergeThreads(Map<String, Set<Integer>> mapMerge,Map<String, Set<Integer>> map1, Map<String, Set<Integer>> map2) {
+		mapMerge.putAll(map1);
+		Set<String> queries = map2.keySet();
+		for(String query: queries) {
+			/*Set<Integer> allIds = new HashSet<>();
+			Set<Integer> map1Ids = map1.get(query);
+			Set<Integer> map2Ids = map2.get(query);
+			if(!CollectionUtils.isEmpty(map1Ids)) {
+				mergeIds.addAll(otherIds);
+			}
+			mapMerge.put(query, mergeIds);*/
+			if(map1.containsKey(query)) {
+				mapMerge.get(query).addAll(map2.get(query));
+			}else {
+				mapMerge.put(query,map2.get(query));
+			}
+		}
+		
+	}
 
 	
 	

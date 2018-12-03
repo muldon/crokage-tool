@@ -21,6 +21,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -73,6 +74,16 @@ public class Tester {
 		map1.put("a", set1);
 		map2.put("b", set2);
 		map2.put("a", set1);
+		
+		
+		map3 =  CrokageUtils.copy(map1);
+		System.out.println(map3);
+		
+		/*map3.clear();
+		map3.putAll(map1);
+		*/
+		CrokageUtils.reduceSetV2(map3, 2);
+		System.out.println(map1);
 		
 		CrokageApp app = new CrokageApp();
 		app.mergeThreads(map3, map2, map1);

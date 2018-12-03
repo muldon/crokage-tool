@@ -75,6 +75,7 @@ public class LuceneSearcherBM25 {
 		index = new RAMDirectory();
 		answersCache = new HashMap<>();
 		config = new IndexWriterConfig(standardAnalyzer);
+		//default
 		config.setSimilarity(new BM25Similarity(0.05f, 0.03f));
 	
 	}
@@ -103,48 +104,21 @@ public class LuceneSearcherBM25 {
 		logger.info("LuceneSearcherBM25.buildSearchManager. Indexing all upvoted scored aswers with code: "+allAnswersWithUpvotesAndCodeBucketsMap.size());
 
 		indexedListSize = allAnswersWithUpvotesAndCodeBucketsMap.size();
-		//logger.info("Number of answers to index: " + upvotedScoredAnswers.size() + " \nIndexing.... ");
-				
-		//String postsIds = "Indexing... \n";
 		IndexWriterConfig config = new IndexWriterConfig(standardAnalyzer);
 		IndexWriter w = new IndexWriter(index, config);
 		
 		Set<Integer> bucketsIds = allAnswersWithUpvotesAndCodeBucketsMap.keySet();
 		
-		//for (int i = 0; i < allThreadsIdsContentsMap.size(); i++) {
 		for (Integer id: bucketsIds) {
 			Bucket answerBucket = allAnswersWithUpvotesAndCodeBucketsMap.get(id);
-			//answersCache.put(answerBucket.getId(),answerBucket);
 			String finalContent = answerBucket.getParentProcessedTitle()+" "+answerBucket.getParentProcessedBody()+" "+answerBucket.getParentProcessedCode()+" "+answerBucket.getProcessedBody()+ " "+answerBucket.getProcessedCode();			
-			/*String finalContent = answerBucket.getParentProcessedTitle()+" "+answerBucket.getParentProcessedBody()+" "+answerBucket.getParentProcessedCode()+" "+answerBucket.getProcessedBody()+ " "+answerBucket.getProcessedCode();
-			if(!StringUtils.isBlank(answerBucket.getAcceptedOrMostUpvotedAnswerOfParentProcessedBody())) {
-				finalContent+= " "+answerBucket.getAcceptedOrMostUpvotedAnswerOfParentProcessedBody();
-			}
-			if(!StringUtils.isBlank(answerBucket.getAcceptedOrMostUpvotedAnswerOfParentProcessedCode())) {
-				finalContent+= " "+answerBucket.getAcceptedOrMostUpvotedAnswerOfParentProcessedCode();
-			}*/
-			
-			
-			//String finalContent = answerBucket.getParentProcessedTitle()+" "+answerBucket.getProcessedBody()+" "+answerBucket.getParentProcessedBody();
-			/*if(i%10000==0) {
-				System.out.println(i+ " indexed ...");
-			}*/
-			//logger.info("Indexando questão: "+post.getId()+ " - Conteudo: "+finalContent); 
-			//postsIds+= post.getId() + " - ";
-			/*if(i%20==0){
-				postsIds+="\n";
-			}*/
 			addDocument(w, finalContent, id);
-			//addDocument(w, allAnswersWithUpvotesAndCodeBucketsMap.get(id), id);
+			
 		}
-		//logger.info(postsIds);
 		w.close();
 		
-		//logger.info("Questions indexed. \nErrors in parse: "+questionsParseErrors.size());
-
 		reader = DirectoryReader.open(index);
 		searcher = new IndexSearcher(reader);
-		//searcher.setSimilarity(new BM25Similarity(ClassifyService.bm25ParameterK, ClassifyService.bm25ParameterB));
 
 	}
 	

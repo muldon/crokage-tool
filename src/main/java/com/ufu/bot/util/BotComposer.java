@@ -58,7 +58,7 @@ public class BotComposer {
 	
 	public static double classFreqWeight;
 	public static double methodFreqWeight;
-	public static double cosSimWeight;
+	public static double tfIdfWeight;
 	public static double repWeight;
 	public static double simWeight;
 	public static double upWeight;
@@ -395,7 +395,7 @@ public class BotComposer {
 	}
 
 
-	public static double calculateFinalScore(double simPair, Bucket bucket,	Map<String, Integer> methodsCounterMap, double apiAnswerPairScore,double tfIdfCosineSimScore) {
+	public static double calculateRankingScore(double simPair, Bucket bucket, Map<String, Integer> methodsCounterMap, double apiAnswerPairScore,double tfIdfCosineSimScore) {
 		
 		double finalScore;
 		
@@ -414,7 +414,7 @@ public class BotComposer {
 	
 		double upScore = calculateUpScore(bucket.getUpVotesScore());
 		
-		finalScore = simPair*simWeight + apiAnswerPairScore*classFreqWeight + repScore*repWeight + upScore*upWeight + methodFreqScore*methodFreqWeight + tfIdfCosineSimScore*cosSimWeight;
+		finalScore = simPair*simWeight + apiAnswerPairScore*classFreqWeight + repScore*repWeight + upScore*upWeight + methodFreqScore*methodFreqWeight + tfIdfCosineSimScore*tfIdfWeight;
 		
 		return finalScore;
 		
@@ -471,14 +471,17 @@ public class BotComposer {
 	}
 
 
-	public static double getCosSimWeight() {
-		return cosSimWeight;
+	public static double getTfIdfWeight() {
+		return tfIdfWeight;
 	}
 
 
-	public static void setCosSimWeight(double cosSimWeight) {
-		BotComposer.cosSimWeight = cosSimWeight;
+	public static void setTfIdfWeight(double tfIdfWeight) {
+		BotComposer.tfIdfWeight = tfIdfWeight;
 	}
+
+
+	
 
  
 	

@@ -1,5 +1,6 @@
 package com.ufu.bot.repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -42,7 +43,7 @@ public interface GenericRepository {
 
 	public List<Post> getAnswersWithCode(String startDate);
 
-	public List<Post> getPostsByIds(List<Integer> postsListIds);
+	public List<Post> getPostsByIds(Collection<Integer> postsListIds);
 
 	public List<Bucket> getBucketsByIds(Set<Integer> postsListIds);
 

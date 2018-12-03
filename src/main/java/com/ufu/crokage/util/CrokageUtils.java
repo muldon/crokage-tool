@@ -21,6 +21,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -32,7 +33,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
-import java.util.Properties;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -45,13 +45,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.StrTokenizer;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.apache.lucene.analysis.CharArraySet;
-import org.apache.lucene.analysis.TokenStream;
-import org.apache.lucene.analysis.core.LowerCaseFilter;
-import org.apache.lucene.analysis.core.StopFilter;
 import org.apache.lucene.analysis.en.EnglishAnalyzer;
-import org.apache.lucene.analysis.en.PorterStemFilter;
 import org.apache.lucene.analysis.standard.StandardTokenizer;
-import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.util.AttributeFactory;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
@@ -445,7 +440,7 @@ public class CrokageUtils {
 	 * @param body
 	 * @return
 	 */
-	public String buildPresentationBody(String body, boolean removeHtmlTags) {
+	public static String buildPresentationBody(String body, boolean removeHtmlTags) {
 		
 		String finalBody = translateHTMLSimbols(body);
 		
@@ -454,7 +449,7 @@ public class CrokageUtils {
 		finalBody = extractLinksTargets(finalBody);
 		
 		if(removeHtmlTags) {
-			finalBody = removeHtmlTagsExceptCode(finalBody);
+			finalBody = removeHtmlTags(finalBody);
 		}
 		
 		return finalBody;
@@ -967,7 +962,7 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
     }
 
 
-	public String extractLinksTargets(String strInput) {
+	public static String extractLinksTargets(String strInput) {
 		final Matcher matcher = LINK_PATTERN.matcher(strInput);
 	    while (matcher.find()) {
 	    /*    System.out.println(matcher.group(0));
@@ -1495,7 +1490,7 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 		return textNormalizer.normalizeSimpleCodeDiscardSmall();
 	}
 
-	public void reduceSetV2(Map<String, Set<Integer>> goldSetQueriesApis, int k) {
+	public static void reduceSetV2(Map<String, Set<Integer>> goldSetQueriesApis, int k) {
 		Set<String> keys = goldSetQueriesApis.keySet();
 		for(String key: keys) {
 			Set<Integer> goldSetApis = goldSetQueriesApis.get(key);
@@ -1504,7 +1499,7 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 		}
 	}
 
-	public void reduceSet(Map<Integer, Set<String>> goldSetQueriesApis, int k) {
+	public static void reduceSet(Map<Integer, Set<String>> goldSetQueriesApis, int k) {
 		Set<Integer> keys = goldSetQueriesApis.keySet();
 		for(Integer key: keys) {
 			Set<String> goldSetApis = goldSetQueriesApis.get(key);
@@ -2014,6 +2009,49 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 		return contentMap;
 	}
 
+	public static void printAnswers(String folder, Map<String, Set<Post>> sortedBuckets, Integer numberOfComposedAnswers) throws FileNotFoundException {
+		File dir = new File(folder);
+		if(!dir.exists()) {
+			dir.mkdirs();
+		}
+		
+		
+		Set<String> queries = sortedBuckets.keySet();
+				
+		for(String query:queries) {
+			StringBuilder lines = new StringBuilder("");
+			Set<Post> posts = sortedBuckets.get(query);
+			setLimitV2(posts, numberOfComposedAnswers);
+			
+			lines.append("Query: "+query+ "\n");
+			//System.out.println("\nAnswers to query: "+query);
+			int count=1;
+			for(Post bucket: posts) {
+				lines.append("\n"+buildPresentationBody(bucket.getBody(),true)+"\n\n");
+				String linesStr = lines.toString();
+				try (PrintWriter out = new PrintWriter(folder+"/"+query.replace("/", "")+"-"+count+".txt")) {
+				    out.println(linesStr);
+				}
+				count++;
+			}
+			
+			
+			
+		}
+		
+	}
 	
 	
+	public static Map<String, Set<Integer>> copy(Map<String, Set<Integer>> original)
+	{
+		Map<String, Set<Integer>> copy = new LinkedHashMap<String, Set<Integer>>();
+	    for (Map.Entry<String, Set<Integer>> entry : original.entrySet())
+	    {
+	    	LinkedHashSet newSet = new LinkedHashSet<Integer>();
+	    	newSet.addAll(entry.getValue());
+	        copy.put(entry.getKey(), newSet);
+	    }
+	    return copy;
+	}
+
 }

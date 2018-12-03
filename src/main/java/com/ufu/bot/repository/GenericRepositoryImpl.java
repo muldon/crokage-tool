@@ -1,6 +1,7 @@
 package com.ufu.bot.repository;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -328,7 +329,7 @@ public class GenericRepositoryImpl implements GenericRepository {
 
 
 	@Override
-	public List<Post> getPostsByIds(List<Integer> soAnswerIds) {
+	public List<Post> getPostsByIds(Collection<Integer> soAnswerIds) {
 		String idsIn = " ";
 		for(Integer soId: soAnswerIds) {
 			idsIn+= soId+ ",";

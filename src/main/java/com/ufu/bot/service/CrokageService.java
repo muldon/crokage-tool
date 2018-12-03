@@ -1,5 +1,6 @@
 package com.ufu.bot.service;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -51,7 +52,7 @@ public class CrokageService extends AbstractService{
 	}
 
 	@Transactional(readOnly = true)
-	public List<Post> findPostsById(List<Integer> somePosts) {
+	public List<Post> findPostsById(Collection<Integer> somePosts) {
 		return genericRepository.getPostsByIds(somePosts);
 	}
 
@@ -84,7 +85,7 @@ public class CrokageService extends AbstractService{
 		metricResult.setRepWeight(BotComposer.getRepWeight());
 		metricResult.setSimWeight(BotComposer.getSimWeight());
 		metricResult.setUpWeight(BotComposer.getUpWeight());
-		metricResult.setTfIdfCosSimWeight(BotComposer.getCosSimWeight());
+		metricResult.setTfIdfCosSimWeight(BotComposer.getTfIdfWeight());
 		metricResultRepository.save(metricResult);
 	}
 

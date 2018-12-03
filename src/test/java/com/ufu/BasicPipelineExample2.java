@@ -68,7 +68,16 @@ public class BasicPipelineExample2 {
     System.out.println("Example: constituency parse");
     System.out.println(constituencyParse);
     System.out.println();
-/*
+
+    List<CoreSentence> sentences = document.sentences();
+    for(CoreSentence eachSentence: sentences) {
+    	System.out.println("Sentence: "+eachSentence);
+    	 Tree constituencyParseTree = eachSentence.constituencyParse();
+    	 System.out.println("Example: constituency parse");
+    	 System.out.println(constituencyParseTree);
+    }
+    
+    /*
     List<CoreMap> sentences = document.get(SentencesAnnotation.class);
     for(CoreMap sentence: sentences) {
     	  // traversing the words in the current sentence
