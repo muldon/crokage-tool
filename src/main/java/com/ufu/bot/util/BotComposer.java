@@ -396,19 +396,9 @@ public class BotComposer {
 
 
 	public static double calculateRankingScore(double simPair, Bucket bucket, Map<String, Integer> methodsCounterMap, double apiAnswerPairScore,double tfIdfCosineSimScore) {
-		
 		double finalScore;
 		
-		//double classFreqScore = calculateScoreForPresentClasses(bucket.getCode(),topClasses);
-		
 		double methodFreqScore = calculateScoreForCommonMethods(bucket.getCode(),methodsCounterMap);
-		//double methodFreqScore = 0;
-		
-		//pontuar substring comum entre a maoiria dos códigos ?
-		
-		/*double codeScore = BotComposer.calculateCodeSizeScore(CrokageUtils.getPreCodes(bucket.getBody()));
-		
-		simPair+= codeScore;*/
 		
 		double repScore = calculateRepScore(bucket.getUserReputation());
 	

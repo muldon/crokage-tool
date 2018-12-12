@@ -7,7 +7,6 @@ import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 
-import com.ufu.bot.config.CrokageStaticDataOld;
 import com.ufu.crokage.util.CrokageUtils;
 
 

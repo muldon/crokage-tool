@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Properties;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -70,6 +71,13 @@ import com.ufu.bot.to.ExternalQuestion;
 import com.ufu.bot.to.Post;
 import com.ufu.bot.util.CosineSimilarity;
 import com.ufu.crokage.to.UserEvaluation;
+
+import edu.stanford.nlp.pipeline.CoreDocument;
+import edu.stanford.nlp.pipeline.CoreSentence;
+import edu.stanford.nlp.pipeline.StanfordCoreNLP;
+import edu.stanford.nlp.trees.Tree;
+import edu.stanford.nlp.trees.tregex.TregexMatcher;
+import edu.stanford.nlp.trees.tregex.TregexPattern;
 
 
 
@@ -128,8 +136,11 @@ public class CrokageUtils {
 	private Map<Integer,Post> answerPostsCache;
 	private static DCG_TYPE dcgType = DCG_TYPE.COMB;
 	private static List<String> stopWordsList;
-
-	
+	private StanfordCoreNLP pipeline;
+	private TregexPattern sentencePattern1; 
+	private TregexPattern sentencePattern2;
+	private List<CoreSentence> removedSentences;
+	private List<String> importantWordsList;
 	
 	@Autowired
 	private CosineSimilarity cs1;
@@ -181,6 +192,7 @@ public class CrokageUtils {
 	public static final String DOUBLE_QUOTES_REGEX_EXPRESSION = "\"(.*?)\"";
 	
 	public static final String NUMBERS_REGEX_EXPRESSION = "([\\d]+)";
+	public static final Pattern NUMBERS_REGEX_PATTERN = Pattern.compile(NUMBERS_REGEX_EXPRESSION, Pattern.DOTALL);
 	
 	public static final String METHOD_CALLS_REGEX_EXPRESSION = "\\.\\w+\\(";
 	public static final Pattern METHOD_CALLS_PATTERN = Pattern.compile(METHOD_CALLS_REGEX_EXPRESSION, Pattern.DOTALL);
@@ -196,11 +208,16 @@ public class CrokageUtils {
             "synchronized", "this", "throw", "throws", "transient", "true",
             "try", "void", "volatile", "while" };
 
-   	
+	public static final String important_words[] = {"java", "api", "regular", "expression","http", "output",
+			"follow","follows", "return","use","code","efficient", "=","-","+","*","/","add","insert","update","remove","delete",
+			"map","list","once","try","alternative", "replace","example","increment","decrement"
+			};
+	
+	
 	
 	private static String htmlTags[] = {"<p>","</p>","<pre>","</pre>","<blockquote>","</blockquote>", /*"<a href=\"","\">",*/
 			"</a>","<img src=","alt=","<ol>","</ol>","<li>","</li>","<ul>",
-			"</ul>","<br>","</br>","<h1>","</h1>","<h2>","</h2>","<strong>","</strong>",
+			"</ul>","<br>","<br />","<br/>","</br>","<h1>","</h1>","<h2>","<h3>","<h3>","</h2>","<strong>","</strong>",
 			"<code>","</code>","<em>","</em>","<hr>"};
 	
 	private static String htmlTagsWithCodeAndBlockquotes[] = {"<p>","</p>", /*"<a href=\"","\">",*/
@@ -242,6 +259,20 @@ public class CrokageUtils {
 		
 		stopWordsList = Files.readAllLines(Paths.get(STOP_WORDS_FILE_PATH)); 
 		
+		 // set up pipeline properties
+	    Properties props = new Properties();
+	    // set the list of annotators to run
+	    props.setProperty("annotators", "tokenize,ssplit,pos,parse");
+	    // set a property for an annotator, in this case the coref annotator is being set to use the neural algorithm
+	    props.setProperty("coref.algorithm", "neural");
+	   
+	    pipeline = new StanfordCoreNLP(props);
+	    
+	    sentencePattern1 = TregexPattern.compile("VP << (NP < /NN.?/) < /VB.?/");
+	    sentencePattern2 = TregexPattern.compile("NP ! < PRP [<< VP | $ VP]");
+	    
+	    removedSentences = new ArrayList<>();
+	    importantWordsList = Arrays.asList(important_words);
 	}
 	
 	
@@ -396,7 +427,7 @@ public class CrokageUtils {
 	
 	public static Set<String> getMethodCalls(String str) {
 	    final Set<String> methodCalls = new HashSet<String>();
-	    final Matcher matcher = CrokageUtils.METHOD_CALLS_PATTERN.matcher(str);
+	    final Matcher matcher = METHOD_CALLS_PATTERN.matcher(str);
 	    while (matcher.find()) {
 	        methodCalls.add(matcher.group(0));
 	    }
@@ -434,6 +465,14 @@ public class CrokageUtils {
 	{
 		return str.matches("[+-]?\\d*(\\.\\d+)?");
 	}
+	
+	
+	public static boolean containNumber(String str) {
+		return str.matches(".*\\d+.*");
+	}
+	
+	
+	//public static 
 
 	/**
 	 * Remove images and html tags, except codes. For the links, leaves only the target.
@@ -978,6 +1017,16 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 	}
 	
 	
+	/*public static String extractLinksContents(String strInput) {
+		final Matcher matcher = LINK_PATTERN.matcher(strInput);
+		String linkContent = "";
+	    while (matcher.find()) {
+	    	linkContent = "group0 : "+matcher.group(0)+ " 1:"+matcher.group(1)+ " 2:"+matcher.group(2);
+	    }
+		return linkContent;
+	}*/
+	
+	
 	public String removeLinkTargets(String strInput) {
 		final Matcher matcher = LINK_TARGET_PATTERN.matcher(strInput);
 	    while (matcher.find()) {
@@ -1035,6 +1084,20 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 		query = null;
 		words = null;
 		return finalContent;
+	}
+	
+	public static Set<String> getProcessedWords(String query){
+		query = query.toLowerCase();
+		query = translateHTMLSimbols(query);
+		
+		//remove punctuations
+		query = removeAllPunctuations(query);
+		String[] words = query.split("\\s+");
+		Set<String> validWords = new LinkedHashSet<>();
+		
+		//remove stop words or small words or numbers only
+		assembleValidWords(validWords,words);
+		return validWords;
 	}
 	
 	
@@ -1115,6 +1178,10 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 		
 	}
 
+	
+	
+	
+	
 	
 
 	public static boolean testContainLinkToSo(String text) {
@@ -1201,6 +1268,8 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 			
 			Integer externalQuestionId=0;
 			String query=null;
+			int differenceCount=0;
+			int answers=0;
 			while (iterator.hasNext()) {
 				Row currentRow = iterator.next();
 				Cell currentCellColumnA = currentRow.getCell(0);
@@ -1215,7 +1284,7 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 				}else {
 					if (currentCellColumnC != null && currentCellColumnC.getCellTypeEnum() == CellType.NUMERIC
 						&& currentCellColumnD != null && currentCellColumnD.getCellTypeEnum() == CellType.NUMERIC) {
-						
+						answers++;
 						Integer currentCValue = (int) (currentCellColumnC.getNumericCellValue());
 						Integer currentDValue = (int) (currentCellColumnD.getNumericCellValue());
 						//System.out.println("Scales: " + currentBValue + " - " + currentCValue);
@@ -1227,6 +1296,7 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 						if(diff>1 && ((currentCValue>3) || (currentDValue>3)) ) {
 							cellE.setCellValue("XXX");
 							cellF.setCellValue("XXX");
+							differenceCount++;
 						}else {
 							cellE.setCellValue(currentCValue);
 							cellF.setCellValue(currentDValue);
@@ -1237,7 +1307,7 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 				
 				}
 			}
-				
+			System.out.println("Disagreements: "+differenceCount+ " -out of "+answers+" answers");	
 			FileOutputStream outputStream = new FileOutputStream(agreementFile);
 	        workbook.write(outputStream);
 	        workbook.close();
@@ -2019,14 +2089,16 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 		Set<String> queries = sortedBuckets.keySet();
 				
 		for(String query:queries) {
-			StringBuilder lines = new StringBuilder("");
+			
 			Set<Post> posts = sortedBuckets.get(query);
 			setLimitV2(posts, numberOfComposedAnswers);
 			
-			lines.append("Query: "+query+ "\n");
+			
 			//System.out.println("\nAnswers to query: "+query);
 			int count=1;
 			for(Post bucket: posts) {
+				StringBuilder lines = new StringBuilder("");
+				lines.append("Query: "+query+ "\nAnswerId: "+bucket.getId()+"\n");
 				lines.append("\n"+buildPresentationBody(bucket.getBody(),true)+"\n\n");
 				String linesStr = lines.toString();
 				try (PrintWriter out = new PrintWriter(folder+"/"+query.replace("/", "")+"-"+count+".txt")) {
@@ -2052,6 +2124,88 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 	        copy.put(entry.getKey(), newSet);
 	    }
 	    return copy;
+	}
+
+	public Boolean processSentences(Post post, String query) {
+		
+		Set<String> queryValidWords = getProcessedWords(query);
+		
+		removedSentences.clear();
+		String processedBody = extractSentences(post.getBody());
+		if(StringUtils.isBlank(processedBody)) {
+			return false;
+		}
+		CoreDocument document = new CoreDocument(processedBody);
+	    // annnotate the document
+	    pipeline.annotate(document);
+	    
+	    List<CoreSentence> sentences = document.sentences();
+	    for(CoreSentence eachSentence: sentences) {
+	    	//System.out.println("Sentence: "+eachSentence);
+	    	
+	    	Tree constituencyParseTree = eachSentence.constituencyParse();
+	    	/*System.out.println("Example: constituency parse");
+	    	System.out.println(constituencyParseTree);*/
+	    	
+	    	TregexMatcher matcher1 = sentencePattern1.matcher(constituencyParseTree);
+	    	TregexMatcher matcher2 = sentencePattern2.matcher(constituencyParseTree);
+	    	
+	    	// Iterate over all of the subtrees that matched
+	    	if (!matcher1.findNextMatchingNode() && !matcher2.findNextMatchingNode()) {
+	    		
+	    		String sentenceText = eachSentence.text();
+	    		Set<String> processedSentenceWords = getProcessedWords(sentenceText);
+	    		
+	    		if(!containNumber(sentenceText)                     //does not remove if sentence contain any number.
+	    			&& !TextNormalizer.isCamelCase(sentenceText)	//does not remove if sentence contains camelCase words (refer to a method or library)
+	    		    && !containImportantWords(processedSentenceWords) //does not remove if sentence contain any special word.
+	    			&& !containCommonWords(processedSentenceWords,queryValidWords) //does not remove if sentence contain any word present in query.
+	    			) {
+	    			
+	    			removedSentences.add(eachSentence);
+		    		post.getBody().replace(sentenceText, "");
+	    		}
+	      		//voltar links contendo textos dos links e os links , ex: 49655398
+	    		
+	    	}
+	    }
+	    
+	    if(!removedSentences.isEmpty()) {
+	    	System.out.println("Removed sentences from postId:"+post.getId());
+		    for(CoreSentence eachSentence: removedSentences) {
+		    	System.out.println("Sentence: "+eachSentence);
+		    }
+	    }
+	    
+	    return true;
+	}
+
+	public boolean containCommonWords(Set<String> processedSentenceWords, Set<String> queryValidWords) {
+		Set<String> intersection = new HashSet<String>(processedSentenceWords); // use the copy constructor
+		intersection.retainAll(queryValidWords);
+		boolean contain = !intersection.isEmpty();
+		intersection = null;
+		return contain;
+	}
+
+	public boolean containImportantWords(Set<String> processedSentenceWords) {
+		Set<String> intersection = new HashSet<String>(processedSentenceWords); // use the copy constructor
+		intersection.retainAll(importantWordsList);
+		boolean contain = !intersection.isEmpty();
+		intersection = null;
+		return contain;
+	}
+
+	public static String extractSentences(String body) {
+		body = translateHTMLSimbols(body);
+		
+		body = body.replaceAll(IMG_EXPRESSION_OUT, " ");
+		body = extractLinksTargets(body);
+		body = body.replaceAll(PRE_CODE_REGEX_EXPRESSION, ". ");
+		//body = body.replaceAll(CODE_MIN_REGEX_EXPRESSION, ". ");
+		body = removeHtmlTags(body);
+		body = StringUtils.normalizeSpace(body);
+		return body;
 	}
 
 }

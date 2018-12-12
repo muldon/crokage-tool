@@ -3,7 +3,6 @@ package com.ufu;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.ufu.bot.config.CrokageStaticDataOld;
 import com.ufu.crokage.util.CrokageUtils;
 import com.ufu.crokage.util.TextNormalizer;
 

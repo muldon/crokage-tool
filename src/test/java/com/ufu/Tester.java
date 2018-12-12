@@ -60,6 +60,11 @@ public class Tester {
 	public Tester() throws Exception {
 		
 		
+		System.out.println(CrokageUtils.containNumber("aaa1"));
+		System.out.println(CrokageUtils.containNumber("<=filter=\\*{0,2})[^&]*[^&*]+ in java: ."));
+		System.out.println(CrokageUtils.containNumber("a  dasldjks djsd flkdsah  >"));
+		
+		
 		Map<String, Set<Integer>> map1 = new HashMap<>();
 		Map<String, Set<Integer>> map2 = new HashMap<>();
 		Map<String, Set<Integer>> map3 = new HashMap<>();

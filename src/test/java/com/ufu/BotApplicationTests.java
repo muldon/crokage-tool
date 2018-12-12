@@ -217,7 +217,7 @@ public class BotApplicationTests extends AbstractService{
 	
 	
 	
-	@Test
+	//@Test
 	public void testGetClassesFromCodes1() throws Exception {
 		logger.info("testStemStop....");
 		Integer questionId = 1953693;
@@ -512,5 +512,36 @@ public class BotApplicationTests extends AbstractService{
 
 	}
 
+	//@Test
+	public void camelCaseTest() {
+		System.out.println(TextNormalizer.isCamelCase("camelC"));
+		System.out.println(TextNormalizer.isCamelCase("Camel"));
+		System.out.println(TextNormalizer.isCamelCase("CamelCase"));
+		System.out.println(TextNormalizer.isCamelCase("camel"));
+		System.out.println(TextNormalizer.isCamelCase("Graphics2D"));
+	}
+	
+	//@Test
+	public void testContainCommonWords() {
+		
+		String query = "How can I insert an element in array at a given position";
+		String text = "123 dlajd dsjklh flkaj hflkasjf sajfh asfjh given";
+		
+		Set<String> processedSentenceWords = crokageUtils.getProcessedWords(text);
+		Set<String> queryValidWords = crokageUtils.getProcessedWords(query);
+		
+		System.out.println(crokageUtils.containImportantWords(queryValidWords));
+		System.out.println(crokageUtils.containCommonWords(processedSentenceWords,queryValidWords));
+		
+	}
+	
+	
+	@Test
+	public void testLinks() {
+		Post post = postsRepository.findOne(564);
+		String link = crokageUtils.extractLinksTargets(post.getBody());
+		System.out.println(link);
+	}
+	
 
 }

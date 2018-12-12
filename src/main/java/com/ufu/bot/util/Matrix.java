@@ -1,14 +1,10 @@
 package com.ufu.bot.util;
 
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.stream.DoubleStream;
 
 import com.google.common.primitives.Doubles;
-import com.ufu.bot.config.CrokageStaticDataOld;
+
 
 public class Matrix {
 	
