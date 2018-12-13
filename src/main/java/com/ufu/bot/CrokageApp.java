@@ -307,15 +307,7 @@ public class CrokageApp extends AppAux{
 			}
 		}
 		
-		CrokageUtils.reduceSetV2(recommendedResults, numberOfComposedAnswers);
-		//System.out.println(recommendedResults);
-		
-		/*if(MapUtils.isEmpty(soContentWordVectorsMap)){
-			readSoContentWordVectorsForAllWords();
-		}
-		if(MapUtils.isEmpty(soIDFVocabularyMap)){
-			crokageUtils.readIDFVocabulary(soIDFVocabularyMap);
-		}*/
+		CrokageUtils.reduceSetV2(recommendedResults, topk);
 		
 		Map<String, Set<Post>> sortedBuckets =  composeAnswers(recommendedResults);
 		
@@ -347,15 +339,6 @@ public class CrokageApp extends AppAux{
 					posts.remove(post);
 				}
 			}
-			
-			
-			/**/
-			//posts = BotComposer.calculate
-			
-			//process sentences
-			//remove sentences with high idf sum
-			
-			//
 			
 			
 			answersPosts.put(query, posts);

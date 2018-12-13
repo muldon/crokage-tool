@@ -2129,7 +2129,7 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 	public Boolean processSentences(Post post, String query) {
 		
 		Set<String> queryValidWords = getProcessedWords(query);
-		
+		String body=post.getBody();
 		removedSentences.clear();
 		String processedBody = extractSentences(post.getBody());
 		if(StringUtils.isBlank(processedBody)) {
@@ -2161,9 +2161,17 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 	    		    && !containImportantWords(processedSentenceWords) //does not remove if sentence contain any special word.
 	    			&& !containCommonWords(processedSentenceWords,queryValidWords) //does not remove if sentence contain any word present in query.
 	    			) {
+	    			if(post.getId()==40388108) {
+	    				System.out.println();
+	    			}
 	    			
-	    			removedSentences.add(eachSentence);
-		    		post.getBody().replace(sentenceText, "");
+	    			sentenceText = sentenceText.replace(".", "");
+	    			sentenceText = sentenceText.trim();
+	    			if(!StringUtils.isEmpty(sentenceText)) {
+	    				removedSentences.add(eachSentence);
+	    				body = body.replace(sentenceText, "");
+	    			}
+	    			post.setBody(body);
 	    		}
 	      		//voltar links contendo textos dos links e os links , ex: 49655398
 	    		
