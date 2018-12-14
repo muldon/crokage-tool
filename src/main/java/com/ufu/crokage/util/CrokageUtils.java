@@ -41,6 +41,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.bcel.generic.StoreInstruction;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.StrTokenizer;
@@ -210,7 +211,7 @@ public class CrokageUtils {
 
 	public static final String important_words[] = {"java", "api", "regular", "expression","http", "output",
 			"follow","follows", "return","use","code","efficient", "=","-","+","*","/","add","insert","update","remove","delete",
-			"map","list","once","try","alternative", "replace","example","increment","decrement"
+			"map","list","once","alternative", "replace","example","increment","decrement"
 			};
 	
 	
@@ -2079,7 +2080,7 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 		return contentMap;
 	}
 
-	public static void printAnswers(String folder, Map<String, Set<Post>> sortedBuckets, Integer numberOfComposedAnswers) throws FileNotFoundException {
+	public static void composeAnswers(String folder, Map<String, Set<Post>> sortedBuckets, Integer numberOfComposedAnswers) throws FileNotFoundException {
 		File dir = new File(folder);
 		if(!dir.exists()) {
 			dir.mkdirs();
@@ -2092,19 +2093,21 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 			
 			Set<Post> posts = sortedBuckets.get(query);
 			setLimitV2(posts, numberOfComposedAnswers);
+			StringBuilder lines = new StringBuilder("");
+			lines.append("Query: "+query);
 			
 			
 			//System.out.println("\nAnswers to query: "+query);
 			int count=1;
 			for(Post bucket: posts) {
-				StringBuilder lines = new StringBuilder("");
-				lines.append("Query: "+query+ "\nAnswerId: "+bucket.getId()+"\n");
-				lines.append("\n"+buildPresentationBody(bucket.getBody(),true)+"\n\n");
-				String linesStr = lines.toString();
-				try (PrintWriter out = new PrintWriter(folder+"/"+query.replace("/", "")+"-"+count+".txt")) {
-				    out.println(linesStr);
-				}
+				lines.append("\n\nRank:"+count+" (https://stackoverflow.com/questions/"+bucket.getId()+")\n"+buildPresentationBody(bucket.getBody(),true)+"\n\n----next answer----");
 				count++;
+			}
+			lines.append("#end");
+			String linesStr = lines.toString();
+			linesStr = linesStr.replace("----next answer----#end", "");
+			try (PrintWriter out = new PrintWriter(folder+"/"+query.replace("/", "")+".txt")) {
+			    out.println(linesStr);
 			}
 			
 			
@@ -2161,7 +2164,7 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 	    		    && !containImportantWords(processedSentenceWords) //does not remove if sentence contain any special word.
 	    			&& !containCommonWords(processedSentenceWords,queryValidWords) //does not remove if sentence contain any word present in query.
 	    			) {
-	    			if(post.getId()==40388108) {
+	    			if(post.getId()==30281392) {
 	    				System.out.println();
 	    			}
 	    			
@@ -2182,10 +2185,16 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 	    	System.out.println("Removed sentences from postId:"+post.getId());
 		    for(CoreSentence eachSentence: removedSentences) {
 		    	System.out.println("Sentence: "+eachSentence);
+		    	processedBody = processedBody.replace(eachSentence.text(), "");
 		    }
 	    }
 	    
-	    return true;
+	    boolean isValid = !StringUtils.isEmpty(removeAllPunctuations(processedBody.trim()));
+	    if(!isValid) {
+	    	System.out.println("Disconsidered answer : "+post.getId());
+	    }
+	    
+	    return isValid;
 	}
 
 	public boolean containCommonWords(Set<String> processedSentenceWords, Set<String> queryValidWords) {
@@ -2197,23 +2206,31 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 	}
 
 	public boolean containImportantWords(Set<String> processedSentenceWords) {
-		Set<String> intersection = new HashSet<String>(processedSentenceWords); // use the copy constructor
+		/*Set<String> intersection = new HashSet<String>(processedSentenceWords); // use the copy constructor
 		intersection.retainAll(importantWordsList);
 		boolean contain = !intersection.isEmpty();
 		intersection = null;
-		return contain;
+		return contain;*/
+		String sentence = String.join(" ", processedSentenceWords);
+		
+		for(String importantWord: importantWordsList) {
+			if(sentence.contains(importantWord)) {
+				return true;
+			}
+		}
+		return false;
+		
 	}
 
 	public static String extractSentences(String body) {
 		body = translateHTMLSimbols(body);
-		
 		body = body.replaceAll(IMG_EXPRESSION_OUT, " ");
 		body = extractLinksTargets(body);
 		body = body.replaceAll(PRE_CODE_REGEX_EXPRESSION, ". ");
 		//body = body.replaceAll(CODE_MIN_REGEX_EXPRESSION, ". ");
 		body = removeHtmlTags(body);
 		body = StringUtils.normalizeSpace(body);
-		return body;
+		return body.trim();
 	}
 
 }

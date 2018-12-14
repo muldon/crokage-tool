@@ -541,6 +541,8 @@ public class BotApplicationTests extends AbstractService{
 		Post post = postsRepository.findOne(564);
 		String link = crokageUtils.extractLinksTargets(post.getBody());
 		System.out.println(link);
+		
+		
 	}
 	
 

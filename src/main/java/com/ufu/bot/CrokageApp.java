@@ -309,14 +309,14 @@ public class CrokageApp extends AppAux{
 		
 		CrokageUtils.reduceSetV2(recommendedResults, topk);
 		
-		Map<String, Set<Post>> sortedBuckets =  composeAnswers(recommendedResults);
+		Map<String, Set<Post>> sortedBuckets =  processAnswers(recommendedResults);
 		
-		CrokageUtils.printAnswers(ANSWERS_DIRECTORY,sortedBuckets,numberOfComposedAnswers);
+		CrokageUtils.composeAnswers(ANSWERS_DIRECTORY,sortedBuckets,numberOfComposedAnswers);
 		
 	}
 
 	
-	private Map<String, Set<Post>> composeAnswers(Map<String, Set<Integer>> recommendedResults) {
+	private Map<String, Set<Post>> processAnswers(Map<String, Set<Integer>> recommendedResults) {
 		Map<String, Set<Post>> answersPosts = new LinkedHashMap<>();
 		Set<String> queries = recommendedResults.keySet();
 		
@@ -331,15 +331,15 @@ public class CrokageApp extends AppAux{
 			
 			for(int i=0; (i<numberOfComposedAnswers && i<posts.size()); i++) {
 				Post post = postsList.get(i);
-				
+				if(post.getId()==30281392) {
+					System.out.println();
+				}
 				//if sentence has low similarity with code, next()
-				
 				boolean processed = crokageUtils.processSentences(post,query);
 				if(!processed) {
 					posts.remove(post);
 				}
 			}
-			
 			
 			answersPosts.put(query, posts);
 		}
