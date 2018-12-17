@@ -60,6 +60,9 @@ public class Tester {
 	public Tester() throws Exception {
 		
 		
+		
+	   
+		
 		System.out.println(CrokageUtils.containNumber("aaa1"));
 		System.out.println(CrokageUtils.containNumber("<=filter=\\*{0,2})[^&]*[^&*]+ in java: ."));
 		System.out.println(CrokageUtils.containNumber("a  dasldjks djsd flkdsah  >"));
@@ -72,7 +75,9 @@ public class Tester {
 		HashSet set1 = new LinkedHashSet<>();
 		HashSet set2 = new LinkedHashSet<>();
 		
-		set1.add(1);set1.add(2);set1.add(3);set1.add(4);set1.add(5);
+		SortedSet<Integer> ssa = new TreeSet<>();
+		
+ 		set1.add(1);set1.add(2);set1.add(3);set1.add(4);set1.add(5);
 		/*set2.add(1);set2.add(2);set2.add(3);set2.add(4);*/
 		set2.add(5);set2.add(6);set2.add(7);set2.add(5);
 		

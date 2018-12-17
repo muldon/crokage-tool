@@ -1341,7 +1341,7 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 				Cell secondEvaluationCell = currentRow.getCell(secondColumn);
 				
 				
-				if(currentCellColumnA!=null && firstEvaluationCell==null) {
+				if(currentCellColumnA!=null && (firstEvaluationCell==null || firstEvaluationCell.getNumericCellValue()<1)) {
 					
 					String currentAValue = currentCellColumnA.getStringCellValue();
 					query = currentAValue.trim();
@@ -2164,9 +2164,9 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 	    		    && !containImportantWords(processedSentenceWords) //does not remove if sentence contain any special word.
 	    			&& !containCommonWords(processedSentenceWords,queryValidWords) //does not remove if sentence contain any word present in query.
 	    			) {
-	    			if(post.getId()==30281392) {
+	    			/*if(post.getId()==30281392) {
 	    				System.out.println();
-	    			}
+	    			}*/
 	    			
 	    			sentenceText = sentenceText.replace(".", "");
 	    			sentenceText = sentenceText.trim();
@@ -2176,6 +2176,7 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 	    			}
 	    			post.setBody(body);
 	    		}
+	    		processedSentenceWords=null;
 	      		//voltar links contendo textos dos links e os links , ex: 49655398
 	    		
 	    	}
@@ -2198,7 +2199,7 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 	}
 
 	public boolean containCommonWords(Set<String> processedSentenceWords, Set<String> queryValidWords) {
-		Set<String> intersection = new HashSet<String>(processedSentenceWords); // use the copy constructor
+		Set<String> intersection = new HashSet<String>(processedSentenceWords); 
 		intersection.retainAll(queryValidWords);
 		boolean contain = !intersection.isEmpty();
 		intersection = null;

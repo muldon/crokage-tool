@@ -156,8 +156,6 @@ Java Program to find ASCII value of a character
 --
 Java Program to read number from Standard Input
 --
-Matching Line Boundaries in a Regular Expression
---
 Find maximum element of ArrayList
 --
 Stopping a Thread with interrupt()
@@ -173,8 +171,6 @@ Java Program to Get IP Address
 Load an Image from a JAR file
 --
 Call a procedure with one IN/OUT parameter
---
-HSQL Delete With Parameter
 --
 Java Program to find Factorial of a number using Recursion
 --

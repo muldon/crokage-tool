@@ -322,7 +322,7 @@ public class CrokageApp extends AppAux{
 		
 		for(String query: queries) {
 			
-			String processedQuery = crokageUtils.processQuery(query);
+			//String processedQuery = crokageUtils.processQuery(query);
 			
 			Set<Integer> answersIds = recommendedResults.get(query);
 			Set<Post> posts = new HashSet<>(crokageService.findPostsById(new ArrayList<>(answersIds)));
@@ -331,16 +331,17 @@ public class CrokageApp extends AppAux{
 			
 			for(int i=0; (i<numberOfComposedAnswers && i<posts.size()); i++) {
 				Post post = postsList.get(i);
-				if(post.getId()==30281392) {
+				/*if(post.getId()==30281392) {
 					System.out.println();
-				}
+				}*/
 				//if sentence has low similarity with code, next()
 				boolean processed = crokageUtils.processSentences(post,query);
 				if(!processed) {
 					posts.remove(post);
 				}
 			}
-			
+			postsList=null;
+			answersIds=null;
 			answersPosts.put(query, posts);
 		}
 		

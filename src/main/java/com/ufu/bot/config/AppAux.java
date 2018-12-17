@@ -760,14 +760,22 @@ public class AppAux {
 			
 			if(meanLikert>=4) { 
 				
+				Post answer=null;
+				try {
+				
 				//verify if post contain APIs
-				Post answer = crokageService.findPostById(userEvaluation.getPostId());
+				answer = crokageService.findPostById(userEvaluation.getPostId());
 				Set<String> classes = crokageUtils.extractClassesFromProcessedCode(answer.getCode());
 				if(!classes.isEmpty()) {
 					validEvaluations.add(userEvaluation);
 				}/*else {
 					System.out.println("Discarding from ground truth: "+userEvaluation.getPostId());
 				}*/
+				
+				} catch (Throwable e2) {
+					System.out.println("Error trying to extract classes from post: "+answer.getId());
+				}
+				
 			}
 		}
 		

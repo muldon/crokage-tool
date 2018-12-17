@@ -156,8 +156,6 @@ Java Program to find ASCII value of a character
 Character Java ASCIIletter Charset Hex HexDigit DecryptCharacter System String Enter UnicodeMarker Scanner MalformedURIException Characters XDigit Ascii SuperAsciiNew ExecuteActionsTaskExecuter FileInputStream UnicodeEscape
 Java Program to read number from Standard Input
 Scanner TextFromStandardInputStream BufferedReader Process System ProcessStartInfo String Standard DirectMessengerClient StandardOutputStreamLog ProcessBuilder NumberOperations NumberOfBlindGroupCombinations KeepRunning Scripter InputStream BlindRadianceFiles GZIPInputStream StandardInputRead Read
-Matching Line Boundaries in a Regular Expression
-Pattern Regular Matcher Opening String Edison Closing ReqExp System Exclamation Troglodytes Ater November Milan September Caret Tilde October Ushinski QStack
 Find maximum element of ArrayList
 ArrayList Integer List Element Collections String Forecast Comparator System Optional Grandfather Comparable Day Arrays Elements Collectors Scanner BigDecimal Math Man
 Stopping a Thread with interrupt()
@@ -174,8 +172,6 @@ Load an Image from a JAR file
 ImageIcon BufferedImage Image ImageLoader LoadImages File EnImage InputStream DeImage String NameOfImage ImageResources ImageDataLoader WinICOFileFormat MyClass IconTest FillLayout LoadBackgroundImage FileFormat EmptyClass
 Call a procedure with one IN/OUT parameter
 ParameterMode StoredProcedureParameter SqlParameter StoredProcedure OracleTypes SimpleJdbcCall NamedStoredProcedureQuery String CallableStatement ProcedureParameter StoredProcedureJpaQuery Procedure SqlOutParameter PLSQLStoredProcedureCall AbstractParameterRegistrationImpl StoredProcedures StoredProcedureQuery Object Types RequestMapping
-HSQL Delete With Parameter
-JdbcTemplate String UserServiceSettingsImpl List ServiceTicket SQLFunctionTemplate SQLServerDialect Object CascadeType StandardBasicTypes JoinColumn HSQLDialect UserRowMapper StatementCreatorUtils SQLException DriverManagerDataSource Query ExtendedSqlServerDialect FinanceDao FixedHsqlDialect
 Java Program to find Factorial of a number using Recursion
 Factorial Recursion FactorialCalc BigInteger Fact FactorialUsingRecursion Recursive FactorialCalculator Trampoline Returning FactorialClient StringTooLongException Integer RecursionIntroRev System String Optional Number Calculation Entered
 Java Program to get Input From User
