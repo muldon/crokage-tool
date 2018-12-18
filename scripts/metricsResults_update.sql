@@ -37,3 +37,6 @@ ALTER TABLE public.metricsresults
 
 ALTER TABLE public.metricsresults
     ADD COLUMN bm25topnbigresults integer;
+
+ALTER TABLE public.metricsresults
+    ADD COLUMN date timestamp without time zone;

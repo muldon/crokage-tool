@@ -444,24 +444,24 @@ public class CrokageApp extends AppAux{
 		int numberOfPostsInfoToMatchAsymmetricSimRelevanceArr[] = {2};
 		int topSimilarContentAsymRelevanceNumberArr[] = {100};
 		int numberOfAPIClassesArr[] = {20};
-		int topkArr[] = {10,5,1};
+		int topkArr[] = {10};
 	
 		int run = 0;
 		int count=0;
 		String obsTmp;
 		String firstObs;
 		
-		for(int numberOfPostsInfoToMatchTFIDF: numberOfPostsInfoToMatchTFIDFArr){
-			for(int numberOfPostsInfoToMatchAsymmetricSimRelevance: numberOfPostsInfoToMatchAsymmetricSimRelevanceArr){
-				for(int topSimilarContentsAsymRelevanceNumber: topSimilarContentAsymRelevanceNumberArr){
-					for(int bm25TopNSmallLimit: bm25TopNSmallLimitArr) {
-						for(int bm25TopNBigLimit: bm25TopNBigLimitArr) {
-							for(double simWeight: simWeights) {
-								for(double classFreqWeight: classFreqWeights) {
-									for(double methodFreqWeight: methodFreqWeights) {
-										for(double tfIdfWeight: tfIdfWeightArr) {
-											for(double repWeight: repWeights) {
-												for(double upWeight: upWeights) {
+		for(int bm25TopNBigLimit: bm25TopNBigLimitArr) {
+			for(int bm25TopNSmallLimit: bm25TopNSmallLimitArr) {
+				for(double simWeight: simWeights) {
+					for(double classFreqWeight: classFreqWeights) {
+						for(double methodFreqWeight: methodFreqWeights) {
+							for(double tfIdfWeight: tfIdfWeightArr) {
+								for(double repWeight: repWeights) {
+									for(double upWeight: upWeights) {
+										for(int numberOfPostsInfoToMatchTFIDF: numberOfPostsInfoToMatchTFIDFArr){
+											for(int numberOfPostsInfoToMatchAsymmetricSimRelevance: numberOfPostsInfoToMatchAsymmetricSimRelevanceArr){
+												for(int topSimilarContentsAsymRelevanceNumber: topSimilarContentAsymRelevanceNumberArr){
 													for(int numberOfAPIClasses: numberOfAPIClassesArr) {
 														
 		
@@ -491,16 +491,16 @@ public class CrokageApp extends AppAux{
 				long initTime2 = System.currentTimeMillis();
 				count++;
 				rawQuery = queries.get(key-1);
-				System.out.println("\n\nQuery: "+count+" "+rawQuery+ " - bm25TopNResults: "+bm25TopNResults+ " - topSimilarContentsAsymRelevanceNumber: "+topSimilarContentsAsymRelevanceNumber+ " - ");
+				//System.out.println("\n\nQuery: "+count+" "+rawQuery+ " - bm25TopNResults: "+bm25TopNResults+ " - topSimilarContentsAsymRelevanceNumber: "+topSimilarContentsAsymRelevanceNumber+ " - ");
 				
 				processedQuery = processedQueries.get(key-1);
 				//System.out.println("Processed query: "+processedQuery);
 				
 				Set<String> topClasses = new LinkedHashSet<>(recommendedApis.get(key));
 				crokageUtils.setLimitV2(topClasses, numberOfAPIClasses);
-				if(rawQuery.contains("How can I insert an element in array at a given position?")) {
+				/*if(rawQuery.contains("How can I insert an element in array at a given position?")) {
 					System.out.println("topClasses number: "+topClasses.size()+ " >> "+topClasses);
-				}
+				}*/
 				
 				//get vectors for query words
 				double[][] matrix1 = CrokageUtils.getMatrixVectorsForQuery(processedQuery,soContentWordVectorsMap);
@@ -513,33 +513,33 @@ public class CrokageApp extends AppAux{
 				luceneBigSetIds = luceneSearcherBM25.getBigSetAnswersIds();
 				luceneTopIdsMap.put(rawQuery, luceneSmallSetIds);
 				sum1+=luceneSmallSetIds.size();
-				if(rawQuery.contains("How can I insert an element in array at a given position?")) {
+				/*if(rawQuery.contains("How can I insert an element in array at a given position?")) {
 					System.out.println("Size of luceneSmallSetThreadsIds: "+sum1);
-				}
+				}*/
 			
 				asymTopAnswersThreadsIds = getAnswersForTopThreads(luceneBigSetIds,matrix1,idf1);
 				topAsymIdsMap.put(rawQuery, asymTopAnswersThreadsIds);
 				sum2+=asymTopAnswersThreadsIds.size();
-				if(rawQuery.contains("How can I insert an element in array at a given position?")) {
+				/*if(rawQuery.contains("How can I insert an element in array at a given position?")) {
 					System.out.println("Size of asymTopThreadsIds: "+sum2);
-				}
+				}*/
 				
 				
 				Set<Integer> mergeIds=new HashSet<>(luceneSmallSetIds);
 				mergeIds.addAll(asymTopAnswersThreadsIds);
 				topMergeIdsMap.put(rawQuery, mergeIds);
 				sum3+=mergeIds.size();
-				if(rawQuery.contains("How can I insert an element in array at a given position?")) {
+				/*if(rawQuery.contains("How can I insert an element in array at a given position?")) {
 					System.out.println("Size of mergeIds: "+sum3);
-				}
+				}*/
 				
 				
 				filteredAnswersWithAPIs = filterAnswersByAPIs(topClasses,mergeIds);
 				filteredAnswersWithApisIdsMap.put(rawQuery, filteredAnswersWithAPIs);
 				sum4+=filteredAnswersWithAPIs.size();
-				if(rawQuery.contains("How can I insert an element in array at a given position?")) {
+				/*if(rawQuery.contains("How can I insert an element in array at a given position?")) {
 					System.out.println("Size of filteredAnswersWithAPIs: "+sum4);
-				}
+				}*/
 				
 				/*
 				tfIdfTopAnswersIds = getAnswersForTFIDF(luceneBigSetIds, processedQuery);
@@ -551,15 +551,15 @@ public class CrokageApp extends AppAux{
 				
 				//last filter: relevance similarity
 				Set<Integer> topKRelevantAnswersIds = getTopKRelevantAnswers(filteredAnswersWithAPIs,matrix1,idf1,key,processedQuery);
-				if(rawQuery.contains("How do I copy a file in JDK 7")) {
+				/*if(rawQuery.contains("How do I copy a file in JDK 7")) {
 					System.out.println("Size of topKRelevantAnswersIds: "+topKRelevantAnswersIds.size());
-				}
+				}*/
 				
 				recommendedResults.put(rawQuery, topKRelevantAnswersIds);
 				//crokageUtils.reportElapsedTime(initTime2,"topKRelevantAnswersIds");
 				topClasses=null;
 				mergeIds=null;
-				crokageUtils.reportElapsedTime(initTime2,"for query");
+				//crokageUtils.reportElapsedTime(initTime2,"for query");
 				
 			}
 			

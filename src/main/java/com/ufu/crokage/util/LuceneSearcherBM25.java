@@ -102,7 +102,8 @@ public class LuceneSearcherBM25 {
 	
 	public void buildSearchManager(Map<Integer, Bucket> allAnswersWithUpvotesAndCodeBucketsMap) throws Exception {
 		logger.info("LuceneSearcherBM25.buildSearchManager. Indexing all upvoted scored aswers with code: "+allAnswersWithUpvotesAndCodeBucketsMap.size());
-
+		long initTime2 = System.currentTimeMillis();
+		
 		indexedListSize = allAnswersWithUpvotesAndCodeBucketsMap.size();
 		IndexWriterConfig config = new IndexWriterConfig(standardAnalyzer);
 		IndexWriter w = new IndexWriter(index, config);
@@ -119,7 +120,7 @@ public class LuceneSearcherBM25 {
 		
 		reader = DirectoryReader.open(index);
 		searcher = new IndexSearcher(reader);
-
+		CrokageUtils.reportElapsedTime(initTime2,"LuceneSearcherBM25.buildSearchManager");
 	}
 	
 	

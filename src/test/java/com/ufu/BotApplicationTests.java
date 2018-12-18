@@ -536,13 +536,19 @@ public class BotApplicationTests extends AbstractService{
 	}
 	
 	
-	@Test
+	//@Test
 	public void testLinks() {
 		Post post = postsRepository.findOne(564);
 		String link = crokageUtils.extractLinksTargets(post.getBody());
 		System.out.println(link);
 		
 		
+	}
+	
+	@Test
+	public void insertMetricResultTest() {
+		MetricResult metricResult = new MetricResult("test",5000,100,10,10,5,10,"obs",10);
+		metricResultRepository.save(metricResult);
 	}
 	
 

@@ -1,5 +1,8 @@
 package com.ufu.crokage.to;
 
+import java.sql.Timestamp;
+import java.util.Calendar;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -93,6 +96,8 @@ public class MetricResult {
 	
 	@Column(name="topclasses")
 	private Integer topClasses;
+	
+	private Timestamp date;
 	
 	public Double getHitK10() {
 		return hitK10;
@@ -253,6 +258,7 @@ public class MetricResult {
 		this.obs = obs;
 		this.approach = approach;
 		this.topClasses=numberofapiclasses;
+		this.date = new Timestamp(Calendar.getInstance().getTimeInMillis());
 	}
 	public MetricResult() {
 		super();
@@ -274,6 +280,12 @@ public class MetricResult {
 	}
 	public void setBm25TopNBigResults(Integer bm25TopNBigResults) {
 		this.bm25TopNBigResults = bm25TopNBigResults;
+	}
+	public Timestamp getDate() {
+		return date;
+	}
+	public void setDate(Timestamp date) {
+		this.date = date;
 	}
 	
 	
