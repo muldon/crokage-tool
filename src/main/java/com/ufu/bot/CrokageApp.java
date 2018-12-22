@@ -516,7 +516,7 @@ public class CrokageApp extends AppAux{
 		int bm25TopNBigLimitArr[]   = {5000};
 		int bm25TopNSmallLimitArr[] = {100};
 		double simWeights[] 		= {0.75};
-		double classFreqWeights[]   = {0.25};
+		double classFreqWeights[]   = {0.25,0.5,0.75,1};
 		double methodFreqWeights[]  = {0.75};
 		double tfIdfWeightArr[] 	= {0.5};
 		double repWeights[] 		= {0.75};
@@ -615,7 +615,7 @@ public class CrokageApp extends AppAux{
 				}*/
 				
 				
-				filteredAnswersWithAPIs = filterAnswersByAPIs(topClasses,mergeIds);
+				filteredAnswersWithAPIs = filterAnswersByAPIs2(topClasses,mergeIds);
 				filteredAnswersWithApisIdsMap.put(rawQuery, filteredAnswersWithAPIs);
 				sum4+=filteredAnswersWithAPIs.size();
 				/*if(rawQuery.contains("How can I insert an element in array at a given position?")) {
@@ -629,11 +629,6 @@ public class CrokageApp extends AppAux{
 				if(rawQuery.contains("How can I insert an element in array at a given position?")) {
 					System.out.println("Size of topTFIDFAnswersIdsMap: "+sum5);
 				}*/
-				
-				
-				
-				
-				
 				
 				
 				//last filter: relevance similarity
@@ -711,6 +706,10 @@ public class CrokageApp extends AppAux{
 
 
 
+	
+
+
+
 	protected Set<Integer> getAnswersForTopThreads(Set<Integer> relevantAnswersIds, double[][] matrix1, double[][] idf1) {
 		Set<Bucket> candidateBuckets = new HashSet<>();
 		for(Integer answerId: relevantAnswersIds) {
@@ -775,6 +774,47 @@ public class CrokageApp extends AppAux{
 	}
 
 	
+	private Set<Integer> filterAnswersByAPIs2(Set<String> topClasses, Set<Integer> relevantAnswersIds) {
+		//long initTime = System.currentTimeMillis();
+		
+		//Set<Integer> answersWithTopFrequentAPIs = new HashSet<>();
+		Set<AnswerParentPair> answerParentThreads = new HashSet<>(); 
+		//List<AnswerParentPair> sortedPairs = new ArrayList<>();
+		List<Integer> topNAnswersIds = new ArrayList<>();
+		//Set<Integer> topNAnswersIds = new LinkedHashSet<>();
+		
+		for(String topClass:topClasses) {
+			Set<Integer> answersIdsFromBigMap = filteredSortedMapAnswersIds.get(topClass);
+			if(answersIdsFromBigMap==null) {
+				//System.out.println("Answers not found for topClass: "+topClass);
+				continue;
+			}	
+			
+			
+			for(Integer relevantAnswerId: relevantAnswersIds) {
+				//if(relevantAnswersIds.contains(answerId) && allAnswersWithUpvotesAndCodeBucketsMap.containsKey(answerId)) { //filtered by lucene and is upvoted answer
+				if(answersIdsFromBigMap.contains(relevantAnswerId) && allAnswersWithUpvotesAndCodeBucketsMap.containsKey(relevantAnswerId)) { //filtered by lucene and is upvoted answer 
+					//answersWithTopFrequentAPIs.add(answerId);
+					AnswerParentPair answerParentPair = new AnswerParentPair(relevantAnswerId, allAnswersWithUpvotesAndCodeBucketsMap.get(relevantAnswerId).getParentId());
+					calculateApiScore(answerParentPair,topClasses);
+					answerParentThreads.add(answerParentPair);
+					topAnswerParentPairsAnswerIdScoreMap.put(relevantAnswerId, answerParentPair.getApiScore());
+				}
+			}
+			
+			
+		}
+		
+		if(!productionEnvironment) {
+			System.out.println("Number of pairs(answer+parent) containing topClasses: "+answerParentThreads.size());
+		}
+		
+		topNAnswersIds=null;
+		answerParentThreads=null;
+		//crokageUtils.reportElapsedTime(initTime,"getAnswersForTopFrequentAPIs");
+		
+		return relevantAnswersIds;
+	}
 
 
 	protected Set<Integer> filterAnswersByAPIs(Set<String> topClasses, Set<Integer> relevantAnswersIds) {

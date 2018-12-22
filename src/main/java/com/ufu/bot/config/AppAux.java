@@ -789,20 +789,13 @@ public class AppAux {
 			allApis.addAll(answerApis);
 		}
 		
-		/*
-		for (int i = 0; i < rapis.size(); i++) {
-			String api = rapis.get(i);
-			if (isApiFound(api, gapis)) {
-				score = 1.0 / (i + 1);
-				break;
-			}
-		}*/
+		
 		
 		outer:for (int i = 0; i < topClassesArray.size(); i++) {
 			String api = topClassesArray.get(i);
 			if(allApis.contains(api)) {
-				score += 1.0 / (i + 1);
-				break outer;
+				score += 1.0 / (i + 2);
+				//break outer;
 			}
 		}
 		
