@@ -24,7 +24,7 @@ How do I send an Http Post request?
 How do I get all available currency codes?
 How do I get the primary key of any JPA entity?
 How do I delete entity object in JPA?
-How do I get host's default timezone id?
+How do I get host default timezone id?
 How to create an XML file of a POJO using JAXB?
 How do I compare two dates?
 How do I retrieve available schemas in database?
@@ -55,13 +55,13 @@ Create a File Lock on a File
 Copy a Directory recursively
 Create a very large file using mapping
 Convert Between a File Path and a URL
-Use Scanner to read a list of comma-separated values
+Use Scanner to read a list of commaseparated values
 Compare the contents of two Streams to determine if they are equal or not
 Apply variable transparency to an image
 Load image from local folder
 List XML element Attributes
 Connect to a SQLite database
-Send e-mail with attachment in Java
+Send email with attachment in Java
 How to download a complete folder from a FTP server
 How to resize images in Java
 Generate random integer
@@ -86,7 +86,7 @@ How do I get current number of live threads?
 How do I get the last element of SortedSet?
 Java Program to Get IP Address
 Load an Image from a JAR file
-Call a procedure with one IN/OUT parameter
+Call a procedure with one IN OUT parameter
 HSQL Delete With Parameter
 Java Program to find Factorial of a number using Recursion
 Java Program to get Input From User

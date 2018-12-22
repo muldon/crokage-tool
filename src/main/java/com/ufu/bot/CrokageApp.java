@@ -1,13 +1,14 @@
 package com.ufu.bot;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -20,7 +21,7 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.collections4.SetUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -92,6 +93,12 @@ public class CrokageApp extends AppAux{
 			runApproach();
 			break;
 		
+				
+		case "processBikerSummaries":
+			generateMetricsForBiker();
+			break;	
+		
+			
 		case "analyzeGroundTruthThreads":
 			analyzeGroundTruthThreads();
 			break;
@@ -294,6 +301,78 @@ public class CrokageApp extends AppAux{
 
 
 	
+	private Map<String,Set<Integer>> generateMetricsForBiker() throws Exception {
+		List<File> filesInFolder = Files.walk(Paths.get(BIKER_ANSWERS_SUMMARIES))
+	            .filter(Files::isRegularFile)
+	            .map(Path::toFile)
+	            .collect(Collectors.toList());
+		
+		String comparison = "Questions";
+		//String comparison = "Answers";
+		String searchPatter = "";
+		
+		Map<String, Set<Integer>> groundTruth;
+		
+		if(comparison.equals("Answers")) {
+			searchPatter = "SO questionId ";
+			generateGroundTruthThreads();
+			groundTruth = groundTruthSelectedQueriesQuestionsIdsMap;
+		}else { //answers
+			searchPatter = "AnswerId: ";
+			queries = readInputQueries();
+			loadGroundTruthSelectedQueries();
+			groundTruth = groundTruthSelectedQueriesAnswersIdsMap;
+		}
+		
+		Map<String,Set<Integer>> bikerRecommendedResults = new LinkedHashMap<>();
+		
+		String parts[]; 
+		for(File file:filesInFolder) {
+			Set<Integer> answersIds = new LinkedHashSet<>();
+			Path path = Paths.get(file.getAbsolutePath());
+			List<String> lines = Files.readAllLines(path);
+			for(String line:lines) {
+				if(line.contains(searchPatter+">||") && line.contains("||<")) {
+					parts=line.split(searchPatter+">\\|\\|");
+					parts=parts[1].split("\\|\\|<");
+					answersIds.add(new Integer(parts[0]));
+				}
+			}
+			String queryName = file.getName().replace(".txt","");
+			bikerRecommendedResults.put(queryName, answersIds);
+		}
+		//System.out.println(bikerQueriesQuestionsIds);
+		
+		Integer topkArr[] = new Integer[]{10,5,1};
+		
+		
+		
+		Map<String,Set<Integer>> recommendedResults = new LinkedHashMap<>();
+		for(String query: queries) {
+			//query = query+ "?";
+			String rawQuery = query.replace("?", "");
+			Set<Integer> ids = bikerRecommendedResults.get(rawQuery);
+			
+			if(ids==null || ids.size()==0) {
+				ids = new LinkedHashSet<>();
+			}
+			
+			recommendedResults.put(query,ids);
+		}
+		
+		for(Integer topk:topkArr) {
+			MetricResult metricResult = new MetricResult("biker",0,0,0,0,0,topk,"approach biker for top"+topk,0);
+			analyzeResults(recommendedResults,groundTruth,metricResult, "biker");
+			crokageService.saveMetricResult(metricResult);
+		}
+		
+		
+		return bikerRecommendedResults;
+		
+	}
+
+
+
 	private void extractAnswers() throws Exception {
 				
 		Map<String, Set<Integer>> recommendedResults = null;
@@ -375,11 +454,13 @@ public class CrokageApp extends AppAux{
 		//System.out.println("Size of threads: "+threadsForUpvotedAnswersWithCodeIdsTitlesMap.size());
 		
 		//loadAllThreadsIdsContentsMap();
-		loadUpvotedAnswersIdsWithCodeContentsAndParentContents();
+		//loadUpvotedAnswersIdsWithCodeContentsAndParentContents2();
+		//loadUpvotedAnswersIdsWithCodeContentsAndParentContents();
+		loadUpvotedAnswersIdsWithCodeContentsAndParentContents3();
 		luceneSearcherBM25.buildSearchManager(allAnswersWithUpvotesAndCodeBucketsMap);
 		//luceneSearcherBM25.buildSearchManager(allAnswersWithUpvotesAndCodeBucketsMap,allThreadsIdsContentsMap);
 		//allAnswersWithUpvotesAndCodeBucketsMap=null;
-		//allThreadsIdsContentsMap=null;
+		allThreadsIdsContentsMap=null;
 		
 		//load all word vectors only once
 		readSoContentWordVectorsForAllWords();
@@ -434,7 +515,7 @@ public class CrokageApp extends AppAux{
 		*/
 		int bm25TopNBigLimitArr[]   = {5000};
 		int bm25TopNSmallLimitArr[] = {100};
-		double simWeights[] 		= {1};
+		double simWeights[] 		= {0.75};
 		double classFreqWeights[]   = {0.25};
 		double methodFreqWeights[]  = {0.75};
 		double tfIdfWeightArr[] 	= {0.5};
@@ -485,7 +566,7 @@ public class CrokageApp extends AppAux{
 			
 			initTime = System.currentTimeMillis();
 			firstObs = " - numberOfPostsInfoToMatchTFIDF: "+numberOfPostsInfoToMatchTFIDF+ " - topSimilarContentsAsymRelevanceNumber: "+topSimilarContentsAsymRelevanceNumber+" - bm25TopNSmallLimit: "+bm25TopNSmallLimit+  " - bm25TopNBigLimit: "+bm25TopNBigLimit+  " - numberOfPostsInfoToMatchAsymmetricSimRelevance:"+numberOfPostsInfoToMatchAsymmetricSimRelevance;
-			System.out.println("\n\nRun: "+count+firstObs );
+			System.out.println("\n\nRun: "+run+firstObs );
 			run++;
 			for(Integer key: keys) {  //for each query
 				long initTime2 = System.currentTimeMillis();
@@ -549,6 +630,12 @@ public class CrokageApp extends AppAux{
 					System.out.println("Size of topTFIDFAnswersIdsMap: "+sum5);
 				}*/
 				
+				
+				
+				
+				
+				
+				
 				//last filter: relevance similarity
 				Set<Integer> topKRelevantAnswersIds = getTopKRelevantAnswers(filteredAnswersWithAPIs,matrix1,idf1,key,processedQuery);
 				/*if(rawQuery.contains("How do I copy a file in JDK 7")) {
@@ -566,35 +653,35 @@ public class CrokageApp extends AppAux{
 			System.out.println("\nSaving baselines");
 			String obsComp=null;
 			MetricResult metricResult=null;
-			for(int topk: topkArr) {
-				obsComp = obs + " - "+firstObs+ " luceneTopIdsMap (avg): "+sum1/keys.size();
-				metricResult = new MetricResult("luceneTopIdsMap",bm25TopNSmallLimit,null,null,null,cutoff,topk,obsComp,null);
-				analyzeResults(luceneTopIdsMap,groundTruthSelectedQueriesAnswersIdsMap,metricResult,"luceneTopIdsMap");
-				crokageService.saveMetricResult(metricResult);
-			}
+			//for(int topk: topkArr) {
+			obsComp = obs + " - "+firstObs+ " luceneTopIdsMap (avg): "+sum1/keys.size();
+			metricResult = new MetricResult("luceneTopIdsMap",bm25TopNSmallLimit,null,null,null,cutoff,bm25TopNSmallLimit,obsComp,null);
+			analyzeResults(luceneTopIdsMap,groundTruthSelectedQueriesAnswersIdsMap,metricResult,"luceneTopIdsMap");
+			crokageService.saveMetricResult(metricResult);
+			//}
 			
-			for(int topk: topkArr) {
-				obsComp = obs + " - "+firstObs+ " topAsymIdsMap (avg): "+sum2/keys.size();
-				metricResult = new MetricResult("topAsymIdsMap",bm25TopNSmallLimit,bm25TopNBigLimit,null,topSimilarContentsAsymRelevanceNumber,cutoff,topk,obsComp,null);
-				analyzeResults(topAsymIdsMap,groundTruthSelectedQueriesAnswersIdsMap,metricResult,"topAsymIdsMap");
-				crokageService.saveMetricResult(metricResult);
-			}
-			
-			
-			for(int topk: topkArr) {
-				obsComp = obs + " - "+firstObs+ " topMergeIdsMap (avg): "+sum3/keys.size();
-				metricResult = new MetricResult("topMergeIdsMap",bm25TopNSmallLimit,bm25TopNBigLimit,null,topSimilarContentsAsymRelevanceNumber,cutoff,topk,obsComp,null);
-				analyzeResults(topMergeIdsMap,groundTruthSelectedQueriesAnswersIdsMap,metricResult,"topMergeIdsMap");
-				crokageService.saveMetricResult(metricResult);
-			}
+			//for(int topk: topkArr) {
+			obsComp = obs + " - "+firstObs+ " topAsymIdsMap (avg): "+sum2/keys.size();
+			metricResult = new MetricResult("topAsymIdsMap",bm25TopNSmallLimit,bm25TopNBigLimit,null,topSimilarContentsAsymRelevanceNumber,cutoff,topSimilarContentsAsymRelevanceNumber,obsComp,null);
+			analyzeResults(topAsymIdsMap,groundTruthSelectedQueriesAnswersIdsMap,metricResult,"topAsymIdsMap");
+			crokageService.saveMetricResult(metricResult);
+			//}
 			
 			
-			for(int topk: topkArr) {
-				obsComp = obs + " filteredAnswersWithApisIdsMap filter (avg): "+sum4/keys.size();
-				metricResult = new MetricResult("filteredAnswersWithApisIdsMap",bm25TopNSmallLimit,bm25TopNBigLimit,topApisScoredPairsPercent,topSimilarContentsAsymRelevanceNumber,cutoff,topk,obsComp,numberOfAPIClasses);
-				analyzeResults(filteredAnswersWithApisIdsMap,groundTruthSelectedQueriesAnswersIdsMap,metricResult,"filteredAnswersWithApisIdsMap");
-				crokageService.saveMetricResult(metricResult);
-			}
+			//for(int topk: topkArr) {
+			obsComp = obs + " - "+firstObs+ " topMergeIdsMap (avg): "+sum3/keys.size();
+			metricResult = new MetricResult("topMergeIdsMap",bm25TopNSmallLimit,bm25TopNBigLimit,null,topSimilarContentsAsymRelevanceNumber,cutoff,bm25TopNSmallLimit+topSimilarContentsAsymRelevanceNumber,obsComp,null);
+			analyzeResults(topMergeIdsMap,groundTruthSelectedQueriesAnswersIdsMap,metricResult,"topMergeIdsMap");
+			crokageService.saveMetricResult(metricResult);
+			//}
+			
+			
+			//for(int topk: topkArr) {
+			obsComp = obs + " filteredAnswersWithApisIdsMap filter (avg): "+sum4/keys.size();
+			metricResult = new MetricResult("filteredAnswersWithApisIdsMap",bm25TopNSmallLimit,bm25TopNBigLimit,topApisScoredPairsPercent,topSimilarContentsAsymRelevanceNumber,cutoff,bm25TopNSmallLimit+topSimilarContentsAsymRelevanceNumber,obsComp,numberOfAPIClasses);
+			analyzeResults(filteredAnswersWithApisIdsMap,groundTruthSelectedQueriesAnswersIdsMap,metricResult,"filteredAnswersWithApisIdsMap");
+			crokageService.saveMetricResult(metricResult);
+			//}
 			
 			/*for(int topk: topkArr) {
 				obsComp = obs + " topTFIDFAnswersIdsMap filter (avg): "+sum5/keys.size();
@@ -1136,7 +1223,7 @@ public class CrokageApp extends AppAux{
 		
 		//remove String
 		//filteredSortedMapAnswersIds.remove("String");
-		
+		System.out.println("Size of big map before: "+bigMapApisAnswersIds.size()+ " -after cutoff: "+filteredSortedMapAnswersIds.size());
 		//generate reduced map
 		//CrokageUtils.printMapInfosIntoCVSFile(filteredSortedMapAnswersIds,REDUCED_MAP_INVERTED_INDEX_APIS_FILE_PATH);
 		crokageUtils.reportElapsedTime(initTime,"reduceBigMapFileToMininumAPIsCount");
@@ -1377,21 +1464,7 @@ public class CrokageApp extends AppAux{
 
 
 
-	protected Set<String> getAllWordsForBuckets(List<Bucket> answerBuckets) {
-		Set<String> allWords = new HashSet<>();
-		String line;
-		String words[];
-		for(Bucket bucket:answerBuckets) {
-			line = bucket.getProcessedBody()+ " "+bucket.getProcessedCode(); 
-			words = line.split("\\s+");
-			allWords.addAll(Arrays.asList(words));
-		}
-		line=null;
-		words=null;
-		return allWords;
-	}
-
-
+	
 
 
 	protected void reportSimilarRelatedPosts(Set<Integer> topSimilarIds, String postType, String obs) {
@@ -1560,6 +1633,10 @@ public class CrokageApp extends AppAux{
 			
 			for (String keyQuery : goldSet.keySet()) {
 				currentQuery=keyQuery;
+				if(keyQuery.equals("How do I convert angle from radians to degrees?")) {
+					System.out.println();
+				}
+				
 				ArrayList<Integer> rapis = new ArrayList<>(recommended.get(keyQuery));
 				ArrayList<Integer> gapis = new ArrayList<>(goldSet.get(keyQuery));
 			

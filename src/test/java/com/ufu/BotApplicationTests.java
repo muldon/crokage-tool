@@ -3,8 +3,10 @@ package com.ufu;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -28,7 +30,9 @@ import com.google.code.stackexchange.schema.Paging;
 import com.google.code.stackexchange.schema.Question;
 import com.google.code.stackexchange.schema.StackExchangeSite;
 import com.google.code.stackexchange.schema.User.QuestionSortOrder;
+import com.ufu.bot.config.AppAux;
 import com.ufu.bot.service.PitBotService;
+import com.ufu.bot.to.Bucket;
 import com.ufu.bot.to.Comment;
 import com.ufu.bot.to.Evaluation;
 import com.ufu.bot.to.Experiment;
@@ -56,6 +60,9 @@ public class BotApplicationTests extends AbstractService{
 	
 	@Autowired
 	protected CrokageUtils crokageUtils;
+	
+	@Autowired
+	protected AppAux app;
 	
 	//@Test
 	public void contextLoads() {
@@ -241,7 +248,7 @@ public class BotApplicationTests extends AbstractService{
 	}
 	
 	
-	//@Test
+	@Test
 	public void testCamelCase() throws Exception {
 		logger.info("testStemStop....");
 		Integer questionId = 37505462;
@@ -262,6 +269,9 @@ public class BotApplicationTests extends AbstractService{
 		assertTrue(TextNormalizer.isCamelCase("Graphics2D"));
 	
 	}
+	
+	
+	
 	
 	//@Test
 	public void testExtractClassesFromCode() {
@@ -545,11 +555,36 @@ public class BotApplicationTests extends AbstractService{
 		
 	}
 	
-	@Test
+	//@Test
 	public void insertMetricResultTest() {
 		MetricResult metricResult = new MetricResult("test",5000,100,10,10,5,10,"obs",10);
 		metricResultRepository.save(metricResult);
 	}
+	
+	@Test
+	public void testGenerateContents() throws IOException {
+		Set<Integer> bucketsThread = new HashSet<>();
+		
+		Integer[] answersToThread= {1495612, 8957001,9352608,11081834,12206434};
+		bucketsThread.addAll(Arrays.asList(answersToThread));
+		
+		List<Bucket> threadBuckets = genericRepository.getBucketsByIds(bucketsThread);
+		
+		System.out.println("number of buckets: "+threadBuckets.size());
+		
+		Set<Integer> parentIds = new HashSet<>();
+		for(Bucket bucket: threadBuckets) {
+			parentIds.add(bucket.getParentId());
+		}
+		
+		
+		String content = app.assembleContentsByThreads(parentIds,threadBuckets);
+		
+		crokageUtils.writeStringContentToFile(content,"/home/rodrigo/tmp/soRelevantThreadsContents.txt");
+		
+	}
+	
+	
 	
 
 }

@@ -1,0 +1,120 @@
+How do I create an Excel document using Apache POI
+
+Rank1:java.lang.Class.forName
+>>>JavaDoc<<<
+Returns the Class object associated with the class or interface with the given string name.
+>>>Relevant Questions<<<
+1.Apache POI, Excel 2007+ XML, and OSGI
+
+-----------------------------------------------
+
+
+Rank2:java.io.ByteArrayOutputStream.toString
+>>>JavaDoc<<<
+Converts the buffer's contents into a string decoding bytes using the platform's default character set.
+>>>Relevant Questions<<<
+1.How to Digitally Sign a Dynamically Created PDF Document Using PDFBox?
+
+-----------------------------------------------
+
+
+Rank3:java.awt.Desktop.open
+>>>JavaDoc<<<
+Launches the associated application to open the file.
+>>>Relevant Questions<<<
+1.Open excel document in java
+
+>>>Code Snippets<<<
+/**********code snippet1**********/
+SO questionId >||6167585||< - AnswerId: >||6167602||<
+ Desktop.getDesktop().open(new File("path/to/your/file.xls"));
+
+-----------------------------------------------
+
+
+Rank4:java.math.BigDecimal.setScale
+>>>JavaDoc<<<
+Returns a BigDecimal whose scale is the specified value, and whose unscaled value is determined by multiplying or dividing this BigDecimal's unscaled value by the appropriate power of ten to maintain its overall value.
+>>>Relevant Questions<<<
+1.How to set nice float value using Apache POI?
+
+>>>Code Snippets<<<
+/**********code snippet1**********/
+SO questionId >||19332944||< - AnswerId: >||19332987||<
+  BigDecimal a = BigDecimal.valueOf(5.165);
+    BigDecimal roundOff = a.setScale(2, BigDecimal.ROUND_HALF_EVEN);
+    System.out.println(roundOff);
+
+-----------------------------------------------
+
+
+Rank5:java.awt.Desktop.getDesktop
+>>>JavaDoc<<<
+Returns the Desktop instance of the current browser context.
+>>>Relevant Questions<<<
+1.Open excel document in java
+
+>>>Code Snippets<<<
+/**********code snippet1**********/
+SO questionId >||6167585||< - AnswerId: >||6167602||<
+ Desktop.getDesktop().open(new File("path/to/your/file.xls"));
+
+-----------------------------------------------
+
+
+Rank6:java.sql.ResultSet.getBinaryStream
+>>>JavaDoc<<<
+Retrieves the value of the designated column in the current row of this ResultSet object as a stream of uninterpreted bytes.
+>>>Relevant Questions<<<
+1.How to store/retrieve an Apache-poi workbook object into/from Oracle blob column?
+
+-----------------------------------------------
+
+
+Rank7:java.lang.Double.parseDouble
+>>>JavaDoc<<<
+Returns a new double initialized to the value represented by the specified String, as performed by the valueOf method of class Double.
+>>>Relevant Questions<<<
+1.Issue reading in a cell from Excel with Apache POI
+
+-----------------------------------------------
+
+
+Rank8:java.util.Map.values
+>>>JavaDoc<<<
+Returns a Collection view of the values contained in this map.
+>>>Relevant Questions<<<
+1.Iterate Map in JXLS and Apache POI template
+
+>>>Code Snippets<<<
+/**********code snippet1**********/
+SO questionId >||26546180||< - AnswerId: >||26554203||<
+ <jx:forEach items="${eventItemList.supplierResponse.values()}" var="supplierResponse"
+    select="${supplierResponse.key > user}">
+
+-----------------------------------------------
+
+
+Rank9:java.lang.String.split
+>>>JavaDoc<<<
+Splits this string around matches of the given regular expression.
+>>>Relevant Questions<<<
+1.How do i read java documentation?
+
+>>>Code Snippets<<<
+/**********code snippet1**********/
+SO questionId >||2576709||< - AnswerId: >||2576730||<
+ someString.split("\\.");
+
+-----------------------------------------------
+
+
+Rank10:java.lang.System.gc
+>>>JavaDoc<<<
+Runs the garbage collector.
+>>>Relevant Questions<<<
+1.How to store directly data in Apache POI XLS?
+
+-----------------------------------------------
+
+

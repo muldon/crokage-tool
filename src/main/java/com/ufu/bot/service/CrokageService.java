@@ -93,6 +93,18 @@ public class CrokageService extends AbstractService{
 		List<Integer> ids = postsRepository.getMostUpvotedAnswerForQuestionId(questionId);
 		return ids.isEmpty() ? null: ids.get(0);
 	}
+	
+	public Bucket getMostUpvotedAnswerForQuestionId2(Integer questionId) {
+		List<Post> buckets = postsRepository.getMostUpvotedAnswerForQuestionId2(questionId);
+		Post post= buckets.isEmpty() ? null: buckets.get(0);
+		Bucket bucket=null;
+		if(post!=null) {
+			bucket = new Bucket(post.getId(),post.getProcessedBody());
+		}else {
+			System.out.println("Bucket null in getMostUpvotedAnswerForQuestionId2 for question:"+questionId);
+		}
+		return bucket;
+	}
 
 	public Post getMostUpvotedAnswerForQuestion(Integer questionId,Integer answerId) {
 		List<Post> questions = postsRepository.getMostUpvotedAnswerForQuestion(questionId,answerId);

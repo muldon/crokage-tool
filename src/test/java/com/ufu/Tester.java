@@ -60,8 +60,14 @@ public class Tester {
 	public Tester() throws Exception {
 		
 		
+		for (String w : "camelValue".split("(?<!(^|[A-Z]))(?=[A-Z])|(?<!^)(?=[A-Z][a-z])")) {
+	        System.out.println(w);
+	    }
 		
-	   
+		
+		
+		String ss = ""+null;
+	   System.out.println(ss);
 		
 		System.out.println(CrokageUtils.containNumber("aaa1"));
 		System.out.println(CrokageUtils.containNumber("<=filter=\\*{0,2})[^&]*[^&*]+ in java: ."));

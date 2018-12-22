@@ -1565,7 +1565,12 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 		Set<String> keys = goldSetQueriesApis.keySet();
 		for(String key: keys) {
 			Set<Integer> goldSetApis = goldSetQueriesApis.get(key);
-			setLimitV2(goldSetApis, k);
+			try {
+				setLimitV2(goldSetApis, k);
+			} catch (Exception e) {
+				System.out.println("Error in reduceSetV2.. ");
+			}
+			
 			
 		}
 	}

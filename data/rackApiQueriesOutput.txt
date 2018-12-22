@@ -50,8 +50,6 @@ key	jpa	entiti
 Entity	ManyToOne	Column	JoinColumn	EntityManager	User	OneToMany	Child	IdClass	Table	Object	ArrayList	Serializable	Parent	Map	HashMap	GeneratedValue	KeyEvent	Embeddable	CascadeType	
 delet	entiti	object	jpa	
 EntityManager	CascadeType	Entity	User	ManyToOne	Object	OneToMany	Query	ArrayList	Foo	Iterator	Serializable	Column	AsyncDatastoreService	File	Class	Set	Book	Collections	JoinColumn	
-host	default	timezon	id	
-TimeZone	Map	InetAddress	AbstractDecoratedTextEditorPreferenceConstants	Host	SimpleDateFormat	Calendar	IOException	Class	DateTimeZone	Context	ComponentScan	DateFormat	Configuration	Europe	Connection	DefaultHttpClient	America	Converters	DateTime	
 creat	xml	file	pojo	jaxb	
 XmlRootElement	JAXBContext	File	Marshaller	IOException	XmlElement	Unmarshaller	XmlAccessorType	Document	Object	Element	ArrayList	XmlAccessType	Demo	Map	Class	Hibernate	InputStream	ObjectMapper	AttSearch	
 compar	date	
@@ -110,8 +108,6 @@ creat	file	map
 File	Map	IOException	HashMap	ArrayList	MappedByteBuffer	FileOutputStream	Object	InputStream	FileInputStream	Set	Configuration	Class	FileWriter	Context	Path	Entity	TreeMap	BufferedReader	Column	
 convert	file	path	url	
 File	IOException	InputStream	FileOutputStream	ByteArrayOutputStream	Pattern	FileInputStream	Class	Object	Arrays	ArrayList	AbstractDetectingUrlHandlerMapping	HttpServletRequest	Content	Path	SimpleDateFormat	Advocatoree	URLEncoder	Map	DatatypeConverter	
-scanner	read	list	comma	valu	
-ArrayList	Scanner	BufferedReader	File	Arrays	IOException	FileNotFoundException	Object	Class	Arraylist	Map	Multiple	Pattern	StringUtils	FileInputStream	HashMap	NumberFormat	FileReader	Collections	FFa	
 compar	content	stream	determin	
 Accept	File	Content	InputStream	ArrayList	Comparator	LinkedList	Object	Collectors	IOException	Bundle	Map	Optional	BigDecimal	FileInputStream	Stream	Class	Cat	Collections	Queue	
 appli	transpar	imag	
@@ -122,8 +118,6 @@ list	xml	element	attribut
 ArrayList	XmlElement	Element	XmlRootElement	JAXBContext	XmlAttribute	Document	Map	NodeList	Object	Arrays	Set	Collections	Node	File	XmlAccessorType	HashMap	DocumentBuilderFactory	Class	LinkedList	
 connect	sqlite	databas	
 SQLiteDatabase	Cursor	Context	Connection	FileOutputStream	DriverManager	SQLiteOpenHelper	Log	Class	Driver	SQLException	InputStream	IOException	ResultSet	DataSource	ContentValues	PreparedStatement	File	OutputStream	ArrayList	
-send	mail	attach	java	
-Message	MimeMessage	DataHandler	MimeBodyPart	DataSource	Session	Multipart	FileDataSource	InternetAddress	File	InputStream	IOException	Content	Transport	Object	ArrayList	Properties	ByteArrayDataSource	RecipientType	Class	
 download	folder	ftp	server	
 InputStream	File	FTPClient	FileInputStream	Content	IOException	ArrayList	BufferedOutputStream	BufferedReader	Disposition	FileOutputStream	Assembly	OutputStream	Answers	Socket	Assets	Server	Path	InputStreamReader	FTPFile	
 resiz	imag	java	
@@ -170,8 +164,6 @@ java	program	address
 IOException	BigInteger	InetAddress	NetworkInterface	File	Address	ArrayList	BufferedReader	Enter	Matcher	Object	Pattern	JFrame	InputStreamReader	Scanner	HttpServletRequest	JOptionPane	Class	Enumeration	InputStream	
 load	imag	jar	file	
 File	InputStream	IOException	Class	ImageIO	BufferedImage	ImageIcon	Image	Properties	Path	FileInputStream	URLClassLoader	Main	MyClass	Graphics	Object	FileOutputStream	ArrayList	Java	BufferedReader	
-call	procedur	paramet	
-Object	Map	ResultSet	CallableStatement	OracleTypes	Connection	Class	HashMap	SQLException	Callable	ArrayList	Java	Test	SqlOutParameter	Method	SqlParameter	Foo	Query	StoredProcedure	IOException	
 java	program	find	number	recurs	
 ArrayList	File	Arrays	BigInteger	Scanner	IOException	Pattern	Node	Random	Object	BufferedReader	Map	Add	Class	Collections	JFrame	Set	Matcher	BigDecimal	HashMap	
 java	program	input	user	

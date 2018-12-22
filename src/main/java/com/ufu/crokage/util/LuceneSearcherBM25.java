@@ -112,7 +112,13 @@ public class LuceneSearcherBM25 {
 		
 		for (Integer id: bucketsIds) {
 			Bucket answerBucket = allAnswersWithUpvotesAndCodeBucketsMap.get(id);
-			String finalContent = answerBucket.getParentProcessedTitle()+" "+answerBucket.getParentProcessedBody()+" "+answerBucket.getParentProcessedCode()+" "+answerBucket.getProcessedBody()+ " "+answerBucket.getProcessedCode();			
+			//String finalContent = answerBucket.getParentProcessedTitle()+" "+answerBucket.getParentProcessedBody()+" "+answerBucket.getParentProcessedCode()+" "+answerBucket.getProcessedBody()+ " "+answerBucket.getProcessedCode();
+			String finalContent = answerBucket.getParentProcessedTitle()+" "+answerBucket.getParentProcessedBody()+" "+answerBucket.getParentProcessedCode()+" "+answerBucket.getProcessedBody()+ " "+answerBucket.getProcessedCode();
+			/*if(!StringUtils.isBlank(answerBucket.getAcceptedAnswerBody())) {
+				finalContent+= " "+answerBucket.getAcceptedAnswerBody();
+			}*/
+		    //String finalContent = answerBucket.getThreadContent();
+			
 			addDocument(w, finalContent, id);
 			
 		}

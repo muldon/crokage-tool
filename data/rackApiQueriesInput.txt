@@ -50,8 +50,6 @@ How do I get the primary key of any JPA entity?
 --
 How do I delete entity object in JPA?
 --
-How do I get host's default timezone id?
---
 How to create an XML file of a POJO using JAXB?
 --
 How do I compare two dates?
@@ -110,8 +108,6 @@ Create a very large file using mapping
 --
 Convert Between a File Path and a URL
 --
-Use Scanner to read a list of comma-separated values
---
 Compare the contents of two Streams to determine if they are equal or not
 --
 Apply variable transparency to an image
@@ -121,8 +117,6 @@ Load image from local folder
 List XML element Attributes
 --
 Connect to a SQLite database
---
-Send e-mail with attachment in Java
 --
 How to download a complete folder from a FTP server
 --
@@ -169,8 +163,6 @@ How do I get the last element of SortedSet?
 Java Program to Get IP Address
 --
 Load an Image from a JAR file
---
-Call a procedure with one IN/OUT parameter
 --
 Java Program to find Factorial of a number using Recursion
 --

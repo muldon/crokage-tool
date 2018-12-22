@@ -109,6 +109,9 @@ public class AppAux {
 	@Value("${BIKER_RUNNER_PATH}")
 	public String BIKER_RUNNER_PATH;
 	
+	@Value("${BIKER_ANSWERS_SUMMARIES}")
+	public String BIKER_ANSWERS_SUMMARIES;
+	
 	@Value("${RECOMMENDED_ANSWERS_QUERIES_CACHE}")
 	public String RECOMMENDED_ANSWERS_QUERIES_CACHE;
 	
@@ -613,13 +616,23 @@ public class AppAux {
 	protected void buildRelevantThreadsContents() throws IOException {
 		//get questions containing answers with upvotes
 		List<Bucket> answersBucketsWithCode = crokageService.getUpvotedAnswersIdsContentsAndParentContents();
+		
 		System.out.println("number of buckets: "+answersBucketsWithCode.size());
-		int count=0;
+		
 		Set<Integer> parentIds = new HashSet<>();
 		for(Bucket bucket: answersBucketsWithCode) {
 			parentIds.add(bucket.getParentId());
 		}
 		
+		String content = assembleContentsByThreads(parentIds,answersBucketsWithCode);
+		
+		crokageUtils.writeStringContentToFile(content,SO_RELEVANT_THREADS_CONTENTS_MAP);
+		
+	}
+
+
+	public String assembleContentsByThreads(Set<Integer> parentIds, List<Bucket> answersBucketsWithCode) {
+		int count=0;
 		List<Post> parents = crokageService.findPostsById(new ArrayList(parentIds));
 		System.out.println("number of threads(parents): "+parents.size());
 		StringBuilder stringBuilder = new StringBuilder();
@@ -637,10 +650,10 @@ public class AppAux {
 				stringBuilder.append(" ");
 				stringBuilder.append(parent.getProcessedBody());
 			}
-			/*if(!StringUtils.isBlank(parent.getProcessedCode())) {
+			if(!StringUtils.isBlank(parent.getProcessedCode())) {
 				stringBuilder.append(" ");
 				stringBuilder.append(parent.getProcessedCode());
-			}*/
+			}
 			
 			List<Bucket> answersBucketsWithCodeForParent = answersBucketsWithCode.stream()
 					.filter(e-> e.getParentId().equals(parent.getId()))
@@ -651,20 +664,80 @@ public class AppAux {
 					stringBuilder.append(" ");
 					stringBuilder.append(answer.getProcessedBody());
 				}
-				/*if(!StringUtils.isBlank(answer.getProcessedCode())) {
+				if(!StringUtils.isBlank(answer.getProcessedCode())) {
 					stringBuilder.append(" ");
 					stringBuilder.append(answer.getProcessedCode());
-				}*/
+				}
 			}
 		}
-		
-		crokageUtils.writeStringContentToFile(stringBuilder.toString(),SO_RELEVANT_THREADS_CONTENTS_MAP);
-		
-		
+		return stringBuilder.toString();
 	}
 
 
 	protected void loadUpvotedAnswersIdsWithCodeContentsAndParentContents() {
+		long initTime2 = System.currentTimeMillis();
+		List<Bucket> buckets = crokageService.getUpvotedAnswersIdsContentsAndParentContents();
+		
+		Set<Integer> acceptedAnswersIds = buckets.stream()
+		  .filter(b -> b.getAcceptedAnswerId()!=null)
+		  .map(e -> e.getAcceptedAnswerId())
+		  .collect(Collectors.toSet());
+		
+		List<Bucket> acceptedAnswersBuckets = crokageService.getBucketsByIds(acceptedAnswersIds);
+		
+		Map<Integer,String> acceptedAnswersBucketsMap = new HashMap<>();
+		for(Bucket acceptedAnswersBucket:acceptedAnswersBuckets) {
+			acceptedAnswersBucketsMap.put(acceptedAnswersBucket.getId(), acceptedAnswersBucket.getAcceptedAnswerBody());
+		}
+		
+		Set<Integer> parentsIdsOfPostsWhoseThreadDoesNotHaveAcceptedAnswers = buckets.stream()
+				  .filter(b -> b.getAcceptedAnswerId()==null)
+				  .map(e -> e.getParentId())
+				  .collect(Collectors.toSet());
+		
+		Map<Integer,Bucket> mostUpVotedBucketsMap = new HashMap<>();
+		for(Integer parentId: parentsIdsOfPostsWhoseThreadDoesNotHaveAcceptedAnswers) {
+			mostUpVotedBucketsMap.put(parentId,crokageService.getMostUpvotedAnswerForQuestionId2(parentId));
+		}
+		
+				
+		for(Bucket bucket:buckets) {
+			if(bucket.getAcceptedAnswerId()!=null && !bucket.getId().equals(bucket.getAcceptedAnswerId())) {
+				bucket.setAcceptedAnswerBody(acceptedAnswersBucketsMap.get(bucket.getAcceptedAnswerId()));
+			}else if(bucket.getAcceptedAnswerId()==null ) {
+				Bucket mostUpvoted = mostUpVotedBucketsMap.get(bucket.getParentId());
+				if(!mostUpvoted.getId().equals(bucket.getId())) {
+					bucket.setAcceptedAnswerBody(mostUpvoted.getProcessedBody());
+				}
+			}
+				
+			allAnswersWithUpvotesAndCodeBucketsMap.put(bucket.getId(), bucket);
+		}
+		crokageUtils.reportElapsedTime(initTime2,"getUpvotedAnswersIdsContentsAndParentContents");
+		buckets=null;
+		acceptedAnswersBuckets=null;
+		acceptedAnswersBucketsMap=null;
+		mostUpVotedBucketsMap=null;
+	}
+	
+	
+	protected void loadUpvotedAnswersIdsWithCodeContentsAndParentContents2() {
+		long initTime2 = System.currentTimeMillis();
+		List<Bucket> buckets = crokageService.getUpvotedAnswersIdsContentsAndParentContents();
+		String threadContent=null;
+		for(Bucket bucket:buckets) {
+			threadContent = allThreadsIdsContentsMap.get(bucket.getParentId());
+			bucket.setThreadContent(threadContent);
+			//allThreadsForAnswersWithUpvotesAndCodeBucketsMap.put(bucket.getId(), bucket);
+			
+			allAnswersWithUpvotesAndCodeBucketsMap.put(bucket.getId(), bucket);
+		}
+		crokageUtils.reportElapsedTime(initTime2,"getUpvotedAnswersIdsContentsAndParentContents");
+		buckets=null;
+		
+	}
+	
+	protected void loadUpvotedAnswersIdsWithCodeContentsAndParentContents3() {
 		long initTime2 = System.currentTimeMillis();
 		List<Bucket> buckets = crokageService.getUpvotedAnswersIdsContentsAndParentContents();
 		for(Bucket bucket:buckets) {
@@ -672,6 +745,7 @@ public class AppAux {
 		}
 		crokageUtils.reportElapsedTime(initTime2,"getUpvotedAnswersIdsContentsAndParentContents");
 		buckets=null;
+		
 	}
 	
 	protected Set<Integer> getAllThreadsForAnswersWithUpvotesAndCodeBucketsMap() {
@@ -702,7 +776,9 @@ public class AppAux {
 	protected void calculateApiScore(AnswerParentPair answerParentPair, Set<String> topClasses) {
 		Set<String> allApis = new HashSet<>();
 		ArrayList<String> topClassesArray = new ArrayList<>(topClasses);
-		double rrank=0;
+		double score=0;
+		double found = 0;
+		double linePrec = 0;
 		
 		Set<String> parentApis = upvotedPostsIdsWithCodeApisMap.get(answerParentPair.getParentId());
 		Set<String> answerApis = upvotedPostsIdsWithCodeApisMap.get(answerParentPair.getAnswerId());
@@ -717,7 +793,7 @@ public class AppAux {
 		for (int i = 0; i < rapis.size(); i++) {
 			String api = rapis.get(i);
 			if (isApiFound(api, gapis)) {
-				rrank = 1.0 / (i + 1);
+				score = 1.0 / (i + 1);
 				break;
 			}
 		}*/
@@ -725,11 +801,25 @@ public class AppAux {
 		outer:for (int i = 0; i < topClassesArray.size(); i++) {
 			String api = topClassesArray.get(i);
 			if(allApis.contains(api)) {
-				rrank = 1.0 / (i + 1);
+				score += 1.0 / (i + 1);
 				break outer;
 			}
 		}
-		answerParentPair.setApiScore(rrank);
+		
+		/*outer:for (int i = 0; i < topClassesArray.size(); i++) {
+			String api = topClassesArray.get(i);
+			if(allApis.contains(api)) {
+				found++;
+				linePrec += (found / (i + 1));
+			}
+		}
+		if (found == 0) {
+			score=0;
+		}else {
+			score = linePrec / found;
+		}*/
+			
+		answerParentPair.setApiScore(score);
 		topClassesArray= null;
 		allApis=null;
 	}
@@ -2098,6 +2188,19 @@ public class AppAux {
 				stringBuffer.append(" ");
 				stringBuffer.append(bucket.getParentProcessedCode());
 			}
+		}else if(numberOfPostsInfoToMatch==8) {
+			if(!StringUtils.isBlank(bucket.getParentProcessedTitle())) {
+				stringBuffer.append(bucket.getParentProcessedTitle());
+			}
+			if(!StringUtils.isBlank(bucket.getProcessedBody())) {
+				stringBuffer.append(" ");
+				stringBuffer.append(bucket.getProcessedBody());
+			}
+			if(!StringUtils.isBlank(bucket.getProcessedCode())) {
+				stringBuffer.append(" ");
+				stringBuffer.append(bucket.getProcessedCode());
+			}
+			
 		}
 			
 	
@@ -2500,6 +2603,22 @@ public class AppAux {
 		}
 		
 	}
+
+	
+	protected Set<String> getAllWordsForBuckets(List<Bucket> answerBuckets) {
+		Set<String> allWords = new HashSet<>();
+		String line;
+		String words[];
+		for(Bucket bucket:answerBuckets) {
+			line = bucket.getProcessedBody()+ " "+bucket.getProcessedCode(); 
+			words = line.split("\\s+");
+			allWords.addAll(Arrays.asList(words));
+		}
+		line=null;
+		words=null;
+		return allWords;
+	}
+
 
 	
 	

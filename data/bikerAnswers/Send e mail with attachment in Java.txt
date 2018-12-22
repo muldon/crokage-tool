@@ -1,0 +1,92 @@
+Send e-mail with attachment in Java
+
+Rank1:java.awt.Desktop.mail
+>>>JavaDoc<<<
+Launches the mail composing window of the user default mail client.
+>>>Relevant Questions<<<
+1.Java: adding attachment to the mail client launched using getDesktop().mail(URI)
+
+-----------------------------------------------
+
+
+Rank2:java.lang.Runtime.exec
+>>>JavaDoc<<<
+Executes the specified string command in a separate process.
+>>>Relevant Questions<<<
+1.Sending multiple mails with Java in Unix
+
+-----------------------------------------------
+
+
+Rank3:java.net.Socket.isInputShutdown
+>>>JavaDoc<<<
+Returns whether the read-half of the socket connection is closed.
+>>>Relevant Questions<<<
+1.Communication between Bash and Java with channels: sending end-of-transmission
+
+-----------------------------------------------
+
+
+Rank4:java.nio.file.Files.readAllLines
+>>>JavaDoc<<<
+Read all lines from a file.
+>>>Relevant Questions<<<
+1.Java read file and send in the server
+
+-----------------------------------------------
+
+
+Rank5:java.util.Hashtable.put
+>>>JavaDoc<<<
+Maps the specified key to the specified value in this hashtable.
+>>>Relevant Questions<<<
+1.Getting Null pointer Exception while using the Java mail api to send mail from local host using gmail smtp.
+
+-----------------------------------------------
+
+
+Rank6:java.io.PrintWriter.print
+>>>JavaDoc<<<
+Prints a boolean value.
+>>>Relevant Questions<<<
+1.Socket error with sending/receiving
+
+-----------------------------------------------
+
+
+Rank7:java.nio.file.Files.readAllBytes
+>>>JavaDoc<<<
+Reads all the bytes from a file.
+>>>Relevant Questions<<<
+1.Java read file and send in the server
+
+-----------------------------------------------
+
+
+Rank8:java.io.PrintWriter.write
+>>>JavaDoc<<<
+Writes a single character.
+>>>Relevant Questions<<<
+1.Socket error with sending/receiving
+
+-----------------------------------------------
+
+
+Rank9:java.io.BufferedReader.readLine
+>>>JavaDoc<<<
+Reads a line of text.
+>>>Relevant Questions<<<
+1.Socket error with sending/receiving
+
+-----------------------------------------------
+
+
+Rank10:java.io.PrintWriter.flush
+>>>JavaDoc<<<
+Flushes the stream.
+>>>Relevant Questions<<<
+1.Socket error with sending/receiving
+
+-----------------------------------------------
+
+

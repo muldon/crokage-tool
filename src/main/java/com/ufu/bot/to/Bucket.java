@@ -35,6 +35,8 @@ public class Bucket {
 	
 	protected Integer acceptedAnswerId;
 	
+	protected String acceptedAnswerBody;
+	
 	protected Integer parentId;
 	
 	protected Integer parentUpVotesScore;
@@ -58,6 +60,8 @@ public class Bucket {
 	protected String acceptedOrMostUpvotedAnswerOfParentProcessedBody;
 	
 	protected String acceptedOrMostUpvotedAnswerOfParentProcessedCode;
+	
+	protected String threadContent;
 	
 	public Integer getId() {
 		return id;
@@ -307,6 +311,30 @@ public class Bucket {
 	public void setAcceptedOrMostUpvotedAnswerOfParentProcessedCode(
 			String acceptedOrMostUpvotedAnswerOfParentProcessedCode) {
 		this.acceptedOrMostUpvotedAnswerOfParentProcessedCode = acceptedOrMostUpvotedAnswerOfParentProcessedCode;
+	}
+
+	public String getAcceptedAnswerBody() {
+		return acceptedAnswerBody;
+	}
+
+	public void setAcceptedAnswerBody(String acceptedAnswerBody) {
+		this.acceptedAnswerBody = acceptedAnswerBody;
+	}
+
+	
+
+	public Bucket(Integer id, String processedBody) {
+		super();
+		this.id = id;
+		this.processedBody = processedBody;
+	}
+
+	public String getThreadContent() {
+		return threadContent;
+	}
+
+	public void setThreadContent(String threadContent) {
+		this.threadContent = threadContent;
 	}
 
  

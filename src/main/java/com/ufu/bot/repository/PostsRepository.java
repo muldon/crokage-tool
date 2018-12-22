@@ -49,6 +49,13 @@ public interface PostsRepository extends CrudRepository<Post, Integer> {
 	 		"	 order by score desc" + 
 	 		"	 limit 1",nativeQuery=true)
 	 List<Integer> getMostUpvotedAnswerForQuestionId(Integer questionId);
+	 
+	 @Query(value="select * " + 
+		 		"	 from postsmin " + 
+		 		"	 where parentid = ?" + 
+		 		"	 order by score desc" + 
+		 		"	 limit 1",nativeQuery=true)
+		 List<Post> getMostUpvotedAnswerForQuestionId2(Integer questionId);
 
 	 @Query(value="select * " + 
 		 		"	 from postsmin " + 
