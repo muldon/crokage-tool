@@ -1,0 +1,197 @@
+Query: Read JSON Array
+-----------------------------------------------------------------------
+
+Rank:1 (https://stackoverflow.com/questions/33488031)
+ You can use  gson  library 
+
+ You can use Maven or jar file: http://mvnrepository.com/artifact/com.google.code.gson/gson     
+
+  package com.test;
+
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
+public class AppJsonTest {
+
+    public static void main(String[] args) {
+        List<DataObject> objList = new ArrayList<DataObject>();
+        objList.add(new DataObject(1, "Coca Cola", 0.9, 19));
+        objList.add(new DataObject(2, "Coca Cola Zero", 0.6, 19));
+
+        // Convert the object to a JSON string
+        String json = new Gson().toJson(objList);
+        System.out.println(json);
+
+        // Now convert the JSON string back to your java object
+        Type type = new TypeToken<List<DataObject>>() {
+        }.getType();
+        List<DataObject> inpList = new Gson().fromJson(json, type);
+        for (int i = 0; i < inpList.size(); i++) {
+            DataObject x = inpList.get(i);
+            System.out.println(x.toString());
+        }
+    }
+}
+
+class DataObject {
+    int idProducto;
+    String Nombre;
+    Double Precio;
+    int Cantidad;
+
+    public DataObject(int idProducto, String nombre, Double precio, int cantidad) {
+        this.idProducto = idProducto;
+        Nombre = nombre;
+        Precio = precio;
+        Cantidad = cantidad;
+    }
+
+    public int getIdProducto() {
+        return idProducto;
+    }
+
+    public void setIdProducto(int idProducto) {
+        this.idProducto = idProducto;
+    }
+
+    public String getNombre() {
+        return Nombre;
+    }
+
+    public void setNombre(String nombre) {
+        Nombre = nombre;
+    }
+
+    public Double getPrecio() {
+        return Precio;
+    }
+
+    public void setPrecio(Double precio) {
+        Precio = precio;
+    }
+
+    public int getCantidad() {
+        return Cantidad;
+    }
+
+    public void setCantidad(int cantidad) {
+        Cantidad = cantidad;
+    }
+
+    @Override
+    public String toString() {
+        return "DataObject [idProducto=" + idProducto + ", Nombre=" + Nombre + ", Precio=" + Precio + ", Cantidad=" + Cantidad + "]";
+    }
+
+}
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:2 (https://stackoverflow.com/questions/44390770)
+ You can use gson 
+
+      <!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
+    <dependency>
+        <groupId>com.google.code.gson</groupId>
+        <artifactId>gson</artifactId>
+        <version>2.8.1</version>
+    </dependency>
+
+JsonParser jsonParser = new JsonParser();
+            JsonObject jo = (JsonObject)jsonParser.parse(str);
+            JsonArray jsonArr = jo.getAsJsonArray("netStatLinks");
+
+    List<NetStatLink> users = new ArrayList<NetStatLink>();
+       Gson gson = new Gson();
+       Type listType = new TypeToken<List<NetStatLink>>(){}.getType();
+       netStatLink = gson.fromJson(jsonArr ,listType);
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:3 (https://stackoverflow.com/questions/23192888)
+ From http://javapostsforlearning.blogspot.com/2013/11/gson-example-read-and-write-json.html: 
+
+   public static void main(String[] args) {
+
+  Gson gson = new Gson();
+
+  try {
+
+   System.out.println("Reading JSON from a file");
+   System.out.println("----------------------------");
+
+   BufferedReader br = new BufferedReader(
+     new FileReader(args[0]));
+
+    //convert the json string back to object
+   MyBean countryObj = gson.fromJson(br, MyBean.class);
+    // MyBean contains the data in the JSON and is a standard Java Bean   
+ }
+}
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:4 (https://stackoverflow.com/questions/34923247)
+ running code.  
+
+  import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
+    public class Test {
+
+        public static void main(String[] args) throws FileNotFoundException, IOException, ParseException {
+
+             JSONParser parser = new JSONParser();
+              Object obj = parser.parse(new FileReader("/home/stpl/NIKHIL/text.json"));
+              JSONArray array = (JSONArray) obj;
+              for(int i = 0; i < array.size(); i++)
+              {
+                 JSONObject objects = (JSONObject)array.get(i);
+                 System.out.println(objects.get("Submission ID")+" "+objects.get("Lat")+" "+objects.get("Long"));
+              }   
+        }
+    } 
+  
+
+ my text.json  
+
+  [{
+ "Submission ID": "9938306",
+ "Lat": "17.447191666666665",
+ "Long": "78.38849"
+ },
+ {
+  "Submission ID": "9938306",
+ "Lat": "17.447191666666665",
+ "Long": "78.38849"
+}]
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:5 (https://stackoverflow.com/questions/24342377)
+  Results  is not a  JSONArray  but a  JSONObject : 
+
+  JSONObject results = json.getJSONObject("food");
+String name = results.getString("name");
+JSONObject details = results.getJSONObject("details");
+String price = details.getString("price");
+  
+
+ You can read more about JSON at http://json.org. 
+
+
+

@@ -1,0 +1,135 @@
+Query: Generating MD5 digest from File or InputStream object
+-----------------------------------------------------------------------
+
+Rank:1 (https://stackoverflow.com/questions/8338800)
+  InputStream.toString()  probably doesn't do what you want it to.  It's not overridden in the normal JDK, so it's basically  Object.toString() ...which will return you a string like  "java.io.InputStream@12345678" .  Even if Android's stuff did return a string representing the stream's contents, it'd get really weird since you never specify what encoding to use to convert bytes to chars. 
+
+ You should read the stream in if you want to MD5 it.   
+
+  private static char[] hexDigits = "0123456789abcdef".toCharArray();
+
+public String md5(InputStream is) throws IOException
+{
+    byte[] bytes = new byte[4096];
+    int read = 0;
+    MessageDigest digest = MessageDigest.getInstance("MD5");
+    while ((read = is.read(bytes)) != -1)
+    {
+        digest.update(bytes, 0, read);
+    }
+
+    byte[] messageDigest = digest.digest();
+
+    StringBuilder sb = new StringBuilder(32);
+
+    // Oh yeah, this too.  Integer.toHexString doesn't zero-pad, so
+    // (for example) 5 becomes "5" rather than "05".
+    for (byte b : messageDigest)
+    {
+        sb.append(hexDigits[(b >> 4) & 0x0f]);
+        sb.append(hexDigits[b & 0x0f]);
+    }
+
+    return sb.toString();
+}
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:2 (https://stackoverflow.com/questions/22602793)
+  public static String getMd5OfFile(String filePath)
+{
+    String returnVal = "";
+    try 
+    {
+        InputStream   input   = new FileInputStream(filePath); 
+        byte[]        buffer  = new byte[1024];
+        MessageDigest md5Hash = MessageDigest.getInstance("MD5");
+        int           numRead = 0;
+        while (numRead != -1)
+        {
+            numRead = input.read(buffer);
+            if (numRead > 0)
+            {
+                md5Hash.update(buffer, 0, numRead);
+            }
+        }
+        input.close();
+
+        byte [] md5Bytes = md5Hash.digest();
+        for (int i=0; i < md5Bytes.length; i++)
+        {
+            returnVal += Integer.toString( ( md5Bytes[i] & 0xff ) + 0x100, 16).substring( 1 );
+        }
+    } 
+    catch(Throwable t) {t.printStackTrace();}
+    return returnVal.toUpperCase();
+}
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:3 (https://stackoverflow.com/questions/19304310)
+ You could wrap a  DigestInputStream  around a  DigestInputStream  and so on recursively: 
+
+  DigestInputStream shaStream = new DigestInputStream(
+    inStream, MessageDigest.getInstance("SHA-1"));
+DigestInputStream md5Stream = new DigestInputStream(
+    shaStream, MessageDigest.getInstance("MD5"));
+// VERY IMPORTANT: read from final stream since it's FilterInputStream
+byte[] shaDigest = shaStream.getMessageDigest().digest();
+byte[] md5Digest = md5Stream.getMessageDigest().digest();
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:4 (https://stackoverflow.com/questions/5470279)
+      String input = "168";
+    MessageDigest md = MessageDigest.getInstance("MD5");
+    byte[] md5sum = md.digest(input.getBytes());
+    String output = String.fmat("%032X", new BigInteger(1, md5sum));
+  
+
+  
+
+  DatatypeConverter.printHexBinary( MessageDigest.getInstance("MD5").digest("a".getBytes("UTF-8")))
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:5 (https://stackoverflow.com/questions/8396600)
+  public static String sStringToHMACMD5(String s, String keyString)
+    {
+        String sEncodedString = null;
+        try
+        {
+            SecretKeySpec key = new SecretKeySpec((keyString).getBytes("UTF-8"), "HmacMD5");
+            Mac mac = Mac.getInstance("HmacMD5");
+            mac.init(key);
+
+            byte[] bytes = mac.doFinal(s.getBytes("ASCII"));
+
+            StringBuffer hash = new StringBuffer();
+
+            for (int i=0; i<bytes.length; i++) {
+                String hex = Integer.toHexString(0xFF &  bytes[i]);
+                if (hex.length() == 1) {
+                    hash.append('0');
+                }
+                hash.append(hex);
+            }
+            sEncodedString = hash.toString();
+        }
+        catch (UnsupportedEncodingException e) {}
+        catch(InvalidKeyException e){}
+        catch (NoSuchAlgorithmException e) {}
+        return sEncodedString ;
+    }
+  
+
+
+

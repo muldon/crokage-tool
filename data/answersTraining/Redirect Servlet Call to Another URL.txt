@@ -1,0 +1,172 @@
+Query: Redirect Servlet Call to Another URL
+-----------------------------------------------------------------------
+
+Rank:1 (https://stackoverflow.com/questions/25106095)
+ You can't redirect to resources inside  WEB-INF . All resources in that directory are non-visible to the browser, by design. 
+
+ Either keep the JSP outside of  WEB-INF , or forwards to the JSP. 
+
+  RequestDispatcher view = request.getRequestDispatcher("/WEB-INF/views/admin.jsp");
+view.forward(request, response);
+  
+
+  Note:  forward/include doesn't change the URL in the browser. 
+
+ https://stackoverflow.com/questions/17807005/why-the-jsp-pages-under-web-inf-cant-be-accessible-with-sendredirect-method 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:2 (https://stackoverflow.com/questions/5539271)
+ You need to use http://download.oracle.com/javaee/6/api/javax/servlet/http/HttpServletResponse.html#sendRedirect%28java.lang.String%29 to send a redirect. Assuming that the servlet is mapped on an URL pattern of  /products : 
+
+  response.sendRedirect("/products");
+  
+
+ This way the webbrowser will be instructed to fire a new HTTP GET request on the given URL and thus the  doGet()  method of the servlet instance will be called where you can in turn load the products and forward to a JSP which displays them the usual way. 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:3 (https://stackoverflow.com/questions/24836169)
+ you can also use requestdispatcher interface 
+
+   <%
+ RequestDispatcher rd = request.getRequestDispatcher("twitterResult.jsp");
+ rd.forward(request, response);
+%>
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:4 (https://stackoverflow.com/questions/40541209)
+ There can be only one action  method (get/post etc.) for your form of  SearchPage.jsp .   
+
+ You as a programmer have to decide first what and how the request needs to be process instead of letting users to choose between  doPost  and  doGet  methods.   
+
+ Both the methods have different purposes check the difference https://stackoverflow.com/questions/2349633/doget-and-dopost-in-servlets 
+
+ You have to keep both the processing units A and B into a single servlet(servletA/servletB), 
+ For example:  Call  Process A  first from JSP then call  Process B  from  Process A  and finally redirect/forward the response to  Welcome.jsp  from  Process B  
+Below is the code: 
+
+  Search.jsp  
+
+  <form action="download result" method="get">
+...
+</form>
+  
+
+    
+
+   protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
+      {
+        ... //processing logic of A
+        ... //processing logic of A
+        ... //processing logic of A
+        doPost(request,response);//call Post 
+      }
+ protected void doPost(HttpServletRequest request,  HttpServletResponse response) throws ServletException, IOException 
+  {
+        ... //processing logic of B
+        ... //processing logic of B
+        ... //processing logic of B
+
+        RequestDispatcher rd=request.getRequestDispatcher("welcome.jsp");  
+        rd.forward(request, response);  
+  }
+  
+
+  Note:  you can do viceversa, that is call  doPost  first and later  doGet  as per your requirement. Also, need to change  method="post"  in  form tag  for this. 
+
+ 
+
+ For your query in comments use the below code: 
+
+    
+
+   protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException 
+      {
+        ... //processing logic of A
+        ... //processing logic of A
+        ... //processing logic of A
+        RequestDispatcher dispatcher = null;
+        dispatcher=request.getRequestDispatcher("servletB");
+        dispatcher.forward(request, response);//call Post 
+      }
+  
+
+    
+
+   protected void doPost(HttpServletRequest request,  HttpServletResponse response) throws ServletException, IOException 
+  {
+        ... //processing logic of B
+        ... //processing logic of B
+        ... //processing logic of B
+
+        RequestDispatcher rd=request.getRequestDispatcher("welcome.jsp");  
+        rd.forward(request, response);  
+  }
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:5 (https://stackoverflow.com/questions/36972349)
+ You have to call the servlet through the jsp page 
+
+ https://stackoverflow.com/questions/5649722/how-to-call-servlet-through-a-jsp-page 
+
+ This is an official example from oracle of how to do that: 
+
+ Jsp2Servlet.jsp 
+
+  <HTML>
+<HEAD> <TITLE> JSP Calling Servlet Demo </TITLE> </HEAD>
+<BODY>
+<!-- Forward processing to a servlet -->
+<% request.setAttribute("empid", "1234"); %>
+<jsp:include page="/servlet/MyServlet?user=Smith" flush="true"/>
+</BODY>
+</HTML>
+  
+
+ MyServlet.java 
+
+  public class MyServlet extends HttpServlet {
+
+    public void doGet (HttpServletRequest request,
+                   HttpServletResponse response) 
+      throws IOException, ServletException {
+      PrintWriter out= response.getWriter(); 
+      out.println("<B><BR>User:" + request.getParameter("user"));
+      out.println(", Employee number:" + request.getAttribute("empid") + "</B>");
+      this.getServletContext().getRequestDispatcher("/jsp/welcome.jsp").
+      include(request, response);
+    }
+}
+  
+
+ welcome.jsp 
+
+  <HTML>
+<HEAD> <TITLE> The Welcome JSP  </TITLE> </HEAD>
+<BODY>
+
+<H3> Welcome! </H3>
+<P><B> Today is <%= new java.util.Date() %>.  Have a nice day! </B></P>
+</BODY>
+</HTML>
+  
+
+ The key is in the line: 
+
+  <jsp:include page="/servlet/MyServlet?user=Smith" flush="true"/>
+  
+
+ In this example a jsp call a servlet a that servlet call another jsp. The example is from this page:
+https://docs.oracle.com/cd/A87860_01/doc/java.817/a83726/basics4.htm 
+
+
+

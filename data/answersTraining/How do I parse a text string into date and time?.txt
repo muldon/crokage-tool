@@ -1,0 +1,131 @@
+Query: How do I parse a text string into date and time?
+-----------------------------------------------------------------------
+
+Rank:1 (https://stackoverflow.com/questions/25872811)
+  DateFormat df = new SimpleDateFormat("MM/dd/yyyy",Locale.ENGLISH);
+Date journeyDate = df.parse(date); // gives you java.util.Date
+  
+
+ If you want java.sql.Date then 
+
+  java.sql.Date sqlDate = new java.sql.Date(journeyDate.getTime());
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:2 (https://stackoverflow.com/questions/26564246)
+ You're doing entirely too much work.  Joda Time can convert for you in its http://joda-time.sourceforge.net/apidocs/org/joda/time/DateTime.html#parse(java.lang.String,%20org.joda.time.format.DateTimeFormatter) method. 
+
+  DateTime dateTime = DateTime.parse(dt1, formatter);
+  
+
+ Alternatively, if your string were in ISO8601 format (that is,  yyyy-MM-dd'T'HH:mm:ssZ ), you could just use  parse(String)  instead: 
+
+  DateTime dateTime = DateTime.parse(dt1);
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:3 (https://stackoverflow.com/questions/16679696)
+  String target = "27-09-1991 20:29:30";
+DateFormat df = new SimpleDateFormat("dd MM yyyy HH:mm:ss");
+Date result =  df.parse(target);
+System.out.println(result); 
+  
+
+ This works fine? 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:4 (https://stackoverflow.com/questions/46331921)
+  
+
+  LocalDate.parse( "2011-01-01" )
+         .format( DateTimeFormatter.ofPattern( "MM-dd-uuuu" ) ) 
+  
+
+ java.time 
+
+ The other Answers are now outdated. The troublesome old date-time classes such as https://docs.oracle.com/javase/8/docs/api/java/util/Date.html, https://docs.oracle.com/javase/8/docs/api/java/util/Calendar.html, and  java.text.SimpleDateFormat  are now https://en.wikipedia.org/wiki/Legacy_system, supplanted by the https://docs.oracle.com/javase/8/docs/api/java/time/package-summary.html classes.  
+
+ ISO 8601 
+
+ The input string  2011-01-01  happens to comply with the ISO 8601 standard formats for date-time text. The java.time classes use these standard formats by default when parsing/generating strings. So no need to specify a formatting pattern. 
+
+  LocalDate  
+
+ The https://docs.oracle.com/javase/8/docs/api/java/time/LocalDate.html class represents a date-only value without time-of-day and without time zone. 
+
+  LocalDate ld = LocalDate.parse( "2011-01-01" ) ;
+  
+
+ Generate a String in the same format by calling  toString . 
+
+  String output = ld.toString() ;
+  
+
+ 
+   2011-01-01 
+ 
+
+  DateTimeFormatter  
+
+ To parse/generate other formats, use a  DateTimeFormatter . 
+
+  DateTimeFormatter f = DateTimeFormatter.ofPattern( "MM-dd-uuuu" ) ;
+String output = ld.format( f ) ;
+  
+
+ 
+   01-01-2011 
+ 
+
+ 
+
+ About java.time 
+
+ The <a href="http://docs.oracle.com/javase/8/docs/api/java/time/package-summary.html"  framework is built into Java 8 and later. These classes supplant the troublesome old https://en.wikipedia.org/wiki/Legacy_system date-time classes such as https://docs.oracle.com/javase/8/docs/api/java/util/Date.html, https://docs.oracle.com/javase/8/docs/api/java/util/Calendar.html, & http://docs.oracle.com/javase/8/docs/api/java/text/SimpleDateFormat.html. 
+
+ The http://www.joda.org/joda-time/ project, now in https://en.wikipedia.org/wiki/Maintenance_mode, advises migration to the <a href="http://docs.oracle.com/javase/8/docs/api/java/time/package-summary.html"  classes. 
+
+ To learn more, see the http://docs.oracle.com/javase/tutorial/datetime/TOC.html. And search Stack Overflow for many examples and explanations. Specification is https://jcp.org/en/jsr/detail?id=310. 
+
+ Where to obtain the java.time classes?  
+
+ 
+ https://en.wikipedia.org/wiki/Java_version_history#Java_SE_8, https://en.wikipedia.org/wiki/Java_version_history#Java_SE_9, and later
+
+ 
+ Built-in.  
+ Part of the standard Java API with a bundled implementation. 
+ Java 9 adds some minor features and fixes. 
+  
+ https://en.wikipedia.org/wiki/Java_version_history#Java_SE_6 and https://en.wikipedia.org/wiki/Java_version_history#Java_SE_7
+
+ 
+ Much of the java.time functionality is back-ported to Java 6 & 7 in http://www.threeten.org/threetenbp/. 
+  
+ https://en.wikipedia.org/wiki/Android_(operating_system)
+
+ 
+ The https://github.com/JakeWharton/ThreeTenABP project adapts  ThreeTen-Backport  (mentioned above) for Android specifically. 
+ See http://stackoverflow.com/q/38922754/642706. 
+  
+ 
+
+ The http://www.threeten.org/threeten-extra/ project extends java.time with additional classes. This project is a proving ground for possible future additions to java.time. You may find some useful classes here such as http://www.threeten.org/threeten-extra/apidocs/org/threeten/extra/Interval.html, http://www.threeten.org/threeten-extra/apidocs/org/threeten/extra/YearWeek.html, http://www.threeten.org/threeten-extra/apidocs/org/threeten/extra/YearQuarter.html, and http://www.threeten.org/threeten-extra/apidocs/index.html. 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:5 (https://stackoverflow.com/questions/19492462)
+ Use  DateFormat#parse(String) : 
+
+  Date date = dateFormat.parse("2013-10-22");
+  
+
+
+

@@ -1,0 +1,214 @@
+Query: How to Capture image from webcam in java
+-----------------------------------------------------------------------
+
+Rank:1 (https://stackoverflow.com/questions/10696643)
+ You could use http://code.google.com/p/javacv/ to capture the image. 
+
+ This code should get you started (taken from https://stackoverflow.com/questions/276292/capturing-image-from-webcam-in-java): 
+
+  import com.googlecode.javacv.CanvasFrame;
+import com.googlecode.javacv.FrameGrabber;
+import com.googlecode.javacv.VideoInputFrameGrabber;
+import com.googlecode.javacv.cpp.opencv_core.IplImage;
+public class GrabberShow implements Runnable {
+    //final int INTERVAL=1000;///you may use interval
+    IplImage image;
+    CanvasFrame canvas = new CanvasFrame("Web Cam");
+    public GrabberShow() {
+        canvas.setDefaultCloseOperation(javax.swing.JFrame.EXIT_ON_CLOSE);
+    }
+    @Override
+    public void run() {
+        FrameGrabber grabber = new VideoInputFrameGrabber(0); 
+        int i=0;
+        try {
+            grabber.start();
+            IplImage img;
+            while (true) {
+                img = grabber.grab();
+                if (img != null) {
+                    cvFlip(img, img, 1);// l-r = 90_degrees_steps_anti_clockwise
+                    cvSaveImage((i++)+"-capture.jpg", img);
+                    // show image on window
+                    canvas.showImage(img);
+                }
+                 //Thread.sleep(INTERVAL);
+            }
+        } catch (Exception e) {
+        }
+    }
+}
+  
+
+ Another alternative would be to use the Java Media Framework (http://www.oracle.com/technetwork/java/javase/tech/index-jsp-140239.html). You can find an example <a href="http://leejava.wordpress.com/2009/09/23/jmf-webcam-app-with-saving-jpeg/" rel="nofollow noreferrer" . 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:2 (https://stackoverflow.com/questions/11094891)
+ @thebjorn has given a good answer. But if you want more options, you can try OpenCV, SimpleCV. 
+
+ using <strong : 
+
+  from SimpleCV import Image, Camera
+
+cam = Camera()
+img = cam.getImage()
+img.save("filename.jpg")
+  
+
+ using  OpenCV : 
+
+  from cv2 import *
+# initialize the camera
+cam = VideoCapture(0)   # 0 -> index of camera
+s, img = cam.read()
+if s:    # frame captured without any errors
+    namedWindow("cam-test",CV_WINDOW_AUTOSIZE)
+    imshow("cam-test",img)
+    waitKey(0)
+    destroyWindow("cam-test")
+    imwrite("filename.jpg",img) #save image
+  
+
+ using  pygame : 
+
+  import pygame
+import pygame.camera
+
+pygame.camera.init()
+pygame.camera.list_camera() #Camera detected or not
+cam = pygame.camera.Camera("/dev/video0",(640,480))
+cam.start()
+img = cam.get_image()
+pygame.image.save(img,"filename.jpg")
+  
+
+ Install  OpenCV : 
+
+  install python-opencv bindings, numpy
+  
+
+ Install <strong : 
+
+  install python-opencv, pygame, numpy, scipy, simplecv
+  
+
+ get latest version of https://github.com/ingenuitas/simplecv/downloads 
+
+ Install  pygame : 
+
+  install pygame
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:3 (https://stackoverflow.com/questions/46145364)
+ I used Webcam Capture API...u can download from this http://webcam-capture.sarxos.pl/ 
+
+          webcam = Webcam.getDefault();
+        webcam.open();
+
+        if (webcam.isOpen()) { //if web cam open 
+            BufferedImage image = webcam.getImage();
+            JLabel imageLbl = new JLabel();
+            imageLbl.setSize(640, 480);             //show captured image
+            imageLbl.setIcon(new ImageIcon(image));
+
+            int showConfirmDialog = JOptionPane.showConfirmDialog(null, imageLbl, "Image Viewer", JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, new ImageIcon(""));
+
+            if (showConfirmDialog == JOptionPane.YES_OPTION) {
+                JFileChooser chooser = new JFileChooser();
+                chooser.setDialogTitle("Save Image");
+                chooser.setFileFilter(new FileNameExtensionFilter("IMAGES ONLY", "png", "jpeg", "jpg")); //this file extentions are shown
+                int showSaveDialog = chooser.showSaveDialog(this);
+                if (showSaveDialog == 0) {                  //if pressed 'Save' button
+                    String filePath = chooser.getCurrentDirectory().toString().replace("\\", "/");
+                    String fileName = chooser.getSelectedFile().getName(); //get user entered file name to save
+                    ImageIO.write(image, "PNG", new File(filePath + "/" + fileName + ".png"));
+
+                }
+            }
+        }
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:4 (https://stackoverflow.com/questions/10897315)
+ You can use BufferedImage to load an image from your hard disk : 
+
+  BufferedImage img = null;
+try {
+    img = ImageIO.read(new File("strawberry.jpg"));
+} catch (IOException e) {
+}
+  
+
+ Try this link for further information. http://docs.oracle.com/javase/tutorial/2d/images/loadimage.html 
+
+ And this one for saving the image. http://docs.oracle.com/javase/tutorial/2d/images/saveimage.html 
+
+  try {
+    // retrieve image
+    BufferedImage bi = getMyImage();
+    File outputfile = new File("saved.png");
+    ImageIO.write(bi, "png", outputfile);
+} catch (IOException e) {
+    ...
+}
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:5 (https://stackoverflow.com/questions/25645825)
+ 
+    I got how to capture image, but how to capture and display frames continuously like a video.  
+ 
+
+ I have never used https://stackoverflow.com/tags/opencv/info API so I don't know nothing about this library. However I think your problem is a tipical thread-blocking issue caused by infinite loops: 
+
+  while(true){ // infinite loop
+
+    if (camera.read(iframe)) {
+        System.out.println("Frame Obtained");
+        System.out.println("Captured Frame Width " + 
+        iframe.width() + " Height " + iframe.height());
+
+        while(true) { // another infinite loop
+            Highgui.imwrite(canvas, iframe);
+        }
+    }
+} 
+  
+
+ You have two infinite loops that are blocking the http://docs.oracle.com/javase/tutorial/uiswing/concurrency/dispatch.html causing your GUI become unresponsive. Swing is single threaded and you have to take extra care on how you create/update your Swing components. 
+
+ In this particular case I think you could use a http://docs.oracle.com/javase/tutorial/uiswing/concurrency/worker.html to read camera data periodically in a background thread and update  Canvas  object in the EDT.  
+
+  SwingWorker<Void, Mat> worker = new SwingWorker<Void, Mat>() {
+    @Override
+    protected Void doInBackground() throws Exception {            
+        while(!isCancelled()) {
+            if (camera.read(iframe)) {
+                publish(iframe);
+            }
+            Thread.sleep(500); // prudential time to avoid block the event queue
+        }            
+        return null;
+    }
+
+    @Override
+    protected void process(List<Mat> chunks) {
+        Mat lastFrame = chuncks.get(chunks.size() - 1);
+        Highgui.imwrite(canvas, lastFrame);
+    }        
+};
+
+worker.execute();
+  
+
+
+

@@ -1,0 +1,98 @@
+Query: Reads a text file and displays it line by line
+-----------------------------------------------------------------------
+
+Rank:1 (https://stackoverflow.com/questions/12886662)
+ Your while loop is swallowing half the lines in your file. 
+
+  while (inFile.readLine()!=null)
+  
+
+ That reads a line, but doesn't assign it to anything.  Declare a  String  before the loop and read each line this way. 
+
+  String line;
+while ((line = inFile.readLine()) != null)
+  
+
+ Now the variable  line  will be available inside the loop, so you don't need to call  inFile.readLine()  in the loop. 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:2 (https://stackoverflow.com/questions/36062099)
+ If your file is not too big you could read all lines of the file at once and store them in a  List : 
+
+  String fileName = "filePath";
+List<String> allLines = Files.readAllLines( Paths.get( fileName ) );
+  
+
+ You can then iterate through the lines at will: 
+
+  //print all the lines
+ for ( String line : allLines )
+ {
+      System.out.println( line );
+ }
+
+ //print until galumph
+ for ( String line : allLines )
+ {
+     if ( "galumph".equals( line ) )
+     {
+          break;
+     }
+     else
+     {
+          System.out.println( line );
+     }
+
+ }
+  
+
+ This approach has the benefit that you need to read your file only once. 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:3 (https://stackoverflow.com/questions/32170269)
+ Declare size field outside the loop and print afterwards. 
+
+  BufferedReader br = new BufferedReader(new FileReader(fileName));
+int size = 0;
+String line;
+while ((line = br.readLine()) != null) { 
+ size++; 
+}
+br.close();
+System.out.printf("%,d lines%n", size);
+  
+
+ Max integer value (Integer.MAX_VALUE) is 2,147,483,647 so if you plan to read files with over 2 billion lines (that lines not bytes) then switch  int  to  long  type. Java can read very large files and  BufferedReader.readLine()  in particular can read very large files as long as the largest number of sequential characters between end-of-line markers fits into memory. 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:4 (https://stackoverflow.com/questions/35109505)
+ Remove this line from your code: 
+
+  String line = reader.readLine();
+  
+
+ It basically reads the line. And later on you have  'while ((line =  reader.readLine() ) != null)'  inside the while condition again, so you read 2 lines in total, but only start processing from second line. 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:5 (https://stackoverflow.com/questions/36657062)
+  setText  does that, sets the text of the field 
+
+ Now,  JTextArea  has a simple  read  method for reading content, for example 
+
+  try (BufferedReader reader = new BufferedReader(new FileReader(new File("resources/New Text Document.txt")))) {
+    textArea.read(reader, "File");
+} catch (IOException exp) {
+    exp.printStackTrace();
+}
+  
+
+
+

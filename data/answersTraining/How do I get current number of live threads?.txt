@@ -1,0 +1,175 @@
+Query: How do I get current number of live threads?
+-----------------------------------------------------------------------
+
+Rank:1 (https://stackoverflow.com/questions/20416439)
+ Your ExecutorService have capacity to run 10 threads. But You submitted only one thread. Change testThread method to  like this.  
+
+  // contains the code where
+public void testThread() {
+    // add to a list
+    List<Callable<String>> taskList = new ArrayList<Callable<String>>();
+    Callable<String> callable1=null;
+    for (int i = 0; i < 10; i++) {
+        // create a callable for each method
+        callable1 = new Callable<String>() {
+            @Override
+            public String call() throws Exception {
+                System.out.println("The current thread is " + Thread.currentThread().getName());
+                return method1();
+                // return null;
+            }
+        };
+        taskList.add(callable1);
+    }
+
+    // create a pool executor with 10 threads
+    ExecutorService executor = Executors.newFixedThreadPool(10);
+
+    try {
+        List<Future<String>> futureList = executor.invokeAll(taskList);
+
+    } catch (InterruptedException ie) {
+    }
+}
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:2 (https://stackoverflow.com/questions/14791190)
+ 
+   now, i want to only launch a new thread if my thread count is < X 
+ 
+
+ Sounds to me that what you need is a thread-pool executor.  Updates to your database can be submitted to the pool for execution and you can limit the number of concurrent requests to the database by limiting the number of threads assigned to the pool: 
+
+  // create a thread pool with a max of 4 concurrent threads
+ExecutorService threadPool = Executors.newFixedThreadPool(4);
+
+// submit your database operation to the thread-pool
+threadPool.submit(new DatabaseUpdateJob(databaseConnection, updateStatement));
+
+...
+public class DatabaseUpdateJob implements Runnable {
+    // you can construct your jobs and pass in context for them if necessary
+    public DatabaseUpdateJob(Connection dbConnection, String statement) {
+        ...
+    }
+    public void run() {
+        // use the connection here to update the database
+    }
+}
+  
+
+ If you really want to do it yourself then  Thread.activeCount()  should definitely work.  It returns the number of active threads in the current thread-group.  What you need to do is take a snapshot of the number of threads before your start your database work.  There are a number of system threads that run in the background doing various tasks that you should ignore.  Then whenever you take a new count, you can subtract the background threads and only track you database threads. 
+
+ But a thread-pool is always a good idea. 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:3 (https://stackoverflow.com/questions/1922300)
+  java.lang.Thread.activeCount()
+  
+
+ It will return the number of active threads in the  current thread's thread group . 
+
+ docs: http://docs.oracle.com/javase/7/docs/api/java/lang/Thread.html#activeCount() 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:4 (https://stackoverflow.com/questions/1922348)
+      public class MainClass {
+
+        public static void main(String args[]) {
+
+          Thread t = Thread.currentThread();
+          t.setName("My Thread");
+
+          t.setPriority(1);
+
+          System.out.println("current thread: " + t);
+
+          int active = Thread.activeCount();
+          System.out.println("currently active threads: " + active);
+          Thread all[] = new Thread[active];
+          Thread.enumerate(all);
+
+          for (int i = 0; i < active; i++) {
+             System.out.println(i + ": " + all[i]);
+          }
+       }
+   }
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:5 (https://stackoverflow.com/questions/2233867)
+ 
+   I want the shared work queue to
+  represent the current processing
+  state. 
+ 
+
+ Try using a shared http://java.sun.com/javase/6/docs/api/java/util/concurrent/BlockingQueue.html  and have a pool of Worker threads taking work items off of the Queue. 
+
+ 
+   I want to be able to block the
+  producers if the consumers aren't
+  keeping up. 
+ 
+
+ Both http://java.sun.com/javase/6/docs/api/java/util/concurrent/ArrayBlockingQueue.html and http://java.sun.com/javase/6/docs/api/java/util/concurrent/LinkedBlockingQueue.html support bounded queues such that they will block on put when full.  Using the blocking http://java.sun.com/javase/6/docs/api/java/util/concurrent/BlockingQueue.html#put%28E%29 methods ensures that producers are blocked if the queue is full. 
+
+ Here is a rough start. You can tune the number of workers and queue size: 
+
+  public class WorkerTest<T> {
+
+    private final BlockingQueue<T> workQueue;
+    private final ExecutorService service;
+
+    public WorkerTest(int numWorkers, int workQueueSize) {
+        workQueue = new LinkedBlockingQueue<T>(workQueueSize);
+        service = Executors.newFixedThreadPool(numWorkers);
+
+        for (int i=0; i < numWorkers; i++) {
+            service.submit(new Worker<T>(workQueue));
+        }
+    }
+
+    public void produce(T item) {
+        try {
+            workQueue.put(item);
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
+
+    private static class Worker<T> implements Runnable {
+        private final BlockingQueue<T> workQueue;
+
+        public Worker(BlockingQueue<T> workQueue) {
+            this.workQueue = workQueue;
+        }
+
+        @Override
+        public void run() {
+            while (!Thread.currentThread().isInterrupted()) {
+                try {
+                    T item = workQueue.take();
+                    // Process item
+                } catch (InterruptedException ex) {
+                    Thread.currentThread().interrupt();
+                    break;
+                }
+            }
+        }
+    }
+}
+  
+
+
+

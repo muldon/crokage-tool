@@ -1,0 +1,101 @@
+Query: Append string to a text file
+-----------------------------------------------------------------------
+
+Rank:1 (https://stackoverflow.com/questions/23129345)
+  public StringBuffer append(String str, int n) {
+    while(n > 0){
+        sb.append(str);
+        n--;
+    }
+    return sb;
+}
+  
+
+  
+
+  public Appender append(String str, int n) {
+    while(n > 0){
+        sb.append(str);
+        n--;
+    }
+    return this;
+}
+  
+
+ because StringBuffer does not have method append(String s, int n) 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:2 (https://stackoverflow.com/questions/12560092)
+ Readin file with file inputstream and append file content to string. 
+
+  import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+
+public class CopyOffileInputStream {
+
+    public static void main(String[] args) {
+
+        //File file = new File("./store/robots.txt");
+        File file = new File("swingloggingsscce.log");
+
+        FileInputStream fis = null;
+        String str = "";
+
+        try {
+            fis = new FileInputStream(file);
+            int content;
+            while ((content = fis.read()) != -1) {
+                // convert to char and display it
+                str += (char) content;
+            }
+
+            System.out.println("After reading file");
+            System.out.println(str);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (fis != null)
+                    fis.close();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+        }
+    }
+}
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:3 (https://stackoverflow.com/questions/4245480)
+  StringBuffer st = new StringBuffer();
+st.append("Hello");
+st.append("\\n"); //<- the first \ escapes the second
+st.append("World");
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:4 (https://stackoverflow.com/questions/17922282)
+ You have to escape the slash: 
+
+  queryStr.append("\\\\%AMPAMP\\\\$");
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:5 (https://stackoverflow.com/questions/6027874)
+ You have to set the Stream to append mode like this:  
+
+  pw = new PrintWriter(new FileWriter("d:\\stam\\stam.txt", true));
+  
+
+
+

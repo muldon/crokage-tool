@@ -1,0 +1,161 @@
+Query: How do I ping a host?
+-----------------------------------------------------------------------
+
+Rank:1 (https://stackoverflow.com/questions/11506847)
+ Check your connectivity. On my Computer this prints REACHABLE for both IP's: 
+
+ 
+   Sending Ping Request to 127.0.0.1 
+  Host is reachable 
+  Sending Ping Request to 173.194.32.38 
+  Host is reachable 
+ 
+
+ EDIT: 
+
+ You could try modifying the code to use getByAddress() to obtain the address: 
+
+  public static void main(String[] args) throws UnknownHostException, IOException {
+    InetAddress inet;
+
+    inet = InetAddress.getByAddress(new byte[] { 127, 0, 0, 1 });
+    System.out.println("Sending Ping Request to " + inet);
+    System.out.println(inet.isReachable(5000) ? "Host is reachable" : "Host is NOT reachable");
+
+    inet = InetAddress.getByAddress(new byte[] { (byte) 173, (byte) 194, 32, 38 });
+    System.out.println("Sending Ping Request to " + inet);
+    System.out.println(inet.isReachable(5000) ? "Host is reachable" : "Host is NOT reachable");
+}
+  
+
+ The getByName() methods may attempt some kind of reverse DNS lookup which may not be possible on your machine, getByAddress() might bypass that. 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:2 (https://stackoverflow.com/questions/18030305)
+ You can use this method to ping hosts on Windows or other platforms:   
+
+  private static boolean ping(String host) throws IOException, InterruptedException {
+    boolean isWindows = System.getProperty("os.name").toLowerCase().contains("win");
+
+    ProcessBuilder processBuilder = new ProcessBuilder("ping", isWindows? "-n" : "-c", "1", host);
+    Process proc = processBuilder.start();
+
+    int returnVal = proc.waitFor();
+    return returnVal == 0;
+}
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:3 (https://stackoverflow.com/questions/30287787)
+  
+Just an addition to what others have given, even though they work well but  in some cases if internet is slow or some unknown network problem exists, some of the codes won't work ( isReachable() ).  But this code mentioned below creates a process which acts as a command line ping (cmd ping) to windows. It works for me in all cases, tried and tested. 
+
+  Code :-  
+
+  public class JavaPingApp {
+
+public static void runSystemCommand(String command) {
+
+    try {
+        Process p = Runtime.getRuntime().exec(command);
+        BufferedReader inputStream = new BufferedReader(
+                new InputStreamReader(p.getInputStream()));
+
+        String s = "";
+        // reading output stream of the command
+        while ((s = inputStream.readLine()) != null) {
+            System.out.println(s);
+        }
+
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+}
+
+public static void main(String[] args) {
+
+    String ip = "stackoverflow.com"; //Any IP Address on your network / Web
+    runSystemCommand("ping " + ip);
+}
+}
+  
+
+ Hope it helps, Cheers!!! 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:4 (https://stackoverflow.com/questions/36778903)
+ Ping for the google server or any other server 
+
+  public boolean isConecctedToInternet() {
+
+    Runtime runtime = Runtime.getRuntime();
+    try {
+        Process ipProcess = runtime.exec("/system/bin/ping -c 1 8.8.8.8");
+        int     exitValue = ipProcess.waitFor();
+        return (exitValue == 0);
+    } catch (IOException e)          { e.printStackTrace(); }
+    catch (InterruptedException e) { e.printStackTrace(); }
+    return false;
+}
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:5 (https://stackoverflow.com/questions/8815119)
+ as viralpatel specified you can use  Runtime.exec()  
+
+ following is an example of it  
+
+  class pingTest {
+
+    public static void main(String[] args) {
+        String ip = "127.0.0.1";
+        String pingResult = "";
+
+        String pingCmd = "ping " + ip;
+        try {
+            Runtime r = Runtime.getRuntime();
+            Process p = r.exec(pingCmd);
+
+            BufferedReader in = new BufferedReader(new
+            InputStreamReader(p.getInputStream()));
+            String inputLine;
+            while ((inputLine = in.readLine()) != null) {
+                System.out.println(inputLine);
+                pingResult += inputLine;
+            }
+            in.close();
+
+        } catch (IOException e) {
+            System.out.println(e);
+        }
+
+    }
+}
+  
+
+  output  
+
+  Pinging 127.0.0.1 with 32 bytes of data:
+Reply from 127.0.0.1: bytes=32 time<1ms TTL=128
+Reply from 127.0.0.1: bytes=32 time<1ms TTL=128
+Reply from 127.0.0.1: bytes=32 time<1ms TTL=128
+Reply from 127.0.0.1: bytes=32 time<1ms TTL=128
+
+Ping statistics for 127.0.0.1:
+    Packets: Sent = 4, Received = 4, Lost = 0 (0% loss),
+Approximate round trip times in milli-seconds:
+    Minimum = 0ms, Maximum = 0ms, Average = 0ms
+  
+
+ refer http://www.velocityreviews.com/forums/t146589-ping-class-java.html 
+
+
+

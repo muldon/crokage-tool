@@ -1,0 +1,60 @@
+Query: Convert Between a File Path and a URL
+-----------------------------------------------------------------------
+
+Rank:1 (https://stackoverflow.com/questions/37945971)
+    
+
+  android.net.URI auri = new android.net.URI("your url goes here");
+java.net.URI juri = new java.net.URI(auri.toString());
+  
+
+  For more refer:  
+
+ https://developer.android.com/reference/android/net/Uri.html 
+
+ http://docs.oracle.com/javase/1.5.0/docs/api/java/net/URI.html 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:2 (https://stackoverflow.com/questions/3631670)
+  URL url=getClass().getResource("/getresources/test.txt");
+File f=new File(url.toURI());
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:3 (https://stackoverflow.com/questions/6164541)
+ The following code is what you need: 
+
+  String path = URLDecoder.decode("/C:/Users/David/Dropbox/My%20Programs/Java/Test/bin/", "UTF-8");
+System.out.println(new File(path).getPath());
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:4 (https://stackoverflow.com/questions/20098130)
+ . The URL is invalid when we convert the  String  to  URL . So, I think we can do this, like follows: 
+
+  String urlString = "vfs:/E:/Servers/jboss7/standalone/deployments/isms.war/WEB-INF/lib/aribaweb.jar/META-INF/aribaweb.properties";
+File file = new File(urlString);
+URL url = file.toURI().toURL();
+  
+
+ . Don't show exception what you say. 
+
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:5 (https://stackoverflow.com/questions/7700050)
+ that is not the correct way to convert a URL to a File.   
+
+  new File(Main.class.getResource("/worlds/").toURI());
+  
+
+
+

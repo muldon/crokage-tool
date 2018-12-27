@@ -1,0 +1,170 @@
+Query: Connect to a SQLite database
+-----------------------------------------------------------------------
+
+Rank:1 (https://stackoverflow.com/questions/12443856)
+ Move your database (DB.sqlite) in your working directory. Then use this url to connect to it : 
+
+  jdbc:sqlite:DB.sqlite
+  
+
+ Using JDBC, it will be something like this : 
+
+  String driver = "org.sqlite.JDBC";
+Class.forName(driver);
+
+String dbUrl = "jdbc:sqlite:DB.sqlite";
+Connection connection = DriverManager.getConnection(dbUrl);
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:2 (https://stackoverflow.com/questions/10737687)
+  connection = DriverManager.getConnection("jdbc:sqlite:D:\\testdb.db");
+  
+
+  
+
+  connection = DriverManager.getConnection("jdbc:sqlite:D:\\testdb");
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:3 (https://stackoverflow.com/questions/19398975)
+      import java.sql.ResultSet;
+    import java.sql.SQLException;
+    import javax.swing.JOptionPane;
+    import org.sqlite.SQLiteDataSource;
+    import org.sqlite.SQLiteJDBCLoader;
+
+    public class Test {
+
+        public static final boolean Connected() {
+            boolean initialize = SQLiteJDBCLoader.initialize();
+
+            SQLiteDataSource dataSource = new SQLiteDataSource();
+            dataSource.setUrl("jdbc:sqlite:/home/users.sqlite");
+            int i=0;
+            try {
+                ResultSet executeQuery = dataSource.getConnection()
+                        .createStatement().executeQuery("select * from \"Table\"");
+                while (executeQuery.next()) {
+i++;
+                    System.out.println("out: "+executeQuery.getMetaData().getColumnLabel(i));
+
+                }
+
+
+
+            } catch (SQLException ex) {
+                JOptionPane.showMessageDialog(null, ex);
+            }
+
+            return initialize;
+
+        }
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:4 (https://stackoverflow.com/questions/45301509)
+ you can use ucanacess.jar for connect Ms Aceess database  
+
+ show some example here http://www.benchresources.net/jdbc-msaccess-database-connection-steps-in-java-8/ 
+
+  import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+
+public class MsAccessDatabaseConnectionInJava8 {
+
+    public static void main(String[] args) {
+
+        // variables
+        Connection connection = null;
+        Statement statement = null;
+        ResultSet resultSet = null;
+
+        // Step 1: Loading or registering Oracle JDBC driver class
+        try {
+
+            Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
+        }
+        catch(ClassNotFoundException cnfex) {
+
+            System.out.println("Problem in loading or "
+                    + "registering MS Access JDBC driver");
+            cnfex.printStackTrace();
+        }
+
+        // Step 2: Opening database connection
+        try {
+
+            String msAccDB = "D:/WORKSPACE/TEST_WORKSPACE/Java-JDBC/Player.accdb";
+            String dbURL = "jdbc:ucanaccess://" + msAccDB; 
+
+            // Step 2.A: Create and get connection using DriverManager class
+            connection = DriverManager.getConnection(dbURL); 
+
+            // Step 2.B: Creating JDBC Statement 
+            statement = connection.createStatement();
+
+            // Step 2.C: Executing SQL & retrieve data into ResultSet
+            resultSet = statement.executeQuery("SELECT * FROM PLAYER");
+
+            System.out.println("ID\tName\t\t\tAge\tMatches");
+            System.out.println("==\t================\t===\t=======");
+
+            // processing returned data and printing into console
+            while(resultSet.next()) {
+                System.out.println(resultSet.getInt(1) + "\t" + 
+                        resultSet.getString(2) + "\t" + 
+                        resultSet.getString(3) + "\t" +
+                        resultSet.getString(4));
+            }
+        }
+        catch(SQLException sqlex){
+            sqlex.printStackTrace();
+        }
+        finally {
+
+            // Step 3: Closing database connection
+            try {
+                if(null != connection) {
+
+                    // cleanup resources, once after processing
+                    resultSet.close();
+                    statement.close();
+
+                    // and then finally close connection
+                    connection.close();
+                }
+            }
+            catch (SQLException sqlex) {
+                sqlex.printStackTrace();
+            }
+        }
+    }
+}
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:5 (https://stackoverflow.com/questions/2839332)
+  String url = "jdbc:mysql://127.0.0.1:3306/yourdatabase";
+String user = "username";
+String password = "password";
+
+// Load the Connector/J driver
+Class.forName("com.mysql.jdbc.Driver").newInstance();
+// Establish connection to MySQL
+Connection conn = DriverManager.getConnection(url, user, password);
+  
+
+
+

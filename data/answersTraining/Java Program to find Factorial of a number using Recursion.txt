@@ -1,0 +1,136 @@
+Query: Java Program to find Factorial of a number using Recursion
+-----------------------------------------------------------------------
+
+Rank:1 (https://stackoverflow.com/questions/35072776)
+ Simple one liner solution, though internally it is doing a loop, as it can't possible without it, but you don't need to do it yourselves: 
+
+  Long factorialNumber = LongStream.rangeClosed(2, N).reduce(1, Math::multiplyExact);
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:2 (https://stackoverflow.com/questions/40662752)
+      /**
+import java liberary class
+
+*/
+import java.util.Scanner;
+
+/* class to find factorial of a number
+*/
+
+public class factorial
+{
+public static void main(String[] args)
+{
+
+// scanner method for read keayboard values
+
+    Scanner factor= new Scanner(System.in);
+
+    int n;
+    double total = 1;
+    double sum= 1;
+
+    System.out.println("\nPlease enter an integer: ");
+    n = factor.nextInt();
+
+// evaluvate the integer is greater than zero and calculate factorial
+
+if(n==0)
+
+{
+    System.out.println(" Factorial of 0 is 1");
+}
+else if (n>0)
+{
+    System.out.println("\nThe factorial of " + n + " is " );
+
+    System.out.print(n);
+
+    for(int i=1;i<n;i++)
+    {
+        do // do while loop for display each integer in the factorial
+              {
+                System.out.print("*"+(n-i) );
+              }
+
+        while ( n == 1);
+
+      total = total * i;
+
+    }
+
+// calculate factorial
+sum= total * n;
+
+
+// display sum of factorial
+
+    System.out.println("\n\nThe "+ n +" Factorial is : "+" "+ sum);
+}
+
+// display invalid entry, if enter a value less than zero
+
+else
+
+{
+    System.out.println("\nInvalid entry!!");
+
+}System.exit(0);
+}
+}
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:3 (https://stackoverflow.com/questions/35567627)
+ . 
+
+  public class FactorialClient
+{
+    public static void main()
+   {
+      Scanner reader = new Scanner(System.in);  // Reading from System.in
+      System.out.println("Enter a number: ");
+      int x = reader.nextInt();
+      Factorial n = new Factorial();
+      System.out.println(n.Factorial(x));
+   }
+}
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:4 (https://stackoverflow.com/questions/36123426)
+  public class Factorial {
+
+    public static void main(String[] args) {
+        System.out.println(factorial(4));
+    }
+
+    private static long factorial(int i) {
+
+        if(i<0)  throw new IllegalArgumentException("x must be >= 0"); 
+        return i==0||i==1? 1:i*factorial(i-1);
+    }
+}
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:5 (https://stackoverflow.com/questions/11447287)
+  public static void main(String[] args) {
+    BigInteger fact = BigInteger.valueOf(1);
+    for (int i = 1; i <= 8785856; i++)
+        fact = fact.multiply(BigInteger.valueOf(i));
+    System.out.println(fact);
+}
+  
+
+
+

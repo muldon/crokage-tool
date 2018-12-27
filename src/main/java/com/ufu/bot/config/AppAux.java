@@ -106,11 +106,18 @@ public class AppAux {
 	@Value("${FAST_TEXT_INSTALLATION_DIR}")
 	public String FAST_TEXT_INSTALLATION_DIR;
 	
-	@Value("${BIKER_RUNNER_PATH}")
-	public String BIKER_RUNNER_PATH;
+	@Value("${BIKER_RUNNER_PATH_TRAINING}")
+	public String BIKER_RUNNER_PATH_TRAINING;
 	
-	@Value("${BIKER_ANSWERS_SUMMARIES}")
-	public String BIKER_ANSWERS_SUMMARIES;
+	@Value("${BIKER_RUNNER_PATH_TEST}")
+	public String BIKER_RUNNER_PATH_TEST;
+	
+	@Value("${BIKER_ANSWERS_SUMMARIES_TRAINING}")
+	public String BIKER_ANSWERS_SUMMARIES_TRAINING;
+	
+	@Value("${BIKER_ANSWERS_SUMMARIES_TEST}")
+	public String BIKER_ANSWERS_SUMMARIES_TEST;
+	
 	
 	@Value("${RECOMMENDED_ANSWERS_QUERIES_CACHE}")
 	public String RECOMMENDED_ANSWERS_QUERIES_CACHE;
@@ -209,6 +216,19 @@ public class AppAux {
 	@Value("${INPUT_QUERIES_FILE_SELECTED_QUERIES}")
 	public String INPUT_QUERIES_FILE_SELECTED_QUERIES;
 	
+	@Value("${INPUT_QUERIES_FILE_TEST_QUERIES}")
+	public String INPUT_QUERIES_FILE_TEST_QUERIES;
+	
+	@Value("${INPUT_QUERIES_FILE_TEST_QUERIES_EVALUATION_DIR}")
+	public String INPUT_QUERIES_FILE_TEST_QUERIES_EVALUATION_DIR;
+	
+	
+	@Value("${BIKER_HOME_DATA_FOLDER}")
+	public String BIKER_HOME_DATA_FOLDER;
+	
+	@Value("${CROKAGE_HOME_DATE_FOLDER}")
+	public String CROKAGE_HOME_DATE_FOLDER;
+		
 	@Value("${BIKER_INPUT_QUERIES_FILE}")
 	public String BIKER_INPUT_QUERIES_FILE;
 	
@@ -348,7 +368,8 @@ public class AppAux {
 	protected Map<String,Set<Integer>> topThreadsAnswersIdsMap;
 	protected Map<String,Set<Integer>> topAsymIdsMap;
 	protected Map<String,Set<Integer>> topTFIDFAnswersIdsMap;
-	protected Map<String,Set<Integer>> topMergeIdsMap;
+	protected Map<String,Set<Integer>> topMergeIdsMap1;
+	protected Map<String,Set<Integer>> topMergeIdsMap2;
 	protected Map<String,Set<Integer>> topAnswersIdsMap;
 	protected Map<Integer,Set<String>> upvotedPostsIdsWithCodeApisMap;
 	protected ArrayList<Document> documents;
@@ -388,7 +409,8 @@ public class AppAux {
 		topThreadsAnswersIdsMap = new LinkedHashMap<>();
 		topAsymIdsMap = new LinkedHashMap<>();
 		topTFIDFAnswersIdsMap = new LinkedHashMap<>();
-		topMergeIdsMap = new LinkedHashMap<>();
+		topMergeIdsMap1 = new LinkedHashMap<>();
+		topMergeIdsMap2 = new LinkedHashMap<>();
 		topAnswersIdsMap = new LinkedHashMap<>();
 		luceneTopIdsMap = new LinkedHashMap<>();
 		documents = new ArrayList<>();
@@ -1230,8 +1252,11 @@ public class AppAux {
 		}else if(dataSet.equals("nlp2api")) {
 			fileName = INPUT_QUERIES_FILE_NLP2API;
 		
-		}else if(dataSet.equals("selectedqueries")) {
+		}else if(dataSet.equals("selectedqueries-training")) {
 			fileName = INPUT_QUERIES_FILE_SELECTED_QUERIES;
+		
+		}else if(dataSet.equals("selectedqueries-test")) {
+			fileName = INPUT_QUERIES_FILE_TEST_QUERIES;
 		}
 		
 		
@@ -2304,7 +2329,7 @@ public class AppAux {
 		if(callNLP2ApiProcess) {
 			//queries = queries.subList(0, 5);
 			//First generate inputQueries file in a format NLP2Api understand
-			FileWriter fw = new FileWriter(NLP2API_INPUT_QUERIES_FILE);
+			FileWriter fw = new FileWriter(CROKAGE_HOME_DATE_FOLDER+dataSet+"-"+NLP2API_INPUT_QUERIES_FILE);
 			for (String query: queries) {
 				fw.write(query+"\n--\n"); //specific format to NLP2API understand
 				
@@ -2326,9 +2351,9 @@ public class AppAux {
 		    command.add("-task");
 		    command.add("reformulate");
 		    command.add("-queryFile");
-		    command.add(NLP2API_INPUT_QUERIES_FILE);
+		    command.add(CROKAGE_HOME_DATE_FOLDER+dataSet+"-"+NLP2API_INPUT_QUERIES_FILE);
 		    command.add("-outputFile");
-		    command.add(NLP2API_OUTPUT_QUERIES_FILE);
+		    command.add(CROKAGE_HOME_DATE_FOLDER+dataSet+"-"+NLP2API_OUTPUT_QUERIES_FILE);
 			
 			ProcessBuilder pb = new ProcessBuilder(command);
 			Process p = pb.start();
@@ -2351,7 +2376,7 @@ public class AppAux {
 		
 		
 		
-		getQueriesAndApisFromFileMayContainDupes(nlp2ApiQueriesApisMap,NLP2API_OUTPUT_QUERIES_FILE);
+		getQueriesAndApisFromFileMayContainDupes(nlp2ApiQueriesApisMap,CROKAGE_HOME_DATE_FOLDER+dataSet+"-"+NLP2API_OUTPUT_QUERIES_FILE);
 		
 		
 	}
@@ -2364,8 +2389,9 @@ public class AppAux {
 		
 		
 		if(callRACKApiProcess) {
+			
 			//First generate inputQueries file in a format NLP2Api understand
-			FileWriter fw = new FileWriter(RACK_INPUT_QUERIES_FILE);
+			FileWriter fw = new FileWriter(CROKAGE_HOME_DATE_FOLDER+dataSet+"-"+RACK_INPUT_QUERIES_FILE);
 			for (String query: queries) {
 				fw.write(query+"\n--\n"); //specific format to NLP2API understand
 				
@@ -2386,9 +2412,9 @@ public class AppAux {
 		    command.add("-task");
 		    command.add("suggestAPI");
 		    command.add("-queryFile");
-		    command.add(RACK_INPUT_QUERIES_FILE);
+		    command.add(CROKAGE_HOME_DATE_FOLDER+dataSet+"-"+RACK_INPUT_QUERIES_FILE);
 		    command.add("-resultFile");
-		    command.add(RACK_OUTPUT_QUERIES_FILE);
+		    command.add(CROKAGE_HOME_DATE_FOLDER+dataSet+"-"+RACK_OUTPUT_QUERIES_FILE);
 			
 			ProcessBuilder pb = new ProcessBuilder(command);
 			Process p = pb.start();
@@ -2411,7 +2437,7 @@ public class AppAux {
 		
 		
 		
-		getQueriesAndApisFromFileMayContainDupes(rackQueriesApisMap,RACK_OUTPUT_QUERIES_FILE);
+		getQueriesAndApisFromFileMayContainDupes(rackQueriesApisMap,CROKAGE_HOME_DATE_FOLDER+dataSet+"-"+RACK_OUTPUT_QUERIES_FILE);
 		
 	}
 	
@@ -2421,21 +2447,37 @@ public class AppAux {
 			queries = readInputQueries();
 		}
 		
+		String runnerPath="";
+		
+		String inputQueriesFile="";
+		String outputPath="";
+		if(dataSet.equals("selectedqueries-test")) {
+			runnerPath=BIKER_RUNNER_PATH_TEST;
+			inputQueriesFile=BIKER_INPUT_QUERIES_FILE+"Test";
+			outputPath=BIKER_HOME_DATA_FOLDER+BIKER_OUTPUT_QUERIES_FILE+"Test.txt";
+		}else {
+			runnerPath=BIKER_RUNNER_PATH_TRAINING;
+			inputQueriesFile=BIKER_INPUT_QUERIES_FILE+"Training";
+			outputPath=BIKER_HOME_DATA_FOLDER+BIKER_OUTPUT_QUERIES_FILE+"Training.txt";
+		}
 	
 		if(callBIKERProcess) {
+					
 			// writing queries to be read by biker
-			Path bikerQueriesFile = Paths.get(BIKER_INPUT_QUERIES_FILE);
+			Path bikerQueriesFile = Paths.get(BIKER_HOME_DATA_FOLDER+inputQueriesFile);
 			Files.write(bikerQueriesFile, queries, Charset.forName("UTF-8"));
 
 			// writing script to be called
 			Path scriptFile = Paths.get(BIKER_SCRIPT_FILE);
 			List<String> lines=null;
 			
+			
+			
 			if(!StringUtils.isBlank(virutalPythonEnv)) { //specific env
-				lines = Arrays.asList("#!/bin/bash","export PYTHONPATH=" + BIKER_HOME, "echo $PYTHONPATH", "cd $PYTHONPATH/../","virtualenv "+virutalPythonEnv,"source "+virutalPythonEnv+"/bin/activate","cd $PYTHONPATH/main","python " + BIKER_RUNNER_PATH);
+				lines = Arrays.asList("#!/bin/bash","export PYTHONPATH=" + BIKER_HOME, "echo $PYTHONPATH", "cd $PYTHONPATH/../","virtualenv "+virutalPythonEnv,"source "+virutalPythonEnv+"/bin/activate","cd $PYTHONPATH/main","python " + BIKER_RUNNER_PATH_TRAINING);
 				//lines = Arrays.asList("#!/bin/bash", "export PYTHONPATH=" + BIKER_HOME, "echo $PYTHONPATH","echo $PYTHONPATH","echo $PYTHONPATH", "cd $PYTHONPATH/../","virtualenv "+virutalPythonEnv,"source "+virutalPythonEnv+"/bin/activate","./test.sh");
 			}else {
-				lines = Arrays.asList("#!/bin/bash","export PYTHONPATH=" + BIKER_HOME, "echo $PYTHONPATH", "cd $PYTHONPATH/main", "python " + BIKER_RUNNER_PATH);
+				lines = Arrays.asList("#!/bin/bash","export PYTHONPATH=" + BIKER_HOME, "echo $PYTHONPATH", "cd $PYTHONPATH/main", "python " + runnerPath);
 			}
 						
 			Files.write(scriptFile, lines, Charset.forName("UTF-8"));
@@ -2465,7 +2507,7 @@ public class AppAux {
 		
 		int key = 1;
 		// reading output from BIKER
-		List<String> queriesWithApis = Files.readAllLines(Paths.get(BIKER_OUTPUT_QUERIES_FILE), Charsets.UTF_8);
+		List<String> queriesWithApis = Files.readAllLines(Paths.get(outputPath), Charsets.UTF_8);
 		if(limitQueries!=null) {
 			queriesWithApis = queriesWithApis.subList(0, limitQueries);
 		}

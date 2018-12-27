@@ -2099,18 +2099,18 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 			Set<Post> posts = sortedBuckets.get(query);
 			setLimitV2(posts, numberOfComposedAnswers);
 			StringBuilder lines = new StringBuilder("");
-			lines.append("Query: "+query);
+			lines.append("Query: "+query+"\n-----------------------------------------------------------------------");
 			
 			
 			//System.out.println("\nAnswers to query: "+query);
 			int count=1;
 			for(Post bucket: posts) {
-				lines.append("\n\nRank:"+count+" (https://stackoverflow.com/questions/"+bucket.getId()+")\n"+buildPresentationBody(bucket.getBody(),true)+"\n\n----next answer----");
+				lines.append("\n\nRank:"+count+" (https://stackoverflow.com/questions/"+bucket.getId()+")\n"+buildPresentationBody(bucket.getBody(),true)+"\n\n-------------------------------------next answer-------------------------------------");
 				count++;
 			}
 			lines.append("#end");
 			String linesStr = lines.toString();
-			linesStr = linesStr.replace("----next answer----#end", "");
+			linesStr = linesStr.replace("-------------------------------------next answer-------------------------------------#end", "");
 			try (PrintWriter out = new PrintWriter(folder+"/"+query.replace("/", "")+".txt")) {
 			    out.println(linesStr);
 			}

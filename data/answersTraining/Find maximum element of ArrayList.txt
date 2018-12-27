@@ -1,0 +1,75 @@
+Query: Find maximum element of ArrayList
+-----------------------------------------------------------------------
+
+Rank:1 (https://stackoverflow.com/questions/41691229)
+ Use https://docs.oracle.com/javase/8/docs/api/java/util/stream/package-summary.html 
+
+  Integer maxValue = Stream.of(data1, data2, data3)
+    .flatMap(Collection::stream)
+    .max(Integer::compare)
+    .get();
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:2 (https://stackoverflow.com/questions/24352786)
+ You can use this  
+
+   Collections.max(arrayList);
+  
+
+ To know more about read  http://docs.oracle.com/javase/6/docs/api/java/util/Collections.html#max%28java.util.Collection%29 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:3 (https://stackoverflow.com/questions/10926358)
+  List<YourData> list = new ArrayList<YourData>();
+
+for(int index=0; index < list.size(); index++) {
+
+    YourData currElement = list.get(index);
+
+    if(index == 0) {
+        //currElement is the first element
+    }
+
+    if(index == list.size() - 1) {
+         //currElement is the last element
+    }
+}
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:4 (https://stackoverflow.com/questions/40091297)
+ Here are three more ways to find the maximum value in a list, using streams: 
+
+  List<Integer> nums = Arrays.asList(-1, 2, 1, 7, 3);
+Optional<Integer> max1 = nums.stream().reduce(Integer::max);
+Optional<Integer> max2 = nums.stream().max(Comparator.naturalOrder());
+OptionalInt max3 = nums.stream().mapToInt(p->p).max();
+System.out.println("max1: " + max1.get() + ", max2: " 
+   + max2.get() + ", max3: " + max3.getAsInt());
+  
+
+ All of these methods, just like  Collections.max , iterate over the entire collection, hence they require time proportional to the size of the collection. 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:5 (https://stackoverflow.com/questions/8304795)
+ You can use the  Collections API  to achieve what you want easily -  read efficiently  - enough
+https://docs.oracle.com/javase/8/docs/api/java/util/Collections.html#max-java.util.Collection- 
+
+  Collections.max(arrayList);
+  
+
+ 
+   Returns the maximum element of the given collection, according to the natural ordering of its elements. All elements in the collection must implement the Comparable interface. 
+ 
+
+
+

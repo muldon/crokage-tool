@@ -1,0 +1,67 @@
+Query: Generate random integer
+-----------------------------------------------------------------------
+
+Rank:1 (https://stackoverflow.com/questions/2627801)
+ To generate a random char in a-z: 
+
+  Random r = new Random();
+char c = (char)(r.nextInt(26) + 'a');
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:2 (https://stackoverflow.com/questions/3710313)
+ Here are two versions, one takes a Random as parameter (in case you want to re-use it): 
+
+  public static BigInteger getRandomNumber(final int digCount){
+    return getRandomNumber(digCount, new Random());
+}
+
+public static BigInteger getRandomNumber(final int digCount, Random rnd){
+    final char[] ch = new char[digCount];
+    for(int i = 0; i < digCount; i++){
+        ch[i] =
+            (char) ('0' + (i == 0 ? rnd.nextInt(9) + 1 : rnd.nextInt(10)));
+    }
+    return new BigInteger(new String(ch));
+}
+  
+
+ The resulting BigInteger will always have the specified length. 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:3 (https://stackoverflow.com/questions/45685145)
+ Generate a random integer between  from (inclusive) and  to (exclusive) 
+
+  import java.util.Random
+
+val random = Random()
+
+fun rand(from: Int, to: Int) : Int {
+    return random.nextInt(to - from) + from
+}
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:4 (https://stackoverflow.com/questions/901706)
+ http://java.sun.com/javase/6/docs/api/java/util/Random.html: 
+
+  Random random = new Random();
+int value = random.nextInt(3) - 1;
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:5 (https://stackoverflow.com/questions/8236137)
+  Random generator = new Random(); 
+int i = generator.nextInt(10) + 1;
+  
+
+
+

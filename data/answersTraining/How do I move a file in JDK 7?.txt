@@ -1,0 +1,75 @@
+Query: How do I move a file in JDK 7?
+-----------------------------------------------------------------------
+
+Rank:1 (https://stackoverflow.com/questions/4645271)
+  myFile.renameTo(new File("/the/new/place/newName.file"));
+  
+
+ http://download.oracle.com/javase/6/docs/api/java/io/File.html#renameTo%28java.io.File%29 does that (it can not only rename, but also move between directories, at least on the same file system). 
+
+ 
+   Renames the file denoted by this abstract pathname. 
+  
+   Many aspects of the behavior of this method are inherently platform-dependent: The rename operation might not be able to move a file from one filesystem to another, it might not be atomic, and it might not succeed if a file with the destination abstract pathname already exists. The return value should always be checked to make sure that the rename operation was successful.  
+ 
+
+ If you need a more comprehensive solution (such as wanting to move the file between disks), look at Apache Commons http://commons.apache.org/io/api-release/org/apache/commons/io/FileUtils.html#moveFile%28java.io.File,%20java.io.File%29 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:2 (https://stackoverflow.com/questions/21076728)
+ I suggest to try Java 7 NIO2 
+
+  Files.move(Path source, Path target, CopyOption... options)
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:3 (https://stackoverflow.com/questions/23812941)
+ With Java 7 or newer you can use  Files.move(from, to, CopyOption... options) . 
+
+ E.g. 
+
+  Files.move(Paths.get("/foo.txt"), Paths.get("bar.txt"), StandardCopyOption.REPLACE_EXISTING);
+  
+
+ See the http://docs.oracle.com/javase/7/docs/api/java/nio/file/Files.html documentation for more details 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:4 (https://stackoverflow.com/questions/27773662)
+  
+
+  oldFile.renameTo(new File(secondarydir+oldFile.getName()))
+  
+
+  
+
+  oldFile.renameTo(new File(secondarydir, oldFile.getName()))
+  
+
+ It's best not to use string concatenation to join path segments, as the proper way to do it may be platform-dependent. 
+
+  Edit:  If you can use JDK 1.7 APIs, you can use  Files.move()  instead of  File.renameTo()  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:5 (https://stackoverflow.com/questions/34733852)
+ From 
+https://docs.oracle.com/javase/7/docs/api/java/nio/file/StandardCopyOption.html     
+
+ ATOMIC_MOVE is a file operation. 
+
+  public static final StandardCopyOption ATOMIC_MOVE
+  
+
+ Move the file as an atomic file system operation. 
+
+ Try  StandardCopyOption.REPLACE_EXISTING  
+
+
+

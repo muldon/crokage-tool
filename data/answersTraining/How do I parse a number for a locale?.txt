@@ -1,0 +1,82 @@
+Query: How do I parse a number for a locale?
+-----------------------------------------------------------------------
+
+Rank:1 (https://stackoverflow.com/questions/34455840)
+  df.format(25.1)  returns formatted number  String  based on the default or specified locale. 
+
+  i.e.  for  Locale.US  it will return  String   25.1  while in case of  Locale.ITALY  it will return  25,1  as decimal separators are different for both the locales. 
+
+ Another  problem  is you are  parsing  the formatted  String  to  double . If you have  double  value (or something else which is valid number), then you don't need to format the number with  DecimalFormat . 
+
+ If you have valid number  String  ( 25.1 ), you can parse it with  DecimalFormatter  in following way, 
+
+  NumberFormat nf = NumberFormat.getNumberInstance(Locale.ITALY);
+DecimalFormat df = (DecimalFormat) nf;
+df.applyPattern("#.##");
+try {
+    System.out.println(df.parse("25,1"));
+} catch (ParseException e) {
+    e.printStackTrace();
+}
+  
+
+  OUTPUT  
+
+  25.1
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:2 (https://stackoverflow.com/questions/4499282)
+ Looks like the German locale has that number format. 
+
+  Double d = (Double) NumberFormat.getInstance(Locale.GERMAN).parse(s);
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:3 (https://stackoverflow.com/questions/12101534)
+ Get a http://docs.oracle.com/javase/7/docs/api/java/text/NumberFormat.html instance for a Portuguese http://docs.oracle.com/javase/7/docs/api/java/util/Locale.html, and then  parse  the number with it. This will also handle locale-specific decimal separators. 
+
+  NumberFormat nf = NumberFormat.getNumberInstance(new Locale("pt", "PT"));
+DecimalFormat df = (DecimalFormat)nf;
+df.setParseBigDecimal(true);
+BigDecimal decimal = (BigDecimal)df.parse("12.090.129.019.201.920.192.091.029.102.901.920.192.019.201.920");
+BigInteger big = decimal.toBigInteger();
+  
+
+  http://ideone.com/gN65j . 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:4 (https://stackoverflow.com/questions/11973568)
+ If it is one number & you want to remove separators,  NumberFormat  will return a number to you. Just make sure to use the correct Locale when using the  getNumberInstance  method. 
+
+ For instance, some Locales swap the comma and decimal point to what you may be used to. 
+
+ Then just use the  intValue  method to return an integer. You'll have to wrap the whole thing in a try/catch block though, to account for Parse Exceptions. 
+
+  try {
+    NumberFormat ukFormat = NumberFormat.getNumberInstance(Locale.UK);
+    ukFormat.parse("265,858").intValue();
+} catch(ParseException e) {
+    //Handle exception
+}
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:5 (https://stackoverflow.com/questions/23015335)
+ Simple trick without custom parsing logic: 
+
+  new DecimalFormat("#,##0;(#,##0)", new DecimalFormatSymbols(Locale.US)).parse("(123,456)")
+  
+
+ DecimalFormatSymbols parameter could be omitted for case to use current locale for parsing  
+
+
+

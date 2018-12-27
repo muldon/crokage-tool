@@ -1,0 +1,70 @@
+Query: How do I get the primary key of any JPA entity?
+-----------------------------------------------------------------------
+
+Rank:1 (https://stackoverflow.com/questions/3883753)
+ Perhaps this will work: 
+
+  em.getEntityManagerFactory().getPersistenceUnitUtil().getIdentifier(obj);
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:2 (https://stackoverflow.com/questions/17455274)
+ When we call persist() with an entity JPA creates a new object for database. When you use @GeneratedValue(strategy=GenerationType.AUTO) for id then JPA will responsible for id generation.Since JPA generate id for associated entity at flush time so you need to flush the entityManager instance. 
+
+  Entity entity = new Entity();
+entity.setAddresse("Address");
+em.persist(entity);
+em.flush();
+  
+
+ after flush you will get the id for you entity. 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:3 (https://stackoverflow.com/questions/17857365)
+ Try refreshing the entity with the database to get the inserted trigger value. 
+
+  public void create(Project project) {
+        entityManager.persist(project);
+        entityManager.getTransaction().commit();
+        project = entityManager.find(Project.class, project.getProjectId());
+        entityManager.refresh(project);
+        System.out.println("Id    -- " + project.getProjectId());
+            System.out.println("no -- " + project.getProjectNo());
+    }
+  
+
+ http://docs.oracle.com/javaee/6/api/javax/persistence/EntityManager.html#refresh%28java.lang.Object%29 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:4 (https://stackoverflow.com/questions/40524287)
+ Piotr Nowicki's answer provides a way of determining whether an entity is  managed . To find out whether an entity has been  detached , we'd need to know whether it was previously managed (i.e. came from the database, e.g. by being persisted or obtained from a  find  operation). Hibernate doesn't provide an "entity state history" so the short answer is there isn't a 100% reliable way of doing this but the following workaround should be sufficient in most cases: 
+
+  public boolean isDetached(Entity entity) {
+    return entity.id != null  // must not be transient
+        && !em.contains(entity)  // must not be managed now
+        && em.find(Entity.class, entity.id) != null;  // must not have been removed
+}
+  
+
+ The above assumes that  em  is the  EntityManager ,  Entity  is the entity class and has a public  id  field that is a  @GeneratedValue  primary key. (It also assumes that the row with this ID hasn't been removed from the database table by an external process in the time after the entity was detached.) 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:5 (https://stackoverflow.com/questions/46073932)
+ Another way of fetching entity ID is: 
+
+  Session session = entityManager.unwrap(Session.class);
+Object entityId = session.getId(entity);
+  
+
+ This approach uses   extractPrimaryKeyFromObject()   method from  ObjectBuilder  class.  
+
+
+

@@ -1,0 +1,121 @@
+Query: Read file as bytes
+-----------------------------------------------------------------------
+
+Rank:1 (https://stackoverflow.com/questions/27124142)
+ Another Way for reading bytes from file 
+
+  Reader reader = null;
+    try {
+        reader = new FileReader(file);
+        char buf[] = new char[8192];
+        int len;
+        StringBuilder s = new StringBuilder();
+        while ((len = reader.read(buf)) >= 0) {
+            s.append(buf, 0, len);
+            byte[] byteArray = s.toString().getBytes();
+        }
+    } catch(FileNotFoundException ex) {
+    } catch(IOException e) {
+    }
+    finally {
+        if (reader != null) {
+            reader.close();
+        }
+    }
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:2 (https://stackoverflow.com/questions/16227895)
+ I would use File or FileChannel to get the file size. This is how to read until the last 128 bytes 
+
+      FileInputStream is = new FileInputStream("1.txt");
+    FileChannel ch = is.getChannel();
+    long len = ch.size() - 128;
+    BufferedInputStream bis = new BufferedInputStream(is);
+    for(long i = 0; i < len; i++) {
+        int b = bis.read();
+        ...
+    }
+  
+
+ if we continue reading we will get the last 128 bytes 
+
+                ByteArrayOutputStream bout128 = new ByteArrayOutputStream();
+    for(int b; (b=bis.read() != -1);) {
+                      bout128.write(b);
+    }        
+              byte[] last128 = bout128.toByteArray();
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:3 (https://stackoverflow.com/questions/35251851)
+ Here is an example using a byte array of size 20 : 
+
+      import java.io.FileInputStream;
+    import java.io.FileOutputStream;
+    import java.io.InputStream;
+    import java.io.OutputStream;
+
+    public class FileInputOutputExample {
+
+        public static void main(String[] args) throws Exception {
+
+            try{
+                    byte[] b = new byte[20];
+                    InputStream is = new FileInputStream("in.txt");
+                    OutputStream os = new FileOutputStream("out.txt");
+
+                    int readBytes = 0;
+
+                    while ((readBytes  = is.read(b)) != -1) {
+                      os.write(b, 0, readBytes);
+                    }
+                    is.close();
+                    os.close();
+
+            }catch(IOException ioe){
+                System.out.println("Error "+ioe.getMessage());
+            }
+         }
+     }
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:4 (https://stackoverflow.com/questions/27707409)
+ That's because http://docs.oracle.com/javase/7/docs/api/java/io/InputStream.html#available%28%29 doesn't do what you think it does. Read its API documentation. You should simply read until the number of bytes read, returned by http://docs.oracle.com/javase/7/docs/api/java/io/InputStream.html#read%28byte[]%29, is -1. Or even simpler, use http://docs.oracle.com/javase/7/docs/api/java/nio/file/Files.html#copy%28java.io.InputStream,%20java.nio.file.Path,%20java.nio.file.CopyOption...%29: 
+
+  Files.copy(in, new File("file.xlsx").toPath());
+  
+
+ Using a buffer that has the size of the input stream also pretty much defeats the purpose of using a buffer, which is to only have a few bytes in memory.  
+
+ If you want to reimplement  copy() , the general pattern is the following: 
+
+  byte[] buffer = new byte[4096]; // number of bytes in memory
+int numberOfBytesRead;
+while ((numberOfBytesRead = in.read(buffer)) >= 0) {
+    out.write(buffer, 0, numberOfBytesRead);
+}
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:5 (https://stackoverflow.com/questions/31600630)
+  File file = new File(filePath);
+byte[] bytes = new byte[(int)file.length()];
+DataInputStream dataInputStream = new DataInputStream(new BufferedInputStream(new FileInputStream(filePath)));
+dataInputStream.readFully(bytes);           
+dataInputStream.close();
+  
+
+  bytes  is a byte array with all of the data of the file in it 
+
+
+

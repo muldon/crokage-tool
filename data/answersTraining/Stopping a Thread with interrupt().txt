@@ -1,0 +1,168 @@
+Query: Stopping a Thread with interrupt()
+-----------------------------------------------------------------------
+
+Rank:1 (https://stackoverflow.com/questions/7176526)
+ You can access the interrupt flag of the current thread using the static method  http://download.oracle.com/javase/6/docs/api/java/lang/Thread.html#interrupted%28%29, e.g. instead of your  active  flag use: 
+
+  public void run() {
+    try {
+        // open your ports
+        while (!Thread.interrupted()) {
+            // do stuff
+        }
+    } finally {
+        // close your ports in finally-block
+        // so they get closed even on exceptions
+    }
+}
+  
+
+ And when you want to shutdown your  ExecutorService , call http://download.oracle.com/javase/6/docs/api/java/util/concurrent/ExecutorService.html#shutdownNow%28%29 on it. This will  interrupt()  any running worker threads and have your  Runnable  break out of its loop. 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:2 (https://stackoverflow.com/questions/17949348)
+ Your DisplayMsg class loops for 100 seconds, and ignores interrupts. Indeed, when  Thread.sleep()  is interrupted, it resets the interrupt status, then throws an InterruptedException. Since you ignore the InterruptedException, the thread continues as if nothing happened. 
+
+  public void show() {
+    for(int t=0;t<100;t++) {        
+        try {
+            System.out.println(dispMsg + t);
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+}
+  
+
+ Don't ignore interrupts: 
+
+  public void show() {
+    for(int t=0;t<100;t++) {        
+        try {
+            System.out.println(dispMsg + t);
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            // re-interrupt the thread and stop looping
+            Thread.currentThread().interrupt();
+            return;
+        }
+    }
+}
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:3 (https://stackoverflow.com/questions/8581317)
+ After you  interrupt()  the thread which is currently waiting, the native wait method will actually reset the interruption flag.  So when you evaluate the  isInterrupted()  here, it is actually reset and will appear as not interrupted. 
+
+  if( Thread.currentThread().isInterrupted()){
+     break;
+}
+  
+
+ You will have to re-interrupt the thread after an interruption occurs during the  wait ing 
+
+  public synchronized void add(Object boar) {
+    /** If there's no free space available wait **/
+    while (!hasFreeSpace()) {
+     try{
+         wait();
+     }catch(InterruptedException e){ 
+        Thread.currentThread().interrupt(); 
+        return; //or rethrow
+     }
+    }
+    /** Once there's free space available add new item **/
+    boars.add(boar);
+}
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:4 (https://stackoverflow.com/questions/33969743)
+ A variable declared as  Thread th  is a reference to an object of type  Thread . It's only a reference to one object. This is true, by the way, for all types, not just thread. 
+
+ Whenever you put a new value into a variable, it no longer refers to the old value<sup>[1]</sup>. 
+
+ Thus  th.interrupt()  in your code will just interrupt the last thread that you assigned to it - the most recent reindeer thread. 
+
+ If you want to interrupt all the threads, you'll need to keep a reference to all the threads. 
+
+ A basic solution 
+
+ A simple way to do this would be to use a list of  Thread : 
+
+  List<Thread> allThreadsToInterrupt = new ArrayList<>();
+  
+
+ When you create a thread, you do 
+
+  th = new Thread(...);
+allThreadsToInterrupt.add(th);
+  
+
+  
+
+  for ( Thread th: allThreadsToInterrupt ) {
+    th.interrupt();
+}
+  
+
+ Using a  ThreadGroup  
+
+ But in fact, Java has an existing class that helps you with this - the  ThreadGroup  class. You can do something like: 
+
+  ThreadGroup elfThreads = new ThreadGroup("Elf Threads");
+ThreadGroup reindeerThreads = new ThreadGroup( "Reindeer Threads" );
+  
+
+ Now, whenever you create a thread, you should create it with a thread group: 
+
+ Instead of: 
+
+  th = new Thread(elf);
+  
+
+ Use: 
+
+  th = new Thread(elfThreads,elf);
+  
+
+ Then at the end, to interrupt all the elves, you can run: 
+
+  elfThreads.interrupt();
+  
+
+ This would automatically call  interrupt()  on  all threads that belong to the group . 
+
+ Of course, you can just create one big group, but I demonstrated separating the elves and the reindeer, in case you will need them to be interrupted separately. 
+
+ 
+
+ [1] In most cases replacing an old reference, which was the only reference to an object, with a new reference will cause the old object to be eligible for garbage collection, but threads are a little different, because if they have been started, there is a second reference to them from the current thread group (because that's the default when you don't give a thread group when you create a thread), which means that they will not be garbage-collected and they will run properly until they complete. 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:5 (https://stackoverflow.com/questions/20528033)
+ When you call interrupt() it triggers a boolean flag which tells the run function it should stop.  That is why I usually write my run functions like this. 
+
+  void run()
+{
+    while(!Thread.interrupted())
+    {
+        //Do something
+    }
+}
+  
+
+ Just because you call interrupt doesn't mean the thread will stop immediately or at all.  It depends on what is in the run function. 
+
+
+

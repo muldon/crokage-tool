@@ -1,0 +1,93 @@
+Query: Load image from local folder
+-----------------------------------------------------------------------
+
+Rank:1 (https://stackoverflow.com/questions/21288533)
+ You need to get it from the classpath instead of from the local disk file system. 
+
+ Assuming that images is actually a package and that this package is inside the same JAR as the current class, then do so: 
+
+  BufferedImage myPicture = null;
+try {
+    myPicture = ImageIO.read(getClass().getResource("/images/Report.png"));
+} catch (IOException e1) {
+
+    e1.printStackTrace();
+}
+
+JLabel headerImage = new JLabel(new ImageIcon(myPicture));
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:2 (https://stackoverflow.com/questions/14819556)
+  URL imgURL =
+   new File( "F:/SwingExample/resource/images/logo1.png" ).toURI().toURL();
+  
+
+ But I suggest to put resource into src. 
+
+ If resource is in src, you may access them by class loader easily. 
+
+  getClassLoader().getResourceAsStream( "resource/images/logo1.png" );
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:3 (https://stackoverflow.com/questions/8661032)
+ Resource loading takes place in the classpath, relative to the current package.
+If  /var/tmp/gameXbox/src/  is in your classpath, then: 
+
+  ImageIO.read( ClassLoader.getSystemResource( "image/button1.png" ) );
+  
+
+ However, usually the  src  folder is  not  included in the classpath by IDEs. Try adding the image to the  bin  folder. 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:4 (https://stackoverflow.com/questions/15992722)
+ You should have a resource folder with the folder named  images  in that, then it should work. 
+
+ Example: 
+
+   
+
+ How I access those icons: 
+
+  public BufferedImage icon32 = loadBufferedImage("/icon/icon32.png");
+public BufferedImage icon64 = loadBufferedImage("/icon/icon64.png");
+
+private BufferedImage loadBufferedImage(String string)
+{
+    try
+    {
+        BufferedImage bi = ImageIO.read(this.getClass().getResource(string));
+        return bi;
+    } catch (IOException e)
+    {
+        e.printStackTrace();
+    }
+    return null;
+}
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:5 (https://stackoverflow.com/questions/14819701)
+ Depending on the execution context of your application, you could use a relative path instead  
+
+  URL imgURL = new File( "resource/images/logo1.png" ).toURI().toURL();
+  
+
+  
+
+  URL imgURL = new File( "../resource/images/logo1.png" ).toURI().toURL();
+  
+
+ Might work, but Aubin is correct, it would be easier to embed the image within your application and access via the class loader context 
+
+
+

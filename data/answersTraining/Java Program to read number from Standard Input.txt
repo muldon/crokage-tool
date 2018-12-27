@@ -1,0 +1,145 @@
+Query: Java Program to read number from Standard Input
+-----------------------------------------------------------------------
+
+Rank:1 (https://stackoverflow.com/questions/25231876)
+ I guess you are trying to use same  scanner--in  for reading the input for integers and text
+  
+
+ 
+   It is not recommended to use same scanner for reading integers and
+  reading text input 
+ 
+
+ use different scanners like scan1 and scan2 
+scan1 for integers 
+scan2 for next line as string  
+
+  Scanner scan1= new Scanner(System.in);
+System.out.println(q.nextInt());
+Scanner scan2= new Scanner(System.in);
+System.out.println(scan2.nextLine());
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:2 (https://stackoverflow.com/questions/8761815)
+ A  while()  loop involving the Scanner object would be beneficial.  You don't need to reinitialize/redeclare it every time through the loop. 
+
+  import java.util.Scanner;
+public class smth {
+    final int SIZE = 10; // You need to define a size.
+    Scanner input = new Scanner(System.in);
+    int array[]= new int[SIZE];
+
+    public void readFromTerminal() {
+        System.out.println("Read lines, please enter some other character to stop.");
+        String in = input.nextLine();
+        while ( ) { } // I encourage you to fill in the blanks!
+    }
+}
+  
+
+ [EDIT]  If you want the user to be able to enter an  "unlimited"  number of integers, then an http://docs.oracle.com/javase/6/docs/api/index.html?java/util/ArrayList.html would be more ideal. 
+
+  import java.util.Scanner;
+public class smth {
+    Scanner input = new Scanner(System.in);
+    ArrayList<Integer> array = new ArrayList<Integer>(); //  Please reference the documentation to see why I'm using the Integer wrapper class, and not a standard int.
+
+    public void readFromTerminal() {
+        System.out.println("Read lines, please enter some other character to stop.");
+        String in = input.nextLine();
+        while ( ) { } // I encourage you to fill in the blanks!
+    }
+}
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:3 (https://stackoverflow.com/questions/41147944)
+ Why your program doesn't work as expected 
+
+ In your output, the strings "Please enter a number:" are chained without newlines, because you don't print the newlines in the program. When the program is running in interactive mode,  the user  enters the newlines. 
+
+ There are no numbers in the output file, because your program doesn't print them to the standard output. Again, when the program is running in interactive mode,  the user  enters the numbers, but not the program. In the case of redirected output, the numbers coming from the input file are read by the program, but never printed to the standard output. 
+
+ The correct way 
+
+ You should check if the program is running in interactive mode (when the input is read from a TTY). 
+
+  test/MyApp.java  
+
+  package test;
+
+import java.util.Scanner;
+import java.io.Console;
+
+class MyApp {
+    public static void main(String args[]) {
+        Scanner scanner = new Scanner(System.in);
+        Console console = System.console();
+
+        int[] numbers = new int[3];
+        for (int i = 0; i < 3; i++){
+            if (console != null) {
+                System.out.print("Please enter a number: ");
+            }
+            numbers[i] = scanner.nextInt();
+            System.out.printf("Number: %d\n", numbers[i]);
+        }
+    }
+}
+  
+
+    
+
+  $ printf '%d\n%d\n%d\n' 1 2 3 > file
+$ javac -cp . test/MyApp.java
+$ java -cp . test/MyApp < file > out
+$ cat out
+Number: 1
+Number: 2
+Number: 3
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:4 (https://stackoverflow.com/questions/28353606)
+ When reader reaches the eof then it returns  -1  in case of  read()  method in  BufferedReader  but in case of  readLine()  method it returns  null .So you can do it by following way:-  
+
+  BufferedReader br=new BufferedReader(new InputStreamReader(System.in));
+String str="";
+while((str=br.readLine())!=null)
+{
+    //It will ends when eof character will encounter
+}
+  
+
+ Above program will till end of program will be reached. Hope this will help you. 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:5 (https://stackoverflow.com/questions/7382154)
+ You are printing an output every time an integer is read.  Your program is behaving as expected. 
+
+ To get what you want, you need to scan  all  the input  before  you produce any output. 
+
+  
+
+          while (data != 0){
+            data = input.nextInt();
+            num[data]++;
+        }
+
+        for (int i = 1; i < 100; ++i) { // your version is 0...99, else array index out of bounds
+            if (num[i] > 0) 
+                System.out.println(i + " occurs " + num[i] + " times ");
+        }
+  
+
+
+

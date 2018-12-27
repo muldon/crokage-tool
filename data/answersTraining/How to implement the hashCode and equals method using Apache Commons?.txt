@@ -1,0 +1,251 @@
+Query: How to implement the hashCode and equals method using Apache Commons?
+-----------------------------------------------------------------------
+
+Rank:1 (https://stackoverflow.com/questions/2132385)
+ in Eclipse right mouse click-> source -> generate hashCode() and equals() gives this: 
+
+  /* (non-Javadoc)
+ * @see java.lang.Object#hashCode()
+ */
+@Override
+public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + (code == null ? 0 : code.hashCode());
+    return result;
+}
+/* (non-Javadoc)
+ * @see java.lang.Object#equals(java.lang.Object)
+ */
+@Override
+public boolean equals(Object obj) {
+    if (this == obj)
+        return true;
+    if (obj == null)
+        return false;
+    if (!(obj instanceof Emp))
+        return false;
+    Emp other = (Emp) obj;
+    return code == null ? other.code == null : code.equals(other.code);
+}
+  
+
+ I've selected code as a unique field 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:2 (https://stackoverflow.com/questions/22411032)
+ Instead of using the eclipse generated code, you can use Apache-common-langs(http://commons.apache.org/proper/commons-lang/) class  HashCodeBuilder and EqualsBuilder  to do this: 
+
+  public int hashCode() {
+   return HashCodeBuilder.reflectionHashCode(this);
+}
+
+
+public boolean equals(Object obj) {
+   return EqualsBuilder.reflectionEquals(this);
+ }
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:3 (https://stackoverflow.com/questions/4421464)
+ I changed my mind to use the reflective approach because of the performance issue. Now I'm using the http://commons.apache.org/lang/api-2.5/org/apache/commons/lang/builder/EqualsBuilder.html and the http://commons.apache.org/lang/api-2.5/org/apache/commons/lang/builder/HashCodeBuilder.html utilities of the Apache commons project (Thanks for the suggestions and feedback), because they hides the complexity of the methods. For quick generation of the  #equals  and  #hashCode  method I use the http://fast-code.sourceforge.net/ with a customized code template: 
+
+ 
+
+  <template type="EQUALS_AND_HASHCODE_METHOD">
+  <variation></variation>
+  <variation-field></variation-field>
+  <allow-multiple-variation></allow-multiple-variation>
+  <class-pattern></class-pattern>
+  <allowed-file-extensions>java</allowed-file-extensions>
+  <number-required-classes>1</number-required-classes>
+  <description>Generates the equals and hashCode method with EqualsBuilder and HashCodeBuilder</description>
+  <template-body>
+    <![CDATA[
+      @Override
+      public boolean equals(final Object obj) {
+        if (obj == null) {
+          return false;
+        }
+        if (obj == this) {
+          return true;
+        }
+        if (obj.getClass() != getClass()) {
+          return false;
+        }
+
+        ${class_name} rhs = (${class_name}) obj;
+        return new EqualsBuilder().appendSuper(super.equals(obj))
+        #foreach ($field in ${fields})
+          .append(${field.name}, rhs.${field.name})
+        #end
+          .isEquals();
+      }
+
+      @Override
+      public int hashCode() {
+        return new HashCodeBuilder(17, 37).appendSuper(super.hashCode())
+        #foreach ($field in ${fields})
+          .append(${field.name})
+        #end
+          .toHashCode();
+      }
+    ]]>
+  </template-body>
+</template>
+  
+
+ I'm using Fast Code plugin because it's able to grap all fields of a selected class. But I'm not happy with the usability of the plugin. It would be nice if eclipse code templating engine would be able to do that too. If anyone knows a similar plugin, then let me know please! 
+
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:4 (https://stackoverflow.com/questions/5039178)
+ The commons/lang builders are great and I have been using them for years without noticeable performance overhead (with and without hibernate. But as Alain writes, the Guava way is even nicer: 
+
+ Here's a sample Bean: 
+
+  public class Bean{
+
+    private String name;
+    private int length;
+    private List<Bean> children;
+
+}
+  
+
+ Here's equals( and hashCode( implemented with Commons/Lang: 
+
+  @Override
+public int hashCode({
+    return new HashCodeBuilder(
+        .append(name
+        .append(length
+        .append(children
+        .HashCode(;
+}
+
+@Override
+public boolean equals(final Object obj{
+    if(obj instanceof Bean{
+        final Bean other = (Bean obj;
+        return new EqualsBuilder(
+            .append(name, other.name
+            .append(length, other.length
+            .append(children, other.children
+            .isEquals(;
+    } else{
+        return false;
+    }
+}
+  
+
+ and here with Java 7 or higher (inspired by Guava: 
+
+  @Override
+public int hashCode({
+    return Objects.hash(name, length, children;
+}
+
+@Override
+public boolean equals(final Object obj{
+    if(obj instanceof Bean{
+        final Bean other = (Bean obj;
+        return Objects.equals(name, other.name
+            && length == other.length // special handling for primitives
+            && Objects.equals(children, other.children;
+    } else{
+        return false;
+    }
+}
+  
+
+ Note: this code originally referenced Guava, but as comments have pointed out, this functionality has since been introduced in the JDK, so Guava is no longer required. 
+
+ As you can see the Guava / JDK version is shorter and avoids superfluous helper objects. In case of equals, it even allows for short-circuiting the evaluation if an earlier  Object.equals(  call returns false ( be fair: commons / lang has an  ObjectUtils.equals(obj1, obj2  method with identical semantics which could be used instead of  EqualsBuilder   allow short-circuiting as above. 
+
+ So: yes, the commons lang builders are very preferable over manually constructed  equals(  and  hashCode(  methods (or those awful monsters Eclipse will generate for you, but the Java 7+ / Guava versions are even better. 
+
+ And a note about Hibernate: 
+
+ be careful about using lazy collections in your equals(, hashCode( and String( implementations. That will fail miserably if you don't have an open Session. 
+
+ 
+
+ Note (about equals(: 
+
+ a in both versions of equals( above, you might want  use one or both of these shortcuts also: 
+
+  @Override
+public boolean equals(final Object obj{
+    if(obj == this return true;  // test for reference equality
+    if(obj == null return false; // test for null
+    // continue as above
+  
+
+ b depending on your interpretation of the equals( contract, you might also change the line(s 
+
+      if(obj instanceof Bean{
+  
+
+  
+
+      // make sure you run a null check before this
+    if(obj.getClass( == getClass({ 
+  
+
+ If you use the second version, you probably also want  call  super(equals(  inside your  equals(  method. Opinions differ here, the pic is discussed in this question:  
+
+ 
+   https://stackoverflow.com/q/8248970/342852 
+ 
+
+ (although it's about  hashCode( , the same applies   equals(  
+
+ 
+
+  Note (inspired by Comment from https://stackoverflow.com/users/274473/kayahr  
+
+  Objects.hashCode(..  (just as the underlying  Arrays.hashCode(...  might perform badly if you have many primitive fields. In such cases,  EqualsBuilder  may actually be the better solution. 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:5 (https://stackoverflow.com/questions/17265747)
+ You can't compare equals using the method hashCode why: 
+
+ a.equals(b) == true, a.hashCode() is mandatorily == b.hashCode() 
+
+ a.hashCode() == b.hashCode(), a.equals(b) NOT is mandatory, more can be == false 
+
+ Example of implementation using one attribute (x). Generate by eclipse: 
+
+  public int hashCode() {
+    final int prime = 31;
+    int result = 1;
+    result = prime * result + x;
+    return result;
+}
+
+public boolean equals(Object obj) {
+    if (this == obj)
+        return true;
+    if (obj == null)
+        return false;
+    if (getClass() != obj.getClass())
+        return false;
+    Node other = (Node) obj;
+    if (x != other.x)
+        return false;
+    return true;
+}   
+  
+
+
+

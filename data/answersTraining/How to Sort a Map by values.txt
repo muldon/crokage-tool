@@ -1,0 +1,162 @@
+Query: How to Sort a Map by values
+-----------------------------------------------------------------------
+
+Rank:1 (https://stackoverflow.com/questions/6584631)
+ Use a generic comparator such as : 
+
+  final class MapValueComparator<K,V extends Comparable<V>> implements Comparator<K> {
+
+    private Map<K,V> map;
+
+    private MapValueComparator() {
+        super();
+    }
+
+    public MapValueComparator(Map<K,V> map) {
+        this();
+        this.map = map;
+    }
+
+    public int compare(K o1, K o2) {
+        return map.get(o1).compareTo(map.get(o2));
+    }
+}
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:2 (https://stackoverflow.com/questions/32891575)
+  package com.naveen.hashmap;
+
+import java.util.*;
+import java.util.Map.Entry;
+
+public class SortBasedonValues {
+
+    /**
+     * @param args
+     */
+    public static void main(String[] args) {
+
+        HashMap<String, Integer> hm = new HashMap<String, Integer>();
+        hm.put("Naveen", 2);
+        hm.put("Santosh", 3);
+        hm.put("Ravi", 4);
+        hm.put("Pramod", 1);
+        Set<Entry<String, Integer>> set = hm.entrySet();
+        List<Entry<String, Integer>> list = new ArrayList<Entry<String, Integer>>(
+                set);
+        Collections.sort(list, new Comparator<Map.Entry<String, Integer>>() {
+            public int compare(Map.Entry<String, Integer> o1,
+                    Map.Entry<String, Integer> o2) {
+                return o2.getValue().compareTo(o1.getValue());
+            }
+        });
+
+        for (Entry<String, Integer> entry : list) {
+            System.out.println(entry.getValue());
+
+        }
+
+    }
+}
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:3 (https://stackoverflow.com/questions/119143)
+ While I agree that the constant need to sort a map is probably a smell, I think the following code is the easiest way to do it without using a different data structure. 
+
+  public class MapUtilities {
+
+public static <K, V extends Comparable<V>> List<Entry<K, V>> sortByValue(Map<K, V> map) {
+    List<Entry<K, V>> entries = new ArrayList<Entry<K, V>>(map.entrySet());
+    Collections.sort(entries, new ByValue<K, V>());
+    return entries;
+
+
+private static class ByValue<K, V extends Comparable<V>> implements Comparator<Entry<K, V>> {
+    public int compare(Entry<K, V> o1, Entry<K, V> o2) {
+        return o1.getValue().compareTo(o2.getValue());
+    
+
+  
+
+  
+
+ And here is an embarrassingly incomplete unit test: 
+
+  public class MapUtilitiesTest extends TestCase {
+public void testSorting() {
+    HashMap<String, Integer> map = new HashMap<String, Integer>();
+    map.put("One", 1);
+    map.put("Two", 2);
+    map.put("Three", 3);
+
+    List<Map.Entry<String, Integer>> sorted = MapUtilities.sortByValue(map);
+    assertEquals("First", "One", sorted.get(0).getKey());
+    assertEquals("Second", "Two", sorted.get(1).getKey());
+    assertEquals("Third", "Three", sorted.get(2).getKey());
+
+  
+
+  
+
+ The result is a sorted list of Map.Entry objects, from which you can obtain the keys and values. 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:4 (https://stackoverflow.com/questions/29739219)
+ Your map key type is Integer so you have to use  Comparator<Integer>  and your  compare  method should take integer inputs and by that Integer key you can get Double value by  map.get(a)  and  map.get(b) . and in  TreeMap  constructor you have to define comparator class which you have created.(i.e ValueComparator) 
+
+ refer this code: 
+
+  public static TreeMap<Integer, Double> SortByValue(Map<Integer, Double> map) {
+        ValueComparator vc =  new ValueComparator(map);
+        TreeMap<Integer, Double> sortedMap = new TreeMap<Integer, Double>(vc);\\constructor should be vc which extends Comparator
+        sortedMap.putAll(map); 
+        return sortedMap;
+    }
+
+class ValueComparator implements Comparator<Integer> {
+
+    Map<Integer, Double> map;
+
+    public ValueComparator(Map<Integer, Double> base) {
+        this.map = base;
+    }
+
+    @Override
+    public int compare(Integer a, Integer b) {
+        // TODO Auto-generated method stub
+        if (map.get(a) >= map.get(b)) {
+            return -1;
+        } else {
+            return 1;
+        }
+    }
+}
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:5 (https://stackoverflow.com/questions/44739950)
+      Collections.sort( list, new Comparator<Map.Entry<String, Integer>>()
+        {
+            public int compare( Map.Entry<String, Integer> o1, Map.Entry<String, Integer> o2 )
+            {
+int cmp=o1.getValue().compareTo( o2.getValue());
+              if(cmp ==0)
+                return (o1.getKey().compareTo( o2.getKey() );//Ascending order
+               else{
+                  return cmp;
+            }
+        } );
+  
+
+
+

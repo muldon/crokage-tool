@@ -1,0 +1,187 @@
+Query: read JSON data to JSON Object Model
+-----------------------------------------------------------------------
+
+Rank:1 (https://stackoverflow.com/questions/20632427)
+    try {
+
+             String data = null;
+             String url = "localhost:8080/test/rest/Action/xyz";
+             String[] dataArray = null;
+             DefaultHttpClient client = new DefaultHttpClient();
+             HttpUriRequest getRequest = new HttpGet(getUrl);
+             getRequest.addHeader("User-Agent", USER_AGENT);
+             getRequest.addHeader(BasicScheme.authenticate(new UsernamePasswordCredentials("key",
+                "pwd"), "UTF-8", false));
+             getRequest.setHeader("Content-Type", "application/json");
+             HttpResponse response = client.execute(getRequest);
+
+             HttpResponse response = client.execute(request);
+
+             BufferedReader rd = new BufferedReader(new  InputStreamReader(response.getEntity().getContent()));
+             System.out.println("Response Code : " +  response.getStatusLine().getStatusCode());
+             data = rd.readLine();
+
+            }
+
+        } catch () {
+       }
+
+try {
+
+        HttpGet request = new HttpGet(url);
+        HttpResponse response = client.execute(request);
+        System.out.println("Response Code : " + response.getStatusLine().getStatusCode());
+
+        data = EntityUtils.toString(response.getEntity());
+        dataArray = data.split(",");
+    } 
+    catch (Exception ex) {
+    }
+    JSONObject mJSONObject = new JSONObject(data);
+
+    try {
+        JSONArray mjSONArray = mJSONObject.getJSONArray("values");
+        for (int i = 0; i < mjSONArray.length(); i++) {
+            JSONObject obj;
+            obj = mjSONArray.getJSONObject(i);
+            valu = obj.getString("valu");
+            valu1= obj.getString("valu1");
+            valu2= obj.getString("valu2");
+            system.out.println(valu);               
+            system.out.println(valu1);               
+            system.out.println(valu2);
+        }
+  
+
+ Using this you can get all the jsonarray data in variables. 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:2 (https://stackoverflow.com/questions/10930792)
+ You can use  Gson  for that: 
+
+ Maven dependency: 
+
+  <dependency>
+    <groupId>com.google.code.gson</groupId>
+    <artifactId>gson</artifactId>
+    <version>2.8.0</version>
+</dependency>
+  
+
+ Java code: 
+
+  Customer customer = new Customer();
+Product product = new Product();
+
+// Set your values ...
+
+Gson gson = new Gson();
+String json = gson.toJson(customer);
+
+Customer deserialized = gson.fromJson(json, Customer.class);
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:3 (https://stackoverflow.com/questions/11678081)
+ I think that the easiest way to do this is using the Jackson http://wiki.fasterxml.com/JacksonTreeModel: let Jackson parse the JSON input into a http://jackson.codehaus.org/1.3.4/javadoc/org/codehaus/jackson/JsonNode.html object that you then query, assuming some knowledge of the data structure. This way you can ignore most of the data, walking down the  JsonNodes  to the data that you want. 
+
+  // String input = The JSON data from your question
+ObjectMapper mapper = new ObjectMapper();
+
+JsonNode rootNode = mapper.readValue(input.getBytes(), JsonNode.class); 
+
+// can also use ArrayNode here, but JsonNode allows us to get(index) line an array:
+JsonNode hits = rootNode.get("hits");
+
+// can also use ObjectNodes here:
+JsonNode oneHit = null;
+JsonNode dataObj = null;
+
+int idx = 0;
+
+Data data = null;
+
+
+if (hits != null)
+{
+    hits = hits.get("hit");
+
+    if (hits != null)
+    {
+        while ((oneHit = hits.get(idx)) != null)
+        {
+            dataObj = oneHit.get("data");
+            System.out.println("Data[" + idx + "]: " + dataObj);
+            idx++;
+        }
+    }
+}
+  
+
+ Output: 
+
+   Data[0]: {"id":"tt1185834","data":{"actor":["Abercrombie, Ian","Baker, Dee","Burton, Corey"],"title":["Star Wars: The Clone Wars"]}}
+ Data[1]: {"id":"tt0121766","data":{"actor":["Bai, Ling","Bryant, Gene","Castle-Hughes, Keisha"],"title":["Star Wars: Episode III - Revenge of the Sith"]}}
+  
+
+ You can still use your  Data  class implementation, but I believe this will require getting the  String  representing each  data  - as above relying on  toString , or using  JsonNode.getText()  - and re-parsing it using the  ObjectMapper : 
+
+  mapper.readValue(dataArray, Data.class));
+  
+
+ The alternative is to use the Jackson Streaming Model, and intercept the nodes yourself until you see the part of the input that marks the beginning of each  data  element, then consume the string and call  objectMapper.readValue  on the contents, for each string. 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:4 (https://stackoverflow.com/questions/44390770)
+ You can use gson 
+
+      <!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
+    <dependency>
+        <groupId>com.google.code.gson</groupId>
+        <artifactId>gson</artifactId>
+        <version>2.8.1</version>
+    </dependency>
+
+JsonParser jsonParser = new JsonParser();
+            JsonObject jo = (JsonObject)jsonParser.parse(str);
+            JsonArray jsonArr = jo.getAsJsonArray("netStatLinks");
+
+    List<NetStatLink> users = new ArrayList<NetStatLink>();
+       Gson gson = new Gson();
+       Type listType = new TypeToken<List<NetStatLink>>(){}.getType();
+       netStatLink = gson.fromJson(jsonArr ,listType);
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:5 (https://stackoverflow.com/questions/23192888)
+ From http://javapostsforlearning.blogspot.com/2013/11/gson-example-read-and-write-json.html: 
+
+   public static void main(String[] args) {
+
+  Gson gson = new Gson();
+
+  try {
+
+   System.out.println("Reading JSON from a file");
+   System.out.println("----------------------------");
+
+   BufferedReader br = new BufferedReader(
+     new FileReader(args[0]));
+
+    //convert the json string back to object
+   MyBean countryObj = gson.fromJson(br, MyBean.class);
+    // MyBean contains the data in the JSON and is a standard Java Bean   
+ }
+}
+  
+
+
+

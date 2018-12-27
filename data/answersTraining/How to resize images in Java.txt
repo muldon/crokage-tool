@@ -1,0 +1,90 @@
+Query: How to resize images in Java
+-----------------------------------------------------------------------
+
+Rank:1 (https://stackoverflow.com/questions/4016989)
+ You are not putting the Icon into the Image.  If icon is an  ImageIcon , then you can do: 
+
+  ..
+Graphics2D g2 = image.createGraphics();
+g2.drawImage(icon.getImage(), 0, 0, 16, 16, null);
+g2.dispose();
+return new ImageIcon(image);
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:2 (https://stackoverflow.com/questions/244177)
+ After loading the image you can try: 
+
+  BufferedImage createResizedCopy(Image originalImage, 
+            int scaledWidth, int scaledHeight, 
+            boolean preserveAlpha)
+    {
+        System.out.println("resizing...");
+        int imageType = preserveAlpha ? BufferedImage.TYPE_INT_RGB : BufferedImage.TYPE_INT_ARGB;
+        BufferedImage scaledBI = new BufferedImage(scaledWidth, scaledHeight, imageType);
+        Graphics2D g = scaledBI.createGraphics();
+        if (preserveAlpha) {
+            g.setComposite(AlphaComposite.Src);
+        }
+        g.drawImage(originalImage, 0, 0, scaledWidth, scaledHeight, null); 
+        g.dispose();
+        return scaledBI;
+    }
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:3 (https://stackoverflow.com/questions/4016970)
+ . 
+
+  ImageIcon icon = model.icon();
+Image image = new BufferedImage(icon.getIconWidth(), icon.getIconHeight(), BufferedImage.TYPE_INT_RGB);
+image.getGraphics().drawImage(icon.getImage(), 0, 0, 16, 16, null);
+return new ImageIcon(image);
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:4 (https://stackoverflow.com/questions/19727034)
+ You can resize an image like this, 
+
+  Image new_image = old_image.getScaledInstance( new_width, new_height,  java.awt.Image.SCALE_SMOOTH ) ;
+  
+
+ To make sure the ball does not exceed the maximum size, 
+
+  if(prevImage.getWidth(null) >= max_width || prevImage.getHeight(null) >= max_height)
+{
+    System.out.println("MAX Size reached !");
+}
+else
+{
+    // increase the size
+    Image new_image = old_image.getScaledInstance( new_width, new_height,  java.awt.Image.SCALE_SMOOTH ) ;
+}
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:5 (https://stackoverflow.com/questions/27445639)
+      public static BufferedImage resizeImg(BufferedImage img, int newW, int newH)
+    {
+    int w = img.getWidth();
+    int h = img.getHeight();
+    BufferedImage dimg = new BufferedImage(newW, newH, img.getType());
+    Graphics2D g = dimg.createGraphics();
+    g.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+            RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+    g.drawImage(img, 0, 0, newW, newH, 0, 0, w, h, null);
+    g.dispose();
+    return dimg;      
+   }
+  
+
+
+

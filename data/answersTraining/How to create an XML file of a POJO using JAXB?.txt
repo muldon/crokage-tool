@@ -1,0 +1,295 @@
+Query: How to create an XML file of a POJO using JAXB?
+-----------------------------------------------------------------------
+
+Rank:1 (https://stackoverflow.com/questions/48152543)
+ In The pom.xml include the following dependency -  
+
+  <dependency>
+        <groupId>org.apache.camel</groupId>
+        <artifactId>camel-jaxb</artifactId>
+        <version>2.13.0</version>
+    </dependency>
+  
+
+ Next annotate the pojo class with  @XmlRootElement(name = "employee")  
+
+  package com.javainuse.model;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
+
+@XmlRootElement(name = "employee")
+@XmlAccessorType(XmlAccessType.FIELD)
+public class Employee {
+
+    private String empName;
+    private int empId;
+
+    public String getEmpName() {
+        return empName;
+    }
+
+    public void setEmpName(String empName) {
+        this.empName = empName;
+    }
+
+    public int getEmpId() {
+        return empId;
+    }
+
+    public void setEmpId(int empId) {
+        this.empId = empId;
+    }
+}
+  
+
+ Finally in the RouteBuilder class define the jaxb dataformat and use it in the route. 
+
+  // XML Data Format
+        JaxbDataFormat xmlDataFormat = new JaxbDataFormat();
+        JAXBContext con = JAXBContext.newInstance(Employee.class);
+        xmlDataFormat.setContext(con);
+
+from("file:C:/inputFolder").doTry().unmarshal(xmlDataFormat).
+        process(new MyProcessor()).marshal(jsonDataFormat).
+        to("jms:queue:javainuse")
+  
+
+ Source Code and more details - http://www.javainuse.com/camel/camel-marshal-unmarshal-example  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:2 (https://stackoverflow.com/questions/7081390)
+ You could do this in JAXB by leveraging an  XMLStreamReader  and an  Unmarshaller.Listener : 
+
+  Demo  
+
+  package forum383861;
+
+import java.io.FileInputStream;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.bind.Unmarshaller.Listener;
+import javax.xml.stream.Location;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamReader;
+
+public class Demo {
+
+    public static void main(String[] args) throws Exception {
+        JAXBContext jc = JAXBContext.newInstance(.class);
+
+
+        XMLInputFactory xif = XMLInputFactory.newFactory();
+        FileInputStream xml = new FileInputStream("src/forum383861/input.xml");
+        XMLStreamReader xsr = xif.createXMLStreamReader(xml);
+
+        Unmarshaller unmarshaller = jc.createUnmarshaller();
+        LocationListener ll = new LocationListener(xsr);
+        unmarshaller.setListener(ll);
+
+         customer = () unmarshaller.unmarshal(xsr);
+        System.out.println(ll.getLocation(customer));
+        System.out.println(ll.getLocation(customer.getAddress()));
+    }
+
+    private static class LocationListener extends Listener {
+
+        private XMLStreamReader xsr;
+        private Map<Object, Location> locations;
+
+        public LocationListener(XMLStreamReader xsr) {
+            this.xsr = xsr;
+            this.locations = new HashMap<Object, Location>();
+        }
+
+        @Override
+        public void beforeUnmarshal(Object target, Object parent) {
+            locations.put(target, xsr.getLocation());
+        }
+
+        public Location getLocation(Object o) {
+            return locations.get(o);
+        }
+
+    }
+
+}
+  
+
+  input.xml  
+
+  <?xml version="1.0" encoding="UTF-8"?>
+<customer>
+    <address/>
+</customer>
+  
+
+  Output  
+
+  [row,col {unknown-source}]: [2,1]
+[row,col {unknown-source}]: [3,5]
+  
+
+    
+
+  package forum383861;
+
+import javax.xml.bind.annotation.XmlRootElement;
+
+@XmlRootElement
+public class  {
+
+    private Address address;
+
+    public Address getAddress() {
+        return address;
+    }
+
+    public void setAddress(Address address) {
+        this.address = address;
+    }
+
+}
+  
+
+  Address  
+
+  package forum383861;
+
+public class Address {
+
+}
+  
+
+  For More Information  
+
+ 
+ http://blog.bdoughan.com/2011/08/using-unmarshallerlistener-to-capture.html 
+ 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:3 (https://stackoverflow.com/questions/13315642)
+ You just need to include the  ObjectFactory  in the array of classes used to bootstrap the  JAXBContext . 
+
+  JAXBContext jc = JAXBContext.newInstance(ObjectFactory.class);
+  
+
+ Or create the  JAXBContext  on the package name of the generated classes: 
+
+  JAXBContext jc = JAXBContext.newInstance("com.example.model");
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:4 (https://stackoverflow.com/questions/25321858)
+ JAXB is the way to go.  
+
+ Note:
+It is included in JAVA 1.6 and later versions 
+
+ Add XML tags to your POJO  (XmlRootElement is enough for simple objects, XmlElement can also be added to variables) 
+
+  import javax.xml.bind.annotation.XmlRootElement;
+
+@XmlRootElement(name = "Person")
+public class Person {
+
+    private String firstName;
+
+    private String lastName;
+
+    private String address;
+
+    public final String getFirstName() {
+        return firstName;
+    }
+
+    public final void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public final String getLastName() {
+        return lastName;
+    }
+
+    public final void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public final String getAddress() {
+        return address;
+    }
+
+    public final void setAddress(String address) {
+        this.address = address;
+    }
+
+    @Override
+    public String toString() {
+        return "FirstName: " + firstName + " LastName: " + lastName + " Address: " + address;
+    }
+
+}
+  
+
+ Use Unmarshaller to create the POJO from the xml file. 
+
+      File file = new File("<Path to Xml file>");
+    JAXBContext context = JAXBContext.newInstance(Person.class);
+    Unmarshaller unmarsheller = context.createUnmarshaller();
+    Person person = (Person) unmarsheller.unmarshal(file);
+    System.out.println(person);
+  
+
+ You can use Marshaller to create the XML from the POJO also. 
+
+ There are more examples available https://jaxb.java.net/tutorial/ to create complex objects, add lists, arrays. 
+
+ Note: It is not available in Android Platform, If you want to use it on android you can use http://simple.sourceforge.net/ with almost  same implementation  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:5 (https://stackoverflow.com/questions/17713499)
+ The XJC is used to generate Java classes with /questions/tagged/jaxb (http://jcp.org/en/jsr/detail?id=222) annotations from an XML Schema (/questions/tagged/xsd).  XML Schema is a standard way of defining the structure of an /questions/tagged/xml document (see: http://www.w3.org/XML/Schema).  Once you have the generated classes you can use them with a JAXB implementaion to parse/create documents that conform to that XML Schema. 
+
+ The XML in your question conforms to a Document Type Definition (/questions/tagged/dtd).  A DTD file is another way of defining the structure of an XML document.  You can run the XJC tool with the  -dtd  option to produce JAXB classes from a DTD. 
+
+  xjc -d out -p com.example.blastoutput  -dtd http://www.ncbi.nlm.nih.gov/dtd/NCBI_BlastOutput.dtd
+  
+
+ Below is a sample of JAXB code that shows how to convert your XML document to instances of the generated classes and then back to XML.  Note how we create the  JAXBContext  on the package name we specified in the XJC call. 
+
+  package com.example.blastoutput;
+
+import java.io.File;
+import javax.xml.bind.*;
+
+public class Demo {
+
+    public static void main(String[] args) throws Exception {
+        JAXBContext jc = JAXBContext.newInstance("com.example.blastoutput");
+
+        Unmarshaller unmarshaller = jc.createUnmarshaller();
+        File xml = new File("src/com/example/blastoutput/input.xml");
+        BlastOutput blastOutput = (BlastOutput) unmarshaller.unmarshal(xml);
+
+        Marshaller marshaller = jc.createMarshaller();
+        marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+        marshaller.marshal(blastOutput, System.out);
+    }
+
+}
+  
+
+
+

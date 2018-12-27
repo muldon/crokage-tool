@@ -1,0 +1,148 @@
+Query: Write lines of text to file using a PrintWriter
+-----------------------------------------------------------------------
+
+Rank:1 (https://stackoverflow.com/questions/49655398)
+ Here are some of the possible ways to create and write a file in Java : 
+
+  Using FileOutputStream  
+
+  try {
+  File fout = new File("myOutFile.txt");
+  FileOutputStream fos = new FileOutputStream(fout);
+  BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(fos));
+  bw.write("Write somthing to the file ...");
+  bw.newLine();
+  bw.close();
+} catch (FileNotFoundException e){
+  // File was not found
+  e.printStackTrace();
+} catch (IOException e) {
+  // Problem when writing to the file
+  e.printStackTrace();
+}
+  
+
+  Using FileWriter  
+
+  try {
+  FileWriter fw = new FileWriter("myOutFile.txt");
+  fw.write("Example of content");
+  fw.close();
+} catch (FileNotFoundException e) {
+  // File not found
+  e.printStackTrace();
+} catch (IOException e) {
+  // Error when writing to the file
+  e.printStackTrace();
+}
+  
+
+  Using PrintWriter  
+
+  try {
+  PrintWriter pw = new PrintWriter("myOutFile.txt");
+  pw.write("Example of content");
+  pw.close();
+} catch (FileNotFoundException e) {
+  // File not found
+  e.printStackTrace();
+} catch (IOException e) {
+  // Error when writing to the file
+  e.printStackTrace();
+}
+  
+
+  Using OutputStreamWriter  
+
+  try {
+  File fout = new File("myOutFile.txt");
+  FileOutputStream fos = new FileOutputStream(fout);
+  OutputStreamWriter osw = new OutputStreamWriter(fos);
+  osw.write("Soe content ...");
+  osw.close();
+} catch (FileNotFoundException e) {
+  // File not found
+  e.printStackTrace();
+} catch (IOException e) {
+  // Error when writing to the file
+  e.printStackTrace();
+}
+  
+
+ For further check this tutorial about How to https://tutoref.com/how-to-read-and-write-files-in-java-8/ . 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:2 (https://stackoverflow.com/questions/15727263)
+ PrintWriter.printf seems to be the most appropriate 
+
+  PrintWriter pw = new PrintWriter(new FileWriter("output.txt"));
+    for (int i = 0; i < 10; i++) {
+        pw.printf("Result %d : %s %n",  i, ans);
+    }
+    pw.close();
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:3 (https://stackoverflow.com/questions/31687985)
+ using  readLine() , https://docs.oracle.com/javase/7/docs/technotes/guides/language/try-with-resources.html and http://docs.oracle.com/javase/7/docs/api/java/util/Vector.html 
+
+      try (BufferedReader bufferedReader = new BufferedReader(new FileReader("C:\\weblog.txt")))
+    {
+        String line;
+        Vector<String> fileRead = new Vector<String>();
+
+        while ((line = bufferedReader.readLine()) != null) {
+            fileRead.add(line);
+        }
+
+    } catch (IOException exception) {
+        exception.printStackTrace();
+    }
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:4 (https://stackoverflow.com/questions/15726985)
+ Your code is creating a new file for every line. Pull the file open outside of the for loop. 
+
+  FileWriter f0 = new FileWriter("output.txt");
+
+String newLine = System.getProperty("line.separator");
+
+
+for(i=0;i<10;i++)
+{
+    f0.write("Result "+ i +" : "+ ans + newLine);
+}
+f0.close();
+  
+
+ If you want to use  PrintWriter , try this 
+
+  PrintWriter f0 = new PrintWriter(new FileWriter("output.txt"));
+
+for(i=0;i<10;i++)
+{
+    f0.println("Result "+ i +" : "+ ans);
+}
+f0.close();
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:5 (https://stackoverflow.com/questions/12795690)
+ You can concatenate system's newline to separate your lines: 
+
+      String newLine = System.getProperty("line.separator");
+    output.println("something" + newLine);
+    output.println("something else" + newLine);
+  
+
+
+

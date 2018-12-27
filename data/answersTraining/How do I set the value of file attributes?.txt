@@ -1,0 +1,110 @@
+Query: How do I set the value of file attributes?
+-----------------------------------------------------------------------
+
+Rank:1 (https://stackoverflow.com/questions/18899761)
+ MANIFEST.MF files can be read with the http://docs.oracle.com/javase/7/docs/api/java/util/jar/Manifest.html class: 
+
+ <code manifest = new Manifest(new FileInputStream(new File("MANIFEST.MF")));
+  
+
+ Then you can get all entries by doing 
+
+  Map<String, Attributes> entries = manifest.getEntries();
+  
+
+ And all main attributes by doing 
+
+  Attributes attr = manifest.getMainAttributes();
+  
+
+ A working example</h3>
+
+ My  MANIFEST.MF  file is this: 
+
+ <code-Version: 1.0
+X-COMMENT: Main-Class will be added automatically by build
+  
+
+ My code: 
+
+ <code manifest = new Manifest(new FileInputStream(new File("MANIFEST.MF")));
+Attributes attr = manifest.getMainAttributes();
+
+System.out.println(attr.getValue("Manifest-Version"));
+System.out.println(attr.getValue("X-COMMENT"));
+  
+
+ Output: 
+
+  1.0
+Main-Class will be added automatically by build
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:2 (https://stackoverflow.com/questions/21899855)
+ You can use: 
+
+  <value>${my.set.value1}/value>
+  
+
+ And set the value in property file: 
+
+  my.set.value1=Value1
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:3 (https://stackoverflow.com/questions/25935580)
+ You can get the value of  id  in  startElement() , using the parameter  attributes . 
+
+  public void startElement(String uri, String localName,String qName,Attributes attributes) throws SAXException {
+    if (qName.equals("staff")) {
+        System.out.println(attributes.getValue("id"));
+    }
+}
+  
+
+ If there is no  id  in  <staff> , the value is null. 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:4 (https://stackoverflow.com/questions/18122232)
+ 
+    Does anyone know from where java gets its default temp path  
+ 
+
+ It is read from the  java.io.tmpdir  property.  
+
+  Files.createTempFile("test", "test");
+  
+
+ essentially calls  java.nio.file.TempFileHelper.createTempFile(null, prefix, suffix, attrs);  which again calls  java.nio.file.TempFileHelper.create(dir, prefix, suffix, false, attrs); . There, if  dir  is null, it is set to  tmpdir  which is declared as follows: 
+
+  private static final Path tmpdir =
+    Paths.get(doPrivileged(new GetPropertyAction("java.io.tmpdir")));
+  
+
+ You can set the property explicitly as shown in the answer from @Joni. If you do not set it explicitly, the JVM initializes it to a platform specific default value at startup - see also https://stackoverflow.com/questions/1924136/environment-variable-to-control-java-io-tmpdir 
+
+ 
+    and how can it be not found?  
+ 
+
+ If the property  java.io.tmpdir  points to an invalid directory, the temporary file can not be created. 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:5 (https://stackoverflow.com/questions/14021010)
+ The solution is: 
+
+  Attribute groupCn = attributes.get("cn");
+String value = groupCn.get();
+  
+
+
+

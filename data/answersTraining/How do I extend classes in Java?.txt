@@ -1,0 +1,238 @@
+Query: How do I extend classes in Java?
+-----------------------------------------------------------------------
+
+Rank:1 (https://stackoverflow.com/questions/13117852)
+ 
+   But, every class of Java inherits Object class by default, and if we extend a class then there are two inherited classes first is Object and second is our inherited class 
+ 
+
+ That's partially correct. 
+
+ If you extend a class explicitely, then it won't extend  Object  class. 
+
+ if you have a class 
+
+  class A
+{
+
+}
+  
+
+ then, compiler will change it into 
+
+  class A extends Object
+{
+
+}
+  
+
+ But, if you extends a class explicitely, as following, 
+
+  class A extends AnotherClass
+{
+
+}
+  
+
+ compiler won't add anything now, hence No multiple inheritance. 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:2 (https://stackoverflow.com/questions/40105201)
+ 
+ If you need functionality of both classes/interfaces you can use 
+ 
+
+
+
+  public <TT extends Trick & Treat> void process(TT thing){
+    //...
+}
+  
+
+  edit:   
+
+ 
+ Implement new Interface MyProxyHandler 
+ 
+
+
+
+  public interface MyProxyHandler {}
+  
+
+ 
+  Extend it with interfaces of classes say TreatInterface and TrickInterface  
+  Create class ProxyManager that implements java.lang.reflect.InvocationHandler  
+ 
+
+
+
+  public abstract class ProxyManager<T extends MyProxyHandler> implements InvocationHandler {
+
+    protected static String LOCK_OBJECT = new String("LOCK");
+
+    protected T proxyHandler;
+    protected List<T> handlers = new ArrayList<>();
+
+    @SuppressWarnings("unchecked")
+    public ProxyManager(Class<T> _clazz) {
+        proxyHandler = (T) Proxy.newProxyInstance(_clazz.getClassLoader(), new Class[]{_clazz}, this);
+    }
+
+    public T getProxy() {
+        return proxyHandler;
+    }
+
+    public List<T> getHandlers() {
+        return handlers;
+    }
+
+    public void setHandlers(List<T> handlers) {
+        this.handlers = handlers;
+    }
+
+    public boolean registerHandler(T handler) {
+        synchronized (LOCK_OBJECT) {
+            boolean add = true;
+            for (T item : this.handlers) {
+                if (item.getClass().equals(handler.getClass())) {
+                    add = false;
+                }
+            }
+            if (add)
+                this.handlers.add(handler);
+            return add;
+        }
+    }
+
+    @Override
+    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+        String result = "";
+        for (MyProxyHandler handler : getHandlers()) {
+            try {
+                //I recommend that methods returns some enum like HANDLED/NOTHANDLED 
+                result = (String) method.invoke(handler, args);
+                if (result.equals("Some flag"))
+                    break;
+            } catch (InvocationTargetException e) {
+                throw e.getCause();
+            }
+        }
+        return result;
+    }
+}
+  
+
+ 
+ Extend that class with your concrete class 
+ 
+
+
+
+  public class TreatTrickProxyManager<T extends TreatInterface & TreatInterface> extends ProxyManager<T> {
+     public TreatTrickProxyManager(Class<T> _clazz) {
+          super(_clazz);
+     }
+}
+  
+
+ 
+  In your bussines logic class get an instance of TreatTrickProxyManager  
+  In your method   
+ 
+
+
+
+  public void retrieveSomeData(){
+     ((TreatTrickProxyManager)getTreatTrickProxyManager().getProxy()).someMethodInvocation()
+}
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:3 (https://stackoverflow.com/questions/29253196)
+ It simply means that  you  can not let your enums extend anything else than the implicitly extended  Enum . 
+
+ When it says Java does not allow extending multiple classes, it means that you can't have 
+
+  .--------.   .----------.
+| Enum   |   | YourBase |
+'--------'   '----------'
+     ^            ^
+      \          /
+        \       /
+       .----------.
+       | YourEnum |
+       '----------'
+  
+
+ THIS on the other hand, is entirely ok: 
+
+  .--------.
+| Object |
+'--------'
+     ^
+     |
+.--------.
+|  Enum  |
+'--------'
+     ^
+     |
+.----------.
+| YourEnum |
+'----------'
+  
+
+ When the documentation says 
+
+ 
+   All classes in Java extend java.lang.Object class implicitly 
+ 
+
+ It simply means that each class either extends Object directly, or indirectly through it's super class. 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:4 (https://stackoverflow.com/questions/29253356)
+ Run this code and you'll get the answer: 
+
+  System.out.println(MyEnum.class.getSuperclass());
+System.out.println(MyEnum.class.getSuperclass().getSuperclass());
+
+public enum MyEnum  {   
+}
+  
+
+ Output: 
+
+  class java.lang.Enum
+class java.lang.Object
+  
+
+ And on top of that consider that multiple inheritance is not allowed in Java. I.e.  MyEnum  already extends  Enum  while  Enum  already extends  Object . There's no room for any other extension in this chain. 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:5 (https://stackoverflow.com/questions/9192748)
+ In Java, each class can  directly  extend only from  one  parent class. So, either B extends from Object and A extends from B,  xor  both A and B extend from Object. 
+
+ You are supposing that both is true at the same time - this is not possible in Java. 
+
+ If B extends from Object, and A extends from B, then yes, A does inherit from Object, but there is still a single parent to each and every class: 
+
+  class Object
+ |
+ +-- class B
+      |
+      +-- class A
+  
+
+ In other words, Java doesn't support multiple inheritance. 
+
+
+

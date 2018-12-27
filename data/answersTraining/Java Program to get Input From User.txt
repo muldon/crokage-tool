@@ -1,0 +1,125 @@
+Query: Java Program to get Input From User
+-----------------------------------------------------------------------
+
+Rank:1 (https://stackoverflow.com/questions/5287570)
+ Here is how you can get the keyboard inputs: 
+
+  Scanner scanner = new Scanner (System.in);
+System.out.print("Enter your name");  
+name = scanner.next(); // Get what the user types.
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:2 (https://stackoverflow.com/questions/38171829)
+ 
+<b>Scanner input=new Scanner(System.in);</b>
+int integer=input.nextInt();
+String string=input.next();
+long longInteger=input.nextLong();
+ 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:3 (https://stackoverflow.com/questions/17215393)
+ Here is your program from the question using  java.util.Scanner : 
+
+  import java.util.Scanner;
+
+public class Example {
+    public static void main(String[] args) {
+        int input = 0;
+        System.out.println("The super insano calculator");
+        System.out.println("enter the corrosponding number:");
+        Scanner reader3 = new Scanner(System.in);
+        System.out.println(
+            "1. Add | 2. Subtract | 3. Divide | 4. Multiply");
+
+        input = reader3.nextInt();
+
+        int a = 0, b = 0;
+
+        Scanner reader = new Scanner(System.in);
+        System.out.println("Enter the first number");
+        // get user input for a
+        a = reader.nextInt();
+
+        Scanner reader1 = new Scanner(System.in);
+        System.out.println("Enter the scend number");
+        // get user input for b
+        b = reader1.nextInt();
+
+        switch (input){
+            case 1:  System.out.println(a + " + " + b + " = " + add(a, b));
+                     break;
+            case 2:  System.out.println(a + " - " + b + " = " + subtract(a, b));
+                     break;
+            case 3:  System.out.println(a + " / " + b + " = " + divide(a, b));
+                     break;
+            case 4:  System.out.println(a + " * " + b + " = " + multiply(a, b));
+                     break;
+            default: System.out.println("your input is invalid!");
+                     break;
+        }
+    }
+
+    static int      add(int lhs, int rhs) { return lhs + rhs; }
+    static int subtract(int lhs, int rhs) { return lhs - rhs; }
+    static int   divide(int lhs, int rhs) { return lhs / rhs; }
+    static int multiply(int lhs, int rhs) { return lhs * rhs; }
+}
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:4 (https://stackoverflow.com/questions/18664284)
+ It is very simple to get input in java, all you have to do is: 
+
+  import java.util.Scanner;
+
+class GetInputFromUser
+{
+    public static void main(String args[])
+    {
+        int a;
+        float b;
+        String s;
+
+        Scanner in = new Scanner(System.in);
+
+        System.out.println("Enter a string");
+        s = in.nextLine();
+        System.out.println("You entered string " + s);
+
+        System.out.println("Enter an integer");
+        a = in.nextInt();
+        System.out.println("You entered integer " + a);
+
+        System.out.println("Enter a float");
+        b = in.nextFloat();
+        System.out.println("You entered float " + b);
+    }
+}
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:5 (https://stackoverflow.com/questions/21620850)
+ Can be something like this... 
+
+  public static void main(String[] args) {
+    Scanner reader = new Scanner(System.in);
+
+    System.out.println("Enter a number: ");
+    int i = reader.nextInt();
+    for (int j = 0; j < i; j++)
+        System.out.println("I love java");
+}
+  
+
+
+

@@ -1,0 +1,168 @@
+Query: How do I compress a file in GZip format?
+-----------------------------------------------------------------------
+
+Rank:1 (https://stackoverflow.com/questions/19044753)
+ Try to use  BufferedWriter  
+
+  public static String compressString(String str) throws IOException{
+if (str == null || str.length() == 0) {
+    return str;
+}
+
+BufferedWriter writer = null;
+
+try{
+    File file =  new File("your.gzip")
+    GZIPOutputStream zip = new GZIPOutputStream(new FileOutputStream(file));
+
+    writer = new BufferedWriter(new OutputStreamWriter(zip, "UTF-8"));
+
+    writer.append(str);
+}
+finally{           
+    if(writer != null){
+     writer.close();
+     }
+  }
+ }
+  
+
+ About your code example try: 
+
+  public static String compressString(String str) throws IOException{
+if (str == null || str.length() == 0) {
+    return str;
+}
+ByteArrayOutputStream out = new ByteArrayOutputStream(str.length());
+GZIPOutputStream gzip = new GZIPOutputStream(out);
+gzip.write(str.getBytes());
+gzip.close();
+
+byte[] compressedBytes = out.toByteArray(); 
+
+Gdx.files.local("gziptest.gzip").writeBytes(compressedBytes, false);
+out.close();
+
+return out.toString(); // I would return compressedBytes instead String
+}
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:2 (https://stackoverflow.com/questions/7980974)
+ Use the ZipOutputStream with ZipEntry  instead of GZipOutputStream. so that it will keep the original file extension. 
+
+ Sample code as below.. 
+
+  ZipOutputStream zipOutStream = new ZipOutputStream(new FileOutputStream(zipFile));
+    FileInputStream inStream = new FileInputStream(file); // Stream to read file
+    ZipEntry entry = new ZipEntry(file.getPath()); // Make a ZipEntry
+    zipOutStream.putNextEntry(entry); // Store entry
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:3 (https://stackoverflow.com/questions/25310791)
+ usage of toString/getBytes for encoding/decoding is a wrong way. try to use something like BASE64 encoding for this purpose (java.util.Base64 in jdk 1.8) 
+
+ as a proof try this simple test: 
+
+  import org.testng.annotations.Test;
+import java.io.ByteArrayOutputStream;
+import static org.testng.Assert.assertEquals;
+
+public class SimpleTest {
+
+    @Test
+    public void test() throws Exception {
+
+        final String CS = "utf-8";
+
+        byte[] b0 = {(byte) 0xff};
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        out.write(b0);
+        out.close();
+
+        byte[] b1 = out.toString(CS).getBytes(CS);
+
+        assertEquals(b0, b1);
+    }
+}
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:4 (https://stackoverflow.com/questions/26358167)
+ If you are still looking an answer you can use the below code to get the compressed byte[] using deflater and decompress it using inflater. 
+
+  public static void main(String[] args) {
+        //Some string for testing
+        String sr = new String("fsdfesfsfdddddddsfdsfssdfdsfdsfdsfdsfdsdfggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggghghghghggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggfsdfesfsfdddddddsfdsfssdfdsfdsfdsfdsfdsdfggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggghghghghggggggggggggggggggggggggggggggggggggggggg");
+        byte[] data = sr.getBytes();
+        System.out.println("src size "+data.length);
+        try {
+            compress(data);
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+    public static byte[] compress(byte[] data) throws IOException { 
+        Deflater deflater = new Deflater(); 
+        deflater.setInput(data); 
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream(data.length);  
+
+        deflater.finish(); 
+        byte[] buffer = new byte[1024];  
+        while (!deflater.finished()) { 
+        int count = deflater.deflate(buffer);  
+        outputStream.write(buffer, 0, count);  
+        } 
+        outputStream.close(); 
+        byte[] output = outputStream.toByteArray(); 
+
+        System.out.println("Original: " + data.length  ); 
+        System.out.println("Compressed: " + output.length ); 
+        return output; 
+        }   
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:5 (https://stackoverflow.com/questions/14467099)
+ Mixing String and byte[]; that does never fit. And only works on the the same OS with same encoding. Not every byte[] can be converted to a string, and the conversion back could give other bytes. 
+
+ The compressedBytes need not represent a String. 
+
+ Explicitly set the encoding in getBytes and new String. 
+
+      String orig = ".............";
+
+    // compress it
+    ByteArrayOutputStream baostream = new ByteArrayOutputStream();
+    OutputStream outStream = new GZIPOutputStream(baostream);
+    outStream.write(orig.getBytes("UTF-8"));
+    outStream.close();
+    byte[] compressedBytes = baostream.toByteArray(); // toString not always possible
+
+    // uncompress it
+    InputStream inStream = new GZIPInputStream(
+            new ByteArrayInputStream(compressedBytes));
+    ByteArrayOutputStream baoStream2 = new ByteArrayOutputStream();
+    byte[] buffer = new byte[8192];
+    int len;
+    while ((len = inStream.read(buffer)) > 0) {
+        baoStream2.write(buffer, 0, len);
+    }
+    String uncompressedStr = baoStream2.toString("UTF-8");
+
+    System.out.println("orig: " + orig);
+    System.out.println("unc:  " + uncompressedStr);
+  
+
+
+

@@ -1,0 +1,86 @@
+Query: How do I get list of files from FTP server?
+-----------------------------------------------------------------------
+
+Rank:1 (https://stackoverflow.com/questions/14467213)
+  File  objects cannot handle an  FTP  connection, you need to use a  URLConnection : 
+
+  URL url = new URL ("ftp://username:password@www.superland.example/server");
+URLConnection urlc = url.openConnection();
+InputStream is = urlc.getInputStream();
+...
+  
+
+ Consider as an alternative  FTPClient  from http://commons.apache.org/net/ which has support for many protocols. Here is an http://www.kodejava.org/examples/357.html.  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:2 (https://stackoverflow.com/questions/21983199)
+ You need to filter the strings returned from the ftp client. Below is an example how to do this. 
+
+  List<String> xlsFiles = new ArrayList<String>();
+for(String i : downloadFiles) {
+    if(i.endsWith(".)) {
+        xlsFiles.add(i);
+    }
+}
+  
+
+ The  xlsFiles   List  will contain only files ending with  ". . 
+
+ Edit: 
+
+ It appears your example won't compile due not using  FTPClient  API correctly.  FTPClient.listFiles()  returns an array of  FTPFiles . 
+
+  FTPFiles[] downloadFiles = ftp.listFiles();
+List<FTPFile> xlsFiles = new ArrayList<FTPFile>();
+for(FTPFilei : downloadFiles) {
+    if(i.getName().endsWith(".)) {
+        xlsFiles.add(i);
+    }
+}
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:3 (https://stackoverflow.com/questions/23768745)
+ You can use http://commons.apache.org/proper/commons-net/apidocs/org/apache/commons/net/ftp/FTPClient.html to do this and all other common commands needed with FTP. 
+
+  Example to delete a folder:  
+
+  FTPClient client = new FTPClient();
+client.connect(host, port);
+client.login(loginname, password);
+client.removeDirectory(directoryPathOnServer);
+client.disconnect();
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:4 (https://stackoverflow.com/questions/44839455)
+ I added  client.enterLocalPassiveMode()  and it works: 
+
+  client.connect("xxx.com");
+boolean login = client.login("xxx", "xxx");
+client.enterLocalPassiveMode();
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:5 (https://stackoverflow.com/questions/48503768)
+  FTPClient  uses ascii mode by default. 
+
+ You have to use binary mode to transfer binary files. 
+
+  ftpClient.setFileType(FTP.BINARY_FILE_TYPE);
+  
+
+ 
+
+ Your current code can by chance work on  some servers  even in the ascii mode, if the server is using Windows EOL sequence, hence no conversion takes place. And even then probably only, if the file by chance does not contain any lone #13. 
+
+
+

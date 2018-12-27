@@ -1,0 +1,155 @@
+Query: How do I execute stored procedure?
+-----------------------------------------------------------------------
+
+Rank:1 (https://stackoverflow.com/questions/32386288)
+ The  executeUpdate(String)  method is inherited from  Statement  and attempts to execute the given SQL statement as is -- without placeholder substitution. 
+
+ The https://docs.oracle.com/javase/8/docs/api/java/sql/PreparedStatement.html#executeUpdate-- (no parameters), declared in  PreparedStatement , will perform placeholder substitution.  This works with  PreparedStatements  such as update statements. 
+
+ In addition, you aren't running a straight SQL statement here.  You are calling a stored procedure.  Switch from  PreparedStatement  to https://docs.oracle.com/javase/8/docs/api/java/sql/CallableStatement.html. 
+
+  CallableStatement cStmt = conn.prepareCall(sql);
+  
+
+ The "set" methods work as before, but then you call  execute()  to execute the  CallableStatement . 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:2 (https://stackoverflow.com/questions/16651148)
+ Seems like your  CallableStatement  has never been executed, first execute your stored procedure: 
+
+  ResultSet rs = stmt.executeQuery()
+  
+
+ Your code executes selects query instead of stored procedure, and the select statement is returning no rows. 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:3 (https://stackoverflow.com/questions/19996773)
+ Since its a procedure you're trying to call, you need to use a http://docs.oracle.com/javase/7/docs/api/java/sql/CallableStatement.html. 
+
+ 
+   The interface used to execute SQL stored procedures. 
+ 
+
+  CallableStatement callableStatement = conn.prepareCall(query);
+  
+
+ Also, your query needs to be 
+
+  String query = "{call test}"; 
+// exec is used to execute the procedure from the sql console as such
+// To execute a procedure using the java code, use call proc.
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:4 (https://stackoverflow.com/questions/30339964)
+ You need to use CallableStatement for executing your Stored procedure 
+
+  String procName= "{call PSTATISTIC}";
+CallableStatement cs = conn.prepareCall(procName);
+cs.executeQuery();
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:5 (https://stackoverflow.com/questions/40984167)
+ Here are the ways to call the stored procedures from java 
+
+  1.   
+
+   connection = jdbcTemplate.getDataSource().getConnection();
+  CallableStatement callableStatement = connection.prepareCall("{call STORED_PROCEDURE_NAME(?, ?, ?)}");
+  callableStatement.setString(1, "FirstName");
+  callableStatement.setString(2, " LastName");
+  callableStatement.registerOutParameter(3, Types.VARCHAR);
+  callableStatement.executeUpdate();
+  
+
+ Here we externally manage the resource closing 
+
+  2. Using CallableStatementCreator  
+
+   List paramList = new ArrayList();
+    paramList.add(new SqlParameter(Types.VARCHAR));
+    paramList.add(new SqlParameter(Types.VARCHAR));
+    paramList.add(new SqlOutParameter("msg", Types.VARCHAR));
+
+    Map<String, Object> resultMap = jdbcTemplate.call(new CallableStatementCreator() {
+
+    @Override
+    public CallableStatement createCallableStatement(Connection connection)
+    throws SQLException {
+
+    CallableStatement callableStatement = connection.prepareCall("{call STORED_PROCEDURE_NAME(?, ?, ?)}");
+    callableStatement.setString(1, "FirstName");
+            callableStatement.setString(2, " LastName");
+            callableStatement.registerOutParameter(3, Types.VARCHAR);
+    return callableStatement;
+
+    }
+    }, paramList);
+  
+
+  3. Use SimpleJdbcCall:  
+
+  SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate)
+
+.withProcedureName("STORED_PROCEDURE_NAME");
+
+Map<String, Object> inParamMap = new HashMap<String, Object>();
+inParamMap.put("firstName", "FirstNameValue");
+inParamMap.put("lastName", "LastNameValue");
+SqlParameterSource in = new MapSqlParameterSource(inParamMap);
+
+
+Map<String, Object> simpleJdbcCallResult = simpleJdbcCall.execute(in);
+System.out.println(simpleJdbcCallResult);
+  
+
+  4. Use StoredProcedure class of org.springframework.jdbc.object  
+
+  The Code:
+First Create subclass of StoredProcedure: MyStoredProcedure
+
+class MyStoredProcedure extends StoredProcedure {
+
+public MyStoredProcedure(JdbcTemplate jdbcTemplate, String name) {
+
+super(jdbcTemplate, name);
+setFunction(false);
+
+}
+
+}
+
+Use MyStoredProcedure to call database stored procedure:
+
+
+//Pass jdbcTemlate and name of the stored Procedure.
+MyStoredProcedure myStoredProcedure = new MyStoredProcedure(jdbcTemplate, "PROC_TEST");
+
+//Sql parameter mapping
+SqlParameter fNameParam = new SqlParameter("fName", Types.VARCHAR);
+SqlParameter lNameParam = new SqlParameter("lName", Types.VARCHAR);
+SqlOutParameter msgParam = new SqlOutParameter("msg", Types.VARCHAR);
+SqlParameter[] paramArray = {fNameParam, lNameParam, msgParam};
+
+
+myStoredProcedure.setParameters(paramArray);
+myStoredProcedure.compile();
+
+
+//Call stored procedure
+Map storedProcResult = myStoredProcedure.execute("FirstNameValue", " LastNameValue");
+  
+
+ https://lalitjc.wordpress.com/2013/07/02/different-ways-of-calling-stored-procedure-using-spring/ 
+
+
+

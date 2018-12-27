@@ -1,0 +1,152 @@
+Query: How to monitor file or directory changes?
+-----------------------------------------------------------------------
+
+Rank:1 (https://stackoverflow.com/questions/26781322)
+ Use a http://docs.oracle.com/javase/8/docs/api/java/nio/file/WatchService.html to monitor your directories: 
+
+  WatchService watchService = FileSystems.getDefault().newWatchService();
+WatchKey watchKey = path.register(watchService,
+                                  ENTRY_CREATE,
+                                  ENTRY_DELETE,
+                                  ENTRY_MODIFY);
+  
+
+ The rest is just implementing your logic using the usual  File  methods. 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:2 (https://stackoverflow.com/questions/20254024)
+ This piece of code will be called every time you create a file in your watched folder: 
+
+      Path path = new File("./folder").toPath();
+    WatchService watchService = FileSystems.getDefault().newWatchService();
+    path.register(watchService, StandardWatchEventKinds.ENTRY_CREATE);
+    for (;;) {
+        try {
+        WatchKey key = watchService.take();
+        for (WatchEvent<?> event : key.pollEvents()) {
+            WatchEvent.Kind<?> kind = event.kind();
+            if (kind.equals(StandardWatchEventKinds.ENTRY_CREATE)) {
+                System.out.println("file created");
+            }
+        }
+        } catch (InterruptedException x) {
+             return;
+        }
+    }
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:3 (https://stackoverflow.com/questions/18701289)
+ A  WatchService  only watches the  Path s  you register. It does not go through those paths recursively.  
+
+ Given  /Root  as a registered path 
+
+  /Root
+    /Folder1
+    /Folder2
+        /Folder3
+  
+
+ If there is a change in  Folder3 , it won't catch it. 
+
+ You can register the directory paths recursively yourself with 
+
+  private void registerRecursive(final Path root) throws IOException {
+    // register all subfolders
+    Files.walkFileTree(root, new SimpleFileVisitor<Path>() {
+        @Override
+        public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+            dir.register(watchService, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
+            return FileVisitResult.CONTINUE;
+        }
+    });
+}
+  
+
+ Now the  WatchService  will notify all changes in all subfolders of  Path root , ie. the  Path  argument you pass. 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:4 (https://stackoverflow.com/questions/42093973)
+ You can use the https://docs.oracle.com/javase/7/docs/api/java/nio/file/WatchService.html: 
+
+ 
+   A watch service that watches registered objects for changes and events. For example a file manager may use a watch service to monitor a directory for changes so that it can update its display of the list of files when files are created or deleted. 
+ 
+
+ To use it you need to: 
+
+  // 1 create the watchService
+WatchService watchService =    FileSystems.getDefault().newWatchService();
+
+// 2 get a reference to the directory to be watched for changes
+String watchedDir = "/mydir";
+Path dir = Paths.get(watchedDir);
+
+// 3 register on the events you need to watch
+WatchKey watchKey = dir.register(watchService, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
+
+...
+
+// 4 wait for changes, generally inside a loop
+watchKey = watchService.take();
+  
+
+ The method take returns a watch key when available, otherwise waits. 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:5 (https://stackoverflow.com/questions/43472800)
+  Solution using shell script  
+
+ I will suggest to monitor your input file using file watchers, and if any file change detected, you can restart your app using shell scripts.  
+
+ You didn't provided platform information.  
+
+ 
+   If your production is on Linux then you can use https://linux.die.net/man/1/watch to monitor
+  changes in your input file. 
+ 
+
+  Solution using Java  
+
+ If you want to detect the file change in Java, you could use FileWatcher, 
+
+  final Path path = FileSystems.getDefault().getPath(System.getProperty("user.home"), "Desktop");
+System.out.println(path);
+try{
+    final WatchService watchService = FileSystems.getDefault().newWatchService();
+    final WatchKey watchKey = path.register(watchService, StandardWatchEventKinds.ENTRY_MODIFY);
+    while (true) {
+        final WatchKey wk = watchService.take();
+        for (WatchEvent<?> event : wk.pollEvents()) {
+            //we only register "ENTRY_MODIFY" so the context is always a Path.
+            final Path changed = (Path) event.context();
+            System.out.println(changed);
+            if (changed.endsWith("myFile.txt")) {
+                System.out.println("My file has changed");
+            }
+        }
+        // reset the key
+        boolean valid = wk.reset();
+        if (!valid) {
+            System.out.println("Key has been unregisterede");
+        }
+    }
+}
+  
+
+ Now to restart your app from within java, you have to start your application from within your main method. 
+
+ Create a separate thread that will monitor your input file, and launch your app in a separate thread. 
+
+ Whenever you detect any change in your input file, interrupt or kill the app thread, and re launch your application in a new thread.  
+
+
+

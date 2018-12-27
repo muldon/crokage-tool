@@ -1,0 +1,103 @@
+Query: How do I format a number with leading zeros?
+-----------------------------------------------------------------------
+
+Rank:1 (https://stackoverflow.com/questions/2555975)
+ When areaCode is 0, you forget to call  format !  Other than that, it looks fine.  The leading "#" are not necessary, but won't cause any problems for valid inputs. 
+
+ I just tried it out real quick to check and it worked fine for me. 
+
+  public static String formatTest(int areaCode, int exchangeCode, int number) {
+    DecimalFormat nf3 = new DecimalFormat("#000");
+    DecimalFormat nf4 = new DecimalFormat("#0000");
+    if( areaCode != 0)
+        return nf3.format(areaCode) + "-" + nf3.format(exchangeCode) + "-" + nf4.format(number);
+    else
+        return nf3.format(exchangeCode) + "-" + nf4.format(number);
+}
+
+
+public static void main(String[] args) {
+    System.out.println(formatTest(12, 90, 8));
+    System.out.println(formatTest(1, 953, 1932));
+}
+  
+
+ Output: 
+
+  012-090-0008
+001-953-1932
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:2 (https://stackoverflow.com/questions/33678358)
+ You can use http://java.sun.com/j2se/1.5.0/docs/api/java/util/Formatter.html#syntax to introduce leading zeros: 
+
+  String threeDigitsNumber = String.format("%03d", westBlockNumber);
+  
+
+ With  3  being the number of digits, and  %0  the number of leading zeros in front of a number. 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:3 (https://stackoverflow.com/questions/275715)
+ String.format (http://java.sun.com/j2se/1.5.0/docs/api/java/util/Formatter.html#syntax) 
+
+ In your case it will be:  
+
+  String formatted = String.format("%03d", num);
+  
+
+ 
+ 0 - to pad with zeros 
+ 3 - to set width to 3 
+ 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:4 (https://stackoverflow.com/questions/2555938)
+ Remove the # sign 
+
+ http://java.sun.com/docs/books/tutorial/i18n/format/decimalFormat.html 
+
+ This code: 
+
+  import java.text.DecimalFormat;
+import java.text.NumberFormat;
+
+
+public class Test
+{
+
+    public static void main(String[] args) 
+    {       
+        int areaCode = 123;
+        int exchangeCode = 456;
+
+        NumberFormat nf3 = new DecimalFormat("0000");
+
+        System.out.println(nf3.format(areaCode) + "-" + nf3.format(exchangeCode) );
+    }
+
+}
+  
+
+ Produces this output: 
+
+ 0123-0456 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:5 (https://stackoverflow.com/questions/3150343)
+ For oct and hex, it's as easy as http://java.sun.com/javase/6/docs/api/java/lang/String.html#format%28java.lang.String,%20java.lang.Object...%29: 
+
+  assert String.format("%03x", 16) == "010";
+assert String.format("%03o", 8) == "010";
+  
+
+
+

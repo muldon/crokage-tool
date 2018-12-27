@@ -1,0 +1,191 @@
+Query: How do I pause the current thread?
+-----------------------------------------------------------------------
+
+Rank:1 (https://stackoverflow.com/questions/17575086)
+ Your code is ... I'm afraid ... totally wrong. 
+
+ But worse than that, I suspect that you are trying to do something that cannot be done.  Or if it can be, then it shouldn't be done because it can't be done  safely . 
+
+ 
+
+ It seems that you are trying to have one thread cause another thread to stop running for a bit ... and then resume.  And you are trying to do this without the cooperation / participation of the controlled thread.  (That's the only interpretation I can think of for  "which has to apply lock on a thread"  ... and the gyrations that your code is performing.) 
+
+ Unfortunately, you can't do that safely in Java.  If you were going to do this at all, you would need to call  thread.suspend()  on a thread object to temporary stop it, and then  thread.resume()  on the same thread object to let it continue.  But those two methods have been  deprecated  a long time ago because (apparently) they are dead-lock prone. 
+
+ 
+
+ A couple of other things to note: 
+
+  final Object lock = new Object();
+...
+synchronized(lock) { ....
+  
+
+ That code is wrong.  Java primitive locks work by having multiple threads  synchronize  on one (shared) object.  But you are synchronizing on lock instances that one the current thread can see.  The net result will be that there is effectively no synchronization and no locking at all. 
+
+  lock.wait();
+  
+
+ This waits for some other thread to  notify  that  lock  object, but ... 
+
+ 
+ no other thread can see that  lock  object, and 
+ the only other place where  lock.notify  is called is on the current thread ... after you've woken up due to an interrupt.  (But if the thread is already woken up, the notify event will simply be discarded.) 
+ 
+
+ 
+
+ Recommendations: 
+
+ 
+  Don't try to pause / resume threads like that.  If you want a thread to be "controlled", then modify that thread to periodically check if it should pause.  
+  You really, really need to read up on Java concurrency, 'cos your attempted solution is ... frankly ... rubbish.  
+ 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:2 (https://stackoverflow.com/questions/19552281)
+ If you're trying to just pause for a second, http://docs.oracle.com/javase/7/docs/api/java/lang/Object.html#wait%28long%29 is the wrong method. You want http://docs.oracle.com/javase/7/docs/api/java/lang/Thread.html#sleep%28long%29 instead. 
+
+  try {
+    Thread.sleep(1);  // Pause for 1 millisecond.
+}
+catch (InterruptedException e) {
+}
+  
+
+ 
+   sleep()  pauses the current thread for the specified interval. Note that the time is specified in milliseconds, so 1 means 1 millisecond. To pause for 1 second pass 1000.  
+   wait()  is a synchronization-related method used to coordinate activity among different threads. It needs to be called from inside a  synchronized  block in tandem with some other thread calling  notify()  or  notifyAll() . It should  not  be used to simply add a delay to your program.  
+ 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:3 (https://stackoverflow.com/questions/20737865)
+  sleep()  is a method which is used to hold the process for few seconds or the time you wanted but in case of wait() method thread goes in waiting state and it won’t come back automatically until we call the notify() or notifyAll(). 
+
+ The  major difference  is that  wait()  releases the lock or monitor while sleep() doesn’t releases any lock or monitor while waiting. Wait is used for inter-thread communication while sleep is used to introduce pause on execution, generally. 
+
+  Thread.sleep()  sends the current thread into the “Not Runnable” state for some amount of time. The thread keeps the monitors it has acquired — i.e. if the thread is currently in a synchronized block or method no other thread can enter this block or method. If another thread calls t.interrupt() it will wake up the sleeping thread. Note that sleep is a static method, which means that it always affects the current thread (the one that is executing the sleep method). A common mistake is to call t.sleep() where t is a different thread; even then, it is the current thread that will sleep, not the t thread. 
+
+  object.wait()  sends the current thread into the “Not Runnable” state, like sleep(), but with a twist. Wait is called on an object, not a thread; we call this object the “lock object.” Before lock.wait() is called, the current thread must synchronize on the lock object; wait() then releases this lock, and adds the thread to the “wait list” associated with the lock. Later, another thread can synchronize on the same lock object and call lock.notify(). This wakes up the original, waiting thread. Basically, wait()/notify() is like sleep()/interrupt(), only the active thread does not need a direct pointer to the sleeping thread, but only to the shared lock object. 
+
+  synchronized(LOCK) {   
+   Thread.sleep(1000); // LOCK is held
+}
+
+synchronized(LOCK) {   
+   LOCK.wait(); // LOCK is not held
+}
+  
+
+ Let categorize all above points : 
+
+  Call on:  
+
+ 
+  wait():  Call on an object; current thread must synchronize on the lock object. 
+  sleep():  Call on a Thread; always currently executing thread. 
+ 
+
+  Synchronized:  
+
+ 
+  wait():  when synchronized multiple threads access same Object one by one. 
+  sleep():  when synchronized multiple threads wait for sleep over of sleeping thread. 
+ 
+
+  Hold lock:  
+
+ 
+  wait():  release the lock for other objects to have chance to execute. 
+  sleep():  keep lock for at least t times if timeout specified or somebody interrupt. 
+ 
+
+  Wake-up condition:  
+
+ 
+  wait():  until call notify(), notifyAll() from object 
+  sleep():  until at least time expire or call interrupt(). 
+ 
+
+  Usage:  
+
+ 
+  sleep():  for time-synchronization and; 
+  wait():  for multi-thread-synchronization. 
+ 
+
+ Ref:http://howtodoinjava.com/2013/03/08/difference-between-sleep-and-wait/ 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:4 (https://stackoverflow.com/questions/1538514)
+ Based on your comments it sounds like you are doing something like this: 
+
+  Thread thread = new Thread(new Runnable(){
+    public void run() { // do stuff }});
+
+thread.start();
+...
+thread.wait();
+  
+
+ There are two problems.  First, as others have said,  obj.wait()  can only be called if the current thread holds the primitive mutex for  obj .  If the current thread does not hold the mutex, you get the exception you are seeing. 
+
+ The second (more important) problem is that  thread.wait()  does not do what you seem to be expecting it to do.  Specifically,  thread.wait()   does not  cause the nominated thread to wait.  Rather it causes  the current thread  to wait until some other thread calls  thread.notify()  or  thread.notifyAll() . 
+
+ There is actually no safe way to force a Thread instance to pause if it doesn't want to.  (The nearest that Java has to this is the deprecated  Thread.suspend()  method, but that method is inherently unsafe, as is explained in the Javadoc.) 
+
+ If you want the newly started Thread to pause, the best way to do it is to create a CountdownLatch instance and have the thread call  await()  on the latch to pause itself.  The main thread would then call  countDown()  on the latch to let the paused thread continue. 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:5 (https://stackoverflow.com/questions/26196010)
+  I am printing  current Date and Time for you  using java.util.Date  : 
+
+  import java.util.Date;               //importing this package just to use Date()
+
+public class StackOverflowQ {
+
+ public interface CallBackInt{
+    String doJob(String str);
+    }
+
+public static void main(String[] args) {
+
+    CallBackInt variable = new CallBackInt(){       //using the interface
+        public String doJob(String str) {       //doJob method from interface
+            return (str + new Date().toString()); 
+                  //used .toString() as return type of doJob is String
+        }
+    };
+
+
+    while (true) {                            //infinite loop
+
+        System.out.println(variable.doJob("Current Date Instance is: "));
+        try {
+            Thread.sleep(60*1000);            
+            //time is in miliseconds and 60*1000 mili sec=60 seconds = 1 minute
+        }
+        catch (InterruptedException e) {   
+         //if there are any Exception thrown, this will catch it and help you !
+
+            e.printStackTrace();
+        }
+    }
+
+}
+}
+  
+
+ And,  thread  is a thread of execution in any program.
+Any process that is currently in execution can be treated as a thread.  So, here in this program   Thread.sleep  refers to the current thread (which is main() method currently). So it pauses the main() thread for 60 seconds and resumes it after the pause and then again prints the current Date. 
+
+
+

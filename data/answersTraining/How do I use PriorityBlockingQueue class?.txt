@@ -1,0 +1,393 @@
+Query: How do I use PriorityBlockingQueue class?
+-----------------------------------------------------------------------
+
+Rank:1 (https://stackoverflow.com/questions/8471474)
+ My solution: 
+
+  public class XThreadPoolExecutor extends ThreadPoolExecutor
+{
+    public XThreadPoolExecutor(int corePoolSize, int maximumPoolSize,
+        long keepAliveTime, TimeUnit unit, PriorityBlockingQueue<Runnable> workQueue)
+    {
+        super(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue);
+    }
+
+    public XThreadPoolExecutor(int corePoolSize, int maximumPoolSize,
+        long keepAliveTime, TimeUnit unit, PriorityBlockingQueue<Runnable> workQueue,
+        RejectedExecutionHandler handler)
+    {
+        super(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue, handler);
+    }
+
+    public XThreadPoolExecutor(int corePoolSize, int maximumPoolSize,
+        long keepAliveTime, TimeUnit unit, PriorityBlockingQueue<Runnable> workQueue,
+        ThreadFactory threadFactory)
+    {
+        super(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue, threadFactory);
+    }
+
+    public XThreadPoolExecutor(int corePoolSize, int maximumPoolSize,
+        long keepAliveTime, TimeUnit unit, PriorityBlockingQueue<Runnable> workQueue,
+        ThreadFactory threadFactory, RejectedExecutionHandler handler)
+    {
+        super(corePoolSize, maximumPoolSize, keepAliveTime, unit, workQueue, threadFactory, handler);
+    }
+
+    protected <T> RunnableFuture<T> newTaskFor(Runnable runnable, T value)
+    {
+        return new ComparableFutureTask<>(runnable, value);
+    }
+
+    protected <T> RunnableFuture<T> newTaskFor(Callable<T> callable)
+    {
+        return new ComparableFutureTask<>(callable);
+    }
+
+    protected class ComparableFutureTask<V>
+        extends FutureTask<V> implements Comparable<ComparableFutureTask<V>>
+    {
+        private Object object;
+        public ComparableFutureTask(Callable<V> callable)
+        {
+            super(callable);
+            object = callable;
+        }
+
+        public ComparableFutureTask(Runnable runnable, V result)
+        {
+            super(runnable, result);
+            object = runnable;
+        }
+
+        @Override
+        @SuppressWarnings("unchecked")
+        public int compareTo(ComparableFutureTask<V> o)
+        {
+            if (this == o)
+            {
+                return 0;
+            }
+            if (o == null)
+            {
+                return -1; // high priority
+            }
+            if (object != null && o.object != null)
+            {
+                if (object.getClass().equals(o.object.getClass()))
+                {
+                    if (object instanceof Comparable)
+                    {
+                        return ((Comparable) object).compareTo(o.object);
+                    }
+                }
+            }
+            return 0;
+        }
+    }
+}
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:2 (https://stackoverflow.com/questions/35553888)
+ Schedulers in RxJava are orthogonal to the datastream and don't know about them at all. All they do is execute a Runnable instance and all Runnables created by operators are born equal. Thus, it doesn't make sense to use priority queues with Schedulers. 
+
+ In addition, datastreams are sequential and unless there is some boundary like thread swap, they maintain their ordering. Unless you collect the events and do the ordering manually, there is just a probability an operator with a priority queue will reorder data as you expect. 
+
+  Edit  
+
+ A bit unconventional, but you could also lay the PriorityBlockingQueue across a subject and some operators so you can feed a sequence with tasks: 
+
+  PriorityBlockingQueue<Task> q = ...
+
+Subject<Integer, Integer> subject = PublishSubject.<Integer>create().toSerialized();
+
+subject
+.map(v -> q.poll())
+.doOnNext(v -> v.execute())
+.subscribe();
+
+q.offer(new Task(...));
+subject.onNext(1);
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:3 (https://stackoverflow.com/questions/27738182)
+ I feel like it's more straightforward to implement this with one  Queue  for each producer. One thread can't wait on multiple  Queue s, but you could combine all of the  Queue s into one helper class so that it doesn't need to. 
+
+  import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.Queue;
+import java.util.concurrent.PriorityBlockingQueue;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
+import javax.annotation.concurrent.GuardedBy;
+
+public class RoundRobin<P, E> {
+    private final Lock lock = new ReentrantLock();
+    private final Condition added = lock.newCondition();
+
+    @GuardedBy("lock") private final Map<P, Queue<E>> queues = new LinkedHashMap<>();
+
+    public boolean add(P producer, E item) {
+        lock.lock();
+        try {
+            if (!queues.containsKey(producer)) {
+                queues.put(producer, new PriorityBlockingQueue<>());
+            }
+
+            added.signalAll();
+            return queues.get(producer).add(item);
+        } finally {
+            lock.unlock();
+        }
+    }
+
+    public Iterator<E> roundRobinIterator() {
+        return new Iterator<E>() {
+            private Iterator<? extends Queue<E>> i = null;
+            private boolean singlePass = true;
+
+            @Override
+            public boolean hasNext() {
+                return true;
+            }
+
+            @Override
+            public E next() {
+                lock.lock();
+                try {
+                    while (true) {
+                        if (i == null || !i.hasNext()) {
+                            i = queues.values().iterator();
+                            singlePass = true;
+                        }
+
+                        while (i.hasNext()) {
+                            Queue<E> q = i.next();
+                            if (!q.isEmpty()) {
+                                if (singlePass) {
+                                    // copy the iterator to prevent
+                                    // ConcurrentModificationExceptions
+                                    singlePass = false;
+                                    i = copy(i);
+                                }
+                                return q.poll();
+                            }
+                        }
+
+                        if (singlePass) {
+                            // If singlePass is true then we just checked every
+                            // queue and they were all empty.
+                            // Wait for another element to be added.
+                            added.await();
+                        }
+                    }
+                } catch (InterruptedException e) {
+                    throw new NoSuchElementException(e.getMessage());
+                } finally {
+                    lock.unlock();
+                }
+            }
+
+            private <T> Iterator<? extends T> copy(Iterator<? extends T> i) {
+                List<T> copy = new ArrayList<>();
+                while (i.hasNext()) {
+                    copy.add(i.next());
+                }
+                return copy.iterator();
+            }
+        };
+    }
+}
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:4 (https://stackoverflow.com/questions/9580485)
+ You're looking for any class that implements the http://docs.oracle.com/javase/6/docs/api/java/util/Queue.html, excluding  PriorityQueue  and  PriorityBlockingQueue , which do not use a FIFO algorithm. 
+
+ Probably a http://docs.oracle.com/javase/6/docs/api/java/util/LinkedList.html using  add  (adds one to the end) and  removeFirst  (removes one from the front and returns it) is the easiest one to use. 
+
+ For example, here's a program that uses a LinkedList to queue and retrieve the digits of PI: 
+
+  import java.util.LinkedList;
+
+class Test {
+    public static void main(String args[]) {
+        char arr[] = {3,1,4,1,5,9,2,6,5,3,5,8,9};
+        LinkedList<Integer> fifo = new LinkedList<Integer>();
+
+        for (int i = 0; i < arr.length; i++)
+            fifo.add (new Integer (arr[i]));
+
+        System.out.print (fifo.removeFirst() + ".");
+        while (! fifo.isEmpty())
+            System.out.print (fifo.removeFirst());
+        System.out.println();
+    }
+} 
+  
+
+ 
+
+ Alternatively, if you  know  you only want to treat it as a queue (without the extra features of a linked list), you can just use the  Queue  interface itself: 
+
+  import java.util.LinkedList;
+import java.util.Queue;
+
+class Test {
+    public static void main(String args[]) {
+        char arr[] = {3,1,4,1,5,9,2,6,5,3,5,8,9};
+        Queue<Integer> fifo = new LinkedList<Integer>();
+
+        for (int i = 0; i < arr.length; i++)
+            fifo.add (new Integer (arr[i]));
+
+        System.out.print (fifo.remove() + ".");
+        while (! fifo.isEmpty())
+            System.out.print (fifo.remove());
+        System.out.println();
+    }
+}
+  
+
+ This has the advantage of allowing you to replace the underlying concrete class with any class that provides the  Queue  interface, without having to change the code too much. 
+
+ The basic changes are to change the type of  fifo  to a  Queue  and to use  remove()  instead of  removeFirst() , the latter being unavailable for the  Queue  interface. 
+
+ Calling  isEmpty()  is still okay since that belongs to the  Collection  interface of which  Queue  is a derivative. 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:5 (https://stackoverflow.com/questions/34974467)
+ I will try to explain this problem with a fully functional code. But before diving into the code I would like to explain about PriorityBlockingQueue 
+
+  PriorityBlockingQueue  : PriorityBlockingQueue is an implementation of BlockingQueue. It accepts the tasks along with their priority and submits the task with the highest priority for execution first. If any two tasks have same priority, then we need to provide some custom logic to decide which task goes first. 
+
+ Now lets get into the code straightaway. 
+
+  Driver class  : This class creates an executor which accepts tasks and later submits them for execution. Here we create two tasks one with LOW priority and the other with HIGH priority. Here we tell the executor to run a MAX  of 1 threads and use the PriorityBlockingQueue.  
+
+       public static void main(String[] args) {
+
+       /*
+       Minimum number of threads that must be running : 0
+       Maximium number of threads that can be created : 1
+       If a thread is idle, then the minimum time to keep it alive : 1000
+       Which queue to use : PriorityBlockingQueue
+       */
+    PriorityBlockingQueue queue = new PriorityBlockingQueue();
+    ThreadPoolExecutor executor = new ThreadPoolExecutor(0,1,
+        1000, TimeUnit.MILLISECONDS,queue);
+
+
+    MyTask task = new MyTask(Priority.LOW,"Low");
+    executor.execute(new MyFutureTask(task));
+    task = new MyTask(Priority.HIGH,"High");
+    executor.execute(new MyFutureTask(task));
+    task = new MyTask(Priority.MEDIUM,"Medium");
+    executor.execute(new MyFutureTask(task));
+
+}
+  
+
+  MyTask class  : MyTask implements Runnable and accepts priority as an argument in the constructor. When this task runs, it prints a message and then puts the thread to sleep for 1 second. 
+
+     public class MyTask implements Runnable {
+
+  public int getPriority() {
+    return priority.getValue();
+  }
+
+  private Priority priority;
+
+  public String getName() {
+    return name;
+  }
+
+  private String name;
+
+  public MyTask(Priority priority,String name){
+    this.priority = priority;
+    this.name = name;
+  }
+
+  @Override
+  public void run() {
+    System.out.println("The following Runnable is getting executed "+getName());
+    try {
+      Thread.sleep(1000);
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+  }
+
+}
+  
+
+  MyFutureTask class  : Since we are using PriorityBlocingQueue for holding our tasks, our tasks must be wrapped inside FutureTask and our implementation of FutureTask must implement Comparable interface. The Comparable interface compares the priority of 2 different tasks and submits the task with the highest priority for execution. 
+
+   public class MyFutureTask extends FutureTask<MyFutureTask>
+      implements Comparable<MyFutureTask> {
+
+    private  MyTask task = null;
+
+    public  MyFutureTask(MyTask task){
+      super(task,null);
+      this.task = task;
+    }
+
+    @Override
+    public int compareTo(MyFutureTask another) {
+      return task.getPriority() - another.task.getPriority();
+    }
+  }
+  
+
+  Priority class  : Self explanatory Priority class.  
+
+  public enum Priority {
+
+  HIGHEST(0),
+  HIGH(1),
+  MEDIUM(2),
+  LOW(3),
+  LOWEST(4);
+
+  int value;
+
+  Priority(int val) {
+    this.value = val;
+  }
+
+  public int getValue(){
+    return value;
+  }
+
+
+}
+  
+
+ Now when we run this example, we get the following output  
+
+  The following Runnable is getting executed High
+The following Runnable is getting executed Medium
+The following Runnable is getting executed Low
+  
+
+ Even though we submitted the LOW priority first, but HIGH priority task later, but since we are using a PriorityBlockingQueue, any task with a higher priority will execute first. 
+
+
+

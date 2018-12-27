@@ -1,0 +1,140 @@
+Query: How do I get MAC address of a host?
+-----------------------------------------------------------------------
+
+Rank:1 (https://stackoverflow.com/questions/1282932)
+ You can get  your own  MAC address via: 
+
+  Enumeration<NetworkInterface> it = NetworkInterface.getNetworkInterfaces();
+while ( it.hasMoreElements() ) {
+    byte[] macAddress = it.nextElement().getHardwareAddress();
+}
+  
+
+ There is definitely no way you can get the MAC address of another host via vanilla java. You'd have to use Process execution or a native library to do it. 
+
+ If you control the other machines, you can let them query their own MAC and send it back across a TCP/IP channel, but I'm guessing that's not what you want. For more details, see jqno's answer. 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:2 (https://stackoverflow.com/questions/11884790)
+ Seems like you are trying to get the MAC address by IP address. An IP address exists  only  when you are connected  successfully  to the Internet. Otherwise, it will be  null , as you state. 
+
+ Try this: http://download.oracle.com/javase/6/docs/api/java/net/NetworkInterface.html#getHardwareAddress(). 
+
+ If you want the MAC address of all network interfaces on your computer, try this: http://download.oracle.com/javase/6/docs/api/java/net/NetworkInterface.html#getNetworkInterfaces(). 
+
+ 
+
+  EDIT : After reviewing the code again, I realize that you have my suggestion implemented. However, you are only trying to obtain the MAC address  if  you have a valid IP. You will not have a valid IP if are not connected to the Internet. 
+
+     public static void main(String[] args) 
+   { 
+       NetworkInterface network;
+       byte[] mac = network.getHardwareAddress();  
+       System.out.print("The mac address is : ");  
+
+       StringBuilder sb = new StringBuilder(); 
+
+       for (int i = 0; i < mac.length; i++)
+       { 
+         sb.append(String.format("%02X%s", mac[i],(i< mac.length - 1)?"-":"")); 
+       }     
+
+       System.out.println(sb.toString());  
+   } 
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:3 (https://stackoverflow.com/questions/32137083)
+ getHostAddress outputs the IP address, so if the IP address resolves to 127.0.0.1 OR InetAddress.getLocalHost().getHostAddress() then its the local host 
+
+ For example: 
+
+      // change 192.168.154.169 to ip of your machine to test
+    String[] hosts = { "192.168.154.169", "localhost", "google.com" };
+
+    for (String host : hosts) {
+        InetAddress address = InetAddress.getByName(host);
+        boolean isLocalhost = "127.0.0.1".equals(address.getHostAddress())
+                || InetAddress.getLocalHost().getHostAddress().equals(address.getHostAddress());
+        System.out.println("Hostname: " + host + ", is local host: " + isLocalhost);
+    }
+  
+
+ Output: 
+
+ Hostname: 192.168.154.169, is local host: true 
+
+ Hostname: localhost, is local host: true 
+
+ Hostname: google.com, is local host: false 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:4 (https://stackoverflow.com/questions/13448848)
+  
+
+  InetAddress inetAddress = InetAddress.getByName("www.google.com");
+byte[] raw = inetAddress.getAddress();
+  
+
+ The byte array now contains the IP addresses bytes. 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:5 (https://stackoverflow.com/questions/31870546)
+ Try this http://www.mkyong.com/java/how-to-get-mac-address-in-java/. 
+
+  import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.net.UnknownHostException;
+
+public class App{
+
+   public static void main(String[] args){
+
+    InetAddress ip;
+    try {
+
+        ip = InetAddress.getLocalHost();
+        System.out.println("Current IP address : " + ip.getHostAddress());
+
+        NetworkInterface network = NetworkInterface.getByInetAddress(ip);
+
+        byte[] mac = network.getHardwareAddress();
+
+        System.out.print("Current MAC address : ");
+
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < mac.length; i++) {
+            sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? "-" : ""));        
+        }
+        System.out.println(sb.toString());
+
+    } catch (UnknownHostException e) {
+
+        e.printStackTrace();
+
+    } catch (SocketException e){
+
+        e.printStackTrace();
+
+    }
+
+   }
+
+}
+  
+
+ This  NetworkInterfaceNetworkInterface.getHardwareAddress()  method is only allowed to access localhost MAC address, not remote host MAC address. 
+
+  Note : You can't do this in remotely for PC or Device in java.But you can do it by using C# and WMI - https://msdn.microsoft.com/en-us/library/aa394595%28v=vs.85%29.aspx  
+
+
+

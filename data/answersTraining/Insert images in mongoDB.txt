@@ -1,0 +1,74 @@
+Query: Insert images in mongoDB
+-----------------------------------------------------------------------
+
+Rank:1 (https://stackoverflow.com/questions/25666472)
+ By using  DBCollection.insert  u can do.It accepts a parameter of type  DBObject ,  List<DBObject> .
+If you are passing in a string array. 
+
+ You can manually create documents(DBObjects), insert them to a List or an array of DBObjects. 
+
+  DBObject doc_1 = new BasicDBObject();
+doc_1.put("name", "XXX");
+doc_1.put("age", 20);
+DBObject doc = new BasicDBObject():
+doc.add("name", "YYY");    
+List<DBObject> doc_List = new ArrayList<>();
+doc_List .add(doc);
+doc_List .add(doc_1);
+collection.insert(doc_List );
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:2 (https://stackoverflow.com/questions/27420867)
+ Just get images as ArrayList: 
+
+  ArrayList<BasicDBObject> images = (ArrayList<BasicDBObject>)obj.get("images"); 
+for(BasicDBObject image: images)
+{
+     String link = image.getString("link");
+     .......
+} 
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:3 (https://stackoverflow.com/questions/10174907)
+ You can convert your java object into json string using the https://code.google.com/p/google-gson/ and then insert it in mongodb. 
+
+  
+
+  Gson gson = new Gson();
+String json = gson.toJson(Employee);    
+BasicDBObject basicDBObject = new BasicDBObject("Name", json );          
+DBCollection dbCollection = db.getCollection("NameColl");          
+dbCollection.save(basicDBObject);    
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:4 (https://stackoverflow.com/questions/38027329)
+  DBCollection collection = database.getCollection("Table Name");
+
+DBObject modifier = new BasicDBObject("counter", 1);
+DBObject incQuery = new BasicDBObject("$id", modifier);
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:5 (https://stackoverflow.com/questions/30513015)
+  ForecastEntries_Coll = db.getCollection('ForecastEntries');
+
+ID = '553e24c1a46da1d1498b4567';
+
+query = BasicDBObject('forecast', ObjectId(ID));
+
+fcstResources = ForecastEntries_Coll.find(query);
+  
+
+
+

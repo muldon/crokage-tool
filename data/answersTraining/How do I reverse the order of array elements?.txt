@@ -1,0 +1,86 @@
+Query: How do I reverse the order of array elements?
+-----------------------------------------------------------------------
+
+Rank:1 (https://stackoverflow.com/questions/40992322)
+ Use ListIterator and its hasPrevious API. It will help you parse list in reverse order. 
+
+      public ArrayList<Double> lat = new ArrayList<Double>();
+    public int l = lat.size();
+
+    public ArrayList<Double> lng = new ArrayList<Double>();
+    public int ll = lng.size();
+
+
+    ListIterator latIt = lat.listIterator(l);
+    ListIterator longIt = lng.listIterator(ll);
+
+    while(latIt.hasPrevious()) {
+        System.out.println(latIt.previous());
+    }
+    while(longIt.hasPrevious()) {
+        System.out.println(longIt.previous());
+    }
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:2 (https://stackoverflow.com/questions/215283)
+ There's been some confusion about  Arrays.asList  in the other answers.   
+
+  double[] arr = new double[]{6.0, 5.0, 11.0, 7.0};
+List xs = Arrays.asList(arr);
+System.out.println(xs.size());  // prints 1
+  
+
+ then you'll have a List with 1 element.  The resulting List has the double[] array as its own element.  What you want is to have a  List<Double>  whose elements are the elements of the  double[] . 
+
+ Unfortunately, no solution involving Comparators will work for a primitive array.   Arrays.sort  only accepts a Comparator when being passed an  Object[] .  And for the reasons describe above,  Arrays.asList  won't let you make a List out of the elements of your array. 
+
+ So despite my earlier answer which the comments below reference, there's no better way than manually reversing the array after sorting.  Any other approach (such as copying the elements into a  Double[]  and reverse-sorting and copying them back) would be more code and slower. 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:3 (https://stackoverflow.com/questions/30740839)
+ Because the reverse order is not the natural order,  sorted()  can't be used to sort in reverse order.  If you avoid the  IntStream , using a  Stream<Integer>  instead, then you can use a  Collections.reverseOrder()  to sort the stream in a reverse to the natural order.  Then you can call  mapToInt  and convert to  int[]  at the end. 
+
+  int[] arr = in.lines()
+            .map(Integer::valueOf)  // Extract Integer, not int
+            .sorted(Collections.reverseOrder())  // On Stream<Integer>
+            .limit(N)
+            .mapToInt(i -> i)       // map Integer to int
+            .toArray();
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:4 (https://stackoverflow.com/questions/2137766)
+  public class ArrayHandle {
+    public static Object[] reverse(Object[] arr) {
+        List<Object> list = Arrays.asList(arr);
+        Collections.reverse(list);
+        return list.toArray();
+    }
+}
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:5 (https://stackoverflow.com/questions/423602)
+  double[] array = new double[1048576];
+  
+
+ ... 
+
+ By default order is ascending  
+
+ To reverse the order  
+
+  Arrays.sort(array,Collections.reverseOrder());
+  
+
+
+

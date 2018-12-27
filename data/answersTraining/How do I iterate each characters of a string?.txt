@@ -1,0 +1,107 @@
+Query: How do I iterate each characters of a string?
+-----------------------------------------------------------------------
+
+Rank:1 (https://stackoverflow.com/questions/3013518)
+ String is not iterable? If you want to iterate over the characters you need to do something like this: 
+
+  String my = "Which form shall I use?";
+for(char c : my.toCharArray())
+    System.out.println(c);
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:2 (https://stackoverflow.com/questions/16817458)
+ You can validate and iterate over matches with one regex by: 
+
+ 
+  Ensuring there are no unmatched characters between matches (e.g.  name1=x;;name2=y; ) by putting a  \G  at the start of our regex, which mean https://docs.oracle.com/javase/7/docs/api/java/util/regex/Pattern.html.  
+  Checking whether we've reached the end of the string on our last match by comparing the length of our string to https://docs.oracle.com/javase/7/docs/api/java/util/regex/Matcher.html#end(), which returns the offset after the last character matched.  
+ 
+
+  
+
+  String line = "name1=gil;name2=orit;";
+Pattern p = Pattern.compile("\\G(\\w+)=(\\w+);");
+Matcher m = p.matcher(line);
+int lastMatchPos = 0;
+while (m.find()) {
+   System.out.println(m.group(1));
+   System.out.println(m.group(2));
+   lastMatchPos = m.end();
+}
+if (lastMatchPos != line.length())
+   System.out.println("Invalid string!");
+  
+
+ https://ideone.com/M9FMUO. 
+
+ 
+
+ Some languages might allow you to iterate over the individual matches directly from 
+ ^((\\w+)=(\\w+);)*$ , but I don't believe you can do this in Java. 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:3 (https://stackoverflow.com/questions/196834)
+ I use a for loop to iterate the string and use  charAt()  to get each character to examine it.  Since the String is implemented with an array, the  charAt()  method is a constant time operation. 
+
+  String s = "...stuff...";
+
+for (int i = 0; i < s.length(); i++){
+    char c = s.charAt(i);        
+    //Process char
+}
+  
+
+ That's what I would do.  . 
+
+ .  It is all based on your personal style. 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:4 (https://stackoverflow.com/questions/7189370)
+ Iterate over the characters of the String and while storing in a new array/string you can append one space before appending each character.  
+
+   
+
+  StringBuilder result = new StringBuilder();
+
+for(int i = 0 ; i < str.length(); i++)
+{
+   result = result.append(str.charAt(i));
+   if(i == str.length()-1)
+      break;
+   result = result.append(' ');
+}
+
+return (result.toString());
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:5 (https://stackoverflow.com/questions/22799728)
+ The problem is in how you iterate your strings. 
+
+ When going from English to Morse, it is ok to just iterate single characters as you do here 
+
+  for( int k = 0; k < inital.length(); k++) {
+    output += morse(inital.charAt( k ));
+}
+  
+
+ but when going from Morse to English you have to iterate several characters at once, because a symbol in Morse generally spans several characters. For instance, the Morse string  . ... ..  has three symbols that correspond to  abc  in English, but they have 2, 4 and 4 characters each. 
+
+ So when iterating your Morse string, you have to split it by spaces, and iterate each of the substrings. In the case above, you'll iterate  . , then  ...  and then  ..  
+
+  for(String symbol  inital2.split(" ")){
+    output2 += english(symbol);
+}
+  
+
+
+

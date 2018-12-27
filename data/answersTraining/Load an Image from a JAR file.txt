@@ -1,0 +1,118 @@
+Query: Load an Image from a JAR file
+-----------------------------------------------------------------------
+
+Rank:1 (https://stackoverflow.com/questions/20227910)
+ Your image has to be loaded from the file system, not from the .jar file itself. If your image is located elsewhere on your system (other directory than your .jar file is at), you should use a different file name than  MapBig.jpg . You can change the file name in your  map.data  file, or you add the default directory as prefix to the loaded file name from your  map.data  file.
+Whenever the files you want to load are loacated in the Jar file itself, you need to load them as resource. Check the example bellow: 
+
+  URL imgUrl = getClass().getResource(in.nextLine());
+ImageIcon imgIcon = new ImageIcon(imgUrl);
+Image img = imgIcon.getImage();
+  
+
+ If your image is located in a sub-directory, you need to prepend your file name with the proper directory path, for example: 
+
+  URL imgUrl = getClass().getResource("resources/" + in.nextLine());
+ImageIcon imgIcon = new ImageIcon(imgUrl);
+Image img = imgIcon.getImage();
+  
+
+ 
+
+ You should also debug whether the file name that needs to be loaded is correct. For example, temporarily replace  your  image = ImageIO.read(new File(in.nextLine()));  line with  System.out.println("File to load: " + in.nextLine().toString());  and make sure this name is correct. You can easily use the following script to automatically check whether the file (you're trying to load) exists, and print an error if that's not the case; 
+
+  File f = new File(in.nextLine());
+if(f.exists() && f.isFile())
+    image = ImageIO.read(f);
+else
+    System.out.println("Unable to load image, file doesn't exist: " + f.getName());
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:2 (https://stackoverflow.com/questions/927019)
+ You can load an image using 
+
+  BufferedImage img = ImageIO.read(new URL("http://stackoverflow.com/content/img/so/logo.png"));
+  
+
+ For methods how to display the loaded image, see the Sun http://java.sun.com/docs/books/tutorial/2d/images/index.html. 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:3 (https://stackoverflow.com/questions/12290352)
+ The way I usually embed imagery inside Java Jar files is I have a package in my  src  folder that contains all of my image files plus a single class called  Resource .  The class code is similar to the following: 
+
+  import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.net.URL;
+
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
+
+public class Resource{
+    public static BufferedImage loadImage(String imageFileName){
+        URL url = Resource.class.getResource(imageFileName);
+        if(url == null) return null;
+
+        try {
+            return ImageIO.read(url);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static ImageIcon loadIcon(String imageFileName){
+        BufferedImage i = loadImage(imageFileName);
+        if(i == null) return null;
+        return new ImageIcon(i);
+    }
+}
+  
+
+ Provided the  Resource  class and all of your image files reside in the same package, all you have to do is create a new  JLabel  with the  ImageIcon  returned by calling  loadIcon([simple filename]) .  This will work regardless of whether you're running in an IDE or from a Jar file. 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:4 (https://stackoverflow.com/questions/5036986)
+ The problem is the way you include the image file. You  will have to include the image in the JAR  when you create it, and you will have to access the image in a different manner: 
+
+  try {
+    InputStream is = ClassLoader.getSystemClassLoader().getResourceAsStream("wing16.png");
+    BufferedImage img = ImageIO.read(is);
+}
+catch (IOException e) {}
+  
+
+ You can just used the  img  variable to set the image in the JAR. 
+
+  Update:  
+
+ Take all of your class files & images and go to command line: 
+
+  jar -cvfm Test.jar Manifest.mft *.class image.png  
+
+ Replace  Manifest.mft  with your manifest file name. Replace  image.png  with the image you want to show up (you can include more images if you need to) 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:5 (https://stackoverflow.com/questions/17745354)
+ The problem is the way you include the image file as the image is inside your  . jar , use  getResource()  or  getResourceAsStream , try this: 
+
+   try {
+    InputStream inputStream= ClassLoader.getSystemClassLoader().getResourceAsStream("/images/Graph.png");
+//or getResourceAsStream("/images/Graph.png"); also returns inputstream
+
+  BufferedImage img = ImageIO.read(inputStream);
+    final TrayIcon trayIcon = new TrayIcon(img, "Application Name", popup);
+}
+   catch (IOException e) {}
+  
+
+
+

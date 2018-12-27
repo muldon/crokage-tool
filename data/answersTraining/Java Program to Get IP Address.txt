@@ -1,0 +1,139 @@
+Query: Java Program to Get IP Address
+-----------------------------------------------------------------------
+
+Rank:1 (https://stackoverflow.com/questions/2462421)
+  InetAddress.getByName("www.girionjava.com")
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:2 (https://stackoverflow.com/questions/38957191)
+ Throw the lines of the constructor into a specific function: 
+
+  protected boolean initThis(String pHost, int pPort) {
+    list = new LinkedList<ClientProcessor>();
+    host = pHost; // 192.168.1.135
+    port = pPort; // 35150
+    try {
+        // \/ Line 57 on my code (see stack trace) \/
+        server = new ServerSocket(port, 10, InetAddress.getByName(host));
+    } catch (BindException bind){
+        bind.printStackTrace(); //Here is the problem !!
+        return false;
+    } catch (UnknownHostException hoste) {
+        hoste.printStackTrace();
+        return false; // Change this to true if you want it to stop here
+    } catch (IOException ioe) {
+        ioe.printStackTrace();
+        return false; // Change to true to stop here
+    }
+    return true;
+}
+  
+
+  
+
+  protected TimeServer(String pHost, int pPort) {
+    while(!initThis(pHost, pPort))
+        Thread.sleep(500); // Wait 0.5 secs before retry
+}
+  
+
+ This will retry so many times until it works. 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:3 (https://stackoverflow.com/questions/2462433)
+  InetAddress giriAddress = java.net.InetAddress.getByName("www.girionjava.com");
+  
+
+ Then, if you want the IP as a String 
+
+  String address = giriAddress.getHostAddress();
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:4 (https://stackoverflow.com/questions/9286956)
+  
+
+  InetAddress address = InetAddress.getByName(new URL(urlString).getHost());
+  
+
+ To get the raw IP: 
+
+  String ip = address.getHostAddress();
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:5 (https://stackoverflow.com/questions/13780614)
+ The receiver must set port of receiver to match port set in sender DatagramPacket. For debugging try listening on port > 1024 (e.g. 8000 or 9000). Ports < 1024 are typically used by system services and need admin access to bind on such a port. 
+
+ If the receiver sends packet to the hard-coded port it's listening to (e.g. port 57) and the sender is on the same machine then you would create a loopback to the receiver itself. Always use the port specified from the packet and in case of production software would need a check in any case to prevent such a case. 
+
+ Another reason a packet won't get to destination is the wrong IP address specified in the sender. UDP unlike TCP will attempt to send out a packet even if the address is unreachable and the sender will not receive an error indication. You can check this by printing the address in the receiver as a precaution for debugging. 
+
+  
+
+   byte [] IP= { (byte)192, (byte)168, 1, 106 };
+ InetAddress address = InetAddress.getByAddress(IP);
+  
+
+ but might be simpler to use the address in string form: 
+
+   InetAddress address = InetAddress.getByName("192.168.1.106");
+  
+
+ In other words, you set target as 192.168.1.106. If this is not the receiver then you won't get the packet. 
+
+ Here's a simple UDP Receiver that works : 
+
+  import java.io.IOException;
+import java.net.*;
+
+public class Receiver {
+
+    public static void main(String[] args) {
+        int port = args.length == 0 ? 57 : Integer.parseInt(args[0]);
+        new Receiver().run(port);
+    }
+
+    public void run(int port) {    
+      try {
+        DatagramSocket serverSocket = new DatagramSocket(port);
+        byte[] receiveData = new byte[8];
+
+        System.out.printf("Listening on udp:%s:%d%n",
+                InetAddress.getLocalHost().getHostAddress(), port);     
+        DatagramPacket receivePacket = new DatagramPacket(receiveData,
+                           receiveData.length);
+
+        while(true)
+        {
+              serverSocket.receive(receivePacket);
+              String sentence = new String( receivePacket.getData(), 0,
+                                 receivePacket.getLength() );
+              System.out.println("RECEIVED: " + sentence);
+              // now send acknowledgement packet back to sender     
+              InetAddress IPAddress = receivePacket.getAddress();
+              String sendString = "polo";
+              byte[] sendData = sendString.getBytes("UTF-8");
+              DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length,
+                   IPAddress, receivePacket.getPort());
+              serverSocket.send(sendPacket);
+        }
+      } catch (IOException e) {
+              System.out.println(e);
+      }
+      // should close serverSocket in finally block
+    }
+}
+  
+
+
+

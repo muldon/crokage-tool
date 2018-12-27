@@ -1,0 +1,119 @@
+Query: Creating MySql database programatically in Java
+-----------------------------------------------------------------------
+
+Rank:1 (https://stackoverflow.com/questions/29957898)
+ I've been having the same problem for hours. I'm using MAMP Server 
+
+ Instead of using localhost:[Apache Port], use your MySQL port. 
+
+ Below is the default MySQL Port for MAMP server. 
+
+  String url = "jdbc:mysql://localhost:8889/db_name";
+
+Connection conn = DriverManager.getConnection(url, dbUsername, dbPassword);
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:2 (https://stackoverflow.com/questions/38024502)
+ The easy approach to problem is : 
+
+  package Database;
+import java.sql.*;
+
+public class Database {
+
+ public static void main(String[] args) {
+    final  String URl = "JDBC:mysql:/localhost:3306/info";
+    final  String id = "root";
+    final  String  password = "";
+
+    try
+    {
+        Connection con1 = DriverManager.getConnection(URl,id,password);
+        Statement s1 = con1.createStatement();
+        String s = "CREATE DATABASE CLASSIFIED";
+        s1.executeUpdate(s);
+
+    }
+    catch(SQLException err)
+    {
+        System.out.println(err.getMessage());
+    }
+
+ }
+
+}
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:3 (https://stackoverflow.com/questions/25333505)
+ I thing you have to use this: 
+
+  DriverManager.getConnection("jdbc:mysql://" + this.hostname + ":" + this.port + "/" + this.database, this.user, this.password);
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:4 (https://stackoverflow.com/questions/48921151)
+ You can also try adding the database name to the connection url. Modify your  getConnection()  method like this. 
+
+  public static Connection getConnection(String dbName) throws Exception {
+    String driver = "org.gjt.mm.mysql.Driver";
+    String url = "jdbc:mysql://localhost:3306/" + ((dbName != null)? (dbName) : (""));
+    String username = "root";
+    String password = "";
+    Class.forName(driver);
+    Connection conn = DriverManager.getConnection(url, username, password);
+    return conn;
+}
+  
+
+ Call  getConnection(null)  for creating the database, and call  getConnection("Employess")  after creation of database. 
+
+  conn = getConnection(null);
+stmt = conn.createStatement();
+stmt.executeUpdate("CREATE DATABASE Employess");
+stmt.close();
+conn.close();
+
+conn = getConnection("Employess");
+stmt = conn.createStatement();
+stmt.executeUpdate(EMPLOYEE_TABLE);
+stmt.executeUpdate("insert into MyEmployees3(id, firstName) values(100, 'A')");
+stmt.executeUpdate("insert into MyEmployees3(id, firstName) values(200, 'B')");
+System.out.println("CreateEmployeeTableMySQL: main(): table created.");
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:5 (https://stackoverflow.com/questions/584929)
+ Unless you have to use the jdbc/odbc driver I would use the straight mysql jdbc driver.  You can download it free from mysql. 
+
+ then  
+
+  public void LoadDriver() {
+
+        // Load the JDBC-ODBC bridge driver
+        try {
+                Class.forName("com.mysql.jdbc.Driver");
+        } catch (ClassNotFoundException ee) {
+                ee.printStackTrace();
+        }
+}
+
+static void connect() throws SQLException {
+
+        // Connect to the database
+        Connection con = DriverManager.getConnection("jdbc:mysql:host/databasename", "root", "admin");
+        Statement stmt = con.createStatement();
+...
+  
+
+
+

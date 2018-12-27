@@ -1,0 +1,170 @@
+Query: List XML element Attributes
+-----------------------------------------------------------------------
+
+Rank:1 (https://stackoverflow.com/questions/24494789)
+ You can get Id using Element: 
+
+  // Get the main element by tag name
+Node bus = doc.getElementsByTagName("bus").item(0);
+
+//get a NodeList
+NodeList list = bus.getChildNodes();
+for (int i = 0; i < list.getLength(); i++) {
+    Node node = list.item(i);
+    System.out.println("\nCurrent Element :" + node.getNodeName());
+    if (node.getNodeType() == Node.ELEMENT_NODE) {
+        Element eElement = (Element) node;
+        System.out.println(" id : " + eElement.getAttribute("id"));
+    }
+}
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:2 (https://stackoverflow.com/questions/17776302)
+ The  @XmlValue  can be applied to a  List  property.  With this mapping the list items will be represented as a space separated list in the XML.  You can do the following: 
+
+  Element  
+
+  import java.util.List;
+import javax.xml.bind.annotation.*;
+
+@XmlRootElement
+@XmlAccessorType(XmlAccessType.FIELD)
+public class Element {
+
+    @XmlAttribute
+    private String attribute1;
+
+    @XmlAttribute
+    private String attribute2;
+
+    @XmlAttribute
+    private String attribute3;
+
+    @XmlValue
+    private List<String> value;
+
+}
+  
+
+    
+
+  import java.io.File;
+import javax.xml.bind.*;
+
+public class  {
+
+    public static void main(String[] args) throws Exception {
+        JAXBContext jc = JAXBContext.newInstance(Element.class);
+
+        Unmarshaller unmarshaller = jc.createUnmarshaller();
+        File xml = new File("src/forum17775900/input.xml");
+        Element element = (Element) unmarshaller.unmarshal(xml);
+
+        Marshaller marshaller = jc.createMarshaller();
+        marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+        marshaller.marshal(element, System.out);
+    }
+
+}
+  
+
+  input.xml/Output  
+
+  <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<element attribute1="a" attribute2="b" attribute3="c">a b c d e f g</element>
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:3 (https://stackoverflow.com/questions/18509098)
+ You could iterate over the list marshalling each item individually.  You will need to set the  JAXB_FRAGMENT  property on the  Marshaller  to prevent the XML header from being written out.  You will only need to create the  JAXBContext  and  Marshaller  once for this use case. 
+
+  import java.io.FileOutputStream;
+import java.util.*;
+import javax.xml.bind.*;
+
+public class Demo {
+
+    public static void main(String[] args) throws Exception {
+        JAXBContext jc = JAXBContext.newInstance(Element.class);
+        Marshaller marshaller = jc.createMarshaller();
+        marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+        marshaller.setProperty(Marshaller.JAXB_FRAGMENT, true);
+
+        List<Element> elements = new ArrayList<>();
+        elements.add(new Element());
+        elements.add(new Element());
+
+        try(FileOutputStream fos = new FileOutputStream("src/forum18509018/out.txt")) {
+           for(Element element : elements) {
+               marshaller.marshal(element, fos);
+           }
+        }
+    }
+
+}
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:4 (https://stackoverflow.com/questions/16954999)
+ eElement.getElementsByTagName(sTag) or eElement.getElementsByTagName(sTag).item(0) return null. Try splitting that insturction to figure out: 
+
+  NodeList nl = eElement.getElementsByTagName(sTag);
+Node n = nl.item(0);
+nlList = n.getChildNodes();
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:5 (https://stackoverflow.com/questions/22072645)
+ If you look at NodeList's documentation, you'll see that it has only two methods:  getLength()  (which you've used) and  Node item(int index) . 
+
+ So your loop will be: 
+
+  for (int i = 0; i < indexEntryList.getLength(); i++) {
+    Node node = indexEntryList.item(i);
+    // do something with node
+}
+  
+
+ ... and what you want to do with node, is find its attributes. 
+
+   NamedNodeMap attributes = node.getAttributes();
+ if(attributes != null) {
+       for(int j=0;j < attributes.getLength(); j++) {
+           Node attribute = attributes.item(j);
+           // do something with node and attribute
+       }
+ }
+  
+
+ ... so what do you want to do with your attribute and its node? I'm not sure, but I  think  your intent is that  map.get(attributeName)  returns a list of nodes containing that element. 
+
+  
+
+    // get the list for this element, or create one
+  List list = map.get(attribute.getName());
+  if(list == null) {
+     list = new ArrayList();
+     map.put(attribute.getName(), list);
+  }
+  // add the node we're working with to that list
+  list.add(node);
+  
+
+ A few notes here: 
+
+ 
+ you might be better off with a Set than a List, because you could end up adding the same node to a list many times. 
+ I really recommend putting each of these blocks into a separate method, calling one from the other -- that is, where I've put  do something... , have a method call. That gives you smaller chunks of code that are easier to understand and easier to test; it would also mean that you could call the loop counter 'i' in both 'for' loops. 
+ 
+
+
+

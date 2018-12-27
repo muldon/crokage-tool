@@ -1,0 +1,226 @@
+Query: How do I retrieve available schemas in database?
+-----------------------------------------------------------------------
+
+Rank:1 (https://stackoverflow.com/questions/23289220)
+ You can combine the multiple schemas into a single schema programmatically and then validate against the combined schema. 
+
+ SchemaFactory.newSchema() has a variant that takes an array of source documents, and combines them into a single Schema instance. However, this method is documented to behave as if creating a new schema document with import directives for each of the source documents. As a result, you can't combine source files with the same target namespace, and you must order the source documents so that definitions in one namespace are available when requested from another (I haven't found anything in the docs to justify this). 
+
+ Provided that your schema documents are accessible via URL or filesystem, the best solution is to create a single top-level schema document, and use explicit import and include directives to reference your definitions.  
+
+ Below code may help in getting starting: 
+
+  URL xsdUrlA = this.getClass().getResource("a.xsd");
+URL xsdUrlB = this.getClass().getResource("b.xsd");
+
+SchemaFactory schemaFactory = schemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+//---
+String W3C_XSD_TOP_ELEMENT =
+"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n"
++ "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" elementFormDefault=\"qualified\">\n"
++ "<xs:include schemaLocation=\"" +xsdUrlB.getPath() +"\"/>\n"
++ "<xs:include schemaLocation=\"" +xsdUrlA.getPath() +"\"/>\n"
++"</xs:schema>";
+Schema schema = schemaFactory.newSchema(new StreamSource(new StringReader(W3C_XSD_TOP_ELEMENT), "xsdTop"));
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:2 (https://stackoverflow.com/questions/3751051)
+ http://www.kdgregory.com/index.php?page=xml.parsing 
+section ' Multiple schemas for a single document ' 
+
+  My solution based on that document:   
+
+  URL xsdUrlA = this.getClass().getResource("a.xsd");
+URL xsdUrlB = this.getClass().getResource("b.xsd");
+URL xsdUrlC = this.getClass().getResource("c.xsd");
+
+SchemaFactory schemaFactory = schemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+//---
+String W3C_XSD_TOP_ELEMENT =
+"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n"
+   + "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" elementFormDefault=\"qualified\">\n"
+   + "<xs:include schemaLocation=\"" +xsdUrlA.getPath() +"\"/>\n"
+   + "<xs:include schemaLocation=\"" +xsdUrlB.getPath() +"\"/>\n"
+   + "<xs:include schemaLocation=\"" +xsdUrlC.getPath() +"\"/>\n"
+   +"</xs:schema>";
+Schema schema = schemaFactory.newSchema(new StreamSource(new StringReader(W3C_XSD_TOP_ELEMENT), "xsdTop"));
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:3 (https://stackoverflow.com/questions/20565182)
+ Since your XML document has 2 namespaces ( http://www.domain.com/ws/protocol  &  http://www.domain.com/ws ) you are going to need 2 XML schemas to represent it.  One schema can reference another with an  import  element. 
+
+ XML Schemas 
+
+ Below I have started the XML Schemas that you will need for your XML. 
+
+  ws.xsd (for  http://www.domain.com/ws  namespace)  
+
+ This is part of the XML schema for the  http://www.domain.com/ws .  The whole one is what you have already generated. 
+
+  <?xml version="1.0" encoding="UTF-8"?>
+<schema 
+    xmlns="http://www.w3.org/2001/XMLSchema" 
+    targetNamespace="http://www.domain.com/ws" 
+    xmlns:tns="http://www.domain.com/ws" 
+    elementFormDefault="qualified">
+
+    <element name="ServiceResultObject">
+        <complexType>
+            <sequence/>
+            <attribute name="isin" type="string"/>
+        </complexType>
+    </element>
+
+</schema>
+  
+
+  .xsd (for  http://www.domain.com/ws/protocol  namespace)  
+
+ Here is a partial version of the schema that you are missing for the  http://www.domain.com/ws/protocol  namespace.  Note the  import  element that references the other XML Schema, and  <element ref="ws:ServiceResultObject"/>  which references an element from the other XML Schema. 
+
+  <?xml version="1.0" encoding="UTF-8"?>
+<schema 
+    xmlns="http://www.w3.org/2001/XMLSchema" 
+    targetNamespace="http://www.domain.com/ws/protocol" 
+    xmlns:tns="http://www.domain.com/ws/protocol"
+    xmlns:ws="http://www.domain.com/ws" 
+    elementFormDefault="qualified">
+
+    <import namespace="http://www.domain.com/ws" schemaLocation="ws.xsd"/>
+
+    <element name="Message">
+        <complexType>
+            <sequence>
+                <element name="HeaderMessage">
+                    <complexType>
+                        <sequence>
+                            <element name="MSGTYPE" type="string"/>
+                        </sequence>
+                    </complexType>
+                </element>
+                <element name="BodyMessage">
+                    <complexType>
+                        <sequence>
+                            <element ref="ws:ServiceResultObject"/>
+                        </sequence>
+                    </complexType>
+                </element>
+            </sequence>
+        </complexType>
+    </element>
+
+</schema>
+  
+
+ Creating the JAXBContext 
+
+ Once you have the two XML Schemas the classes will generate to 2 different packages.  Below is an example of how to bootstrap the  JAXBContext .  Note that the package names are delimited by the  :  character. 
+
+  JAXBContext jc = JAXBContext.newInstance("com.domain.ws:com.domain.ws.protocol");
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:4 (https://stackoverflow.com/questions/9554901)
+ If it's Oracle, then run the below query using JDBC 
+
+  SELECT YOUR_SEQUENCE.NEXTVAL FROM DUAL
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:5 (https://stackoverflow.com/questions/25640847)
+ "YES" 
+
+ If you have an xsd you also could generate automatically these classes by  <artifactId>maven-jaxb2-plugin</artifactId> maven plugin. 
+
+ An example of your Class 
+
+  import java.io.Serializable;
+
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlType;
+
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlType(name = "objectFromSchema1", propOrder = {
+
+})
+@XmlRootElement(name = "objectFromSchema1")
+public class ObjectFromSchema1
+implements Serializable
+{
+
+    private final static long serialVersionUID = 12343L;
+    protected String element1;
+    protected String element2;
+    protected String commonElement1;
+    protected String commonElement2;
+    public String getElement1() {
+        return element1;
+    }
+    public void setElement1(String element1) {
+        this.element1 = element1;
+    }
+    public String getElement2() {
+        return element2;
+    }
+    public void setElement2(String element2) {
+        this.element2 = element2;
+    }
+    public String getCommonElement1() {
+        return commonElement1;
+    }
+    public void setCommonElement1(String commonElement1) {
+        this.commonElement1 = commonElement1;
+    }
+    public String getCommonElement2() {
+        return commonElement2;
+    }
+    public void setCommonElement2(String commonElement2) {
+        this.commonElement2 = commonElement2;
+    }
+
+}
+  
+
+ Main method to use it 
+
+  public static void main(String[] args) throws JAXBException {
+        final JAXBContext context = JAXBContext.newInstance(ObjectFromSchema1.class);
+        final Marshaller m = context.createMarshaller();
+        m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+
+        final ObjectFromSchema1 objectFromSchema1 = new ObjectFromSchema1();
+
+        objectFromSchema1.setCommonElement1("commonElement1");
+        objectFromSchema1.setCommonElement2("commonElement2");
+        objectFromSchema1.setElement1("element1");
+        objectFromSchema1.setElement2("element2");
+
+        m.marshal(objectFromSchema1, System.out);
+    }
+  
+
+ output 
+
+  <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<objectFromSchema1>
+    <element1>element1</element1>
+    <element2>element2</element2>
+    <commonElement1>commonElement1</commonElement1>
+    <commonElement2>commonElement2</commonElement2>
+</objectFromSchema1>
+  
+
+
+

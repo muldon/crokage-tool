@@ -1,0 +1,130 @@
+Query: How to Load an image and write text to it
+-----------------------------------------------------------------------
+
+Rank:1 (https://stackoverflow.com/questions/7894297)
+ You'd typically 
+
+ 
+ Create a new  BufferedImage  ( dst  below) with the desired width and height. 
+ Get hold of it's  Graphics  object 
+ Load the original .jpeg image ( src  below) 
+ Paint the desired part of that, onto the  BufferedImage  
+ Write the buffered image out to file using  ImageIO . 
+ 
+
+ In code: 
+
+  Image src = ImageIO.read(new File("duke.jpg"));
+
+int x = 10, y = 20, w = 40, h = 50;
+
+BufferedImage dst = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+dst.getGraphics().drawImage(src, 0, 0, w, h, x, y, x + w, y + h, null);
+
+ImageIO.write(dst, "png", new File("duke_cropped.png"));
+  
+
+   .jpg...  
+
+   
+
+  ...It generates this .  
+
+   
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:2 (https://stackoverflow.com/questions/34855858)
+  File fileToWrite = new File(filePath, "url");
+
+BufferedImage bufferedImage = cropImage(fileToWrite, x, y, w, h);
+
+private BufferedImage cropImage(File filePath, int x, int y, int w, int h){
+
+    try {
+        BufferedImage originalImgage = ImageIO.read(filePath);
+
+        BufferedImage subImgage = originalImgage.getSubimage(x, y, w, h);
+
+
+
+        return subImgage;
+    } catch (IOException e) {
+        e.printStackTrace();
+        return null;
+    }
+}
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:3 (https://stackoverflow.com/questions/17802477)
+ Try the below code 
+
+  import java.awt.Color;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import javax.imageio.ImageIO;
+
+public class Testing {
+    public static void main(String arg[]) throws IOException {
+        String key = "Sample";
+        BufferedImage bufferedImage = new BufferedImage(170, 30,
+                BufferedImage.TYPE_INT_RGB);
+        Graphics graphics = bufferedImage.getGraphics();
+        graphics.setColor(Color.LIGHT_GRAY);
+        graphics.fillRect(0, 0, 200, 50);
+        graphics.setColor(Color.BLACK);
+        graphics.setFont(new Font("Arial Black", Font.BOLD, 20));
+        graphics.drawString(key, 10, 25);
+        ImageIO.write(bufferedImage, "jpg", new File(
+                "C:/Users/admin/desktop/image.jpg"));
+        System.out.println("Image Created");
+    }
+}
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:4 (https://stackoverflow.com/questions/3340263)
+ Here's a method to draw text on an image: 
+
+  public void displayText(BufferedImage image, String text, Font font, int x, int y){
+   Graphics2d g = image.createGraphics();
+   g.setFont(font);
+   g.drawString(text, x, y);
+   g.dispose();
+}
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:5 (https://stackoverflow.com/questions/10929569)
+ It's easy, just get the  Graphics  object from the image and draw your string onto the image. This example (and output image) is doing that: 
+
+  public static void main(String[] args) throws Exception {
+    final BufferedImage image = ImageIO.read(new URL(
+        "http://upload.wikimedia.org/wikipedia/en/2/24/Lenna.png"));
+
+    Graphics g = image.getGraphics();
+    g.setFont(g.getFont().deriveFont(30f));
+    g.drawString("Hello World!", 100, 100);
+    g.dispose();
+
+    ImageIO.write(image, "png", new File("test.png"));
+}
+  
+
+ Output ( test.png ): 
+
+   
+
+
+

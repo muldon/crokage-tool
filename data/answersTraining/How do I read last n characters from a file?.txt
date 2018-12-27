@@ -1,0 +1,94 @@
+Query: How do I read last n characters from a file?
+-----------------------------------------------------------------------
+
+Rank:1 (https://stackoverflow.com/questions/33198153)
+ You are trying to convert bytes into characters. 
+
+ However, the character  ľ  is not represented as a single byte. Its unicode representation is U+013E, and its UTF-8 representation is C4 BE. Thus, it is represented by two bytes. The same is true for the other characters. 
+
+ Suppose the encoding of your file is UTF-8. Then you read the byte value  C4 , and then you convert it to a  char . This will give you the character U+00C4 (Ä),  not  U+013E. Then you read the  BE , and it is converted to the character U+00BE (¾). 
+
+ So don't confuse bytes and characters. Instead of using the  InputStream  directly, you should wrap it with a  Reader . A  Reader  is able to read charecters based on the encoding it is created with: 
+
+  BufferedReader reader = new BufferedReader(
+                            new InputStreamReader(
+                                new FileInputStream(f), StandardCharsets.UTF_8
+                            )
+                        );
+  
+
+ Now, you'll be able to read characters or even whole lines and the encoding will be done directly. 
+
+  int readVal;
+while ( ( readVal = reader.read() ) != -1 ) {
+    curr = (char)readVal;
+    // ... the rest of your code
+}
+  
+
+ Remember that you are still reading an  int  if you are going to use  read()  without parameters. 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:2 (https://stackoverflow.com/questions/495699)
+  (...)
+FileReader r= new FileReader(filePath);
+StringBuilder b=new StringBuilder();
+int n=0;
+char array[]=new char[1024];
+while((n=r.read(array))!=-1) b.append(array,0,n);
+r.close();
+String content=b.toString();
+textArea.setText(content.substring(0,content.lengt()-1);
+(...)
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:3 (https://stackoverflow.com/questions/29078127)
+ You can use  java.io.RandomAccessFile  class: 
+
+  private static byte[] readFromFile(String filePath, int position, int size) throws IOException 
+{
+    RandomAccessFile file = new RandomAccessFile(filePath, "r");
+    file.seek(position);
+    byte[] bytes = new byte[size];
+    file.read(bytes);
+    file.close();
+    return bytes;
+ }
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:4 (https://stackoverflow.com/questions/6616996)
+  Looking at the source code it reads chunks of  4096  bytes which can be seen on line  129  of http://search-lucene.com/c/Tika:/tika-parsers/src/main/java/org/apache/tika/parser/txt/TXTParser.java%7C%7C+%2522plain+not%2522. At line  132  the  characters(...)  routine is invoked.  
+
+ In short, the target code is:  
+
+     char[] buffer = new char[4096];
+   int n = reader.read(buffer);
+   while (n != -1) {
+       xhtml.characters(buffer, 0, n);
+       n = reader.read(buffer);
+   }
+  
+
+ where  reader  is a  BufferedReader . I cannot see any flaw in this code, hence I'm thinking you might be working an older version? 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:5 (https://stackoverflow.com/questions/20155909)
+ You have to do it by using http://docs.oracle.com/javase/6/docs/api/java/io/RandomAccessFile.html. Instances of this class support both reading and writing to a random access file. A random access file behaves like a large array of bytes stored in the file system.  
+
+ <code randomAccessFile = new RandomAccessFile(your_file, "r");
+randomAccessFile.seek(your_file.length() - n); 
+randomAccessFile.read(byteArray, 0, n);
+  
+
+
+

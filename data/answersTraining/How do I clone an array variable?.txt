@@ -1,0 +1,179 @@
+Query: How do I clone an array variable?
+-----------------------------------------------------------------------
+
+Rank:1 (https://stackoverflow.com/questions/12802148)
+ You can use http://docs.oracle.com/javase/6/docs/api/java/util/Arrays.html#copyOf or http://docs.oracle.com/javase/1.4.2/docs/api/java/lang/System.html#arraycopy%28java.lang.Object,%20int,%20java.lang.Object,%20int,%20int%29 to copy an array, or, more simply, clone(): 
+
+  Card[] temp = rummyHand.getHand().clone();
+  
+
+ Note that using the  =  operator never  copies  any data. All  =  does is make a variable refer to a different thing. This is important to understand because otherwise it will cause you a lot of trouble down the road. 
+
+ In (hopefully useful) detail: 
+
+  new Card[8];
+  
+
+ creates an array: a new area of memory big enough to hold pointers to 8 cards. 
+
+  Card[] temp
+  
+
+ creates a variable that must point to some kind of array of cards.  
+
+  =
+  
+
+ in the middle makes the variable point to that area of memory.  expression 
+
+  rummyHand.getHand();
+  
+
+ supplies you with the address of a different area of memory.  
+
+  temp = rummyHand.getHand();
+  
+
+ just makes the  temp  variable point to that area of memory instead.  copyOf ,  arrayCopy  and  clone  all work by creating a new array and filling it with the references from the original array, then handing you back the new array. 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:2 (https://stackoverflow.com/questions/27357042)
+ It is possible to use streams in Java 8 to copy a 2D array. 
+
+  @Test
+public void testCopy2DArray() {
+   int[][] data = {{1, 2}, {3, 4}};
+   int[][] dataCopy = Arrays.stream(data)
+             .map((int[] row) -> row.clone())
+             .toArray((int length) -> new int[length][]);
+
+   assertNotSame(data, dataCopy);
+   assertNotSame(data[0], dataCopy[0]);
+   assertNotSame(data[1], dataCopy[1]);
+
+   dataCopy[0][1] = 5;
+   assertEquals(2, data[0][1]);
+   assertEquals(5, dataCopy[0][1]);
+}
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:3 (https://stackoverflow.com/questions/9942358)
+ You need to use array's  clone()  method to make its copy: 
+
+  //for example
+int[][] copy = (int[][])arraySource.clone();
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:4 (https://stackoverflow.com/questions/47773245)
+ 
+   Is there any issue of cloning of an interface object or any other
+  issue? 
+ 
+
+ Conceptually, it is not right. 
+You don't clone interfaces. 
+You clone only instances. 
+So it means that in your case you want also to clone the interface implementations.  
+
+ 
+   My question is I have five variables other than interface variable
+  while cloning all five variables is getting but not this interface
+  variable. 
+ 
+
+ These variables are very probably primitives and the default  clone()  behavior is "fine" as primitives copy means primitive assignments such as  clone.myInt = original.myInt  and this doesn't result to a shared  myInt   variable between the original and the cloned object.  
+
+ But this one :  
+
+  private ValueChangeObserver observer = null;
+  
+
+ .  
+
+ So as you clone a  BaseModelItem  instance, the  observer  field will reference exactly the same object in the original and the cloned object.  
+
+ So you should specify how to clone that variable. 
+You should rather write something like : 
+
+  private ValueChangeObserver observer = null;
+...
+@Override
+public WiSeConBaseModelItem clone() {
+    WiSeConBaseModelItem clonedItem = (WiSeConBaseModelItem) super.clone();
+    cloneItem.observer = observer.clone();
+    return clonedItem;
+}
+  
+
+ So it means you will have to override  clone()  in each implementation of  ValueChangeObserver  but you will also have to defined  clone()  in  ValueChangeObserver  as it doesn't declare it :  
+
+  public interface ValueChangeObserver {
+   onChanged(Object obj);
+}
+  
+
+ In fact, you should not even use  clone()  and  Cloneable() . 
+All that should make you realize that overriding  clone()  is complicate, error prone (and it has also a important limitation for  final  fields contained by mutable class as you cannot reassigned a  final  field). 
+
+ So just forget  clone()  and favor rather the use of a copy constructor : 
+
+  public WiSeConBaseModelItem copy() {
+     WiSeConBaseModelItem copy = new WiSeConBaseModelItem(primitiveOne, primitiveTwo, primitiveThree, observer.copy() ...);
+     return copy;
+}
+  
+
+ You may also use reflection libraries to perform copies. 
+It avoids writing boiler plate code. 
+Note that the processing time may be a little more important. . 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:5 (https://stackoverflow.com/questions/31661719)
+   .clone()  method you can get a copy of the  Object  rather than a reference to it.  
+
+ As @CharlesDurham said : 
+
+ 
+    .clone()  will produce a shallow copy, it's a new instance of Card but if c has any object references the new Card will have the same references as c, Unless you implement the Cloneable interface, then you can implement deep cloning. 
+ 
+
+  Array<Cards> cards = new Array<Cards>();
+
+//add items to cards
+
+Iterator<Cards> iterator = cards.iterator();
+while(iterator.hasNext()){
+      Cards c = iterator.next();
+      Cards Temp = c.clone();
+      //when i change values of temp...the value of c also changes
+      //overall changing the value of cards
+}
+  
+
+ Alternately you can make a  new Cards(c)  like so: 
+
+  Array<Cards> cards = new Array<Cards>();
+
+//add items to cards
+
+Iterator<Cards> iterator = cards.iterator();
+while(iterator.hasNext()){
+      Cards c = iterator.next();
+      Cards Temp = new Cards(c);
+      //when i change values of temp...the value of c also changes
+      //overall changing the value of cards
+}
+  
+
+
+

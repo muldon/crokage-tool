@@ -1,0 +1,121 @@
+Query: Compare the contents of two Streams to determine if they are equal or not
+-----------------------------------------------------------------------
+
+Rank:1 (https://stackoverflow.com/questions/13501200)
+ You could sort both lists using  Collections.sort()  and then use the equals method. A slighly better solution is to first check if they are the same length before ordering, if they are not, then they are not equal, then sort, then use equals. For example if you had two lists of Strings it would be something like: 
+
+  public  boolean equalLists(List<String> one, List<String> two){     
+    if (one == null && two == null){
+        return true;
+    }
+
+    if((one == null && two != null) 
+      || one != null && two == null
+      || one.size() != two.size()){
+        return false;
+    }
+
+    //to avoid messing the order of the lists we will use a copy
+    //as noted in comments by A. R. S.
+    one = new ArrayList<String>(one); 
+    two = new ArrayList<String>(two);   
+
+    Collections.sort(one);
+    Collections.sort(two);      
+    return one.equals(two);
+}
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:2 (https://stackoverflow.com/questions/7819620)
+  import java.io.*;
+
+public class Testing {
+public static void main(String[] args) throws java.io.IOException {
+
+    BufferedReader bfr2 = new BufferedReader(new InputStreamReader(
+            System.in));
+    String s1 = "";
+    String s2 = "", s3 = "", s4 = "";
+    String y = "", z = "";
+
+    File file1 = new File("args[0]");
+    File file2 = new File("args[1]");
+
+    BufferedReader bfr = new BufferedReader(new FileReader(file1));
+    BufferedReader bfr1 = new BufferedReader(new FileReader(file2));
+
+    while ((z = bfr1.readLine()) != null)
+        s3 += z;
+
+    while ((y = bfr.readLine()) != null)
+        s1 += y;
+
+    System.out.println();
+
+    System.out.println(s3);
+
+    if (s3.equals(s1)) {
+        System.out.println("Content of both files are same");
+    } else {
+
+        System.out.println("Content of both files are not same");
+    }
+}
+}
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:3 (https://stackoverflow.com/questions/33227728)
+ Assuming both the lists will have equal number of elements, you can make use of  IntStream  as: 
+
+  List<String> inputNameList = new ArrayList<String>();
+inputNameList.add("ram");
+inputNameList.add("shyam");
+inputNameList.add("hari");
+
+List<String> outputNameList = new ArrayList<String>();
+outputNameList.add("ram");
+outputNameList.add("shyaM");
+outputNameList.add("ram");
+
+IntStream.range(0,inputNameList.size()).forEach(i -> {
+    if(inputNameList.get(i).equals(outputNameList.get(i))) System.out.println(i);
+});
+  
+
+ This will print the index when elements are equal at that index in the lists. You can modify it as per your requirement. 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:4 (https://stackoverflow.com/questions/46728479)
+  public static boolean equalStreams(Stream<?>...streams) {
+    List<Iterator<?>>is = Arrays.stream(streams).map(Stream::iterator).collect(Collectors.toList());
+    while(is.stream().allMatch(Iterator::hasNext))
+        if(is.stream().map(Iterator::next).distinct().limit(2).count()>1) return false;
+    return is.stream().noneMatch(Iterator::hasNext);
+}
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:5 (https://stackoverflow.com/questions/10976656)
+ In this way you are not comparing contents... you are comparing references. 
+
+ If you want to compare contents then use 
+
+  publisher.equals("Niho books")
+
+or 
+
+publisher.equalsIgnoreCase("Niho books")
+  
+
+
+

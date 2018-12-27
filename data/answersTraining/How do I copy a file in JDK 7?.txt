@@ -1,0 +1,90 @@
+Query: How do I copy a file in JDK 7?
+-----------------------------------------------------------------------
+
+Rank:1 (https://stackoverflow.com/questions/8756390)
+ The native zip support in jre can do it.  
+
+  void substitute(ZipInputStream zis, ZipOutputStream zos) {
+  for (ZipEntry ze = zis.getNextEntry(); ze != null; ze = zis.getNextEntry()) {
+    if (ze.getName() is what you want to copy) {
+      zos.putNextEntry(ze)
+      Array[Byte] buffer = new Array[Byte](1024)
+      for (int read = zis.read(buffer); read != -1; read = zis.read(buffer)) {
+        zos.write(buffer, 0, read)
+      }
+      zos.closeEntry
+    }
+  }
+  zos.close()
+  zis.close()
+}
+  
+
+ Note: the data inside zip file is decompressed and compressed again. 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:2 (https://stackoverflow.com/questions/14464653)
+ Just copy this file : 
+
+  c:/Program Files/Java/jre(5,6,7..any version)/bin/javaw.exe
+  
+
+ to Eclipse Folder  
+
+ *note only tested for Windows  
+
+   
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:3 (https://stackoverflow.com/questions/43535994)
+ As I figured the best way to tackle this is to add the following configuration to your eclipse.ini to make sure it uses the jdk copy of javaw while running eclipse instead of the JRE copy which solves the problem and seems to be the correct approach to fix the issue 
+
+  -vm
+C:/Program Files/Java/jdk1.8.0_73/bin/javaw.exe
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:4 (https://stackoverflow.com/questions/24471207)
+ Search for the  vecmath  file, you may find it in  /usr/share/java . 
+
+ Copy the contents of this folder to  /jdk_installation_folder/jre/lib/ext . 
+
+ For me, it is  /usr/lib/jvm/java-7-openjdk-amd64/jre/lib/ext . 
+
+ To copy you can use either the  cp -command or change the  ext  folder permission to  777  using  chmod . 
+
+  $ chmod 777 /usr/lib/jvm/java-7-openjdk-amd64/jre/lib/ext
+  
+
+ Then copy all the files in file explorer. 
+
+  $ chmod 755 /usr/lib/jvm/java-7-openjdk-amd64/jre/lib/ext
+  
+
+ If you do did not find the  vecmath.jar  file, then download and install it.  
+
+  apt-get install libvecmath-java
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:5 (https://stackoverflow.com/questions/25309586)
+ You seem on to something interesting. Under Linux someone is allowed to be holding a file handle to the original file, when you open it, actually deleting the directory entry and starting afresh. This does not bother the original file (handle). On closing than, maybe some disk directory work happens. 
+
+ Test it with IOUtils.copyLarge and Files.copy: 
+
+  Path target = Paths.get("/home/d1x/temp/500mb.out");
+Files.copy(fis, target, StandardCopyOption.REPLACE_EXISTING);
+  
+
+ (I once saw a IOUtils.copy that just called copyLarge, but Files.copy should act nice.) 
+
+
+

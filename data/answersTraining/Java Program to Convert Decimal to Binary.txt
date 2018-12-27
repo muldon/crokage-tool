@@ -1,0 +1,85 @@
+Query: Java Program to Convert Decimal to Binary
+-----------------------------------------------------------------------
+
+Rank:1 (https://stackoverflow.com/questions/12525696)
+ I would use toBinaryString to check your result all the same 
+
+  int decimalInput = 19070;
+System.out.println(Integer.toBinaryString(decimalInput));
+  
+
+  
+
+  100101001111110
+  
+
+ as does your program so its correct! 
+
+ Note: your program won't display negative numbers at all. 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:2 (https://stackoverflow.com/questions/25980142)
+  int num = Integer.parseInt("binaryString",2);
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:3 (https://stackoverflow.com/questions/26008590)
+ You can create a binary string and convert it to decimal and then to hex: 
+
+      int[] arr = {0,0,0,0,0,1,0,1,0,1,0,0,0,0,1,1,1,0,0,1,1,1,0,1};
+    int i = 0;
+    while (i < arr.length) {
+        String res = "";
+        for(int j = 0; j < 8; j++) {
+            res += arr[i];
+            i++;
+        }
+        System.out.println(Integer.toHexString(Integer.parseInt(res, 2)));
+    }
+  
+
+  OUTPUT  
+
+  5
+43
+9d
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:4 (https://stackoverflow.com/questions/26311732)
+  Integer.toString(n,8) // decimal to octal
+
+Integer.toString(n,2) // decimal to binary
+
+Integer.toString(n,16) //decimal to Hex
+  
+
+ where n = decimal number. 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:5 (https://stackoverflow.com/questions/34122171)
+ Split each line read by the  while  loop using http://docs.oracle.com/javase/7/docs/api/java/lang/String.html#split%28java.lang.String%29, and iterate the split values: 
+
+  String text = null;
+while ((text = reader.readLine()) != null) {
+    for (String value : text.split("\\s+")) {
+        try {
+            list.add(Integer.parseInt(value,2));
+        }
+        catch (Exception ex) {
+            continue; // should throw error: File is corrupt
+        }
+    }
+}
+  
+
+
+

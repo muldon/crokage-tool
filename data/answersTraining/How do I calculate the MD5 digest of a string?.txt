@@ -1,0 +1,104 @@
+Query: How do I calculate the MD5 digest of a string?
+-----------------------------------------------------------------------
+
+Rank:1 (https://stackoverflow.com/questions/48421874)
+          MessageDigest messageDigest = MessageDigest.getInstance("SHA-1");
+        messageDigest.reset();
+        messageDigest.update(password.getBytes("UTF-8"));
+        String sha1String = new BigInteger(1, messageDigest.digest()).toString(16);
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:2 (https://stackoverflow.com/questions/5470279)
+      String input = "168";
+    MessageDigest md = MessageDigest.getInstance("MD5");
+    byte[] md5sum = md.digest(input.getBytes());
+    String output = String.fmat("%032X", new BigInteger(1, md5sum));
+  
+
+  
+
+  DatatypeConverter.printHexBinary( MessageDigest.getInstance("MD5").digest("a".getBytes("UTF-8")))
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:3 (https://stackoverflow.com/questions/48507508)
+  import java.security.*;
+import javax.xml.bind.*;
+
+byte[] bytesOfMessage = yourString.getBytes("UTF-8");
+MessageDigest md = MessageDigest.getInstance("MD5");
+byte[] bytesOfDigest = md.digest(bytesOfMessage);
+String digest = DatatypeConverter.printHexBinary(bytesOfDigest).toLowerCase();
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:4 (https://stackoverflow.com/questions/4400809)
+ To use UTF-8, do this: 
+
+  userPass.getBytes("UTF-8");
+  
+
+ <strike>
+And to get a Base64 String from the digest, you can do something like this: 
+
+  this.password = new BASE64Encoder().encode(cript.digest());
+  
+
+ </strike> 
+
+ Since  MessageDigest.digest()  returns a byte array, you can convert it to String using Apache's http://commons.apache.org/codec/apidocs/org/apache/commons/codec/binary/Hex.html (simpler). 
+
+ E.g. 
+
+  this.password = Hex.encodeHexString(cript.digest());
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:5 (https://stackoverflow.com/questions/13412049)
+ This is how I use MD5 hash. Calculate MD5 hash from string and return 32-byte hexadecimal representation. 
+
+  import java.io.UnsupportedEncodingException; 
+import java.security.MessageDigest; 
+import java.security.NoSuchAlgorithmException; 
+
+public class MySimpleMD5 { 
+
+private static String convertToHex(byte[] data) { 
+    StringBuffer buf = new StringBuffer();
+    for (int i = 0; i < data.length; i++) { 
+        int halfbyte = (data[i] >>> 4) & 0x0F;
+        int two_halfs = 0;
+        do { 
+            if ((0 <= halfbyte) && (halfbyte <= 9)) 
+                buf.append((char) ('0' + halfbyte));
+            else 
+                buf.append((char) ('a' + (halfbyte - 10)));
+            halfbyte = data[i] & 0x0F;
+        } while(two_halfs++ < 1);
+    } 
+    return buf.toString();
+} 
+
+public static String MD5(String text) 
+throws NoSuchAlgorithmException, UnsupportedEncodingException  { 
+    MessageDigest md;
+    md = MessageDigest.getInstance("MD5");
+    byte[] md5hash = new byte[32];
+    md.update(text.getBytes("iso-8859-1"), 0, text.length());
+    md5hash = md.digest();
+    return convertToHex(md5hash);
+ } 
+} 
+  
+
+
+

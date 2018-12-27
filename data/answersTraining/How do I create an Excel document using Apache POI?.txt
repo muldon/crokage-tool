@@ -1,0 +1,329 @@
+Query: How do I create an Excel document using Apache POI?
+-----------------------------------------------------------------------
+
+Rank:1 (https://stackoverflow.com/questions/15271706)
+  //Find jar from here "http://poi.apache.org/download.html"
+import  java.io.*;
+import  org.apache.poi.hssf.usermodel.HSSFSheet;
+import  org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import  org.apache.poi.hssf.usermodel.HSSFRow;
+
+public class CreateExlFile{
+    public static void main(String[]args) {
+        try {
+            String filename = "C:/NewExcelFile.xls" ;
+            HSSFWorkbook workbook = new HSSFWorkbook();
+            HSSFSheet sheet = workbook.createSheet("FirstSheet");  
+
+            HSSFRow rowhead = sheet.createRow((short)0);
+            rowhead.createCell(0).setCellValue("No.");
+            rowhead.createCell(1).setCellValue("Name");
+            rowhead.createCell(2).setCellValue("Address");
+            rowhead.createCell(3).setCellValue("Email");
+
+            HSSFRow row = sheet.createRow((short)1);
+            row.createCell(0).setCellValue("1");
+            row.createCell(1).setCellValue("Sankumarsingh");
+            row.createCell(2).setCellValue("India");
+            row.createCell(3).setCellValue("sankumarsingh@gmail.com");
+
+            FileOutputStream fileOut = new FileOutputStream(filename);
+            workbook.write(fileOut);
+            fileOut.close();
+            workbook.close();
+            System.out.println("Your excel file has been generated!");
+
+        } catch ( Exception ex ) {
+            System.out.println(ex);
+        }
+    }
+}
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:2 (https://stackoverflow.com/questions/15473663)
+  try this
+
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.Iterator;
+
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
+public class ExcelExample {
+
+    public static void main(String[] args) throws IOException {
+
+        try {
+
+            FileInputStream file = new FileInputStream(new File("C:\\test.xls"));
+
+            HSSFWorkbook workbook = new HSSFWorkbook(file);
+            HSSFSheet sheet = workbook.getSheetAt(0);
+            Cell cell = null;
+
+            //Update the value of cell
+            cell = sheet.getRow(1).getCell(2);
+            cell.setCellValue(cell.getNumericCellValue() * 2);
+            cell = sheet.getRow(2).getCell(2);
+            cell.setCellValue(cell.getNumericCellValue() * 2);
+            Row row = sheet.getRow(0);
+            row.createCell(3).setCellValue("Value 2");
+
+            file.close();
+
+            FileOutputStream outFile =new FileOutputStream(new File("C:\\update.xls"));
+            workbook.write(outFile);
+            outFile.close();
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:3 (https://stackoverflow.com/questions/35695907)
+ To add more than one Excel sheet to a new Excel file, those sheets need to be created from one workbook, and written once to the file output stream 
+
+  import java.io.*;
+import java.util.*;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.*;
+
+public class JustATest {
+   public static void main(String[] args) throws Exception  {       
+
+        XSSFWorkbook AWorkbook = new XSSFWorkbook(); //Create blank workbook 
+
+        for (int i = 0; i < 10; i++) {
+            XSSFSheet spreadsheet = AWorkbook.createSheet(" Employee "+i);
+
+            // the follwing code is to create dummy data in sheets 
+            // is similar to the one at tutorialPoint.com
+            XSSFRow row;            
+            //This data needs to be written (Object[])
+            Map < String, Object[] > empinfo =    new TreeMap< String, Object[] >();
+            empinfo.put( "1", new Object[] { "EMP ID", "EMP NAME", "DESIGNATION" });
+            for (int j = 0; j < i; j++) {
+                empinfo.put( j+2+"", new Object[] {  j+2+"", "Fadel K", "Technical Manager" });                
+            }          
+            //Iterate over data and write to sheet
+            Set<String> keyid = empinfo.keySet();
+            int rowid = 0;
+            for (String key : keyid){
+               row = spreadsheet.createRow(rowid++);
+               Object [] objectArr = empinfo.get(key);
+               int cellid = 0;
+               for (Object obj : objectArr){
+                  Cell cell = row.createCell(cellid++);
+                  cell.setCellValue((String)obj);
+               }
+            }            
+            // dummy data creation over.
+        }       
+
+        // here you write all sheets at once, by writing the entier workbook
+        FileOutputStream out = new FileOutputStream(new File("AllData.xlsx"));
+        AWorkbook.write(out);
+        out.close();               
+   }
+}
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:4 (https://stackoverflow.com/questions/46505079)
+  .doc/.xls documents can are stored in the OLE2 storage format. The  org.apache.poi.poifs.filesystem.FileMagic  helps you to detect the file storage format only and not sufficient alone to distinguish between .doc/..  
+
+ Also it does not appear that there is any direct API available in POI library to determine the document type (excel or document) for given inputstream/file. 
+
+ Below example my be helpful to determine if given stream is a valid .xls (or .xlsx)file with the caveat that it read the given inputstram and close it.  
+
+      // slurp content from given input and close it
+    public static boolean isExcelFile(InputStream in) throws IOException {
+        try {
+            // it slurp the input stream
+            Workbook workbook = org.apache.poi.ss.usermodel.WorkbookFactory.create(in);
+            workbook.close();
+            return true;
+
+        } catch (java.lang.IllegalArgumentException | org.apache.poi.openxml4j.exceptions.InvalidFormatException e) {
+            return false;
+        }
+    }
+  
+
+ You may found more information on excel file format on https://www.openoffice.org/sc/excelfileformat.pdf 
+
+  Update  
+Solution based on https://tika.apache.org/ as suggested by https://stackoverflow.com/users/685641/gagravarr: 
+
+  public class TikaBasedFileTypeDetector {
+    private Tika tika;
+    private TemporaryResources temporaryResources;
+
+    public void init() {
+        this.tika = new Tika();
+        this.temporaryResources = new TemporaryResources();
+    }
+
+    // clean up all the temporary resources
+    public void destroy() throws IOException {
+        temporaryResources.close();
+    }
+
+    // return content mime type
+    public String detectType(InputStream in) throws IOException {
+        TikaInputStream tikaInputStream = TikaInputStream.get(in, temporaryResources);
+
+        return tika.detect(tikaInputStream);
+    }
+
+    public boolean isExcelFile(InputStream in) throws IOException{
+        // see https://stackoverflow.com/a/4212908/1700467 for information on mimetypes
+        String type = detectType(in);
+        return type.startsWith("application/vnd.ms-excel") || //for Micorsoft document
+                type.startsWith("application/vnd.openxmlformats-officedocument.spreadsheetml"); // for OpenOffice xml format
+    }
+}
+  
+
+ See https://stackoverflow.com/a/4212908/1700467 on mime types. 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:5 (https://stackoverflow.com/questions/16423728)
+  import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Iterator;
+
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
+/**
+ * Partial copy of one of style and data..
+ * 
+ * @author jcalfee
+ */
+public class xls2xlsx {
+
+    /**
+     * @param args
+     * @throws InvalidFormatException
+     * @throws IOException
+     */
+    public static void main(String[] args) throws InvalidFormatException,
+            IOException {
+
+        String inpFn = args[0];
+        String outFn = args[1];
+
+        InputStream in = new BufferedInputStream(new FileInputStream(inpFn));
+        try {
+            Workbook wbIn = new HSSFWorkbook(in);
+            File outF = new File(outFn);
+            if (outF.exists())
+                outF.delete();
+
+            Workbook wbOut = new XSSFWorkbook();
+            int sheetCnt = wbIn.getNumberOfSheets();
+            for (int i = 0; i < sheetCnt; i++) {
+                Sheet sIn = wbIn.getSheetAt(0);
+                Sheet sOut = wbOut.createSheet(sIn.getSheetName());
+                Iterator<Row> rowIt = sIn.rowIterator();
+                while (rowIt.hasNext()) {
+                    Row rowIn = rowIt.next();
+                    Row rowOut = sOut.createRow(rowIn.getRowNum());
+
+                    Iterator<Cell> cellIt = rowIn.cellIterator();
+                    while (cellIt.hasNext()) {
+                        Cell cellIn = cellIt.next();
+                        Cell cellOut = rowOut.createCell(
+                                cellIn.getColumnIndex(), cellIn.getCellType());
+
+                        switch (cellIn.getCellType()) {
+                        case Cell.CELL_TYPE_BLANK:
+                            break;
+
+                        case Cell.CELL_TYPE_BOOLEAN:
+                            cellOut.setCellValue(cellIn.getBooleanCellValue());
+                            break;
+
+                        case Cell.CELL_TYPE_ERROR:
+                            cellOut.setCellValue(cellIn.getErrorCellValue());
+                            break;
+
+                        case Cell.CELL_TYPE_FORMULA:
+                            cellOut.setCellFormula(cellIn.getCellFormula());
+                            break;
+
+                        case Cell.CELL_TYPE_NUMERIC:
+                            cellOut.setCellValue(cellIn.getNumericCellValue());
+                            break;
+
+                        case Cell.CELL_TYPE_STRING:
+                            cellOut.setCellValue(cellIn.getStringCellValue());
+                            break;
+                        }
+
+                        {
+                            CellStyle styleIn = cellIn.getCellStyle();
+                            CellStyle styleOut = cellOut.getCellStyle();
+                            styleOut.setDataFormat(styleIn.getDataFormat());
+                        }
+                        cellOut.setCellComment(cellIn.getCellComment());
+
+                        // HSSFCellStyle cannot be cast to XSSFCellStyle
+                        // cellOut.setCellStyle(cellIn.getCellStyle());
+                    }
+                }
+            }
+            OutputStream out = new BufferedOutputStream(new FileOutputStream(
+                    outF));
+            try {
+                wbOut.write(out);
+            } finally {
+                out.close();
+            }
+        } finally {
+            in.close();
+        }
+    }
+}
+  
+
+
+

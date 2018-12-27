@@ -1,0 +1,143 @@
+Query: Java Program to find ASCII value of a character
+-----------------------------------------------------------------------
+
+Rank:1 (https://stackoverflow.com/questions/16458684)
+ It's simple, get the character you want, and convert it to int. 
+
+  String name = "admin";
+int ascii = name.charAt(0);
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:2 (https://stackoverflow.com/questions/27996506)
+ The problem is that you're using the unicode value of the character when it's a digit. 
+
+  
+
+  max = c;
+  
+
+ ... you should use: 
+
+  max = c - '0';
+  
+
+ Also note that  Character.isLetter  returns  true  for all unicode letters, including Arabic letters and letters from other alphabets, that have much higher unicode codepoint values; likewise for  Character.isDigit  
+
+ In your case, you're only capable of handling Latin characters from the ASCII character set, so to be safe it's better to check for that specifically.
+And you're not checking correctly for the maximum value (you're comparing the unicode codepoint to the max, not the converted value) 
+
+              int v = 0;
+            if (c >= '0' && c <= '9') {
+                v = c - '0';
+            } else if (c >= 'A' && c <= 'Z') {
+                v = 10 + (c - 'A');
+            }
+            if (v > max) {
+                max = v;
+            }
+  
+
+ Full program: 
+
+  public static int findBase(String str) {
+    int max = 0;
+    str = str.toUpperCase();
+    for (int i = 0; i < str.length(); i++) {
+        char c = str.charAt(i);
+        int v = 0;
+        if (c >= '0' && c <= '9') {
+            v = c - '0';
+        } else if (c >= 'A' && c <= 'Z') {
+            v = 10 + (c - 'A');
+        }
+        if (v > max) {
+            max = v;
+        }
+    }
+    return max + 1;
+}
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:3 (https://stackoverflow.com/questions/16458601)
+  
+
+  String char = name.substring(0,1); //char="a"
+  
+
+ You should use the  charAt()  method. 
+
+  char c = name.charAt(0); // c='a'
+int ascii = (int)c;
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:4 (https://stackoverflow.com/questions/14066594)
+ Or you copy the code from the http://docs.oracle.com/javase/6/docs/api/java/net/IDN.html class. 
+
+  // to check if a string only contains US-ASCII code point
+//
+private static boolean isAllASCII(String input) {
+    boolean isASCII = true;
+    for (int i = 0; i < input.length(); i++) {
+        int c = input.charAt(i);
+        if (c > 0x7F) {
+            isASCII = false;
+            break;
+        }
+    }
+    return isASCII;
+}
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:5 (https://stackoverflow.com/questions/17637848)
+  //%%%%%%%%%%%%%%%%%%%%%% HEX to ASCII %%%%%%%%%%%%%%%%%%%%%%
+public String convertHexToString(String hex){
+
+ String ascii="";
+ String str;
+
+ // Convert hex string to "even" length
+ int rmd,length;
+ length=hex.length();
+ rmd =length % 2;
+ if(rmd==1)
+ hex = "0"+hex;
+
+  // split into two characters
+  for( int i=0; i<hex.length()-1; i+=2 ){
+
+      //split the hex into pairs
+      String pair = hex.substring(i, (i + 2));
+      //convert hex to decimal
+      int dec = Integer.parseInt(pair, 16);
+      str=CheckCode(dec);
+      ascii=ascii+" "+str;
+  }
+  return ascii;
+}
+
+public String CheckCode(int dec){
+  String str;
+
+          //convert the decimal to character
+        str = Character.toString((char) dec);
+
+      if(dec<32 || dec>126 && dec<161)
+             str="n/a";  
+  return str;
+}
+  
+
+
+

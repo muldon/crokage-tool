@@ -1,0 +1,195 @@
+Query: Apply variable transparency to an image
+-----------------------------------------------------------------------
+
+Rank:1 (https://stackoverflow.com/questions/37346826)
+ . To apply an effect to the whole application, use the setEffect method on the root node. For a grayscale effect, set the saturation of the https://docs.oracle.com/javase/8/javafx/api/javafx/scene/effect/ColorAdjust.html to the value -1 
+
+  ColorAdjust grayscale = new ColorAdjust();
+grayscale.setSaturation(-1);
+stage.getScene().getRoot().setEffect(grayscale);
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:2 (https://stackoverflow.com/questions/2319251)
+ Just create a new BufferedImage with transparency, then paint the other two images (with full or semi-transparency) on it.
+This is how it will look like: 
+
+ https://i.stack.imgur.com/6jZ4V.png 
+
+ Sample code (images are called 'image.png' and 'overlay.png'): 
+
+  File path = ... // base path of the images
+
+// load source images
+BufferedImage image = ImageIO.read(new File(path, "image.png"));
+BufferedImage overlay = ImageIO.read(new File(path, "overlay.png"));
+
+// create the new image, canvas size is the max. of both image sizes
+int w = Math.max(image.getWidth(), overlay.getWidth());
+int h = Math.max(image.getHeight(), overlay.getHeight());
+BufferedImage combined = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+
+// paint both images, preserving the alpha channels
+Graphics g = combined.getGraphics();
+g.drawImage(image, 0, 0, null);
+g.drawImage(overlay, 0, 0, null);
+
+// Save as new image
+ImageIO.write(combined, "PNG", new File(path, "combined.png"));
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:3 (https://stackoverflow.com/questions/26074681)
+ In your example it's not the image you scale, but you set a scaling transformation on the  Graphics2D  object which will be applied on all operations performed on that graphics context. 
+
+ If you want to scale an image, you have 2 options. All I write below uses  java.awt.Image , but since  BufferedImage  extends  Image , all this applies to  BufferedImage  as well. 
+
+ 1.  Image.getScaledInstance()  
+
+ You can use the  Image.getScaledInstance(int width, int height, int hints)  method. The 3rd parameter (the  hints ) tells what scaling algorithm you want to use which will affect the "quality" of the scaled image. Possible values are: 
+
+  SCALE_DEFAULT, SCALE_FAST, SCALE_SMOOTH, SCALE_REPLICATE, SCALE_AREA_AVERAGING
+  
+
+ Try the  SCALE_AREA_AVERAGING  and the  SCALE_SMOOTH  for nicer scaled images. 
+
+  // Scaled 3 times:
+Image img2 = img.getScaledInstance(img.getWidth(null)*3, img.getHeight(null)*3,
+    Image.SCALE_AREA_AVERAGING);
+// Tip: you should cache the scaled image and not scale it in the paint() method!
+
+// To draw it at x=100, y=200
+g2.drawImage(img2, 100, 200, null);
+  
+
+ 2.  Graphics.drawImage()  
+
+ You can use different  Graphics.drawImage()  overloads where you can specify the size of the scaled image. You can "control" the image quality with the  KEY_INTERPOLATION  rendering hint. It has 3 possible values: 
+
+  VALUE_INTERPOLATION_NEAREST_NEIGHBOR, VALUE_INTERPOLATION_BILINEAR,
+VALUE_INTERPOLATION_BICUBIC
+  
+
+ The  VALUE_INTERPOLATION_BILINEAR  uses a bilinear interpolation algorithm of the 4 nearest pixels. The  VALUE_INTERPOLATION_BICUBIC  uses a cubic interpolation of the 9 nearby pixels. 
+
+  g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
+    RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+
+// To draw image scaled 3 times, x=100, y=200:
+g2.drawImage(img, 100, 200, img.getWidth(null)*3, img.getHeight(null)*3, null);
+  
+
+ Removing sharp edges 
+
+ If you want to avoid sharp edges around the image, you should write a loop to go over the pixels at the edge of the image, and set some kind of transparency, e.g. alpha=0.5 (or alpha=128). You might also do this on multiple rows/columns, e.g. 0.8 alpha for the edge, 0.5 alpha for the 2nd line and 0.3 alpha for the 3rd line. 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:4 (https://stackoverflow.com/questions/24403939)
+ The fastest way you can do this in Java (i.e. no OpenGL) that I know of, would be to: 
+
+ a) Change your mask ( terrainMask ) image's colors to white and transparent (instead of white and black). Just changing the color table ( IndexColorModel ) will do, I guess. 
+
+ b) Replace the double  getRGB/setRGB  loop with painting the mask over the terrain, using the proper alpha composite rule. Both  setRGB  and  getRGB  are potentially slow operations, due to lookups, color conversion and possible data type conversion (all depending on your images), so they should generally be avoided in performance critical code. The updated code could look something like the following: 
+
+  public void mapUpdate() {
+    Graphics2D g = terrain.createGraphics();
+    try {
+        g.setComposite(AlphaComposite.DstIn); // Porter-Duff "destination-in" rule
+        g.drawImage(terrainMask); // Clear out transparent parts from terrainMask
+    }
+    finally {
+         g.dispose();
+    }
+}
+  
+
+ Doing it this way should also keep your images managed (i.e. no fps drop). 
+
+ For more information on http://docs.oracle.com/javase/7/docs/api/java/awt/AlphaComposite.html, see http://docs.oracle.com/javase/tutorial/2d/advanced/compositing.html from the Java2D Advanced Topics tutorial. 
+
+ PS: Another optimization you could do, is to only update the part of  terrain  that are covered by the explosion (i.e. the rectangle covered by  position.x, position.y, explosionImage.getWidth(), explosionImage.getHeight() ). No need to update the pixels you know isn't covered... 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:5 (https://stackoverflow.com/questions/48602852)
+ I'm a bit puzzled about the behavior of  Graphics.drawImage() . Maybe somebody else can comment about it. 
+
+ However,  Graphics2D.drawRenderedImage()  works a treat. It takes an  AffineTransform  to control the rotation. The below example nicely works. You probably have additional requirement about the final image size and the location of the rotated image. 
+
+  import javax.imageio.ImageIO;
+import java.awt.Graphics2D;
+import java.awt.geom.AffineTransform;
+import java.awt.image.BufferedImage;
+import java.io.File;
+
+public class ImageRotation {
+
+    public static void main(String[] args) {
+        ImageRotation rotation = new ImageRotation();
+        rotation.rotate("input.png", 45, "output.png");
+    }
+
+    public void rotate(String inputImageFilename, double angle, String outputImageFilename) {
+
+        try {
+            BufferedImage inputImage = ImageIO.read(new File(inputImageFilename));
+            BufferedImage outputImage = rotateImage(inputImage, angle);
+            ImageIO.write(outputImage, "PNG", new File(outputImageFilename));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private BufferedImage rotateImage(BufferedImage sourceImage, double angle) {
+        int width = sourceImage.getWidth();
+        int height = sourceImage.getHeight();
+        BufferedImage destImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2d = destImage.createGraphics();
+
+        AffineTransform transform = new AffineTransform();
+        transform.rotate(angle / 180 * Math.PI, width / 2 , height / 2);
+        g2d.drawRenderedImage(sourceImage, transform);
+
+        g2d.dispose();
+        return destImage;
+    }
+}
+  
+
+  Update  
+
+ While the above code works for most PNGs, it does not work for the http://download.decisionwanted.com/image2_cleared_1-2149x1417+1443+479.png that alexanoid is using. I've analyzed the image: 
+
+ 
+ It's a grayscale image without a color palette (PNG color type 0) . 
+ It uses simple transparency with a 2 byte long tRNS chunk. 
+ 
+
+ . However, ImageIO does not implement this combination. If the image has no palette, it simply ignores the tRNS chunk and therefore ignores the transparency information. That's most likely a bug. 
+
+ You basically have two options now: 
+
+ 
+ Look for an alternative library to read PNG files. 
+ Fix the transparency after you have read the PNG file. This only works if know that the image used the particular problematic format. 
+ 
+
+  Input and output for working PNG files  
+
+ Input image: 
+
+ https://i.stack.imgur.com/z063b.png 
+
+ Ouptput Image: 
+
+ <a href="https://i.stack.imgur.com/1tz8I.png"  
+
+
+

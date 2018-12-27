@@ -1,0 +1,100 @@
+Query: How do I compare two dates?
+-----------------------------------------------------------------------
+
+Rank:1 (https://stackoverflow.com/questions/43412934)
+      private int compare(Calendar c1, LocalDate c2) {
+        int yearCompare = ((Integer) c1.get(Calendar.YEAR)).compareTo(c2.getYear());
+        if (yearCompare == 0)
+            return ((Integer) c1.get(Calendar.DAY_OF_YEAR)).compareTo(c2.getDayOfYear());
+        else
+            return yearCompare;
+    }
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:2 (https://stackoverflow.com/questions/15925576)
+ java.util.Date class has before and after method to compare dates. 
+
+<pre class="lang-java prettyprint-override"> Date date1 = new Date();
+Date date2 = new Date();
+
+if(date1.before(date2)){
+    //Do Something
+}
+
+if(date1.after(date2)){
+    //Do Something else
+}
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:3 (https://stackoverflow.com/questions/25051355)
+  try{
+
+      SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    } catch (ParseException e1) 
+      {
+    // TODO Auto-generated catch block
+    e1.printStackTrace();
+                        }
+
+       String str1 = "2014-09-10 00:00:00";
+       Date date1 = formatter.parse(str1);
+
+        String str2 = "2014-08-31 10:37:15";
+       Date date2 = formatter.parse(str2);
+
+    if (date1.compareTo(date2)<0)
+    {
+    System.out.println("date2 is Greater than my date1");                          
+    }
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:4 (https://stackoverflow.com/questions/22040488)
+ An Alternative is.... 
+
+ Convert both dates into milliseconds as below 
+
+  Date d = new Date();
+long l = d.getTime();
+  
+
+ Now compare both long values 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:5 (https://stackoverflow.com/questions/22609983)
+  Date date = new Date();
+String str="2013-08-23";
+Date date=new SimpleDateFormat("yyyy-MM-dd").parse(str);
+
+Calendar cal = Calendar.getInstance();
+cal.setTime(date);
+Calendar cal1 = Calendar.getInstance();
+cal1.setTime(date1);
+
+if(cal.get(Calendar.YEAR) == cal1.get(Calendar.YEAR)){
+System.out.println("Years are equal");
+}
+else{
+System.out.println("Years not equal");
+}
+
+if(cal.get(Calendar.MONTH) == cal1.get(Calendar.MONTH)){
+System.out.println("Months are equal");
+}
+else{
+System.out.println("Months not equal");
+}
+  
+
+
+

@@ -1,0 +1,163 @@
+Query: Create a File Lock on a File
+-----------------------------------------------------------------------
+
+Rank:1 (https://stackoverflow.com/questions/4022734)
+ You are locking twice the file and never release the first lock: 
+
+      // Get an exclusive lock on the whole file
+    FileLock lock = channel.lock();
+    try {
+        lock = channel.lock();
+        doWithLockedFile(file);
+    } finally {
+        lock.release();
+    }
+  
+
+ As you reuse the var lock, where do you release the first? 
+
+ You code should be: 
+
+      // Get an exclusive lock on the whole file
+    FileLock lock = null;
+    try {
+        lock = channel.lock();
+        doWithLockedFile(file);
+    } finally {
+        if(lock!=null) {
+           lock.release();
+         }
+    }
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:2 (https://stackoverflow.com/questions/20042642)
+ I am sorry guys it was my mistake  I was using FileInputStream which is used for reading a file .  
+
+  File syncDatafile = new File(file, "sync.txt");
+                FileOutputStream fileoutputStream = new FileOutputStream (syncDatafile);
+                java.nio.channels.FileLock lock = fileInputStream.getChannel().lock();
+                try{
+                    FileWriter writer = new FileWriter(syncDatafile, true);
+                    writer.write(data);
+                    writer.flush();
+                    writer.close();
+                }catch(Exception ex){
+                    ex.printStackTrace();
+                }finally{
+                    lock.release();
+                    fileInputStream.close();
+                }
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:3 (https://stackoverflow.com/questions/3700892)
+ This is a sample program that lock file and unlock file. 
+
+  try { // Get a file channel for the file 
+
+    File file = new File("filename");
+
+    FileChannel channel = new RandomAccessFile(file, "rw").getChannel(); // Use the file channel to create a lock on the file.
+
+    // This method blocks until it can retrieve the lock. 
+
+    FileLock lock = channel.lock(); // Try acquiring the lock without blocking. This method returns // null or throws an exception if the file is already locked. 
+
+    try { 
+
+        lock = channel.tryLock();
+
+    } catch (OverlappingFileLockException e){}
+
+
+    lock.release(); // Close the file 
+
+    channel.close();
+} 
+
+catch (Exception e) { } 
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:4 (https://stackoverflow.com/questions/20306423)
+ A generic solution using java.util.concurrent 
+
+  import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantLock;
+
+public class LockByName<L> {
+
+    ConcurrentHashMap<String, L> mapStringLock;
+
+    public LockByName(){
+        mapStringLock = new ConcurrentHashMap<String, L>();
+    }
+
+    public LockByName(ConcurrentHashMap<String, L> mapStringLock){
+        this.mapStringLock = mapStringLock;
+    }
+
+    @SuppressWarnings("unchecked")
+    public L getLock(String key) {
+        L initValue = (L) createIntanceLock();
+        L lock = mapStringLock.putIfAbsent(key, initValue);
+        if (lock == null) {
+            lock = initValue;
+        }
+        return lock;
+    }
+
+    protected Object createIntanceLock() {
+        return new ReentrantLock();
+    }
+
+    public static void main(String[] args) {
+
+        LockByName<ReentrantLock> reentrantLocker = new LockByName<ReentrantLock>();
+
+        ReentrantLock reentrantLock1 = reentrantLocker.getLock("pepe");
+
+        try {
+            reentrantLock1.lock();
+            //DO WORK
+
+        }finally{
+            reentrantLock1.unlock();
+
+        }
+
+
+    }
+
+}
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:5 (https://stackoverflow.com/questions/14353423)
+ maybe you can try file lock.  each file can be a file lock. 
+
+  RandomAccessFile file = new RandomAccessFile(some_file, "rw");
+FileChannel fc = file.getChannel();
+FileLock lock = fc.tryLock();
+....
+lock.release()
+  
+
+ when you write screanshot to a file such as A.shot, you create the file A.shot, and hold the file lock of A.shot, then write data into it. when the file is finished, release the file lock. 
+
+ the rename process should try to get the file lock first, if succeed, then do rename work.
+if the file lock can not be got (as the write thread have not released the lock), then wait. 
+
+ hope it's useful.   
+
+
+

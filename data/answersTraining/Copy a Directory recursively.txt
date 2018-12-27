@@ -1,0 +1,226 @@
+Query: Copy a Directory recursively
+-----------------------------------------------------------------------
+
+Rank:1 (https://stackoverflow.com/questions/9338319)
+ Answering my own question... Please note I figured this out by trial and error so I could be wrong on some of the points: 
+
+ 
+  Archives are treated as directories.  Files.copy(archive, archive)  is essentially trying to copy one directory to another.  Files.copy(Path, Path)  is made for copying a single file, not for copying directories recursively.  
+  Now that we know archives are treated as directories we simply copy files from one directory into another:  
+ 
+
+
+
+  Files.walkFileTree(sourceFile, new SimpleFileVisitor<Path>()
+{
+    @Override
+    public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
+    {
+        Files.copy(file, targetFile.resolve(sourceFile.relativize(file)), 
+            StandardCopyOption.COPY_ATTRIBUTES);
+        return super.visitFile(file, attrs);
+    }
+});
+  
+
+ 3. Yes, you can use:  targetFile.getFileSystem().sync(FsSyncOptions.UMOUNT);  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:2 (https://stackoverflow.com/questions/32604758)
+ There is a https://docs.oracle.com/javase/tutorial/essential/io/copy.html with a recursive copy https://docs.oracle.com/javase/tutorial/displayCode.html?code=https://docs.oracle.com/javase/tutorial/essential/io/examples/Copy.java. It works with java se 7+. It uses Files.walkFileTree method, which https://bugs.openjdk.java.net/browse/JDK-8069345. To avoid using Files.walkFileTree, the possible solution can look like: 
+
+  public static void copyFileOrFolder(File source, File dest, CopyOption...  options) throws IOException {
+    if (source.isDirectory())
+        copyFolder(source, dest, options);
+    else {
+        ensureParentFolder(dest);
+        copyFile(source, dest, options);
+    }
+}
+
+private static void copyFolder(File source, File dest, CopyOption... options) throws IOException {
+    if (!dest.exists())
+        dest.mkdirs();
+    File[] contents = source.listFiles();
+    if (contents != null) {
+        for (File f : contents) {
+            File newFile = new File(dest.getAbsolutePath() + File.separator + f.getName());
+            if (f.isDirectory())
+                copyFolder(f, newFile, options);
+            else
+                copyFile(f, newFile, options);
+        }
+    }
+}
+
+private static void copyFile(File source, File dest, CopyOption... options) throws IOException {
+    Files.copy(source.toPath(), dest.toPath(), options);
+}
+
+private static void ensureParentFolder(File file) {
+    File parent = file.getParentFile();
+    if (parent != null && !parent.exists())
+        parent.mkdirs();
+} 
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:3 (https://stackoverflow.com/questions/26214647)
+  public static void copyFolder(File source, File destination)
+{
+    if (source.isDirectory())
+    {
+        if (!destination.exists())
+        {
+            destination.mkdirs();
+        }
+
+        String files[] = source.list();
+
+        for (String file : files)
+        {
+            File srcFile = new File(source, file);
+            File destFile = new File(destination, file);
+
+            copyFolder(srcFile, destFile);
+        }
+    }
+    else
+    {
+        InputStream in = null;
+        OutputStream out = null;
+
+        try
+        {
+            in = new FileInputStream(source);
+            out = new FileOutputStream(destination);
+
+            byte[] buffer = new byte[1024];
+
+            int length;
+            while ((length = in.read(buffer)) > 0)
+            {
+                out.write(buffer, 0, length);
+            }
+        }
+        catch (Exception e)
+        {
+            try
+            {
+                in.close();
+            }
+            catch (IOException e1)
+            {
+                e1.printStackTrace();
+            }
+
+            try
+            {
+                out.close();
+            }
+            catch (IOException e1)
+            {
+                e1.printStackTrace();
+            }
+        }
+    }
+}
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:4 (https://stackoverflow.com/questions/20085222)
+ You need to use walkFileTree to copy directories.  If you use Files.copy on a directory only an empty directory will be created. 
+
+ Following code taken/adapted from http://codingjunkie.net/java-7-copy-move/ 
+
+  File src = new File("c:\\temp\\srctest");
+File dest = new File("c:\\temp\\desttest");
+Path srcPath = src.toPath();
+Path destPath = dest.toPath();
+
+Files.walkFileTree(srcPath, new CopyDirVisitor(srcPath, destPath, StandardCopyOption.REPLACE_EXISTING));
+
+public static class CopyDirVisitor extends SimpleFileVisitor<Path>
+{
+    private final Path fromPath;
+    private final Path toPath;
+    private final CopyOption copyOption;
+
+    public CopyDirVisitor(Path fromPath, Path toPath, CopyOption copyOption)
+    {
+        this.fromPath = fromPath;
+        this.toPath = toPath;
+        this.copyOption = copyOption;
+    }
+
+    @Override
+    public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException
+    {
+        Path targetPath = toPath.resolve(fromPath.relativize(dir));
+        if( !Files.exists(targetPath) )
+        {
+            Files.createDirectory(targetPath);
+        }
+        return FileVisitResult.CONTINUE;
+    }
+
+    @Override
+    public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException
+    {
+        Files.copy(file, toPath.resolve(fromPath.relativize(file)), copyOption);
+        return FileVisitResult.CONTINUE;
+    }
+}
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:5 (https://stackoverflow.com/questions/29801090)
+ my version: 
+
+  static private void copyFolder(File src, File dest) {
+    // checks
+    if(src==null || dest==null)
+        return;
+    if(!src.isDirectory())
+        return;
+    if(dest.exists()){
+        if(!dest.isDirectory()){
+            //System.out.println("destination not a folder " + dest);
+            return;
+        }
+    } else {
+        dest.mkdir();
+    }
+
+    if(src.listFiles()==null || src.listFiles().length==0)
+        return;
+
+    for(File file: src.listFiles()){
+        File fileDest = new File(dest, file.getName());
+        //System.out.println(fileDest.getAbsolutePath());
+        if(file.isDirectory()){
+            copyFolder(file, fileDest);
+        }else{
+            if(fileDest.exists())
+                continue;
+
+            try {
+                Files.copy(file.toPath(), fileDest.toPath());
+            } catch (IOException e) {
+                //e.printStackTrace();
+            }
+        }
+    }
+}
+  
+
+
+

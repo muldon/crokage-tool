@@ -1,0 +1,87 @@
+Query: How do I send an HTML email?
+-----------------------------------------------------------------------
+
+Rank:1 (https://stackoverflow.com/questions/31635811)
+ You need a https://en.wikipedia.org/wiki/MIME#Multipart_messages to send both a text and an attachment. This code should work: 
+
+  String text = " Hello My HTML formatted message ";
+String to = email_id_of_recipients;
+MimeMessage message = new MimeMessage(session);
+message.setFrom(new InternetAddress(from));
+message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(to));
+message.setSubject("My resume");
+// message.setText(text, "utf-8", "html");
+
+MimeBodyPart textPart = new MimeBodyPart();
+textPart.setContent(text, "text/html; charset=utf-8");
+
+DataSource source = new FileDataSource(filename);
+MimeBodyPart messageBodyPart = new MimeBodyPart();
+messageBodyPart = new MimeBodyPart();
+messageBodyPart.setDataHandler(new DataHandler(source));
+messageBodyPart.setFileName(filename);
+Multipart multipart = new MimeMultipart("mixed");
+multipart.addBodyPart(textPart);
+multipart.addBodyPart(messageBodyPart);
+message.setContent(multipart);
+
+Transport.send(message);
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:2 (https://stackoverflow.com/questions/2829339)
+  sendIntent.putExtra(Intent.EXTRA_TEXT, Html.fromHtml("<a href=\"" + link_val + "\">" + text_value+ " "));
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:3 (https://stackoverflow.com/questions/13455424)
+  
+
+  import javax.mail.internet.MimeMessage;
+import org.springframework.mail.javamail.MimeMessageHelper;
+
+MimeMessage mimeMessage = mailSender.createMimeMessage();
+MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, false, "utf-8");
+String htmlMsg = " Hello World!</h3>";
+mimeMessage.setContent(htmlMsg, "text/html");
+helper.setTo("someone@abc.com");
+helper.setSubject("This is the test message for testing gmail smtp server using spring mail");
+helper.setFrom("abc@gmail.com");
+mailSender.send(mimeMessage);
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:4 (https://stackoverflow.com/questions/8652065)
+ If you are using java mail directly, you need to set the content type to html using the http://docs.oracle.com/javaee/6/api/javax/mail/internet/MimeMessage.html#setContent%28java.lang.Object,%20java.lang.String%29 method.
+ MimeMessage.setContent("<html> <body> Hello   </body></html>", "text/html");  
+
+ Or if you are using Spring framework's http://javasourcecode.org/html/open-source/spring/spring-3.0.5/org/springframework/mail/javamail/MimeMessageHelper.html you can use <a href="http://javasourcecode.org/html/open-source/spring/spring-3.0.5/org/springframework/mail/javamail/MimeMessageHelper.html#setText%28java.lang.String,%20java.lang.String%29".setText(emailContent,true)  method. The boolean  true  flag indicates html content.  
+
+      mimeMessageHelper.setTo("some@someone");
+    mimeMessageHelper.setReplyTo("some@someone");
+    mimeMessageHelper.setFrom("some@someone");
+    mimeMessageHelper.setSubject("someSubject");
+    mimeMessageHelper.setText("<html> <body> Hello   </body></html>",true);
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:5 (https://stackoverflow.com/questions/12507532)
+ I used the following code: 
+
+  mimeBodyPart1.setDataHandler(new DataHandler(new ByteArrayDataSource(messageBody, "text/html; charset=utf-8")));
+multiPart.addBodyPart(mimeBodyPart1);
+message.setContent(multiPart, "text/html; charset=utf-8");
+  
+
+ Now,  Outlook  displays in  html  format. 
+
+
+

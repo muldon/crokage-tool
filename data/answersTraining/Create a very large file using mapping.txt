@@ -1,0 +1,118 @@
+Query: Create a very large file using mapping
+-----------------------------------------------------------------------
+
+Rank:1 (https://stackoverflow.com/questions/15975716)
+ I solved this problem without using OData. There is a URL available that will return just the binary data. So with this URL I can use other Java classes to stream the data directly to disk. 
+
+ So with this URL: 
+
+ 
+   www.example.com/OData.svc/File/Data/$value 
+ 
+
+ (which returns just the binary data) 
+
+ We can create a URL connection and download it: 
+
+  URL url = new URL(webPage);
+HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+
+File file = new File(dir, fileName);//need to create a file based on your storage paths
+
+FileOutputStream out = new FileOutputStream(file);
+InputStream in = urlConnection.getInputStream();
+
+byte[] buffer = new byte[1024];
+int i = 0;
+while ((i = in.read(buffer)) > 0) {
+    out.write(buffer, 0, i);
+}
+
+out.flush();
+out.close();
+in.close();
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:2 (https://stackoverflow.com/questions/8923594)
+ To work around this bug in Java, I had to do the following, which will work ok for small to medium-sized files: 
+
+      // first open the file for random access
+    RandomAccessFile raf = new RandomAccessFile(file, "r");
+
+    // extract a file channel
+    FileChannel channel = raf.getChannel();
+
+    // you can memory-map a byte-buffer, but it keeps the file locked
+    //ByteBuffer buf =
+    //        channel.map(FileChannel.MapMode.READ_ONLY, 0, channel.size());
+
+    // or, since map locks the file... just read the whole file into memory
+    ByteBuffer buf = ByteBuffer.allocate((int)file.length());
+    int read = channel.read(buf);
+
+    // .... do something with buf
+
+    channel.force(false);  // doesn't help
+    channel.close();       // doesn't help
+    channel = null;        // doesn't help
+    buf = null;            // doesn't help
+    raf.close();           // try to make sure that this thing is closed!!!!!
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:3 (https://stackoverflow.com/questions/15800625)
+ It is because you are reading the entire file into memory, use a buffered read and write instead. 
+
+  @RequestMapping(value = "/file/{dummyparam}.pdf", method = RequestMethod.GET, produces=MediaType.APPLICATION_OCTET_STREAM_VALUE)
+public void getFile(@PathVariable("dummyparam") String dummyparam, HttpServletResponse response) {
+
+
+    InputStream is = new FileInputStream(resultFile);
+
+    response.setHeader("Content-Disposition", "attachment; filename=\"dummyname " + dummyparam + ".pdf\"");
+
+
+    int read=0;
+    byte[] bytes = new byte[BYTES_DOWNLOAD];
+    OutputStream os = response.getOutputStream();
+
+    while((read = is.read(bytes))!= -1){
+        os.write(bytes, 0, read);
+    }
+    os.flush();
+    os.close(); 
+}
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:4 (https://stackoverflow.com/questions/24184436)
+  Map<Integer, Integer> mappings = new HashMap<Integer, Integer>();
+mappings.put(2,3);
+mappings.put(3,5);
+mappings.put(4,7);
+System.out.println(mappings.get(2));
+System.out.println(mappings.get(3));
+System.out.println(mappings.get(4));
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:5 (https://stackoverflow.com/questions/9505190)
+ I suggest you try memory mapping. 
+
+  FileChannel fc = new FileInputStream(file).getChannel();
+MappedByteBuffer mbb = fc.map(FileChannel.MapMode.READ_ONLY, 0, (int) fc.size());
+  
+
+ This will make the whole file available almost immediately (about 10 ms) and uses next to no heap.  BTW The file has to be less than 2 GB. 
+
+
+

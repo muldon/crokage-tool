@@ -1,0 +1,464 @@
+Query: How do I call a stored procedure that return a result set?
+-----------------------------------------------------------------------
+
+Rank:1 (https://stackoverflow.com/questions/27683399)
+ Yes, it should be possible to write such a generic class. Here is a small example class as a starting point for you. I use Firebird with the example database  employee.fdb  because there are already some stored procedures defined. 
+
+ So to connect to the Firebird server, I use the http://www.firebirdsql.org/en/jdbc-driver/ and include the  jaybird-full-2.2.5.jar  JAR file. 
+
+ There are several different JSON libraries for JAVA. I use the https://jsonp.java.net/ here in streaming mode (like StaX for XML). So the second external JAR here is  javax.json-1.0.4.jar . 
+
+ My example works only for stored procedures returning result sets. For stored procedures with output parameters a  CallableStatement  should be used instead of a  PreparedStatement . 
+
+ First, a generic SQL statement is created for the specific stored procedure with its input parameters. To call the stored procedure, a  PreparedStatemend  is used. The parameters are set according to the individual parameter types. (Procedures  createSql()  and  createStatement() ) 
+
+ In procedure  convertToJson()  the method  ResultSet.getMetaData()  is used to get the result set's column information (how many columns, column name and column type). 
+
+ The  executeStoredProcedure()  methods are public API methods to call. 
+
+ The  main()  method connects to the  èmployee.fdb  database and calls three stored procedures:  GET_EMP_PROJ ,  MAIL_LABEL  and  ORG_CHART . 
+
+  package com.genericsptojson;
+
+import java.io.ByteArrayOutputStream;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.json.Json;
+import javax.json.stream.JsonGenerator;
+import javax.json.stream.JsonGeneratorFactory;
+
+public class GenericSpToJson {
+
+  private static final String DB_URL = "jdbc:firebirdsql:localhost/3050:/var/lib/firebird/2.5/data/employee.fdb";
+  private static final String DB_USER = "SYSDBA";
+  private static final String DB_PWD = "***";
+
+  private Connection con;
+
+  public GenericSpToJson(Connection con) {
+    this.con = con;
+  }
+
+  /**
+   * Creates the SQL to call the stored procedure. 
+   * 
+   * @param spName
+   *          Name of stored procecdure to call
+   * @param paramCount
+   *          number of input parameters
+   * @return SQL with placeholders for input parameters
+   */
+  private String createSql(String spName, int paramCount) {
+    if(paramCount > 0) {
+      final StringBuilder params = new StringBuilder();
+      boolean isFirst = true;
+      for(int i = 0; i < paramCount; i++) {
+        if(isFirst) {
+          isFirst = false;
+        } else {
+          params.append(", ");
+        }
+        params.append('?');
+      }
+      return String.format("SELECT * FROM %s (%s)", spName, params.toString());
+    } else {
+      return String.format("SELECT * FROM %s", spName);
+    }
+  }
+
+  /**
+   * Creates a PreparedStatement to call the stored procedure. This works only
+   * for stored procedures creating result sets. Stored procedures with OUT
+   * parameters should be handled by a CallableStatement instead.
+   * 
+   * @param spName
+   *          The stored procedure name to be called.
+   * @param params
+   *          The input parameters.
+   * @return A prepared statement. All parameters are set.
+   * @throws SQLException
+   */
+  private PreparedStatement createStatement(String spName, Object... params) throws SQLException {
+    final PreparedStatement stmt = con.prepareStatement(createSql(spName, params.length));
+    for(int i = 0; i < params.length; i++) {
+      final Object param = params[i];
+      if(param instanceof String) {
+        stmt.setString(i + 1, (String) param);
+      } else if(param instanceof Integer) {
+        stmt.setInt(i + 1, ((Integer) param).intValue());
+      } else {
+        // Handle other param types ...
+      }
+    }
+    return stmt;
+  }
+
+  /**
+   * Converts the result set to JSON in streaming mode.
+   * 
+   * @param spName
+   *          The stored procedure name.
+   * @param rs
+   *          The result set of the stored procedure call.
+   * @param out
+   *          The output stream to write the JSON into.
+   * @throws SQLException
+   */
+  private void convertToJson(String spName, ResultSet rs, OutputStream out) throws SQLException {
+    // Get the result set meta data to obtain column information on the fly. 
+    final ResultSetMetaData metaData = rs.getMetaData();
+
+    // Create the JSON generator with pretty printing
+    final Map<String, Object> properties = new HashMap<String, Object>(1);
+    properties.put(JsonGenerator.PRETTY_PRINTING, true);
+    final JsonGeneratorFactory jsonGeneratorFactory = Json.createGeneratorFactory(properties);
+    final JsonGenerator generator = jsonGeneratorFactory.createGenerator(out);
+    generator.writeStartObject(); // root object
+
+    generator.write("storedProcedureName", spName);
+    generator.write("columnCount", metaData.getColumnCount());
+    generator.writeStartArray("records"); // records array
+    while(rs.next()) {
+      generator.writeStartObject(); // record object
+      // Each record object contains one field for every column.
+      // The field name is the columns name.
+      for(int col = 1; col <= metaData.getColumnCount(); col++) {
+        final String fieldName = metaData.getColumnName(col);
+        switch(metaData.getColumnType(col)) {
+          case Types.INTEGER:
+            final int intValue = rs.getInt(col);
+            if(rs.wasNull()) {
+              generator.writeNull(fieldName);
+            } else {
+              generator.write(fieldName, intValue);
+            }
+            break;
+          case Types.VARCHAR:
+          case Types.CHAR:
+            String stringValue = rs.getString(col);
+            if(rs.wasNull()) {
+              generator.writeNull(fieldName);
+            } else {
+              if(metaData.getColumnType(col) == Types.CHAR) {
+                stringValue = stringValue.trim();
+              }
+              generator.write(fieldName, stringValue);
+            }
+            break;
+          // Handle other types here
+          default:
+            System.out.println(String.format("Unhandled SQL type: %s", metaData.getColumnTypeName(col)));
+        }
+      }
+      generator.writeEnd(); // record object
+    }
+    generator.writeEnd(); // records array
+    generator.writeEnd(); // root object
+    generator.flush();
+    generator.close();
+  }
+
+  /**
+   * Executes the stored procedures with the given input parameters and creates
+   * JSON in streaming mode.
+   * 
+   * @param spName
+   *          The name of the stored procedure.
+   * @param out
+   *          The output stream to write the generated JSON into.
+   * @param params
+   *          The stored procedure's parameters.
+   */
+  public void executeStoredProcedure(String spName, OutputStream out, Object... params) {
+    PreparedStatement stmt = null;
+    ResultSet rs = null;
+    try {
+      stmt = createStatement(spName, params);
+      rs = stmt.executeQuery();
+      convertToJson(spName, rs, out);
+    } catch (SQLException e) {
+      e.printStackTrace();
+    } finally {
+      // Cleaning up ...
+      if(stmt != null) {
+        try {
+          stmt.close();
+        } catch (SQLException e) {
+          e.printStackTrace();
+        }
+      }
+      if(rs != null) {  
+        try {
+          rs.close();
+        } catch (SQLException e) {
+          e.printStackTrace();
+        }   
+      }
+    }
+  }
+
+  /**
+   * Convenience method to call the stored procedure and create a JSON string.
+   * This should only be called for short result sets. For longer result sets
+   * use {@link #executeStoredProcedure(String, OutputStream, Object...)} where
+   * it is not necessary to hold the entire JSON document in memory.
+   * 
+   * @param spName
+   *          The name of the stored procedure to call.
+   * @param params
+   *          The stored procedure's parameters
+   * @return The stored procedure's call result as a JSON string.
+   * @throws UnsupportedEncodingException
+   */
+  public String executeStoredProcedure(String spName, Object... params) throws UnsupportedEncodingException {
+    final ByteArrayOutputStream out = new ByteArrayOutputStream();
+    executeStoredProcedure(spName, out, params);
+    return out.toString("UTF-8");
+  }
+
+
+  public static void main(String[] args) {
+    Connection con = null;
+    try {
+      Class.forName("org.firebirdsql.jdbc.FBDriver");
+      con = DriverManager.getConnection(DB_URL, DB_USER, DB_PWD);
+
+      final GenericSpToJson converter = new GenericSpToJson(con);
+
+      System.out.println("Executing stored procedure GET_EMP_PROJ (8):\n"
+          + converter.executeStoredProcedure("GET_EMP_PROJ", 8));
+      System.out.println("\n\nExecuting stored procedure MAIL_LABEL (1015):\n"
+          + converter.executeStoredProcedure("MAIL_LABEL", 1015));
+      System.out.println("\n\nExecuting stored procedure ORG_CHART:\n"
+          + converter.executeStoredProcedure("ORG_CHART"));
+    } catch (ClassNotFoundException e) {
+      e.printStackTrace();
+    } catch (SQLException e) {
+      e.printStackTrace();
+    } catch (UnsupportedEncodingException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
+    if(con != null) {
+      try {
+        con.close();
+      } catch (SQLException e) {
+        e.printStackTrace();
+      }
+    }
+  }    
+}
+  
+
+ The output is (shortened): 
+
+  Executing stored procedure GET_EMP_PROJ (8):
+
+{
+    "storedProcedureName":"GET_EMP_PROJ",
+    "columnCount":1,
+    "records":[
+        {
+            "PROJ_ID":"VBASE"
+        },
+        {
+            "PROJ_ID":"GUIDE"
+        },
+        {
+            "PROJ_ID":"MKTPR"
+        }
+    ]
+}
+
+
+Executing stored procedure MAIL_LABEL (1015):
+
+{
+    "storedProcedureName":"MAIL_LABEL",
+    "columnCount":6,
+    "records":[
+        {
+            "LINE1":"GeoTech Inc.",
+            "LINE2":"K.M. Neppelenbroek",
+            "LINE3":"P.0.Box 702",
+            "LINE4":"",
+            "LINE5":null,
+            "LINE6":"Netherlands    2514"
+        }
+    ]
+}
+
+
+Executing stored procedure ORG_CHART:
+
+{
+    "storedProcedureName":"ORG_CHART",
+    "columnCount":5,
+    "records":[
+        {
+            "HEAD_DEPT":null,
+            "DEPARTMENT":"Corporate Headquarters",
+            "MNGR_NAME":"Bender, Oliver H.",
+            "TITLE":"CEO",
+            "EMP_CNT":2
+        },
+        {
+            "HEAD_DEPT":"Corporate Headquarters",
+            "DEPARTMENT":"Sales and Marketing",
+            "MNGR_NAME":"MacDonald, Mary S.",
+            "TITLE":"VP",
+            "EMP_CNT":2
+        },
+        // ... SNIP ...
+        {
+            "HEAD_DEPT":"Corporate Headquarters",
+            "DEPARTMENT":"Finance",
+            "MNGR_NAME":"Steadman, Walter",
+            "TITLE":"CFO",
+            "EMP_CNT":2
+        }
+    ]
+}
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:2 (https://stackoverflow.com/questions/26111708)
+ To handle a result set from a  CallableStatement , treat it just like a  Statement  that returns one or more  ResultSet s: 
+
+  ResultSet rs = tableProc.getResultSet();
+// ... and loop over the result set just like normal
+  
+
+ (A PostgreSQL function can return multiple resultsets if it returns  SETOF REFCURSOR ). 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:3 (https://stackoverflow.com/questions/50023901)
+ In order to call stored procedures with callable statement you need to registerOutParameter for the expected results. Also you don't need to  executeQuery  after the  execute  becaues you don't have a query and you have already executed your statement 
+
+ Try to change your code to: 
+
+  boolean hasResults=statement.execute();
+
+while (hasResults) {
+    ResultSet rs = cStmt.getResultSet();
+    int tempId = rs.getInt("id");
+    String tempJudul = rs.getString("judul");
+    result.add(new Buku(tempId, tempJudul));
+    hasResults= cStmt.getMoreResults();        
+}
+  
+
+ But before that you should add the parameters you expect to the statement.  
+
+   statement.setString(1,parameter);
+ // Add out parameters here
+ statement.registerOutParameter(1, java.sql.Types.INTEGER);
+ ....
+  
+
+ I cannot be bothered to look at the procedure call right now ;) but I guess it works if you can execute it in management studio 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:4 (https://stackoverflow.com/questions/40339502)
+ Warning: this answer was written without access to a SQL Server instance, so it might not be correct, I hope it will help you. I'll try to update it later when I do have access to an SQL Server system. 
+
+ The problem seems to be is that you have  three  different ways of getting values from this stored procedure. You have a return value, an  OUTPUT  parameter and a result set. If the result set is produced depends on the logic of your stored procedure, so you must be prepared to handle its absence. 
+
+ First of all, to get the return value of the stored procedure, you must use: 
+
+  String query = "{?=call [system].[usp_UserLogin(?,?,?,?,?)}";
+  
+
+ Where the  ?=  is the return value. 
+
+ This also has an effect on the the index of the various parameters. It may also be necessary to explicitly register the first (return) parameter as an out parameter. 
+
+ Then you need to execute the stored procedure and be prepared to handle the absence of a result set: 
+
+  boolean firstResultIsResultSet = cs.execute();
+if (firstResultIsResultSet) {
+    ResultSet rs = cs.getResultSet();
+    // process result set
+}
+  
+
+ Note that if you would have multiple result sets and also update counts, this would get even more complicated. 
+
+ You should be able to get the return value using  cs.getInt(1) , although I'm not 100% sure if you can get it before checking and processing the result set. On this the Javadoc for  CallableStatement  says: 
+
+ 
+   For maximum portability, a call's  ResultSet  objects and update counts should be processed prior to getting the values of output parameters. 
+ 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:5 (https://stackoverflow.com/questions/14853194)
+ 'Rules/limitations for using stored procedures' in hibernate documentation states that  
+
+  "The procedure must return a result set. Note that since these servers can return multiple result sets and update counts, Hibernate will iterate the results and take the first result that is a result set as its return value. Everything else will be discarded." 
+(reference : http://docs.jboss.org/hibernate/orm/3.3/reference/en/html/querysql.html#sp_query) 
+
+ As stated, the second resultset in your case is being ignored. 
+
+ You would need to use jdbc for getting both result sets. Either you can make separate classes for doing so, or alternatively, hibernate offers you methods for performing traditional jdbc operations via its session's 'doWork' and 'doReturningWork' methods... 
+
+ A simple example could be: 
+
+  List<Object> res = session.doReturningWork(new ReturningWork<List<Object> /*objectType returned*/>() {
+            @Override
+            /* or object type you need to return to process*/
+            public List<Object> execute(Connection conn) throws SQLException 
+            {
+                CallableStatement cstmt = conn.prepareCall("CALL YOUR_PROCEDURE");
+                //Result list that would return ALL rows of ALL result sets
+                List<Object> result = new ArrayList<Object>();
+                try
+                {
+                    cstmt.execute();                        
+
+                    ResultSet rs = cstmt.getResultSet(); // First resultset
+                    while (rs.next()) {//Read items/rows of first resultset
+                        // .
+                        // Process rows of first resultset
+
+                        result.add(obj); // add items of resultset 1 to the returning list object
+                    }
+
+                    cstmt.getMoreResults(); // Moves to this Statement object's next result, returns true if it is a ResultSet object
+
+                    rs = cstmt.getResultSet(); // Second resultset
+                    while (rs.next()) {
+                        // .
+                        // Process rows of second resultset
+
+                        result.add(obj); // add items of resultset 2 to the returning list object
+                    }
+                    rs.close();                           
+                }
+                finally
+                {cstmt.close();}
+
+                return result; // this should contain All rows or objects you need for further processing
+            }
+        });
+  
+
+
+

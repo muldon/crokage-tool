@@ -1,0 +1,278 @@
+Query: How do I convert number into Roman Numerals?
+-----------------------------------------------------------------------
+
+Rank:1 (https://stackoverflow.com/questions/12968022)
+ From http://math.hws.edu/javanotes/ website:  
+
+        /**
+       * An object of type RomanNumeral is an integer between 1 and 3999.  It can
+       * be constructed either from an integer or from a string that represents
+       * a Roman numeral in this range.  The function toString() will return a
+       * standardized Roman numeral representation of the number.  The function
+       * toInt() will return the number as a value of type int.
+       */
+      public class RomanNumeral {
+
+         private final int num;   // The number represented by this Roman numeral.
+
+         /* The following arrays are used by the toString() function to construct
+            the standard Roman numeral representation of the number.  For each i,
+            the number numbers[i] is represented by the corresponding string, letters[i].
+         */
+
+         private static int[]    numbers = { 1000,  900,  500,  400,  100,   90,  
+                                               50,   40,   10,    9,    5,    4,    1 };
+
+         private static String[] letters = { "M",  "CM",  "D",  "CD", "C",  "XC",
+                                             "L",  "XL",  "X",  "IX", "V",  "IV", "I" };
+
+         /**
+          * Constructor.  Creates the Roman number with the int value specified
+          * by the parameter.  Throws a NumberFormatException if arabic is
+          * not in the range 1 to 3999 inclusive.
+          */
+         public RomanNumeral(int arabic) {
+            if (arabic < 1)
+               throw new NumberFormatException("Value of RomanNumeral must be positive.");
+            if (arabic > 3999)
+               throw new NumberFormatException("Value of RomanNumeral must be 3999 or less.");
+            num = arabic;
+         }
+
+
+         /*
+          * Constructor.  Creates the Roman number with the given representation.
+          * For example, RomanNumeral("xvii") is 17.  If the parameter is not a
+          * legal Roman numeral, a NumberFormatException is thrown.  Both upper and
+          * lower case letters are allowed.
+          */
+         public RomanNumeral(String roman) {
+
+            if (roman.length() == 0)
+               throw new NumberFormatException("An empty string does not define a Roman numeral.");
+
+            roman = roman.toUpperCase();  // Convert to upper case letters.
+
+            int i = 0;       // A position in the string, roman;
+            int arabic = 0;  // Arabic numeral equivalent of the part of the string that has
+                             //    been converted so far.
+
+            while (i < roman.length()) {
+
+               char letter = roman.charAt(i);        // Letter at current position in string.
+               int number = letterToNumber(letter);  // Numerical equivalent of letter.
+
+               i++;  // Move on to next position in the string
+
+               if (i == roman.length()) {
+                     // There is no letter in the string following the one we have just processed.
+                     // So just add the number corresponding to the single letter to arabic.
+                  arabic += number;
+               }
+               else {
+                     // Look at the next letter in the string.  If it has a larger Roman numeral
+                     // equivalent than number, then the two letters are counted together as
+                     // a Roman numeral with value (nextNumber - number).
+                  int nextNumber = letterToNumber(roman.charAt(i));
+                  if (nextNumber > number) {
+                       // Combine the two letters to get one value, and move on to next position in string.
+                     arabic += (nextNumber - number);
+                     i++;
+                  }
+                  else {
+                       // Don't combine the letters.  Just add the value of the one letter onto the number.
+                     arabic += number;
+                  }
+               }
+
+            }  // end while
+
+            if (arabic > 3999)
+               throw new NumberFormatException("Roman numeral must have value 3999 or less.");
+
+            num = arabic;
+
+         } // end constructor
+
+
+         /**
+          * Find the integer value of letter considered as a Roman numeral.  Throws
+          * NumberFormatException if letter is not a legal Roman numeral.  The letter 
+          * must be upper case.
+          */
+         private int letterToNumber(char letter) {
+            switch (letter) {
+               case 'I':  return 1;
+               case 'V':  return 5;
+               case 'X':  return 10;
+               case 'L':  return 50;
+               case 'C':  return 100;
+               case 'D':  return 500;
+               case 'M':  return 1000;
+               default:   throw new NumberFormatException(
+                            "Illegal character \"" + letter + "\" in Roman numeral");
+            }
+         }
+
+
+         /**
+          * Return the standard representation of this Roman numeral.
+          */
+         public String toString() {
+            String roman = "";  // The roman numeral.
+            int N = num;        // N represents the part of num that still has
+                                //   to be converted to Roman numeral representation.
+            for (int i = 0; i < numbers.length; i++) {
+               while (N >= numbers[i]) {
+                  roman += letters[i];
+                  N -= numbers[i];
+               }
+            }
+            return roman;
+         }
+
+
+         /**
+          * Return the value of this Roman numeral as an int.
+          */
+         public int toInt() {
+            return num;
+         }
+
+
+      }
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:2 (https://stackoverflow.com/questions/29218799)
+ Less code, more efficient.  
+
+  public int evaluateRomanNumerals(String roman) {
+    return (int) evaluateNextRomanNumeral(roman, roman.length() - 1, 0);
+}
+
+private double evaluateNextRomanNumeral(String roman, int pos, double rightNumeral) {
+    if (pos < 0) return 0;
+    char ch = roman.charAt(pos);
+    double value = Math.floor(Math.pow(10, "IXCM".indexOf(ch))) + 5 * Math.floor(Math.pow(10, "VLD".indexOf(ch)));
+    return value * Math.signum(value + 0.5 - rightNumeral) + evaluateNextRomanNumeral(roman, pos - 1, value);
+}
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:3 (https://stackoverflow.com/questions/19941430)
+ My solution is in function getRoman: 
+
+  public  String getRoman(int number) {
+
+    String riman[] = {"M","XM","CM","D","XD","CD","C","XC","L","XL","X","IX","V","IV","I"};
+    int arab[] = {1000, 990, 900, 500, 490, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1};
+    StringBuilder result = new StringBuilder();
+    int i = 0;
+    while (number > 0 || arab.length == (i - 1)) {
+        while ((number - arab[i]) >= 0) {
+            number -= arab[i];
+            result.append(riman[i]);
+        }
+        i++;
+    }
+    return result.toString();
+}
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:4 (https://stackoverflow.com/questions/29212316)
+  // Author: Francisco Edmundo
+private int translateNumber(String texto) {
+    int n = 0;
+    int numeralDaDireita = 0;
+    for (int i = texto.length() - 1; i >= 0; i--) {
+        int valor = (int) translateNumber(texto.charAt(i));
+        n += valor * Math.signum(valor + 0.5 - numeralDaDireita);
+        numeralDaDireita = valor;
+    }
+    return n;
+}
+private double translateNumber(char caractere) {
+    return Math.floor(Math.pow(10, "IXCM".indexOf(caractere))) + 5 * Math.floor(Math.pow(10, "VLD".indexOf(caractere)));
+}
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:5 (https://stackoverflow.com/questions/9073310)
+ It will be good if you traverse in reverse. 
+
+  public class RomanToDecimal {
+    public static void romanToDecimal(java.lang.String romanNumber) {
+        int decimal = 0;
+        int lastNumber = 0;
+        String romanNumeral = romanNumber.toUpperCase();
+        /* operation to be performed on upper cases even if user 
+           enters roman values in lower case chars */
+        for (int x = romanNumeral.length() - 1; x >= 0 ; x--) {
+            char convertToDecimal = romanNumeral.charAt(x);
+
+            switch (convertToDecimal) {
+                case 'M':
+                    decimal = processDecimal(1000, lastNumber, decimal);
+                    lastNumber = 1000;
+                    break;
+
+                case 'D':
+                    decimal = processDecimal(500, lastNumber, decimal);
+                    lastNumber = 500;
+                    break;
+
+                case 'C':
+                    decimal = processDecimal(100, lastNumber, decimal);
+                    lastNumber = 100;
+                    break;
+
+                case 'L':
+                    decimal = processDecimal(50, lastNumber, decimal);
+                    lastNumber = 50;
+                    break;
+
+                case 'X':
+                    decimal = processDecimal(10, lastNumber, decimal);
+                    lastNumber = 10;
+                    break;
+
+                case 'V':
+                    decimal = processDecimal(5, lastNumber, decimal);
+                    lastNumber = 5;
+                    break;
+
+                case 'I':
+                    decimal = processDecimal(1, lastNumber, decimal);
+                    lastNumber = 1;
+                    break;
+            }
+        }
+        System.out.println(decimal);
+    }
+
+    public static int processDecimal(int decimal, int lastNumber, int lastDecimal) {
+        if (lastNumber > decimal) {
+            return lastDecimal - decimal;
+        } else {
+            return lastDecimal + decimal;
+        }
+    }
+
+    public static void main(java.lang.String args[]) {
+        romanToDecimal("XIV");
+    }
+}
+  
+
+
+

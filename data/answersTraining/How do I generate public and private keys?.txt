@@ -1,0 +1,284 @@
+Query: How do I generate public and private keys?
+-----------------------------------------------------------------------
+
+Rank:1 (https://stackoverflow.com/questions/23208113)
+ Although the key is too small for practical use, you may still use it for educational purposes. Note that the key is so small that you cannot even use PKCS#1 padding modes, only "raw" RSA encryption (i.e. only the modular exponentiation part of RSA). 
+
+ The following works perfectly well for the Bouncy Castle provider (where the key is a 64 bit key): 
+
+  final Provider bc = new BouncyCastleProvider();
+
+// generating the key from modulus & private exponent
+KeyFactory rsaFactory = KeyFactory.getInstance("RSA", bc);
+RSAPrivateKeySpec spec = new RSAPrivateKeySpec(key.getModulus(), key.getPrivateExponent());
+RSAPrivateKey testKey = (RSAPrivateKey) rsaFactory.generatePrivate(spec);
+
+// using it in a raw cipher
+Cipher c= Cipher.getInstance("RSA/ECB/NoPadding", bc);
+c.init(Cipher.DECRYPT_MODE, testKey);
+c.doFinal(new byte[] {(byte) 0x7F, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, });
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:2 (https://stackoverflow.com/questions/39311251)
+ As per the link :http://codeartisan.blogspot.in/2009/05/public-key-cryptography-in-java.html
+You should be trying the below  
+
+ Generate a 2048-bit RSA private key 
+
+  $ openssl genrsa -out private_key.pem 2048
+  
+
+ Convert private Key to PKCS#8 format (so Java can read it) 
+
+  $ openssl pkcs8 -topk8 -inform PEM -outform DER -in private_key.pem -out private_key.der -nocrypt
+  
+
+ Output public key portion in DER format (so Java can read it) 
+
+  $ openssl rsa -in private_key.pem -pubout -outform DER -out public_key.der
+  
+
+ You can read the java code like below: 
+
+  import java.io.DataInputStream;
+    import java.io.File;
+    import java.io.FileInputStream;
+    import java.io.IOException;
+    import java.security.KeyFactory;
+    import java.security.NoSuchAlgorithmException;
+    import java.security.interfaces.RSAPrivateKey;
+    import java.security.interfaces.RSAPublicKey;
+    import java.security.spec.InvalidKeySpecException;
+    import java.security.spec.PKCS8EncodedKeySpec;
+    import java.security.spec.X509EncodedKeySpec;
+
+    public class Demo {
+
+        public static final String PRIVATE_KEY="/home/user/private.der";
+        public static final String PUBLIC_KEY="/home/user/public.der";
+
+        public static void main(String[] args) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
+            //get the private key
+            File file = new File(PRIVATE_KEY);
+            FileInputStream fis = new FileInputStream(file);
+            DataInputStream dis = new DataInputStream(fis);
+
+            byte[] keyBytes = new byte[(int) file.length()];
+            dis.readFully(keyBytes);
+            dis.close();
+
+            PKCS8EncodedKeySpec spec = new PKCS8EncodedKeySpec(keyBytes);
+            KeyFactory kf = KeyFactory.getInstance("RSA");
+            RSAPrivateKey privKey = (RSAPrivateKey) kf.generatePrivate(spec);
+            System.out.println("Exponent :" + privKey.getPrivateExponent());
+            System.out.println("Modulus" + privKey.getModulus());
+
+            //get the public key
+            File file1 = new File(PUBLIC_KEY);
+            FileInputStream fis1 = new FileInputStream(file1);
+            DataInputStream dis1 = new DataInputStream(fis1);
+            byte[] keyBytes1 = new byte[(int) file1.length()];
+            dis1.readFully(keyBytes1);
+            dis1.close();
+
+            X509EncodedKeySpec spec1 = new X509EncodedKeySpec(keyBytes1);
+            KeyFactory kf1 = KeyFactory.getInstance("RSA");
+            RSAPublicKey pubKey = (RSAPublicKey) kf1.generatePublic(spec1);
+
+            System.out.println("Exponent :" + pubKey.getPublicExponent());
+            System.out.println("Modulus" + pubKey.getModulus());
+        }
+    }
+  
+
+ Program Output: 
+
+  PUBLIC KEY EXPO : 65537
+PRIVATE KEY : 16540425323481903232154296082061217323015064904150073221896716535825697862890781586244035403066600439504989225032100277459509106847714925918656002207273016950425690931486784061794302602299415224979080443644674838230854689682941689891752703570749249869153966528967635783430367525635094847999700308350727275663213969614628360232440655477057807291869565586695953970804798770095849408924111596670565606097668752646013504502815936286143578191877967720393294592625997337105475883689954727277867955887242546330469781268095607005541678733388864537898085207735975487415418212440417692928205650585590564551063589766600954407329
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:3 (https://stackoverflow.com/questions/29892431)
+ You will need BouncyCastle: 
+
+  import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1Primitive;
+import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.util.io.pem.PemObject;
+import org.bouncycastle.util.io.pem.PemWriter;
+  
+
+ The code snippets below have been checked and found working with Bouncy Castle 1.52. 
+
+ Private key 
+
+ Convert private key from PKCS8 to PKCS1: 
+
+  PrivateKey priv = pair.getPrivate();
+byte[] privBytes = priv.getEncoded();
+
+PrivateKeyInfo pkInfo = PrivateKeyInfo.getInstance(privBytes);
+ASN1Encodable encodable = pkInfo.parsePrivateKey();
+ASN1Primitive primitive = encodable.toASN1Primitive();
+byte[] privateKeyPKCS1 = primitive.getEncoded();
+  
+
+ Convert private key in PKCS1 to PEM: 
+
+  PemObject pemObject = new PemObject("RSA PRIVATE KEY", privateKeyPKCS1);
+StringWriter stringWriter = new StringWriter();
+PemWriter pemWriter = new PemWriter(stringWriter);
+pemWriter.writeObject(pemObject);
+pemWriter.close();
+String pemString = stringWriter.toString();
+  
+
+ Check with command line OpenSSL that the key format is as expected: 
+
+  openssl rsa -in rsa_private_key.pem -noout -text
+  
+
+ Public key 
+
+ Convert public key from X.509 SubjectPublicKeyInfo to PKCS1: 
+
+  PublicKey pub = pair.getPublic();
+byte[] pubBytes = pub.getEncoded();
+
+SubjectPublicKeyInfo spkInfo = SubjectPublicKeyInfo.getInstance(pubBytes);
+ASN1Primitive primitive = spkInfo.parsePublicKey();
+byte[] publicKeyPKCS1 = primitive.getEncoded();
+  
+
+ Convert public key in PKCS1 to PEM: 
+
+  PemObject pemObject = new PemObject("RSA PUBLIC KEY", publicKeyPKCS1);
+StringWriter stringWriter = new StringWriter();
+PemWriter pemWriter = new PemWriter(stringWriter);
+pemWriter.writeObject(pemObject);
+pemWriter.close();
+String pemString = stringWriter.toString();
+  
+
+ Check with command line OpenSSL that the key format is as expected: 
+
+  openssl rsa -in rsa_public_key.pem -RSAPublicKey_in -noout -text
+  
+
+ Thanks 
+
+ Many thanks to the authors of the following posts: 
+
+ 
+<li 
+<li 
+<li 
+ 
+
+ Those posts contained useful, though sometimes outdated info (i.e. for older versions of BouncyCastle), that helped me to construct this post. 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:4 (https://stackoverflow.com/questions/12813708)
+ The assumption is that we are talking about RSA private and Public keys. Then, if you are working from a PEM format file, then first you need to read the private key from the file into a PrivateKey object: 
+
+      public PrivateKey readPemRsaPrivateKey(String pemFilename) throws
+            java.io.IOException,
+            java.security.NoSuchAlgorithmException,
+            java.security.spec.InvalidKeySpecException
+    {
+            String pemString = File2String(pemFilename);
+
+            pemString = pemString.replace("-----BEGIN RSA PRIVATE KEY-----\n", "");
+            pemString = pemString.replace("-----END RSA PRIVATE KEY-----", "");
+
+            byte[] decoded = Base64.decodeBase64(pemString);
+
+            PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(decoded);
+            KeyFactory kf = KeyFactory.getInstance("RSA");
+
+            return kf.generatePrivate(keySpec);
+    }
+  
+
+ where File2String is something like: 
+
+      private static String File2String(String fileName) throws
+            java.io.FileNotFoundException, java.io.IOException
+    {
+            File file = new File(fileName);
+
+            char[] buffer = null;
+
+            BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
+
+            buffer = new char[(int)file.length()];
+
+            int i = 0;
+            int c = bufferedReader.read();
+
+            while (c != -1) {
+                    buffer[i++] = (char)c;
+                    c = bufferedReader.read();
+            }
+            return new String(buffer);
+    }
+  
+
+ Now you can generate the corresponding PublicKey with code like this: 
+
+      import java.security.interfaces.RSAPrivateCrtKey;
+    import java.security.spec.RSAPublicKeySpec;
+  
+
+ ... 
+
+      PrivateKey myPrivateKey = readPemRsaPrivateKey(myPrivateKeyPemFileName);
+    RSAPrivateCrtKey privk = (RSAPrivateCrtKey)myPrivateKey;
+
+    RSAPublicKeySpec publicKeySpec = new java.security.spec.RSAPublicKeySpec(privk.getModulus(), privk.getPublicExponent());
+
+    KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+    PublicKey myPublicKey = keyFactory.generatePublic(publicKeySpec);
+  
+
+ Credits: https://stackoverflow.com/questions/11345346/how-to-get-a-rsa-publickey-by-giving-a-privatekey 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:5 (https://stackoverflow.com/questions/8713518)
+ From http://tools.ietf.org/html/rfc5208, the PKCS#8 unencrypted format consists of a  PrivateKeyInfo  structure: 
+
+ 
+PrivateKeyInfo ::= SEQUENCE {
+  version                   Version,
+  privateKeyAlgorithm       PrivateKeyAlgorithmIdentifier,
+  privateKey                PrivateKey,
+  attributes           [0]  IMPLICIT Attributes OPTIONAL }
+ 
+
+ where  privateKey  is: 
+
+ 
+   "...an octet string whose contents are the value of the private key.  The interpretation of the contents is defined in the registration of the private-key algorithm.  For an RSA private key, for example, the contents are a BER encoding of a value of type RSAPrivateKey." 
+ 
+
+ This  RSAPrivateKey  structure is just the PKCS#1 encoding of the key, which we can extract using BouncyCastle: 
+
+  // pkcs8Bytes contains PKCS#8 DER-encoded key as a byte[]
+PrivateKeyInfo pki = PrivateKeyInfo.getInstance(pkcs8Bytes);
+RSAPrivateKeyStructure pkcs1Key = RSAPrivateKeyStructure.getInstance(
+        pki.getPrivateKey());
+byte[] pkcs1Bytes = pkcs1Key.getEncoded(); // etc.
+  
+
+
+

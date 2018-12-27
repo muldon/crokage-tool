@@ -1,0 +1,109 @@
+Query: How do I get JDBC driver property information?
+-----------------------------------------------------------------------
+
+Rank:1 (https://stackoverflow.com/questions/35147321)
+  DriverManager.getDriver(String)  should do this: 
+
+  Connection conn = DriverManager.getConnection(...); 
+
+String originalURL = conn.getMetaData().getURL();
+Driver drv = DriverManager.getDriver(originalURL);
+String driverClass = drv.getClass().getName();
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:2 (https://stackoverflow.com/questions/20806762)
+ Have you tried calling the driver class? 
+
+  Class.forName("com.mysql.jdbc.Driver");
+  
+
+ How to call it 
+
+  try {
+    Class.forName("com.mysql.jdbc.Driver");
+} catch (ClassNotFoundException ex) {
+    // error out
+}
+Connection con = DriverManager.getConnection(/*your connection query*/);
+  
+
+ I may have the class wrong, but if  com.mysql.jdbc.Driver  doesn't work, you can also try  com.mysql.JDBC  or  com.mysql.jdbc  (basing off how SQLite calls it) 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:3 (https://stackoverflow.com/questions/40729242)
+ All of the answers here use the  Class.forName("my.vandor.Driver");  line to load the driver. 
+
+ As an (better) alternative you can use the  DriverManager  helper class which provides you with a handful of methods to handle your JDBC driver/s. 
+
+ You might want to 
+
+ 
+ Use  DriverManager.registerDriver(driverObject);  to register your driver to it's list of drivers 
+ 
+
+ 
+   Registers the given driver with the DriverManager. A newly-loaded driver class should call the method registerDriver to make itself known to the DriverManager. If the driver is currently registered, no action is taken 
+ 
+
+<ol start="2">
+ Use  DriverManager.deregisterDriver(driverObject);  to remove it. 
+ 
+
+ 
+   Removes the specified driver from the DriverManager's list of registered drivers. 
+ 
+
+ Example: 
+
+  Driver driver = new oracle.jdbc.OracleDriver();
+DriverManager.registerDriver(driver);
+Connection conn = DriverManager.getConnection(url, user, password);
+// ... 
+// and when you don't need anything else from the driver
+DriverManager.deregisterDriver(driver);
+  
+
+ or better yet, use a https://docs.oracle.com/javase/tutorial/jdbc/basics/sqldatasources.html 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:4 (https://stackoverflow.com/questions/10528230)
+  con = DriverManager.getConnection("jdbc:mysql://localhost:3306/books","root","1234");
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:5 (https://stackoverflow.com/questions/3377222)
+  
+
+  String driver = "com.microsoft.jdbc.sqlserver.SQLServerDriver";
+Class.forName(driver);
+String url = "jdbc:microsoft:sqlserver://host:1433/database";
+Connection conn = DriverManager.getConnection(url, "username", "password");
+  
+
+ For more info, see http://support.microsoft.com/kb/313100 to get started with Microsoft JDBC.
+  You can use any of the two JDBC drivers for MSSQL: 
+
+ 
+ http://www.microsoft.com/downloads/details.aspx?FamilyID=99b21b65-e98f-4a61-b811-19912601fdc9&displaylang=en 
+ http://jtds.sourceforge.net/ 
+ 
+
+ For MS SQL Server driver 2.0, use 
+
+  URL: jdbc:sqlserver://server:port; DatabaseName=dbname
+Class name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+  
+
+ For MySql & Java, see https://stackoverflow.com/questions/2839321/java-connectivity-with-mysql on SO. 
+
+
+

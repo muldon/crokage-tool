@@ -1,0 +1,144 @@
+Query: Java Program to Calculate average of numbers using Array
+-----------------------------------------------------------------------
+
+Rank:1 (https://stackoverflow.com/questions/46305025)
+ Your problem seems to bee on this line: 
+
+  if(Averages.size() < avg) aveless++;
+  
+
+ You should be checking  Averages.get(i) < avg  instead, otherwise what is the point of looping? 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:2 (https://stackoverflow.com/questions/32135007)
+ If using  Java8  you can get the average of the values from a List as follows: 
+
+      List<Integer> intList = Arrays.asList(1,2,2,3,1,5);
+
+    Double average = intList.stream().mapToInt(val -> val).average().orElse(0.0);
+  
+
+ This has the advantage of having no moving parts.  It can be easily adapted to work with a List of other types of object by changing the map method call.   
+
+ For example with Doubles:  
+
+      List<Double> dblList = Arrays.asList(1.1,2.1,2.2,3.1,1.5,5.3);
+    Double average = dblList.stream().mapToDouble(val -> val).average().orElse(0.0);
+  
+
+ . mapToDouble is required because it returns a DoubleStream which has an  average  method, while using  map  does not.  
+
+  
+
+      List<BigDecimal> bdList = Arrays.asList(valueOf(1.1),valueOf(2.1),valueOf(2.2),valueOf(3.1),valueOf(1.5),valueOf(5.3));
+    Double average = bdList.stream().mapToDouble(BigDecimal::doubleValue).average().orElse(0.0);
+  
+
+ using  orElse(0.0)  removes problems with the Optional object returned from the  average  being 'not present'. 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:3 (https://stackoverflow.com/questions/15315741)
+ Instead of using a statically-sized array you could use a dynamically-sized  List : 
+
+  import java.util.List;
+import java.util.LinkedList;
+
+// . . .
+
+private static void infoMenu1(Scanner sc) throws FileNotFoundException {
+    File file = new File("data.txt");
+    sc = new Scanner(file);
+
+    List<Integer> numbers = new LinkedList<Integer>();
+
+    while (sc.hasNextInt()) {
+        numbers.add(sc.nextInt());
+    }
+
+    System.out.println("The average of the numbers in the file is: " + avg(numbers));
+}
+
+public static int avg(List<Integer> numbers) {
+    int sum = 0;
+    for (Integer i : numbers) {
+        sum += i;
+    }
+    return (sum / numbers.size());
+}
+  
+
+ This has added the benefit of allowing you to read in more than 100 numbers. Since the  LinkedList  allows you to perform an arbitrary number of  add  operations, each in constant time, you don't need to know how many numbers (or even an upper-bound on the count) before reading the input. 
+
+ As kkonrad also mentioned, you may or may not actually want to use a floating-point value for your average. Right now you're doing integer arithmetic, which would say that the average of  1  and  2  is  1 . If you want  1.5  instead, you should consider using a  double  to compute the average: 
+
+  public static double avg(List<Integer> numbers) {
+    double sum = 0;
+    for (Integer i : numbers) {
+        sum += i;
+    }
+    return (sum / numbers.size());
+}
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:4 (https://stackoverflow.com/questions/19967350)
+  public static void main(String[] args){
+    int total = 0;     // sum
+    int largest = Integer.MIN_VALUE;   // highest
+    int lowest = Integer.MAX_VALUE;    // lowest
+    int count = 0;     // how many nums enters
+    int average;       // average
+    int number = 0;
+
+    Scanner scanner = new Scanner(System.in);
+
+    while(true){
+        if (number < 0) break;
+        System.out.println("Enter a number:");
+        int number = scanner.nextInt();
+
+        // for every number input, increase count by one 
+        count++; // freebie code - complete the reamining [your code here]'s  
+
+        // for every number increase total by number
+        [your code here]
+
+        // if number is greater than largest, largest equals number
+        [your code here]
+
+        // if number is less than lowest, lowest = number
+        [your code here]
+
+    }
+
+    average = total / count;
+
+    System.out.println("Total input numbers: " + count);
+    System.out.println("Sum of input number: " + sum);
+    System.out.println("Highest number: " + highest);
+    System.out.println("Lowest numer: " + lowest);
+    System.out.println("Average: " + average);
+}
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:5 (https://stackoverflow.com/questions/25630098)
+ To compute the final mean: 
+
+  double sum = 0;
+for(double d : numbers) {
+    sum += d;
+}
+System.out.println(sum / numbers.size()); 
+  
+
+
+

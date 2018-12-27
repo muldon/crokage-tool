@@ -1,0 +1,212 @@
+Query: How do I decompress a GZip file in Java?
+-----------------------------------------------------------------------
+
+Rank:1 (https://stackoverflow.com/questions/16600158)
+ The MIME header is NOT in the GZIP format, it's in plain text. You have to read that first before you can decompress the stream. 
+
+ Also, why not just use this: 
+
+  InputStream in = sock.getInputStream();
+readHeader(in);
+InputStream zin = new GZIPInputStream(in);
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:2 (https://stackoverflow.com/questions/36224729)
+    public static byte[] gzip(byte[] val) throws IOException {  
+  ByteArrayOutputStream bos = new ByteArrayOutputStream(val.length);  
+  GZIPOutputStream gos = null;  
+  try {  
+   gos = new GZIPOutputStream(bos);  
+   gos.write(val, 0, val.length);  
+   gos.finish();  
+   gos.flush();  
+   bos.flush();  
+   val = bos.toByteArray();  
+  } finally {  
+   if (gos != null)  
+    gos.close();  
+   if (bos != null)  
+    bos.close();  
+  }  
+  return val;  
+ }  
+
+ /** 
+  * Compress
+  *  
+  * @param source 
+  *
+  * @param target 
+  *           
+  * @throws IOException 
+  */  
+ public static void zipFile(String source, String target) throws IOException {  
+  FileInputStream fin = null;  
+  FileOutputStream fout = null;  
+  GZIPOutputStream gzout = null;  
+  try {  
+   fin = new FileInputStream(source);  
+   fout = new FileOutputStream(target);  
+   gzout = new GZIPOutputStream(fout);  
+   byte[] buf = new byte[1024];  
+   int num;  
+   while ((num = fin.read(buf)) != -1) {  
+    gzout.write(buf, 0, num);  
+   }  
+  } finally {  
+   if (gzout != null)  
+    gzout.close();  
+   if (fout != null)  
+    fout.close();  
+   if (fin != null)  
+    fin.close();  
+  }  
+ }  
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:3 (https://stackoverflow.com/questions/902912)
+ a) Zip is an archive format, while gzip is not. So an entry iterator does not make much sense unless (for example) your gz-files are compressed tar files.  
+
+  File outFile = new File(infile.getParent(), infile.getName().replaceAll("\\.gz$", ""));
+  
+
+ b) Do you only want to uncompress the files? If not you may be ok with using GZIPInputStream and read the files directly, i.e. without intermediate decompression. 
+
+ . Let's say you really  only  want to uncompress the files. If so, you could probably use this: 
+
+  public static File unGzip(File infile, boolean deleteGzipfileOnSuccess) throws IOException {
+    GZIPInputStream gin = new GZIPInputStream(new FileInputStream(infile));
+    FileOutputStream fos = null;
+    try {
+        File outFile = new File(infile.getParent(), infile.getName().replaceAll("\\.gz$", ""));
+        fos = new FileOutputStream(outFile);
+        byte[] buf = new byte[100000];
+        int len;
+        while ((len = gin.read(buf)) > 0) {
+            fos.write(buf, 0, len);
+        }
+
+        fos.close();
+        if (deleteGzipfileOnSuccess) {
+            infile.delete();
+        }
+        return outFile; 
+    } finally {
+        if (gin != null) {
+            gin.close();    
+        }
+        if (fos != null) {
+            fos.close();    
+        }
+    }       
+}
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:4 (https://stackoverflow.com/questions/33022277)
+ Try this - it is a minimal working example: 
+
+  package zlib.example;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.util.Arrays;
+import java.util.zip.Deflater;
+import java.util.zip.DeflaterOutputStream;
+import java.util.zip.InflaterInputStream;
+
+/**
+ * Created by keocra on 08.10.15.
+ */
+public class Main {
+    private final static String inputStr = "Hello World!";
+
+    public static void main(String[] args) throws Exception {
+        System.out.println("Will zlib compress following string: " + inputStr);
+
+        // will compress "Hello World!"
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        DeflaterOutputStream dos = new DeflaterOutputStream(baos);
+        dos.write(inputStr.getBytes());
+        dos.flush();
+        dos.close();
+
+        // at this moment baos.toByteArray() holds the compressed data of "Hello World!"
+
+        // will decompress compressed "Hello World!"
+        ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
+        InflaterInputStream iis = new InflaterInputStream(bais);
+
+        String result = "";
+        byte[] buf = new byte[5];
+        int rlen = -1;
+        while ((rlen = iis.read(buf)) != -1) {
+            result += new String(Arrays.copyOf(buf, rlen));
+        }
+
+        // now result will contain "Hello World!"
+
+        System.out.println("Decompress result: " + result);
+    }
+}
+  
+
+ You should also easily be able to extend this example to compress/decompress files. 
+
+ Hope it helps ;-) 
+
+ Further readings: 
+
+ 
+ http://docs.oracle.com/javase/7/docs/api/java/util/zip/DeflaterOutputStream.html 
+ https://docs.oracle.com/javase/7/docs/api/java/util/zip/InflaterInputStream.html 
+ 
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:5 (https://stackoverflow.com/questions/26358167)
+ If you are still looking an answer you can use the below code to get the compressed byte[] using deflater and decompress it using inflater. 
+
+  public static void main(String[] args) {
+        //Some string for testing
+        String sr = new String("fsdfesfsfdddddddsfdsfssdfdsfdsfdsfdsfdsdfggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggghghghghggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggfsdfesfsfdddddddsfdsfssdfdsfdsfdsfdsfdsdfggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggggghghghghggggggggggggggggggggggggggggggggggggggggg");
+        byte[] data = sr.getBytes();
+        System.out.println("src size "+data.length);
+        try {
+            compress(data);
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+    public static byte[] compress(byte[] data) throws IOException { 
+        Deflater deflater = new Deflater(); 
+        deflater.setInput(data); 
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream(data.length);  
+
+        deflater.finish(); 
+        byte[] buffer = new byte[1024];  
+        while (!deflater.finished()) { 
+        int count = deflater.deflate(buffer);  
+        outputStream.write(buffer, 0, count);  
+        } 
+        outputStream.close(); 
+        byte[] output = outputStream.toByteArray(); 
+
+        System.out.println("Original: " + data.length  ); 
+        System.out.println("Compressed: " + output.length ); 
+        return output; 
+        }   
+  
+
+
+

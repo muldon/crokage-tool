@@ -1,0 +1,151 @@
+Query: Java Program to Check Even or Odd Number
+-----------------------------------------------------------------------
+
+Rank:1 (https://stackoverflow.com/questions/42053332)
+ To generate prime number simply loop through a given number and check if that number is prime or not.
+For efficient prime number generation IsPrime method must be very efficient and fast.
+So here is code to check if given number is prime or not very efficiently. 
+
+  public static boolean IsPrime(int n) {
+
+    if (n > 2 && n %2 == 0){
+        return false;
+    }
+    int top = (int)Math.sqrt(n)+1;
+    for (int i=3;i<top;i+=2){
+        if (n%i==0){
+            return false;
+        }
+    }
+    return true;
+}
+  
+
+ Here is the code that will generate prime number between 1 and given number. 
+
+   public class GeneratePrimeNumber {
+    public static void main(String[] args) {
+    System.out.println("Enter number to get prime number");
+    int n = new Scanner(System.in).nextInt();
+        for (int j=0;j<n;j++){
+            if (IsPrime(j)){
+                System.out.print(j + " ");
+            }
+        }
+
+    }
+ }
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:2 (https://stackoverflow.com/questions/5709205)
+ So it seems like you want to print out the factorial of a number if you have an odd number and the divisors of the number if it is even. You haven't specified a way to present the divisors, so here's one way you could do it: 
+
+  Scanner var = new Scanner(System.in);
+int m;
+long x=1; //for the factorial, we want to store in a long to combat data overflow
+System.out.println("Type in your first number: ");
+m = var.nextInt();
+//if the input is odd we calculate its factorial
+if (m%2==1){
+    for (int i = 1;i<=m;i++)
+        x*=i;
+    System.out.println(m+"!: "+x);
+}
+else{
+    System.out.println("1 is a divisor for "+m);
+    System.out.println("2 is a divisor for "+m);
+    if (m%3==0)
+        System.out.println("3 is a divisor for "+m);
+    //and so on for more divisors of m
+}
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:3 (https://stackoverflow.com/questions/8002800)
+ If the number that you want to find the factors for happens to be odd, you only need to test odd numbers because it is impossible to have an even factor for an odd number.  So with a pre-check up front, you can save yourself some processing.  
+
+  private static List<Integer> findFactors(int num)
+{
+    int incrementer = 1;
+    if (num % 2 != 0)
+    {
+        incrementer = 2; //only test the odd ones
+    }
+    List<Integer> list = new ArrayList<Integer>();
+    for (int i = 1; i <= num / 2; i=i+incrementer)
+    {
+        if (num % i == 0)
+        {
+            list.add(i);
+        }
+    }
+    list.add(num);
+    return list;
+}
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:4 (https://stackoverflow.com/questions/22587551)
+ All you've done is find the  not  factors of  n . You test if each number leading up to it is a factor of  n  by adding it if  n % i != 0 . 
+
+ What you need to do is iterate from 2 to n, and for  each  of those numbers, test if it's prime. You will need two loops. I suggest creating a method to determine prime numbers, and I guess your current method is find as it is. Just replace  if (n % i != 0)  with  if(isPrime(i))  
+
+  public static boolean isPrime(long n) {
+    // eliminate the simple cases
+    if (n < 2) {
+        return false;
+    } else if (n == 2) {
+        return true;
+    }
+
+    // only test up until the square root of that number
+    for (int i = 2; i < Math.pow(n, 0.5) + 1; i++) {
+        if (n % i == 0) {
+            return false; // found a factor, it's not prime
+        }
+    }
+    return true; // hasn't found a factor and returned false, so it's prime
+}
+  
+
+ And then in your current code: 
+
+  for(int i=2; i<=n; i++){
+    if(n%i != 0){
+        primeList.add(i);
+    }
+}
+  
+
+ Just change  if(n%i != 0){  to  if(isPrime(i))  
+
+ So it would be this: 
+
+  for(int i=2; i<=n; i++){
+    if(isPrime(i)) {
+        primeList.add(i);
+    }
+}
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:5 (https://stackoverflow.com/questions/45789981)
+ You can use the modulus operator, but that can be slow. A more efficient way would be to check the lowest bit because that determines whether a number is even or odd. The code would look something like this: 
+
+  public static void main(String[] args) {        
+    System.out.println("Enter a number to check if it is even or odd");        
+    System.out.println("Your number is " + (((new Scanner(System.in).nextInt() & 1) == 0) ? "even" : "odd"));        
+}
+  
+
+
+

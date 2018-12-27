@@ -1,0 +1,181 @@
+Query: Java Program to check Prime Number
+-----------------------------------------------------------------------
+
+Rank:1 (https://stackoverflow.com/questions/42053332)
+ To generate prime number simply loop through a given number and check if that number is prime or not.
+For efficient prime number generation IsPrime method must be very efficient and fast.
+So here is code to check if given number is prime or not very efficiently. 
+
+  public static boolean IsPrime(int n) {
+
+    if (n > 2 && n %2 == 0){
+        return false;
+    }
+    int top = (int)Math.sqrt(n)+1;
+    for (int i=3;i<top;i+=2){
+        if (n%i==0){
+            return false;
+        }
+    }
+    return true;
+}
+  
+
+ Here is the code that will generate prime number between 1 and given number. 
+
+   public class GeneratePrimeNumber {
+    public static void main(String[] args) {
+    System.out.println("Enter number to get prime number");
+    int n = new Scanner(System.in).nextInt();
+        for (int j=0;j<n;j++){
+            if (IsPrime(j)){
+                System.out.print(j + " ");
+            }
+        }
+
+    }
+ }
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:2 (https://stackoverflow.com/questions/32786799)
+ It's possible to check prime numbers with few lines using a  for  loop. It's better for performance. 
+
+  Code to check prime numbers:  
+
+      boolean isPrime = true;
+    for (int i = 2; i < n && isPrime; i++) {
+        isPrime = !(n % i == 0);
+    }
+  
+
+  Full class according to your example:  
+
+  import java.util.Scanner;
+
+public class Prime {
+
+    public static void main(String[] args) {
+        System.out.println("Enter a number to check if it is prime:");
+        Scanner kb = new Scanner(System.in);
+        int n = kb.nextInt();
+
+        boolean isPrime = true;
+        for (int i = 2; i < n && isPrime; i++) {
+            isPrime = !(n % i == 0);
+        }
+
+        System.out.println(n + " is prime - " + isPrime);
+    }
+}
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:3 (https://stackoverflow.com/questions/37018879)
+ Java java.math.BigInteger class contains a method  isProbablePrime(int certainty)  to check the primality of a number. 
+
+  isProbablePrime(int certainty) : A method in  BigInteger  class to check if a given number is prime.
+For  certainty = 1 , it return true if  BigInteger  is prime and false if  BigInteger  is composite. 
+
+  Miller–Rabin primality algorithm is used to check primality in this method.  
+
+  import java.math.BigInteger;
+
+public class TestPrime {
+
+    public static void main(String[] args) {
+        int number = 83;
+        boolean isPrime = testPrime(number);
+        System.out.println(number + " is prime : " + isPrime);
+
+    }
+
+    /**
+     * method to test primality
+     * @param number
+     * @return boolean
+     */
+    private static boolean testPrime(int number) {
+        BigInteger bValue = BigInteger.valueOf(number);
+
+        /**
+         * isProbablePrime method used to check primality. 
+         * */
+        boolean result = bValue.isProbablePrime(1);
+
+        return result;
+    }
+}
+  
+
+  Output: 83 is prime : true  
+
+ For more information, see my http://javaexplorer03.blogspot.in/2016/05/generate-next-prime-of-number-in-java.html.   
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:4 (https://stackoverflow.com/questions/28970343)
+      Scanner reader = new Scanner(System.in);
+    System.out.println("Enter the a number");
+    int num = reader.nextInt();
+    int counter = 0;
+    int root = 0;
+    boolean prime_flag;
+
+    if (2 <= num) {
+        // 2 is the only even prime number
+        counter++;
+    }
+
+    for (int i = 3; i < (num + 1); i++) {
+
+        // test only for odd number
+        if (i % 2 != 0) {
+            prime_flag = true;
+            root = (int) (Math.sqrt(i) + 1);
+
+            for (int j = 3; j < (root + 1); j++) {
+                if ((i % j == 0) && (i != j)) {
+
+                    prime_flag = false;
+                    break;
+                }
+            }
+
+            if (prime_flag) {
+                counter++;
+            }
+
+        }
+
+    }
+
+    System.out.println("Count of prime numbers upto " + num + " is "
+            + counter);
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:5 (https://stackoverflow.com/questions/34007819)
+ You should return a  List<Integer>  not a single  int , and there is no point in  i  being an argument. A correct method is  
+
+  public static List<Integer> primeFactorization(int a) {
+    List<Integer> list = new ArrayList<Integer>();
+    for (int i = 2; i <= a ; i++) {
+        while (a % i == 0) {
+            list.add(i);
+            a /= i;
+        }
+    }
+    return list;
+}
+  
+
+
+

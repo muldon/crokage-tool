@@ -1,0 +1,95 @@
+Query: how to serialize JSON Object
+-----------------------------------------------------------------------
+
+Rank:1 (https://stackoverflow.com/questions/8725397)
+  Pojo myPojo = new Pojo();
+
+Gson gson = new Gson();
+gson.toJson(myPojo);
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:2 (https://stackoverflow.com/questions/3272244)
+ In the object you're mapping: 
+
+  @JsonSerialize(using = CustomDateSerializer.class)
+public DateTime getDate() { ... }
+  
+
+  
+
+  public class CustomDateSerializer extends JsonSerializer<DateTime> {
+
+    private static DateTimeFormatter formatter = 
+        DateTimeFormat.forPattern("dd-MM-yyyy");
+
+    @Override
+    public void serialize(DateTime value, JsonGenerator gen, 
+                          SerializerProvider arg2)
+        throws IOException, JsonProcessingException {
+
+        gen.writeString(formatter.print(value));
+    }
+}
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:3 (https://stackoverflow.com/questions/5631816)
+ I don't know if your problem is solved. I ran into a similar question and here it is how I worked it out: 
+
+  JsonDeserializer  allows you to make you own adapter to deserialize that **: 
+
+  class JavaBeanDeserializer implements JsonDeserializer<JavaBeanObject>() {
+    public JavaBeanObject fromJson(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
+    // return JavaBeanObject built using your logic.
+}
+  
+
+ You've to register  JavaBeanDeserializer  to Gson object when building it: 
+
+  Gson gson = new GsonBuilder().registerTypeAdapter(JavaBeanObject.class, new JavaBeanDeserializer()).create();
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:4 (https://stackoverflow.com/questions/20542508)
+  public class TryJsonStringSerializer extends JsonSerializer<String> {
+
+    private RawSerializer<String> rawSerializer = new RawSerializer<String>(String.class);
+    private ToStringSerializer stringSerializer = ToStringSerializer.instance;
+
+    @Override
+    public void serialize(String value, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) 
+            throws IOException, JsonProcessingException {
+        if (value == null) {
+            return;
+        }
+        value = value.trim();
+        if (value.startsWith("{") && value.endsWith("}")) {
+            rawSerializer.serialize(value, jsonGenerator, serializerProvider);
+        } else {
+            stringSerializer.serialize(value, jsonGenerator, serializerProvider);
+        }
+    }
+
+}
+  
+
+
+-------------------------------------next answer-------------------------------------
+
+Rank:5 (https://stackoverflow.com/questions/33292415)
+ The gson.toJson() returns a String, not a JsonObject. 
+
+ If you want to get a real JsonObject better do this: 
+
+  JsonObject json = (JsonObject)parser.parse(new Gson().toJson(myPojo));
+  
+
+
+
