@@ -532,6 +532,9 @@ public class CrokageApp extends AppAux{
 		double upWeights[] 			= {0.5};
 		int numberOfPostsInfoToMatchTFIDFArr[] = {3};
 		int numberOfPostsInfoToMatchAsymmetricSimRelevanceArr[] = {2};
+		//int topSimilarContentAsymRelevanceNumberArr[] = {10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200};
+		//int topApisScoredPairsNumberArr[] = {10,20,30,40,50,60,70,80,90,100,110,120,130,140,150,160,170,180,190,200};
+		int topApisScoredPairsNumberArr[] = {100};
 		int topSimilarContentAsymRelevanceNumberArr[] = {100};
 		int numberOfAPIClassesArr[] = {20};
 		int topkArr[] = {10};
@@ -552,7 +555,8 @@ public class CrokageApp extends AppAux{
 										for(int numberOfPostsInfoToMatchTFIDF: numberOfPostsInfoToMatchTFIDFArr){
 											for(int numberOfPostsInfoToMatchAsymmetricSimRelevance: numberOfPostsInfoToMatchAsymmetricSimRelevanceArr){
 												for(int topSimilarContentsAsymRelevanceNumber: topSimilarContentAsymRelevanceNumberArr){
-													for(int numberOfAPIClasses: numberOfAPIClassesArr) {
+													for(int topApisScoredPairsNumber: topApisScoredPairsNumberArr){
+														for(int numberOfAPIClasses: numberOfAPIClassesArr) {
 														
 		
 			
@@ -561,8 +565,10 @@ public class CrokageApp extends AppAux{
 			int sum3=0;
 			int sum4=0;
 			int sum5=0;
+			//BotComposer.setSimWeight(0);
+			//BotComposer.setClassFreqWeight(0);      //must be zero if API extractors are not used 
 			BotComposer.setSimWeight(simWeight);
-			BotComposer.setClassFreqWeight(classFreqWeight);
+			BotComposer.setClassFreqWeight(classFreqWeight);    
 			BotComposer.setMethodFreqWeight(methodFreqWeight);
 			BotComposer.setRepWeight(repWeight);
 			BotComposer.setUpWeight(upWeight);
@@ -571,10 +577,11 @@ public class CrokageApp extends AppAux{
 			this.topSimilarContentsAsymRelevanceNumber=topSimilarContentsAsymRelevanceNumber;
 			this.numberOfPostsInfoToMatchAsymmetricSimRelevance=numberOfPostsInfoToMatchAsymmetricSimRelevance;
 			this.numberOfAPIClasses=numberOfAPIClasses;
+			this.topApisScoredPairsPercent=topApisScoredPairsNumber;
 			
 			
 			initTime = System.currentTimeMillis();
-			firstObs = " - numberOfPostsInfoToMatchTFIDF: "+numberOfPostsInfoToMatchTFIDF+ " - topSimilarContentsAsymRelevanceNumber: "+topSimilarContentsAsymRelevanceNumber+" - bm25TopNSmallLimit: "+bm25TopNSmallLimit+  " - bm25TopNBigLimit: "+bm25TopNBigLimit+  " - numberOfPostsInfoToMatchAsymmetricSimRelevance:"+numberOfPostsInfoToMatchAsymmetricSimRelevance;
+			firstObs = " - numberOfPostsInfoToMatchTFIDF: "+numberOfPostsInfoToMatchTFIDF+ " - topSimilarContentsAsymRelevanceNumber: "+topSimilarContentsAsymRelevanceNumber+" - bm25TopNSmallLimit: "+bm25TopNSmallLimit+  " - bm25TopNBigLimit: "+bm25TopNBigLimit+  " - numberOfPostsInfoToMatchAsymmetricSimRelevance:"+numberOfPostsInfoToMatchAsymmetricSimRelevance+ " - topApisScoredPairsNumber:"+topApisScoredPairsNumber;
 			System.out.println("\n\nRun: "+run+firstObs );
 			run++;
 			for(Integer key: keys) {  //for each query
@@ -621,15 +628,18 @@ public class CrokageApp extends AppAux{
 				sum3+=mergeIds1.size();
 				
 				
-				filteredAnswersWithAPIs = filterAnswersByAPIs(topClasses,luceneBigSetIds);
+				
+				filteredAnswersWithAPIs = filterAnswersByAPIs2(topClasses,luceneBigSetIds);
 				filteredAnswersWithApisIdsMap.put(rawQuery, filteredAnswersWithAPIs);
 				sum5+=filteredAnswersWithAPIs.size();
 				
-				
+				/*
 				Set<Integer> mergeIds2=new HashSet<>(luceneSmallSetIds);
 				mergeIds2.addAll(filteredAnswersWithAPIs);
 				topMergeIdsMap2.put(rawQuery, mergeIds2);
 				sum4+=mergeIds2.size();
+				*/
+				
 				/*if(rawQuery.contains("How can I insert an element in array at a given position?")) {
 					System.out.println("Size of mergeIds: "+sum3);
 				}*/
@@ -661,6 +671,7 @@ public class CrokageApp extends AppAux{
 				//crokageUtils.reportElapsedTime(initTime2,"topKRelevantAnswersIds");
 				topClasses=null;
 				mergeIds1=null;
+				//mergeIds2=null;
 				//crokageUtils.reportElapsedTime(initTime2,"for query");
 				
 			}
@@ -686,24 +697,29 @@ public class CrokageApp extends AppAux{
 				
 				
 				//for(int topk: topkArr) {
-				obsComp = obs + " - "+firstObs+ " topMergeIdsMap1 (avg): "+sum3/keys.size();
-				metricResult = new MetricResult("topMergeIdsMap1",bm25TopNSmallLimit,bm25TopNBigLimit,null,topSimilarContentsAsymRelevanceNumber,cutoff,bm25TopNSmallLimit+topSimilarContentsAsymRelevanceNumber,obsComp,null);
-				analyzeResults(topMergeIdsMap1,groundTruthSelectedQueriesAnswersIdsMap,metricResult,"topMergeIdsMap1");
-				crokageService.saveMetricResult(metricResult);
+				if(!topMergeIdsMap1.isEmpty()) {
+					obsComp = obs + " - "+firstObs+ " topMergeIdsMap1 (avg): "+sum3/keys.size();
+					metricResult = new MetricResult("topMergeIdsMap1",bm25TopNSmallLimit,bm25TopNBigLimit,null,topSimilarContentsAsymRelevanceNumber,cutoff,bm25TopNSmallLimit+topSimilarContentsAsymRelevanceNumber,obsComp,null);
+					analyzeResults(topMergeIdsMap1,groundTruthSelectedQueriesAnswersIdsMap,metricResult,"topMergeIdsMap1");
+					crokageService.saveMetricResult(metricResult);
+				}
 				
-				obsComp = obs + " - "+firstObs+ " topMergeIdsMap2 (avg): "+sum4/keys.size();
-				metricResult = new MetricResult("topMergeIdsMap2",bm25TopNSmallLimit,bm25TopNBigLimit,null,topSimilarContentsAsymRelevanceNumber,cutoff,bm25TopNSmallLimit+topSimilarContentsAsymRelevanceNumber,obsComp,null);
-				analyzeResults(topMergeIdsMap2,groundTruthSelectedQueriesAnswersIdsMap,metricResult,"topMergeIdsMap2");
-				crokageService.saveMetricResult(metricResult);
-				
+				if(!topMergeIdsMap2.isEmpty()) {
+					obsComp = obs + " - "+firstObs+ " topMergeIdsMap2 (avg): "+sum4/keys.size();
+					metricResult = new MetricResult("topMergeIdsMap2",bm25TopNSmallLimit,bm25TopNBigLimit,null,topSimilarContentsAsymRelevanceNumber,cutoff,bm25TopNSmallLimit+topSimilarContentsAsymRelevanceNumber,obsComp,null);
+					analyzeResults(topMergeIdsMap2,groundTruthSelectedQueriesAnswersIdsMap,metricResult,"topMergeIdsMap2");
+					crokageService.saveMetricResult(metricResult);
+				}
 				//}
 				
 				
 				//for(int topk: topkArr) {
-				obsComp = obs + " - "+firstObs+ " filteredAnswersWithApisIdsMap filter (avg): "+sum5/keys.size();
-				metricResult = new MetricResult("filteredAnswersWithApisIdsMap",bm25TopNSmallLimit,bm25TopNBigLimit,topApisScoredPairsPercent,topSimilarContentsAsymRelevanceNumber,cutoff,bm25TopNSmallLimit+topSimilarContentsAsymRelevanceNumber,obsComp,numberOfAPIClasses);
-				analyzeResults(filteredAnswersWithApisIdsMap,groundTruthSelectedQueriesAnswersIdsMap,metricResult,"filteredAnswersWithApisIdsMap");
-				crokageService.saveMetricResult(metricResult);
+				if(!filteredAnswersWithApisIdsMap.isEmpty()) {
+					obsComp = obs + " - "+firstObs+ " filteredAnswersWithApisIdsMap filter (avg): "+sum5/keys.size();
+					metricResult = new MetricResult("filteredAnswersWithApisIdsMap",bm25TopNSmallLimit,bm25TopNBigLimit,topApisScoredPairsPercent,topSimilarContentsAsymRelevanceNumber,cutoff,bm25TopNSmallLimit+topSimilarContentsAsymRelevanceNumber,obsComp,numberOfAPIClasses);
+					analyzeResults(filteredAnswersWithApisIdsMap,groundTruthSelectedQueriesAnswersIdsMap,metricResult,"filteredAnswersWithApisIdsMap");
+					crokageService.saveMetricResult(metricResult);
+				}
 				//}
 				
 				/*for(int topk: topkArr) {
@@ -728,7 +744,7 @@ public class CrokageApp extends AppAux{
 			
 		}
 		
-		}}}}}}}}}}}
+		}}}}}}}}}}}}
 		
 		return recommendedResults;
 	}
@@ -878,7 +894,8 @@ public class CrokageApp extends AppAux{
 		}
 		
 		
-		int topApisScoredPairs = answerParentThreads.size()*topApisScoredPairsPercent/100;
+		//int topApisScoredPairs = answerParentThreads.size()*topApisScoredPairsPercent/100;
+		int topApisScoredPairs = topApisScoredPairsPercent;
 		
 		//sort by apiScore desc
 		topNAnswersIds= answerParentThreads.stream()
