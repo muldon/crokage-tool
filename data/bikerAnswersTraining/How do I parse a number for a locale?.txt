@@ -1,0 +1,57 @@
+How do I parse a number for a locale?
+
+Rank1:java.text.NumberFormat.getCurrencyInstance
+>>>JavaDoc<<<
+Returns a currency format for the current default FORMAT locale.
+>>>Relevant Questions<<<
+1.How do I format a Currency for a Locale in Java
+2.How do I limit the number of decimals printed for a double?
+
+-----------------------------------------------
+
+
+Rank2:java.lang.String.format
+>>>JavaDoc<<<
+Returns a formatted string using the specified format string and arguments.
+>>>Relevant Questions<<<
+1.How do I format a number in Java?
+2.How do I limit the number of decimals printed for a double?
+3.java String.format: numbers with localization
+
+>>>Code Snippets<<<
+/**********code snippet1**********/
+SO questionId >||50532||< - AnswerId: >||50544||<
+  String.format("%.2f", (double)value);
+
+-----------------------------------------------
+
+
+Rank3:java.text.NumberFormat.setCurrency
+>>>JavaDoc<<<
+Sets the currency used by this number format when formatting currency values.
+>>>Relevant Questions<<<
+1.How do I format a Currency for a Locale in Java
+
+-----------------------------------------------
+
+
+Rank4:java.util.Locale.getDefault
+>>>JavaDoc<<<
+Gets the current value of the default locale for this instance of the Java Virtual Machine.
+>>>Relevant Questions<<<
+1.how do I set the default locale for my JVM?
+
+-----------------------------------------------
+
+
+Rank5:java.lang.Integer.parseInt
+>>>JavaDoc<<<
+Parses the string argument as a signed integer in the radix specified by the second argument.
+>>>Relevant Questions<<<
+1.How do I parse a string as an Integer
+2.In Java, how do I check if input is a number?
+3.How do I convert a integer representing a character to a string?
+
+-----------------------------------------------
+
+

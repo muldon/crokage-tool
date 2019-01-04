@@ -1,0 +1,65 @@
+How to create a digital signature and sign data?
+
+Rank1:java.lang.Integer.parseInt
+>>>JavaDoc<<<
+Parses the string argument as a signed integer in the radix specified by the second argument.
+>>>Relevant Questions<<<
+1.How to represent a 5 letter string as digit?
+2.How to create a random 16 digits number, with specific first digits?
+3.How to find sum of the digits of a binary value in a single string
+
+>>>Code Snippets<<<
+/**********code snippet1**********/
+SO questionId >||38223611||< - AnswerId: >||38223692||<
+ System.out.println(Integer.parseInt("ABZXY", 36)); // 17355958
+
+-----------------------------------------------
+
+
+Rank2:java.lang.Long.parseLong
+>>>JavaDoc<<<
+Parses the string argument as a signed long in the radix specified by the second argument.
+>>>Relevant Questions<<<
+1.How to check if a string contains only digits in Java
+2.Signed Hexadecimal to decimal in Java
+
+>>>Code Snippets<<<
+/**********code snippet1**********/
+SO questionId >||15111420||< - AnswerId: >||15111441||<
+ Long.parseLong(data)
+
+-----------------------------------------------
+
+
+Rank3:java.lang.Long.toString
+>>>JavaDoc<<<
+Returns a string representation of the first argument in the radix specified by the second argument.
+>>>Relevant Questions<<<
+1.Signed Hexadecimal to decimal in Java
+
+-----------------------------------------------
+
+
+Rank4:java.lang.Math.random
+>>>JavaDoc<<<
+Returns a double value with a positive sign, greater than or equal to 0.
+>>>Relevant Questions<<<
+1.How to create a random 16 digits number, with specific first digits?
+
+>>>Code Snippets<<<
+/**********code snippet1**********/
+SO questionId >||27843947||< - AnswerId: >||27844105||<
+ long first14 = (long) (Math.random() * 100000000000000L);
+
+-----------------------------------------------
+
+
+Rank5:java.io.ByteArrayOutputStream.toString
+>>>JavaDoc<<<
+Converts the buffer's contents into a string decoding bytes using the platform's default character set.
+>>>Relevant Questions<<<
+1.How to Digitally Sign a Dynamically Created PDF Document Using PDFBox?
+
+-----------------------------------------------
+
+

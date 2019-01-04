@@ -1,0 +1,52 @@
+How do I generate public and private keys?
+
+Rank1:java.security.interfaces.RSAPrivateKey.getPrivateExponent
+>>>JavaDoc<<<
+Returns the private exponent.
+>>>Relevant Questions<<<
+1.How to generate fixed length exponent of a given RSA private key in Java?
+
+-----------------------------------------------
+
+
+Rank2:java.util.Collections.singletonMap
+>>>JavaDoc<<<
+Returns an immutable map, mapping only the specified key to the specified value.
+>>>Relevant Questions<<<
+1.How can I initialise a static Map?
+
+>>>Code Snippets<<<
+/**********code snippet1**********/
+SO questionId >||507602||< - AnswerId: >||43711510||<
+ Map<K, V> map = Collections.singletonMap(key, value)
+
+-----------------------------------------------
+
+
+Rank3:java.security.Key.getEncoded
+>>>JavaDoc<<<
+Returns the key in its primary encoding format, or null if this key does not support encoding.
+>>>Relevant Questions<<<
+1.how to read private key for digital signature
+
+-----------------------------------------------
+
+
+Rank4:java.lang.reflect.Field.get
+>>>JavaDoc<<<
+Returns the value of the field represented by this Field, on the specified object.
+>>>Relevant Questions<<<
+1.How can I get access to a private array using Java reflection?
+
+-----------------------------------------------
+
+
+Rank5:java.lang.Class.getMethod
+>>>JavaDoc<<<
+Returns a Method object that reflects the specified public member method of the class or interface represented by this Class object.
+>>>Relevant Questions<<<
+1.How do I get a subclass to use a parent class' protected methods?
+
+-----------------------------------------------
+
+

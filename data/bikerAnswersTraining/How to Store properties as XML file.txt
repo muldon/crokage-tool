@@ -1,0 +1,66 @@
+How to Store properties as XML file
+
+Rank1:org.w3c.dom.Element.getAttribute
+>>>JavaDoc<<<
+Retrieves an attribute value by name.
+>>>Relevant Questions<<<
+1.how to get the attributes from xml file?
+
+>>>Code Snippets<<<
+/**********code snippet1**********/
+SO questionId >||10431450||< - AnswerId: >||10431601||<
+ System.out.println(((Element) nList.item(i)).getAttribute("unit"));
+
+-----------------------------------------------
+
+
+Rank2:javax.swing.text.html.parser.Element.getAttributes
+>>>JavaDoc<<<
+Get the attributes.
+>>>Relevant Questions<<<
+1.how to get the attributes from xml file?
+
+-----------------------------------------------
+
+
+Rank3:javax.xml.bind.JAXBContext.newInstance
+>>>JavaDoc<<<
+ Obtain a new instance of a JAXBContext class.
+>>>Relevant Questions<<<
+1.How to read an XML file with JAXB?
+
+>>>Code Snippets<<<
+/**********code snippet1**********/
+SO questionId >||12053379||< - AnswerId: >||12054013||<
+ JAXBContext.newInstance("com.example.foo");
+
+-----------------------------------------------
+
+
+Rank4:java.lang.System.getProperty
+>>>JavaDoc<<<
+Gets the system property indicated by the specified key.
+>>>Relevant Questions<<<
+1.How to load system properties file in Spring?
+
+-----------------------------------------------
+
+
+Rank5:java.util.Properties.load
+>>>JavaDoc<<<
+Reads a property list (key and element pairs) from the input character stream in a simple line-oriented format.
+>>>Relevant Questions<<<
+1.How to use Java property files?
+2.how to create a properties file for keystore?
+3.How to load my properties file?
+
+>>>Code Snippets<<<
+/**********code snippet1**********/
+SO questionId >||1318347||< - AnswerId: >||1318385||<
+ Properties props = new java.util.Properties();
+FileInputStream fis new FileInputStream("myfile.txt");
+props.load(fis)
+
+-----------------------------------------------
+
+

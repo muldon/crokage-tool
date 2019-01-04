@@ -45,21 +45,3 @@ Returns the number of milliseconds since January 1, 1970, 00:00:00 GMT represent
 -----------------------------------------------
 
 
-Rank6:javax.swing.SwingUtilities.invokeLater
->>>JavaDoc<<<
-Causes doRun.
->>>Relevant Questions<<<
-1.Two JPanels in one JFrame
-
------------------------------------------------
-
-
-Rank7:java.util.Calendar.getTimeInMillis
->>>JavaDoc<<<
-Returns this Calendar's time value in milliseconds.
->>>Relevant Questions<<<
-1.Lucene 4.10 Date Range Query Api
-
------------------------------------------------
-
-

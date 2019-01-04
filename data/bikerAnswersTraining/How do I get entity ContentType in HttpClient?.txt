@@ -1,0 +1,68 @@
+How do I get entity ContentType in HttpClient?
+
+Rank1:java.net.URL.openConnection
+>>>JavaDoc<<<
+Returns a URLConnection instance that represents a connection to the remote object referred to by the URL.
+>>>Relevant Questions<<<
+1.How do I make HttpURLConnection use a proxy?
+2.How to modify the header of a HttpUrlConnection
+
+>>>Code Snippets<<<
+/**********code snippet1**********/
+SO questionId >||1432961||< - AnswerId: >||1433296||<
+ //Proxy instance, proxy ip = 10.0.0.1 with port 8080
+Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress("10.0.0.1", 8080));
+conn = new URL(urlString).openConnection(proxy);
+
+-----------------------------------------------
+
+
+Rank2:java.lang.reflect.Proxy.getInvocationHandler
+>>>JavaDoc<<<
+Returns the invocation handler for the specified proxy instance.
+>>>Relevant Questions<<<
+1.How do I get the underlying type of a proxy object in java?
+
+>>>Code Snippets<<<
+/**********code snippet1**********/
+SO questionId >||3344299||< - AnswerId: >||28762771||<
+ String.format("[ProxyInvocationHandler: %s, Interfaces: %s]", 
+     Proxy.getInvocationHandler(proxy).getClass().getSimpleName(), 
+     ArrayUtils.toString(proxy.getClass().getInterfaces()));
+
+-----------------------------------------------
+
+
+Rank3:java.net.URLConnection.setRequestProperty
+>>>JavaDoc<<<
+Sets the general request property.
+>>>Relevant Questions<<<
+1.How to modify the header of a HttpUrlConnection
+
+-----------------------------------------------
+
+
+Rank4:java.lang.System.setProperty
+>>>JavaDoc<<<
+Sets the system property indicated by the specified key.
+>>>Relevant Questions<<<
+1.How do I make HttpURLConnection use a proxy?
+
+>>>Code Snippets<<<
+/**********code snippet1**********/
+SO questionId >||1432961||< - AnswerId: >||1432993||<
+ System.setProperty("http.proxyHost", "host");
+System.setProperty("http.proxyPort", "port_number");
+
+-----------------------------------------------
+
+
+Rank5:java.lang.Object.toString
+>>>JavaDoc<<<
+Returns a string representation of the object.
+>>>Relevant Questions<<<
+1.how to read multipart entity from android in jersey web service
+
+-----------------------------------------------
+
+

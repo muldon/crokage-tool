@@ -1,0 +1,49 @@
+How to create a server socket
+
+Rank1:java.net.Socket.connect
+>>>JavaDoc<<<
+Connects this socket to the server.
+>>>Relevant Questions<<<
+1.How can a socket be both connected and closed?
+
+-----------------------------------------------
+
+
+Rank2:java.net.Socket.getPort
+>>>JavaDoc<<<
+Returns the remote port number to which this socket is connected.
+>>>Relevant Questions<<<
+1.In TCP MultiThreaded Server, if a client gets service ,how to find the port number of servicing socket?
+
+-----------------------------------------------
+
+
+Rank3:java.net.Socket.getLocalPort
+>>>JavaDoc<<<
+Returns the local port number to which this socket is bound.
+>>>Relevant Questions<<<
+1.In TCP MultiThreaded Server, if a client gets service ,how to find the port number of servicing socket?
+2.How to get the dynamic port number in Java for Socket client
+
+-----------------------------------------------
+
+
+Rank4:java.net.ServerSocket.accept
+>>>JavaDoc<<<
+Listens for a connection to be made to this socket and accepts it.
+>>>Relevant Questions<<<
+1.What buffers to use for receiving an input stream from a Socket created by ServerSocket?
+2.How to interrupt a thread if it is to open socket?
+
+-----------------------------------------------
+
+
+Rank5:java.net.Socket.isConnected
+>>>JavaDoc<<<
+Returns the connection state of the socket.
+>>>Relevant Questions<<<
+1.How can a socket be both connected and closed?
+
+-----------------------------------------------
+
+

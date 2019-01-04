@@ -1,0 +1,50 @@
+How do I compress or zip a directory recursively?
+
+Rank1:java.util.zip.ZipFile.entries
+>>>JavaDoc<<<
+Returns an enumeration of the ZIP file entries.
+>>>Relevant Questions<<<
+1.How do I enumerate the content of a zipped folder in Java?
+
+-----------------------------------------------
+
+
+Rank2:java.nio.file.Files.walk
+>>>JavaDoc<<<
+Return a Stream that is lazily populated with Path by walking the file tree rooted at a given starting file.
+>>>Relevant Questions<<<
+1.How to recursively list all .rar files in a directory
+2.How do I iterate through the files in a directory in Java?
+
+-----------------------------------------------
+
+
+Rank3:java.util.jar.JarFile.entries
+>>>JavaDoc<<<
+Returns an enumeration of the zip file entries.
+>>>Relevant Questions<<<
+1.How do I list the files inside a JAR file?
+
+-----------------------------------------------
+
+
+Rank4:java.nio.file.Files.walkFileTree
+>>>JavaDoc<<<
+Walks a file tree.
+>>>Relevant Questions<<<
+1.How do I find/list a file or directory with specific name inside a directory and its subdirectories in Java?
+2.TrueZip - How to get Size of a Folder within an Zip Archive
+3.How would i get a list of all files and folders in a directory in java
+
+-----------------------------------------------
+
+
+Rank5:java.util.zip.ZipInputStream.read
+>>>JavaDoc<<<
+Reads from the current ZIP entry into an array of bytes.
+>>>Relevant Questions<<<
+1.Java: How to decompress files (zip or tar.gz) with low memory usage?
+
+-----------------------------------------------
+
+

@@ -1,0 +1,54 @@
+How do I call a stored procedure that return a result set?
+
+Rank1:java.sql.Statement.execute
+>>>JavaDoc<<<
+Executes the given SQL statement, which may return multiple results.
+>>>Relevant Questions<<<
+1.java code make a stored procedure return a resultset in DAO layer
+
+-----------------------------------------------
+
+
+Rank2:java.sql.CallableStatement.registerOutParameter
+>>>JavaDoc<<<
+Registers the OUT parameter in ordinal position parameterIndex to the JDBC type sqlType.
+>>>Relevant Questions<<<
+1.How can I call a MySQL stored function from Java?
+
+>>>Code Snippets<<<
+/**********code snippet1**********/
+SO questionId >||44481095||< - AnswerId: >||44481140||<
+ final CallableStatement callableStatement = connection.prepareCall("{? = call get_customer_balance(?, ?)}");
+
+callableStatement.registerOutParameter(1, java.sql.Types.INTEGER);
+
+-----------------------------------------------
+
+
+Rank3:java.sql.PreparedStatement.execute
+>>>JavaDoc<<<
+Executes the SQL statement in this PreparedStatement object, which may be any kind of SQL statement.
+>>>Relevant Questions<<<
+1.java code make a stored procedure return a resultset in DAO layer
+
+-----------------------------------------------
+
+
+Rank4:java.sql.ResultSet.next
+>>>JavaDoc<<<
+Moves the cursor forward one row from its current position.
+>>>Relevant Questions<<<
+1.How to check whether ResultSet returned a result?
+
+-----------------------------------------------
+
+
+Rank5:java.sql.Array.getArray
+>>>JavaDoc<<<
+Retrieves the contents of the SQL ARRAY value designated by this Array object in the form of an array in the Java programming language.
+>>>Relevant Questions<<<
+1.Read an ARRAY from a STRUCT returned by a stored procedure
+
+-----------------------------------------------
+
+

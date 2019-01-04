@@ -1,0 +1,55 @@
+Get and Set Session Variables in a Servlet
+
+Rank1:java.sql.Connection.close
+>>>JavaDoc<<<
+Releases this Connection object's database and JDBC resources immediately instead of waiting for them to be automatically released.
+>>>Relevant Questions<<<
+1.Application users in row-level policies: how to set session variables
+
+-----------------------------------------------
+
+
+Rank2:javax.sql.DataSource.getConnection
+>>>JavaDoc<<<
+Attempts to establish a connection with the data source that this DataSource object represents.
+>>>Relevant Questions<<<
+1.Application users in row-level policies: how to set session variables
+
+-----------------------------------------------
+
+
+Rank3:java.util.TimeZone.getTimeZone
+>>>JavaDoc<<<
+Gets the TimeZone for the given ID.
+>>>Relevant Questions<<<
+1.Servlet get date and time
+
+-----------------------------------------------
+
+
+Rank4:javax.swing.SwingUtilities.invokeLater
+>>>JavaDoc<<<
+Causes doRun.
+>>>Relevant Questions<<<
+1.Getting and Setting a Flag variable in a thread
+
+-----------------------------------------------
+
+
+Rank5:java.util.Collections.list
+>>>JavaDoc<<<
+Returns an array list containing the elements returned by the specified enumeration in the order they are returned by the enumeration.
+>>>Relevant Questions<<<
+1.Destroy all session variables without invalidating session java
+
+>>>Code Snippets<<<
+/**********code snippet1**********/
+SO questionId >||45272027||< - AnswerId: >||45272253||<
+ Collections.list(session.getAttributeNames())
+                .stream()
+                .filter(s -> !s.equals("uname"))
+                .forEach(session::removeAttribute);
+
+-----------------------------------------------
+
+

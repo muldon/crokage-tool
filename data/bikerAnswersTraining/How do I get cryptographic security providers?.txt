@@ -1,0 +1,55 @@
+How do I get cryptographic security providers?
+
+Rank1:javax.crypto.KeyGenerator.getInstance
+>>>JavaDoc<<<
+Returns a KeyGenerator object that generates secret keys for the specified algorithm.
+>>>Relevant Questions<<<
+1.How to create a secure random AES key in Java?
+
+>>>Code Snippets<<<
+/**********code snippet1**********/
+SO questionId >||18228579||< - AnswerId: >||18228702||<
+ KeyGenerator keyGen = KeyGenerator.getInstance("AES");
+keyGen.init(256); // for example
+SecretKey secretKey = keyGen.generateKey();
+
+-----------------------------------------------
+
+
+Rank2:java.security.MessageDigest.getInstance
+>>>JavaDoc<<<
+Returns a MessageDigest object that implements the specified digest algorithm.
+>>>Relevant Questions<<<
+1.How do I generate a hash code with hash sha256 in java?
+
+-----------------------------------------------
+
+
+Rank3:javax.crypto.Cipher.getInstance
+>>>JavaDoc<<<
+Returns a Cipher object that implements the specified transformation.
+>>>Relevant Questions<<<
+1.How do you use the crypt library in C for DES encryption? (setkey, encrypt, crypt, etc.)
+2.How to encrypt a file in java using AES
+
+-----------------------------------------------
+
+
+Rank4:java.security.Signature.getInstance
+>>>JavaDoc<<<
+Returns a Signature object that implements the specified signature algorithm.
+>>>Relevant Questions<<<
+1.how to do verify using java.security.Signature
+
+-----------------------------------------------
+
+
+Rank5:javax.crypto.Mac.getInstance
+>>>JavaDoc<<<
+Returns a Mac object that implements the specified MAC algorithm.
+>>>Relevant Questions<<<
+1.How to securely store a PrivateKey in code
+
+-----------------------------------------------
+
+

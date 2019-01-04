@@ -1,0 +1,47 @@
+XML How to Add CDATA data
+
+Rank1:javax.xml.bind.Unmarshaller.Listener.afterUnmarshal
+>>>JavaDoc<<<
+ Callback method invoked after unmarshalling XML data into target.
+>>>Relevant Questions<<<
+1.How to inject runtime data to object created when parsing XML using JAXB
+
+-----------------------------------------------
+
+
+Rank2:org.w3c.dom.Document.createTextNode
+>>>JavaDoc<<<
+Creates a Text node given the specified string.
+>>>Relevant Questions<<<
+1.How to add information in-between tags when creating an xml with Java
+
+-----------------------------------------------
+
+
+Rank3:org.w3c.dom.Node.getTextContent
+>>>JavaDoc<<<
+This attribute returns the text content of this node and its descendants.
+>>>Relevant Questions<<<
+1.How to get XML content as a String
+
+-----------------------------------------------
+
+
+Rank4:javax.xml.stream.XMLInputFactory.createFilteredReader
+>>>JavaDoc<<<
+Create a filtered reader that wraps the filter around the reader.
+>>>Relevant Questions<<<
+1.How to ignore some tags in XML in Jaxb
+
+-----------------------------------------------
+
+
+Rank5:java.util.Base64.getDecoder
+>>>JavaDoc<<<
+Returns a Base64.
+>>>Relevant Questions<<<
+1.reading cdata with binary data in xml by java
+
+-----------------------------------------------
+
+

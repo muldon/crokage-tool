@@ -94,7 +94,7 @@ public class CrokageApp extends AppAux{
 			break;
 		
 				
-		case "processBikerSummaries":
+		case "generateMetricsForBiker":
 			generateMetricsForBiker();
 			break;	
 		
@@ -307,13 +307,13 @@ public class CrokageApp extends AppAux{
 	            .map(Path::toFile)
 	            .collect(Collectors.toList());
 		
-		String comparison = "Questions";
-		//String comparison = "Answers";
+		//String comparison = "Questions";
+		String comparison = "Answers";
 		String searchPatter = "";
 		
 		Map<String, Set<Integer>> groundTruth;
 		
-		if(comparison.equals("Answers")) {
+		if(comparison.equals("Questions")) {
 			searchPatter = "SO questionId ";
 			generateGroundTruthThreads();
 			groundTruth = groundTruthSelectedQueriesQuestionsIdsMap;
@@ -350,8 +350,8 @@ public class CrokageApp extends AppAux{
 		Map<String,Set<Integer>> recommendedResults = new LinkedHashMap<>();
 		for(String query: queries) {
 			//query = query+ "?";
-			String rawQuery = query.replace("?", "");
-			Set<Integer> ids = bikerRecommendedResults.get(rawQuery);
+			//String rawQuery = query.replace("?", "");
+			Set<Integer> ids = bikerRecommendedResults.get(query);
 			
 			if(ids==null || ids.size()==0) {
 				ids = new LinkedHashSet<>();
@@ -375,14 +375,22 @@ public class CrokageApp extends AppAux{
 
 	private void extractAnswers() throws Exception {
 				
+		String resultsCacheFile = "";
+		if(dataSet.equals("selectedqueries-test")){
+			resultsCacheFile=RECOMMENDED_ANSWERS_QUERIES_CACHE+"Test.txt";
+		}else {
+			resultsCacheFile=RECOMMENDED_ANSWERS_QUERIES_CACHE+"Training.txt";
+		}
+				
+		
 		Map<String, Set<Integer>> recommendedResults = null;
 		if(subAction.contains("userecommendedcache")) {
-			recommendedResults = crokageUtils.readFileToMap(RECOMMENDED_ANSWERS_QUERIES_CACHE);
+			recommendedResults = crokageUtils.readFileToMap(resultsCacheFile);
 		}else {
 			recommendedResults = runApproach();
 			if(subAction.contains("savecache")) {
 				CrokageUtils.reduceSetV2(recommendedResults, topk);
-				crokageUtils.printBigMapIntoFile(recommendedResults,RECOMMENDED_ANSWERS_QUERIES_CACHE);
+				crokageUtils.printBigMapIntoFile(recommendedResults,resultsCacheFile);
 			}
 		}
 		
@@ -409,7 +417,7 @@ public class CrokageApp extends AppAux{
 		for(String query: queries) {
 			
 			//String processedQuery = crokageUtils.processQuery(query);
-			
+			 
 			Set<Integer> answersIds = recommendedResults.get(query);
 			Set<Post> posts = new HashSet<>(crokageService.findPostsById(new ArrayList<>(answersIds)));
 			ArrayList<Post> postsList = new ArrayList<>(posts);
@@ -537,7 +545,7 @@ public class CrokageApp extends AppAux{
 		int topApisScoredPairsNumberArr[] = {100};
 		int topSimilarContentAsymRelevanceNumberArr[] = {100};
 		int numberOfAPIClassesArr[] = {20};
-		int topkArr[] = {10};
+		int topkArr[] = {10,5,1};
 	
 		int run = 0;
 		int count=0;
@@ -1722,9 +1730,9 @@ public class CrokageApp extends AppAux{
 			
 			for (String keyQuery : goldSet.keySet()) {
 				currentQuery=keyQuery;
-				if(keyQuery.equals("How do I convert angle from radians to degrees?")) {
+				/*if(keyQuery.equals("How do I convert angle from radians to degrees?")) {
 					System.out.println();
-				}
+				}*/
 				
 				ArrayList<Integer> rapis = new ArrayList<>(recommended.get(keyQuery));
 				ArrayList<Integer> gapis = new ArrayList<>(goldSet.get(keyQuery));

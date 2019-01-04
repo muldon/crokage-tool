@@ -1,0 +1,61 @@
+How do I get data types supported by database?
+
+Rank1:java.sql.DatabaseMetaData.getUserName
+>>>JavaDoc<<<
+Retrieves the user name as known to this database.
+>>>Relevant Questions<<<
+1.How to get database schema name when using oracle jdbc connection?
+
+>>>Code Snippets<<<
+/**********code snippet1**********/
+SO questionId >||13341286||< - AnswerId: >||13341566||<
+ Connection conn = 
+DriverManager.getConnection("jdbc:oracle:thin:@server:port:SID",prop);    
+DatabaseMetaData databaseMetaData = conn.getMetaData();
+System.out.println("schema name >>>> "+databaseMetaData.getUserName());
+
+-----------------------------------------------
+
+
+Rank2:java.lang.reflect.Field.getType
+>>>JavaDoc<<<
+Returns a Class object that identifies the declared type for the field represented by this Field object.
+>>>Relevant Questions<<<
+1.Using jOOQ, how to get data type of a column by name
+
+>>>Code Snippets<<<
+/**********code snippet1**********/
+SO questionId >||33712302||< - AnswerId: >||33743980||<
+ Class<?> type1 = result.field("MY_COLUMN").getType()
+Class<?> type2 = record.field("MY_COLUMN").getType()
+
+-----------------------------------------------
+
+
+Rank3:java.lang.reflect.Field.getGenericType
+>>>JavaDoc<<<
+Returns a Type object that represents the declared type for the field represented by this Field object.
+>>>Relevant Questions<<<
+1.Java: how do I get a class literal from a generic type?
+
+-----------------------------------------------
+
+
+Rank4:java.lang.Class.getDeclaredFields
+>>>JavaDoc<<<
+Returns an array of Field objects reflecting all the fields declared by the class or interface represented by this Class object.
+>>>Relevant Questions<<<
+1.how to get all variable and type data in class and method using java
+
+-----------------------------------------------
+
+
+Rank5:java.lang.Class.getDeclaredMethods
+>>>JavaDoc<<<
+Returns an array containing Method objects reflecting all the declared methods of the class or interface represented by this Class object, including public, protected, default (package) access, and private methods, but excluding inherited methods.
+>>>Relevant Questions<<<
+1.how to get all variable and type data in class and method using java
+
+-----------------------------------------------
+
+

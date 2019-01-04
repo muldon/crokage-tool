@@ -1,0 +1,71 @@
+How do I set file last modified time?
+
+Rank1:java.io.File.lastModified
+>>>JavaDoc<<<
+Returns the time that the file denoted by this abstract pathname was last modified.
+>>>Relevant Questions<<<
+1.How do I find the last modified file in a directory in Java?
+2.Delete all files not modified in last ten days
+3.Get files in a directory sorted by last modified?
+
+>>>Code Snippets<<<
+/**********code snippet1**********/
+SO questionId >||2064694||< - AnswerId: >||43668024||<
+ Files.walk(thePath)
+.sorted((f1, f2) -> -(int)(f1.toFile().lastModified() - f2.toFile().lastModified()))
+.skip(1)
+.findFirst()
+
+-----------------------------------------------
+
+
+Rank2:java.io.File.setLastModified
+>>>JavaDoc<<<
+Sets the last-modified time of the file or directory named by this abstract pathname.
+>>>Relevant Questions<<<
+1.Changing File's last modified without closing it
+
+-----------------------------------------------
+
+
+Rank3:java.nio.file.Files.walk
+>>>JavaDoc<<<
+Return a Stream that is lazily populated with Path by walking the file tree rooted at a given starting file.
+>>>Relevant Questions<<<
+1.How do I find the last modified file in a directory in Java?
+
+>>>Code Snippets<<<
+/**********code snippet1**********/
+SO questionId >||2064694||< - AnswerId: >||43668024||<
+ Files.walk(thePath)
+.sorted((f1, f2) -> -(int)(f1.toFile().lastModified() - f2.toFile().lastModified()))
+.skip(1)
+.findFirst()
+
+-----------------------------------------------
+
+
+Rank4:java.nio.file.Files.setLastModifiedTime
+>>>JavaDoc<<<
+Updates a file's last modified time attribute.
+>>>Relevant Questions<<<
+1.Set last modified timestamp of a file using jimfs in Java
+
+>>>Code Snippets<<<
+/**********code snippet1**********/
+SO questionId >||35333498||< - AnswerId: >||35345897||<
+ Files.setLastModifiedTime(path, FileTime.fromMillis(millis));
+
+-----------------------------------------------
+
+
+Rank5:java.io.File.listFiles
+>>>JavaDoc<<<
+Returns an array of abstract pathnames denoting the files in the directory denoted by this abstract pathname.
+>>>Relevant Questions<<<
+1.How do I find the last modified file in a directory in Java?
+2.Get files in a directory sorted by last modified?
+
+-----------------------------------------------
+
+

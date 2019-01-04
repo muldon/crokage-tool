@@ -1,0 +1,61 @@
+How do I execute stored procedure?
+
+Rank1:java.sql.PreparedStatement.executeUpdate
+>>>JavaDoc<<<
+Executes the SQL statement in this PreparedStatement object, which must be an SQL Data Manipulation Language (DML) statement, such as INSERT, UPDATE or DELETE; or an SQL statement that returns nothing, such as a DDL statement.
+>>>Relevant Questions<<<
+1.Problems using the ? wildcard for a MySQL stored procedure when updating from Java
+
+-----------------------------------------------
+
+
+Rank2:java.sql.CallableStatement.registerOutParameter
+>>>JavaDoc<<<
+Registers the OUT parameter in ordinal position parameterIndex to the JDBC type sqlType.
+>>>Relevant Questions<<<
+1.How can I call a MySQL stored function from Java?
+
+>>>Code Snippets<<<
+/**********code snippet1**********/
+SO questionId >||44481095||< - AnswerId: >||44481140||<
+ final CallableStatement callableStatement = connection.prepareCall("{? = call get_customer_balance(?, ?)}");
+
+callableStatement.registerOutParameter(1, java.sql.Types.INTEGER);
+
+-----------------------------------------------
+
+
+Rank3:java.lang.Runtime.exec
+>>>JavaDoc<<<
+Executes the specified string command in a separate process.
+>>>Relevant Questions<<<
+1.How do I execute a perl script in java?
+
+-----------------------------------------------
+
+
+Rank4:java.util.concurrent.Future.get
+>>>JavaDoc<<<
+Waits if necessary for the computation to complete, and then retrieves its result.
+>>>Relevant Questions<<<
+1.How do I wait for Threads to complete execution in Java?
+
+-----------------------------------------------
+
+
+Rank5:java.lang.System.exit
+>>>JavaDoc<<<
+Terminates the currently running Java Virtual Machine.
+>>>Relevant Questions<<<
+1.JAVA , System.exit() ? How do i use it?
+
+>>>Code Snippets<<<
+/**********code snippet1**********/
+SO questionId >||30898773||< - AnswerId: >||30898838||<
+ System.exit(0) //exit signaling the process terminated successfully
+
+System.exit(-1) //exit signaling the process did not terminate successfully
+
+-----------------------------------------------
+
+

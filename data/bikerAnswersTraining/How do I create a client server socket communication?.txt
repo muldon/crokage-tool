@@ -1,0 +1,48 @@
+How do I create a client-server socket communication?
+
+Rank1:java.net.Socket.getPort
+>>>JavaDoc<<<
+Returns the remote port number to which this socket is connected.
+>>>Relevant Questions<<<
+1.In TCP MultiThreaded Server, if a client gets service ,how to find the port number of servicing socket?
+
+-----------------------------------------------
+
+
+Rank2:java.net.Socket.isClosed
+>>>JavaDoc<<<
+Returns the closed state of the socket.
+>>>Relevant Questions<<<
+1.How can I know client send FIN package in socket?
+
+-----------------------------------------------
+
+
+Rank3:java.net.ServerSocket.accept
+>>>JavaDoc<<<
+Listens for a connection to be made to this socket and accepts it.
+>>>Relevant Questions<<<
+1.how to communicate between client and server in java
+2.Difficulty with socket communication from Server to Client
+
+-----------------------------------------------
+
+
+Rank4:java.net.Socket.isConnected
+>>>JavaDoc<<<
+Returns the connection state of the socket.
+>>>Relevant Questions<<<
+1.How can I know client send FIN package in socket?
+
+-----------------------------------------------
+
+
+Rank5:java.net.Socket.getLocalPort
+>>>JavaDoc<<<
+Returns the local port number to which this socket is bound.
+>>>Relevant Questions<<<
+1.In TCP MultiThreaded Server, if a client gets service ,how to find the port number of servicing socket?
+
+-----------------------------------------------
+
+

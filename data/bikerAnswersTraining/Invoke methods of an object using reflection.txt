@@ -1,0 +1,62 @@
+Invoke methods of an object using reflection
+
+Rank1:java.lang.reflect.Method.invoke
+>>>JavaDoc<<<
+Invokes the underlying method represented by this Method object, on the specified object with the specified parameters.
+>>>Relevant Questions<<<
+1.Calling a method in java using reflection
+2.How to call a void method in java using reflection
+3.Calling a method using reflection and return back the map
+
+>>>Code Snippets<<<
+/**********code snippet1**********/
+SO questionId >||17424817||< - AnswerId: >||17424929||<
+ sayHello.invoke(this, null);
+
+-----------------------------------------------
+
+
+Rank2:java.lang.Class.getDeclaredField
+>>>JavaDoc<<<
+Returns a Field object that reflects the specified declared field of the class or interface represented by this Class object.
+>>>Relevant Questions<<<
+1.How can I use Java reflection to invoke a method on a reference variable?
+
+-----------------------------------------------
+
+
+Rank3:java.lang.Class.getDeclaredConstructor
+>>>JavaDoc<<<
+Returns a Constructor object that reflects the specified constructor of the class or interface represented by this Class object.
+>>>Relevant Questions<<<
+1.Reflection: create an instance -java
+
+-----------------------------------------------
+
+
+Rank4:java.lang.Class.getConstructors
+>>>JavaDoc<<<
+Returns an array containing Constructor objects reflecting all the public constructors of the class represented by this Class object.
+>>>Relevant Questions<<<
+1.Using a HashMap and reflection to call methods with variable argument types
+
+-----------------------------------------------
+
+
+Rank5:java.lang.Class.newInstance
+>>>JavaDoc<<<
+Creates a new instance of the class represented by this Class object.
+>>>Relevant Questions<<<
+1.Create new object using reflection?
+2.Reflection: create an instance -java
+3.Create an instance within Abstract Class using Reflection
+
+>>>Code Snippets<<<
+/**********code snippet1**********/
+SO questionId >||10470263||< - AnswerId: >||10470279||<
+ final Value v = Value.class.getConstructor(
+   int.class, int.class, double.class).newInstance(_xval1,_xval2,_pval);
+
+-----------------------------------------------
+
+

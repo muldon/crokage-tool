@@ -1,0 +1,77 @@
+How do I change date formatting symbols?
+
+Rank1:java.time.LocalDate.parse
+>>>JavaDoc<<<
+Obtains an instance of LocalDate from a text string such as 2007-12-03.
+>>>Relevant Questions<<<
+1.How can I change the date format in Java?
+2.How to parse/format dates with LocalDateTime? (Java 8)
+3.How to parse dates in multiple formats using SimpleDateFormat
+
+>>>Code Snippets<<<
+/**********code snippet1**********/
+SO questionId >||3469507||< - AnswerId: >||20815964||<
+ SimpleDateFormat newDateFormat = new SimpleDateFormat("dd/MM/yyyy");
+Date myDate = newDateFormat.parse("28/12/2013");
+newDateFormat.applyPattern("yyyy/MM/dd")
+String myDateString = newDateFormat.format(myDate);
+
+-----------------------------------------------
+
+
+Rank2:java.text.NumberFormat.getCurrencyInstance
+>>>JavaDoc<<<
+Returns a currency format for the current default FORMAT locale.
+>>>Relevant Questions<<<
+1.How can I format a double to something using comma and euro symbol
+2.How do I format a Currency for a Locale in Java
+
+-----------------------------------------------
+
+
+Rank3:java.lang.String.format
+>>>JavaDoc<<<
+Returns a formatted string using the specified format string and arguments.
+>>>Relevant Questions<<<
+1.How do I format a number in Java?
+2.How do I change the timezone used by %tZ in String.format() in Java?
+
+>>>Code Snippets<<<
+/**********code snippet1**********/
+SO questionId >||50532||< - AnswerId: >||50544||<
+  String.format("%.2f", (double)value);
+
+-----------------------------------------------
+
+
+Rank4:java.text.SimpleDateFormat.format
+>>>JavaDoc<<<
+Formats the given Date into a date/time string and appends the result to the given StringBuffer.
+>>>Relevant Questions<<<
+1.How to properly format the date?
+
+>>>Code Snippets<<<
+/**********code snippet1**********/
+SO questionId >||8946538||< - AnswerId: >||8946664||<
+ Date d = date("2010-08-25", "00:00");
+System.out.println(new SimpleDateFormat("yyyy-MM-dd HH:mm").format(d));
+
+-----------------------------------------------
+
+
+Rank5:java.time.LocalDateTime.parse
+>>>JavaDoc<<<
+Obtains an instance of LocalDateTime from a text string such as 2007-12-03T10:15:30.
+>>>Relevant Questions<<<
+1.How to parse/format dates with LocalDateTime? (Java 8)
+
+>>>Code Snippets<<<
+/**********code snippet1**********/
+SO questionId >||22463062||< - AnswerId: >||22463063||<
+ String str = "1986-04-08 12:30";
+DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+LocalDateTime dateTime = LocalDateTime.parse(str, formatter);
+
+-----------------------------------------------
+
+

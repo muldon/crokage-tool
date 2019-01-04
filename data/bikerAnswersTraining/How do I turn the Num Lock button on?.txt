@@ -1,0 +1,62 @@
+How do I turn the Num Lock button on?
+
+Rank1:java.util.Collections.synchronizedList
+>>>JavaDoc<<<
+Returns a synchronized (thread-safe) list backed by the specified list.
+>>>Relevant Questions<<<
+1.How does class Collections turn a list/set to a synchronized object? Through what mechanism?
+2.Does a lock on class, locks class variables too? - java
+3.How do Synchronized Lists Work?
+
+-----------------------------------------------
+
+
+Rank2:javax.swing.JLabel.getText
+>>>JavaDoc<<<
+Returns the text string that the label displays.
+>>>Relevant Questions<<<
+1.How do I display the numbers in a for loop in a jLabel?
+
+>>>Code Snippets<<<
+/**********code snippet1**********/
+SO questionId >||31365095||< - AnswerId: >||31365147||<
+ for (int x = intStartingNumber; x <= intEndingNumber; x++) {
+    System.out.print(x + " ");
+    this.lblOutputNumbers.setText(lblOutputNumbers.getText() + " " + x);
+}
+
+-----------------------------------------------
+
+
+Rank3:java.awt.Robot.mouseMove
+>>>JavaDoc<<<
+Moves mouse pointer to given screen coordinates.
+>>>Relevant Questions<<<
+1.How do I set the position of the mouse in Java?
+
+-----------------------------------------------
+
+
+Rank4:java.lang.Math.abs
+>>>JavaDoc<<<
+Returns the absolute value of an int value.
+>>>Relevant Questions<<<
+1.How do you find if a number is within a range in Java? Problems with Math.abs(num1-num2) <= inRange
+
+>>>Code Snippets<<<
+/**********code snippet1**********/
+SO questionId >||7976744||< - AnswerId: >||7976851||<
+ Math.abs(x - a) + Math.abs(b - x) == Math.abs(b - a)
+
+-----------------------------------------------
+
+
+Rank5:java.lang.Thread.interrupted
+>>>JavaDoc<<<
+Tests whether the current thread has been interrupted.
+>>>Relevant Questions<<<
+1.How do i exit a loop running in threadA after I get a specified input in threadB? in java
+
+-----------------------------------------------
+
+
