@@ -2195,7 +2195,8 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 		    }
 	    }
 	    
-	    boolean isValid = !StringUtils.isEmpty(removeAllPunctuations(processedBody.trim()));
+	    String cleanedBody = removeAllPunctuations(processedBody.trim());
+	    boolean isValid = !StringUtils.isEmpty(cleanedBody.trim());
 	    if(!isValid) {
 	    	System.out.println("Disconsidered answer : "+post.getId());
 	    }

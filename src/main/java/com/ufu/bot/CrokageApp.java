@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -21,7 +22,6 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.SetUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -346,7 +346,6 @@ public class CrokageApp extends AppAux{
 		Integer topkArr[] = new Integer[]{10,5,1};
 		
 		
-		
 		Map<String,Set<Integer>> recommendedResults = new LinkedHashMap<>();
 		for(String query: queries) {
 			//query = query+ "?";
@@ -417,24 +416,35 @@ public class CrokageApp extends AppAux{
 		for(String query: queries) {
 			
 			//String processedQuery = crokageUtils.processQuery(query);
-			 
-			Set<Integer> answersIds = recommendedResults.get(query);
-			Set<Post> posts = new HashSet<>(crokageService.findPostsById(new ArrayList<>(answersIds)));
-			ArrayList<Post> postsList = new ArrayList<>(posts);
-			System.out.println("\n\n"+query+"\n");
+			/*if(query.contains("How do I get today date and time?")){
+				System.out.println();
+			}*/
 			
-			for(int i=0; (i<numberOfComposedAnswers && i<posts.size()); i++) {
-				Post post = postsList.get(i);
-				/*if(post.getId()==30281392) {
-					System.out.println();
-				}*/
-				//if sentence has low similarity with code, next()
+			
+			Set<Integer> answersIds = recommendedResults.get(query);
+			Iterator<Integer> it = answersIds.iterator();
+			Set<Post> posts = new LinkedHashSet<>();
+			boolean stop=false;
+			
+			for(int i=0; i<answersIds.size(); i++) {
+				if((i+1) >=numberOfComposedAnswers) {
+					stop = true;
+				}
+				
+				
+				Post post = crokageService.findPostById(it.next());
 				boolean processed = crokageUtils.processSentences(post,query);
 				if(!processed) {
-					posts.remove(post);
+					stop = false;
+				}else {
+					posts.add(post);
+				}
+				
+				if(stop) {
+					break;
 				}
 			}
-			postsList=null;
+			
 			answersIds=null;
 			answersPosts.put(query, posts);
 		}
@@ -573,10 +583,10 @@ public class CrokageApp extends AppAux{
 			int sum3=0;
 			int sum4=0;
 			int sum5=0;
+			BotComposer.setSimWeight(simWeight);
+		    BotComposer.setClassFreqWeight(classFreqWeight);    
 			//BotComposer.setSimWeight(0);
 			//BotComposer.setClassFreqWeight(0);      //must be zero if API extractors are not used 
-			BotComposer.setSimWeight(simWeight);
-			BotComposer.setClassFreqWeight(classFreqWeight);    
 			BotComposer.setMethodFreqWeight(methodFreqWeight);
 			BotComposer.setRepWeight(repWeight);
 			BotComposer.setUpWeight(upWeight);

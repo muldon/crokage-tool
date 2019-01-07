@@ -1895,7 +1895,7 @@ public class AppAux {
 		
 		try (PrintWriter out = new PrintWriter(GOOGLE_TOP_RESULTS_FOR_CROKAGE)) {
 			for(String query: queries) {
-				Set<Integer> soQuestionsIds = executeGoogleSearch(prepareQueryForCrawler(query),10);
+				Set<Integer> soQuestionsIds = executeGoogleSearch(prepareQueryForGoogleCrawler(query),10);
 				out.print("\n"+query+ " >> ");
 				for(Integer soQuestionId: soQuestionsIds) {
 					out.print(soQuestionId+ " ");
@@ -1909,11 +1909,13 @@ public class AppAux {
 
 	
 	protected void crawlGoogleForRelatedQuestionsIdsDatasetNLP2Api() throws Exception {
+		//must be executed in files containing 100 queries each
+		
 		List<String> queries = Files.readAllLines(Paths.get(CROKAGE_HOME+"/data/inputQueriesNlp2Api-201-300.txt"));
 		
 		try (PrintWriter out = new PrintWriter(CROKAGE_HOME+"/data/googleNLP2ApiResults-201-300.txt")) {
 			for(String query: queries) {
-				Set<Integer> soQuestionsIds = executeGoogleSearch(prepareQueryForCrawler(query),10);
+				Set<Integer> soQuestionsIds = executeGoogleSearch(prepareQueryForGoogleCrawler(query),10);
 				out.print("\n"+query+ " >> ");
 				for(Integer soQuestionId: soQuestionsIds) {
 					out.print(soQuestionId+ " ");
@@ -1926,7 +1928,7 @@ public class AppAux {
 	
 	
 	
-	public String prepareQueryForCrawler(String query) {
+	public String prepareQueryForGoogleCrawler(String query) {
 		String completeQuery = "";
 		
 		Boolean containJavaToken = Pattern.compile(".*\\bjava\\b.*").matcher(query.toLowerCase()).find();
@@ -1934,7 +1936,7 @@ public class AppAux {
 		if(!containJavaToken) {
 			completeQuery += "java ";
 		}
-		
+		//filter for SO posts is executed in another method: executeGoogleSearch
 		completeQuery += query;
 		
 		return completeQuery;
