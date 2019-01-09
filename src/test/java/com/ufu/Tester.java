@@ -155,7 +155,7 @@ public class Tester {
 		
 		
 		CrokageApp crokageApp = new CrokageApp();
-		System.out.println(crokageApp.prepareQueryForCrawler("How can I insert an element in array at a given position?"));
+		System.out.println(crokageApp.prepareQueryForGoogleCrawler("How can I insert an element in array at a given position?"));
 		
 		
 		//stripDuplicatesFromFile(CrokageStaticDataOld.INPUT_QUERIES_FILE_NLP2API);

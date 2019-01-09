@@ -680,7 +680,7 @@ public class CrokageApp extends AppAux{
 				//last filter: relevance similarity
 				//merge1 = lucene + asymetric similarity
 				//merge2 = lucene + API extractors				
-				Set<Integer> topKRelevantAnswersIds = getTopKRelevantAnswers(mergeIds1,matrix1,idf1,key,processedQuery);
+				Set<Integer> topKRelevantAnswersIds = getTopKRelevantAnswers(mergeIds1,key,processedQuery);
 				/*if(rawQuery.contains("How do I copy a file in JDK 7")) {
 					System.out.println("Size of topKRelevantAnswersIds: "+topKRelevantAnswersIds.size());
 				}*/
@@ -1396,7 +1396,7 @@ public class CrokageApp extends AppAux{
 	}
 	
 	
-	protected Set<Integer> getTopKRelevantAnswers(Set<Integer> candidateAnswersIds, double[][] matrix1, double[][] idf1, Integer key, String processedQuery) throws IOException {
+	protected Set<Integer> getTopKRelevantAnswers(Set<Integer> candidateAnswersIds, Integer key, String processedQuery) throws IOException {
 		Set<Bucket> candidateBuckets = new HashSet<>();
 		for(Integer answerId: candidateAnswersIds) {
 			candidateBuckets.add(allAnswersWithUpvotesAndCodeBucketsMap.get(answerId));
