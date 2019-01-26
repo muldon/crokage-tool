@@ -219,6 +219,9 @@ public class AppAux {
 	@Value("${INPUT_QUERIES_FILE_TEST_QUERIES}")
 	public String INPUT_QUERIES_FILE_TEST_QUERIES;
 	
+	@Value("${INPUT_QUERIES_FILE_DUMMY_QUERIES}")
+	public String INPUT_QUERIES_FILE_DUMMY_QUERIES;
+	
 	@Value("${INPUT_QUERIES_FILE_TEST_QUERIES_EVALUATION_DIR}")
 	public String INPUT_QUERIES_FILE_TEST_QUERIES_EVALUATION_DIR;
 	
@@ -311,8 +314,7 @@ public class AppAux {
 	@Value("${numberOfComposedAnswers}")
 	public Integer numberOfComposedAnswers;
 	
-	@Value("${iHaveALotOfMemory}")
-	public Boolean iHaveALotOfMemory;
+	
 	
 	@Value("${useGoogleSearch}")
 	public Boolean useGoogleSearch;  
@@ -863,6 +865,11 @@ public class AppAux {
 			meanLikert = CrokageUtils.round(meanFull,2);
 			userEvaluation.setMeanLikert(meanLikert);
 			
+			if(userEvaluation.getPostId().equals(1305454)) {
+				System.out.println();
+			}
+			
+			
 			if(meanLikert>=4) { 
 				
 				Post answer=null;
@@ -893,9 +900,6 @@ public class AppAux {
 		}
 				
 		for(String query: queries) {
-			/*if(query.contains("How to implement the hashCode and equals method using Apache Commons?")) {
-				System.out.println("");
-			}*/
 			
 			Map<String,Set<Integer>> strIdsMap = validEvaluations.stream()
 					.filter(e -> Objects.equals(e.getQuery(), query))
@@ -910,10 +914,17 @@ public class AppAux {
 			System.out.println("Number of queries whose mean likert is > 4: "+groundTruthSelectedQueriesAnswersIdsMap.size());
 		}
 		
+		List<String> originalQueriesList = new ArrayList<>(queries);
+		
 		queries.clear();
 		queries.addAll(groundTruthSelectedQueriesAnswersIdsMap.keySet());
 		
 		System.out.println("Size of ground truth considering only posts with api calls:"+groundTruthSelectedQueriesAnswersIdsMap.size()+ " \nNew queries list size: "+queries.size());
+		
+		originalQueriesList.removeAll(groundTruthSelectedQueriesAnswersIdsMap.keySet());
+		
+		System.out.println("Excluded queries: "+originalQueriesList);
+		
 	}
 	
 
@@ -1257,6 +1268,9 @@ public class AppAux {
 		
 		}else if(dataSet.equals("selectedqueries-test")) {
 			fileName = INPUT_QUERIES_FILE_TEST_QUERIES;
+		
+		}else if(dataSet.equals("selectedqueries-dummy")) {
+			fileName = INPUT_QUERIES_FILE_DUMMY_QUERIES;
 		}
 		
 		

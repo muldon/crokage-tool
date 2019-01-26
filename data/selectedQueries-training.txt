@@ -55,7 +55,7 @@ Create a File Lock on a File
 Copy a Directory recursively
 Create a very large file using mapping
 Convert Between a File Path and a URL
-Use Scanner to read a list of commaseparated values
+Use Scanner to read a list of comma separated values
 Compare the contents of two Streams to determine if they are equal or not
 Apply variable transparency to an image
 Load image from local folder

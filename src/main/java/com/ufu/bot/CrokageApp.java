@@ -72,7 +72,6 @@ public class CrokageApp extends AppAux{
 				+ "\n bm25TopNResults: " + bm25TopNResults
 				+ "\n topApisScoredPairsPercent: " + topApisScoredPairsPercent
 				+ "\n dataSet: " + dataSet
-				+ "\n iHaveALotOfMemory: " + iHaveALotOfMemory
 				+ "\n productionEnvironment: " + productionEnvironment
 				+ "\n callBIKERProcess: " + callBIKERProcess
 				+ "\n callNLP2ApiProcess: " + callNLP2ApiProcess
@@ -374,13 +373,7 @@ public class CrokageApp extends AppAux{
 
 	private void extractAnswers() throws Exception {
 				
-		String resultsCacheFile = "";
-		if(dataSet.equals("selectedqueries-test")){
-			resultsCacheFile=RECOMMENDED_ANSWERS_QUERIES_CACHE+"Test.txt";
-		}else {
-			resultsCacheFile=RECOMMENDED_ANSWERS_QUERIES_CACHE+"Training.txt";
-		}
-				
+		String resultsCacheFile = RECOMMENDED_ANSWERS_QUERIES_CACHE+"-"+dataSet+".txt";
 		
 		Map<String, Set<Integer>> recommendedResults = null;
 		if(subAction.contains("userecommendedcache")) {
@@ -398,11 +391,8 @@ public class CrokageApp extends AppAux{
 		Map<String, Set<Post>> sortedBuckets =  processAnswers(recommendedResults);
 		
 		String answersFolder = "";
-		if(dataSet.equals("selectedqueries-test")){
-			answersFolder=ANSWERS_DIRECTORY+"Test";
-		}else {
-			answersFolder=ANSWERS_DIRECTORY+"Training";
-		}
+		
+		answersFolder=CROKAGE_HOME_DATE_FOLDER+"solutions-"+dataSet;
 		
 		CrokageUtils.composeAnswers(answersFolder,sortedBuckets,numberOfComposedAnswers);
 		
@@ -469,7 +459,7 @@ public class CrokageApp extends AppAux{
 		//load input queries considering dataset
 		queries = readInputQueries();
 		//load ground truth answers
-		if(!dataSet.equals("selectedqueries-test")){
+		if(dataSet.equals("selectedqueries-training")){
 			loadGroundTruthSelectedQueries();
 		}
 				
@@ -694,7 +684,7 @@ public class CrokageApp extends AppAux{
 				
 			}
 			
-			if(!dataSet.equals("selectedqueries-test")){
+			if(dataSet.equals("selectedqueries-training")){
 				
 				System.out.println("\nSaving baselines");
 				String obsComp=null;
@@ -1622,9 +1612,9 @@ public class CrokageApp extends AppAux{
 		}
 		answersWithTopFrequentAPIsIds.removeAll(irrelevantQuestionsIds);
 		
-		if(!iHaveALotOfMemory) {
+		/*if(!iHaveALotOfMemory) {
 			crokageUtils.readVectorsFromSOMapForWords(soContentWordVectorsMap,contents,wordsAndVectorsLines);
-		}
+		}*/
 		contents=null;
 		irrelevantQuestionsIds=null;
 		
@@ -1669,6 +1659,11 @@ public class CrokageApp extends AppAux{
 		System.out.println("loading queries from approaches...");
 		int numApproaches = 0;
 		long initTime = System.currentTimeMillis();
+		
+		//load ground truth answers
+		if(dataSet.equals("selectedqueries-training")){
+			loadGroundTruthSelectedQueries();
+		}
 		
 		//subAction is transformed to lowercase
 		if(subAction.contains("rack")) {

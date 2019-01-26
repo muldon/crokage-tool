@@ -82,3 +82,13 @@ select po.id,parent.processedtitle,parent.processedbody as parentBody,parent.pro
 
  select * from postsmin where id in (9352608)
  
+ 
+ select distinct(po.tags)
+ from postsmin po
+ where po.posttypeid=1
+ and po.tags like '<java%' and po.tags not like '%javascript%' 
+ order by po.tags
+ 
+  --java tagged posts
+select count(id) 
+from postsmin po
