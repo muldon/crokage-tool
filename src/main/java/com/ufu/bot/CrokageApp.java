@@ -54,6 +54,7 @@ public class CrokageApp extends AppAux{
 		long initTime = System.currentTimeMillis();
 		System.out.println("Initializing CrokageApp app...");
 		initializeVariables();
+		action = StringUtils.trim(action);
 		
 		System.out.println("\nConsidering parameters: \n" 
 				+ "\n BIKER_HOME: " + BIKER_HOME
