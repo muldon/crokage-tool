@@ -16,5 +16,3 @@ Crokage receives as input an API related query in natural language. This query i
 - Biker is limited as it does not provide comments to the codes, only javadoc
 - Crokage address both limitations by providing relevant code and comments to these codes. 
 
-## Overleaf paper
-https://v2.overleaf.com/read/qfkvbtcncsgs
