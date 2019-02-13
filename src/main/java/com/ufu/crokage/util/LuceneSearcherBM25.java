@@ -34,7 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.ufu.bot.to.Bucket;
+import com.ufu.crokage.to.Bucket;
 
 @Component
 public class LuceneSearcherBM25 {

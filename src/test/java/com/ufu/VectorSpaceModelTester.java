@@ -3,9 +3,9 @@ package com.ufu;
 
 import java.util.ArrayList;
 
-import com.ufu.bot.tfidf.Corpus;
-import com.ufu.bot.tfidf.Document;
-import com.ufu.bot.tfidf.VectorSpaceModel;
+import com.ufu.crokage.tfidf.Corpus;
+import com.ufu.crokage.tfidf.Document;
+import com.ufu.crokage.tfidf.VectorSpaceModel;
 
 /**
  * the tester class.

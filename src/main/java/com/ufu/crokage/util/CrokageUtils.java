@@ -21,7 +21,6 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -41,7 +40,6 @@ import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
-import org.apache.bcel.generic.StoreInstruction;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.text.StrTokenizer;
@@ -67,10 +65,9 @@ import org.springframework.stereotype.Component;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
-import com.ufu.bot.repository.GenericRepository;
-import com.ufu.bot.to.ExternalQuestion;
-import com.ufu.bot.to.Post;
-import com.ufu.bot.util.CosineSimilarity;
+import com.ufu.crokage.repository.GenericRepository;
+import com.ufu.crokage.to.ExternalQuestion;
+import com.ufu.crokage.to.Post;
 import com.ufu.crokage.to.UserEvaluation;
 
 import edu.stanford.nlp.pipeline.CoreDocument;
@@ -84,36 +81,6 @@ import edu.stanford.nlp.trees.tregex.TregexPattern;
 
 @Component
 public class CrokageUtils {
-	
-	/*
-	 * Stores the value obtained from the pathFileEnvFlag file
-	 */
-	@Value("${useProxy}")
-	public Boolean useProxy;
-	
-	@Value("${environment}")
-	public String environment;
-	
-	@Value("${productionEnvironment}")
-	public Boolean productionEnvironment;  
-	
-	@Value("${BIKER_HOME}")
-	public String bikerHome;
-	
-	@Value("${CROKAGE_HOME}")
-	public String crokageHome;
-	
-	@Value("${TMP_DIR}")
-	public String tmpDir;
-	
-	@Value("${virutalPythonEnv}")
-	public String virutalPythonEnv;
-	
-	@Value("${FAST_TEXT_INSTALLATION_DIR}")
-	public String FAST_TEXT_INSTALLATION_DIR;
-	
-	@Value("${FAST_TEXT_MODEL_PATH}")
-	public String FAST_TEXT_MODEL_PATH;
 	
 	@Value("${SO_IDF_VOCABULARY}")
 	public String SO_IDF_VOCABULARY;
@@ -1594,8 +1561,8 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 	}
 
 
-	public static void setLimit(Set<String> set, int k) {
-		List<String> items = new ArrayList<String>();
+	public static <T> void setLimit(Set<T> set, int k) {
+		List<T> items = new ArrayList<T>();
 	    items.addAll(set);
 	    set.clear();
 	    int trim = k>items.size() ? items.size() : k;
@@ -1708,33 +1675,6 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 	}
 
 
-	public Map<String, double[]> readVectorsForQuery(String word) throws Exception {
-		String modelPath = FAST_TEXT_MODEL_PATH;
-		String fastTextIntallationDir = FAST_TEXT_INSTALLATION_DIR;
-		
-		//build a temporary file with words --size issues
-		File tmpFile = new File("/home/rodrigo/tmp/tempWordsFile.txt");
-		try (PrintWriter out = new PrintWriter(tmpFile)) {
-		    out.println(word);
-		}
-		
-		// echo "java filewriter file" | ./fasttext print-word-vectors
-		//String[] cmd = { "bash", "-c", "echo \""+words+"\" | " + fastTextIntallationDir+ "/fasttext print-word-vectors "+modelPath };
-		String[] cmd = { "bash", "-c", "echo \"$(cat "+tmpFile.getAbsolutePath()+")\" | " + fastTextIntallationDir+ "/fasttext print-word-vectors "+modelPath };
-		
-		ProcessBuilder pb = new ProcessBuilder(cmd);
-		Process p = pb.start();
-		p.waitFor();
-		String output = CrokageUtils.loadStream(p.getInputStream());
-		String error = CrokageUtils.loadStream(p.getErrorStream());
-		int rc = p.waitFor();
-		//System.out.println(output);
-		String lines[] = output.split("\n");
-		Map<String,double[]> vectorsMap = new LinkedHashMap<>();
-		getVectorsFromLines(Arrays.asList(lines),vectorsMap);
-		
-		return vectorsMap;
-	}
 
 
 	public static void getVectorsFromLines(List<String> wordsAndVectors, Map<String,double[]> vectorsMap) {
@@ -1888,9 +1828,9 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 			soContentWordVectorsMap.put(parts[0], vectors);
 		}
 		//System.out.println(bigMapApisIds);
-		if(!productionEnvironment) {
+		/*if(!productionEnvironment) {
 			reportElapsedTime(initTime,"readVectorsFromSOMapForWords");
-		}
+		}*/
 		return soContentWordVectorsMap;
 	}
 
@@ -2085,40 +2025,23 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 		return contentMap;
 	}
 
-	public static void composeAnswers(String folder, Map<String, Set<Post>> sortedBuckets, Integer numberOfComposedAnswers) throws FileNotFoundException {
-		File dir = new File(folder);
-		if(!dir.exists()) {
-			dir.mkdirs();
+	public static String composeAnswers(String query, Set<Post> sortedBuckets, Integer numberOfComposedAnswers) throws FileNotFoundException {
+		setLimitV2(sortedBuckets, numberOfComposedAnswers);
+		StringBuilder lines = new StringBuilder("");
+		lines.append("Query: "+query+"\n-----------------------------------------------------------------------");
+		
+		
+		//System.out.println("\nAnswers to query: "+query);
+		int count=1;
+		for(Post bucket: sortedBuckets) {
+			lines.append("\n\nRank:"+count+" (https://stackoverflow.com/questions/"+bucket.getId()+")\n"+buildPresentationBody(bucket.getBody(),true)+"\n\n-------------------------------------next answer-------------------------------------");
+			count++;
 		}
+		lines.append("#end");
+		String linesStr = lines.toString();
+		linesStr = linesStr.replace("-------------------------------------next answer-------------------------------------#end", "");
 		
-		
-		Set<String> queries = sortedBuckets.keySet();
-				
-		for(String query:queries) {
-			
-			Set<Post> posts = sortedBuckets.get(query);
-			setLimitV2(posts, numberOfComposedAnswers);
-			StringBuilder lines = new StringBuilder("");
-			lines.append("Query: "+query+"\n-----------------------------------------------------------------------");
-			
-			
-			//System.out.println("\nAnswers to query: "+query);
-			int count=1;
-			for(Post bucket: posts) {
-				lines.append("\n\nRank:"+count+" (https://stackoverflow.com/questions/"+bucket.getId()+")\n"+buildPresentationBody(bucket.getBody(),true)+"\n\n-------------------------------------next answer-------------------------------------");
-				count++;
-			}
-			lines.append("#end");
-			String linesStr = lines.toString();
-			linesStr = linesStr.replace("-------------------------------------next answer-------------------------------------#end", "");
-			try (PrintWriter out = new PrintWriter(folder+"/"+query.replace("/", "")+".txt")) {
-			    out.println(linesStr);
-			}
-			
-			
-			
-		}
-		
+		return linesStr;
 	}
 	
 	

@@ -46,10 +46,10 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-jersey</artifactId>
 		</dependency>
-		<!-- <dependency>
+		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
-		</dependency> -->
+		</dependency>
 
 		<dependency>
 			<groupId>org.springframework.security</groupId>
@@ -320,7 +320,7 @@
 
 	<!-- Package as an executable jar -->
 	<build>
-		<finalName>bot</finalName>
+		<finalName>crokage-tool</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>

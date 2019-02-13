@@ -19,8 +19,8 @@ import org.springframework.test.context.web.WebAppConfiguration;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.ufu.bot.tfidf.TfIdf;
-import com.ufu.bot.tfidf.ngram.NgramTfIdf;
+import com.ufu.crokage.tfidf.TfIdf;
+import com.ufu.crokage.tfidf.ngram.NgramTfIdf;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
