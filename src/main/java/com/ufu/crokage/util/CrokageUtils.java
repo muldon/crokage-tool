@@ -1768,7 +1768,10 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 		
 		for(int i=0; i<queryTokens.length; i++) {
 			String word = queryTokens[i];
-			double idfValue = IDFVocabularyMap.get(word);
+			double idfValue = 0d;
+			if(IDFVocabularyMap.get(word)!=null) {
+				idfValue = IDFVocabularyMap.get(word);
+			}
 			matrix[0][i] = idfValue;
 		}
 				
@@ -1786,6 +1789,7 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 			double[] vectors = wordVectorsMap.get(word);
 			if(vectors==null) {
 				System.out.println("error here: "+word);
+				vectors = new double[100];
 			}
 			matrix[i] = vectors;
 		}
