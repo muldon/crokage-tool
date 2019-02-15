@@ -166,7 +166,7 @@ public class CrokageApp extends AppAux{
 		Set<Integer> answersWithTopFrequentAPIs=null;
 		Set<Integer> filteredAnswersWithAPIs=null;
 		Set<Integer> luceneSmallSetIds=null;
-		Set<Integer> luceneBigSetIds=null;
+		//Set<Integer> luceneBigSetIds=null;
 		Set<Integer> asymTopAnswersThreadsIds=null;
 		Set<Integer> topAnswersForThreadsIds=null;
 		Set<Integer> topKRelevantQuestionsIds=null;
@@ -179,32 +179,33 @@ public class CrokageApp extends AppAux{
 		String firstObs;
 		
 	
-		BotComposer.setSemWeight(semWeight);
-	    BotComposer.setApiWeight(apiWeight); //must be set to 0 if API extractors are not used
-		BotComposer.setMethodFreqWeight(methodWeight); 
-		BotComposer.setCosSimWeight(cosSimWeight);
-		
 		int sum1=0;
 		int sum2=0;
 		
 		processedQuery = crokageUtils.processQuery(rawQuery);
 		System.out.println("Processed query: "+processedQuery);
 		
-		if(useExtractors) {
-			topClasses = getApisFromExtractors(rawQuery);
-			crokageUtils.setLimitV2(topClasses, numberOfAPIClasses);
+		if(!useExtractors) {
+			//not using classes, weights are different
+			topSimilarContentsAsymRelevanceNumber=50;
+			apiWeight=0d;
 		}
 		
 		
+		//default is using classes
+		BotComposer.setSemWeight(semWeight);
+	    BotComposer.setApiWeight(apiWeight); 
+		BotComposer.setMethodFreqWeight(methodWeight); 
+		BotComposer.setTfIdfWeight(tfIdfWeight);
+		BotComposer.setBm25Weight(bm25Weight);
 		
 		//Stage 1: BM25
- 		luceneSmallSetIds = luceneSearch(processedQuery,bm25TopNSmallLimit,bm25TopNBigLimit);
-		luceneBigSetIds = luceneSearcherBM25.getBigSetAnswersIds();
+		luceneSmallSetIds = luceneSearcherBM25.search(processedQuery, bm25TopNSmallLimit,bm25ScoreAnswerIdMap);
 		luceneTopIdsMap.put(rawQuery, luceneSmallSetIds);
 		sum1+=luceneSmallSetIds.size();
 	
 		//Stage 2: Asymmetric Relevance
-		asymTopAnswersThreadsIds = getAnswersForTopThreads(luceneBigSetIds,processedQuery);
+		asymTopAnswersThreadsIds = scoreAnswersBySemantics(luceneSmallSetIds,processedQuery);
 		topAsymIdsMap.put(rawQuery, asymTopAnswersThreadsIds);
 		sum2+=asymTopAnswersThreadsIds.size();
 		
@@ -217,7 +218,9 @@ public class CrokageApp extends AppAux{
 		
 		//Stage 4: Score answers by API
 		if(useExtractors) {
-			scoreAnswersByAPIs(topClasses,luceneBigSetIds);
+			topClasses = getApisFromExtractors(rawQuery);
+			crokageUtils.setLimitV2(topClasses, numberOfAPIClasses);
+			scoreAnswersByAPIs(topClasses,luceneSmallSetIds);
 		}
 			
 		//Stage 5: Relevance calculation
@@ -330,54 +333,87 @@ public class CrokageApp extends AppAux{
 
 
 
+	private double getSimPair(String comparingContent, Bucket bucket, double[][] matrix1, double[][] idf1) {
+		
+		//get vectors for query2 words
+		double[][] matrix2 = CrokageUtils.getMatrixVectorsForQuery(comparingContent,soContentWordVectorsMap);
+		
+		//get idfs for query2
+		double[][] idf2 = CrokageUtils.getIDFMatrixForQuery(comparingContent, soIDFVocabularyMap);
+		
+		double simPair = CrokageUtils.round(Matrix.simDocPair(matrix1,matrix2,idf1,idf2),6);
+		
+		return simPair;
+	}
 
-	protected Set<Integer> getAnswersForTopThreads(Set<Integer> relevantAnswersIds, String processedQuery) {
+
+	protected Set<Integer> scoreAnswersBySemantics(Set<Integer> luceneSmallSetIds, String processedQuery) {
+		Set<Bucket> luceneBigSetBuckets = new HashSet<>();
+		Set<Bucket> luceneSmallSetBuckets = new HashSet<>();
+		
 		//get vectors for query words
 		double[][] matrix1 = CrokageUtils.getMatrixVectorsForQuery(processedQuery,soContentWordVectorsMap);
 		
 		//get idfs for query
 		double[][] idf1 = CrokageUtils.getIDFMatrixForQuery(processedQuery, soIDFVocabularyMap);
 		
-		Set<Bucket> candidateBuckets = new HashSet<>();
-		for(Integer answerId: relevantAnswersIds) {
-			candidateBuckets.add(allAnswersWithUpvotesAndCodeBucketsMap.get(answerId));
+		
+		/*
+		for(Integer answerId: luceneBigSetIds) {
+			luceneBigSetBuckets.add(allAnswersWithUpvotesAndCodeBucketsMap.get(answerId));
+		}*/
+		
+		
+		for(Integer answerId: luceneSmallSetIds) {
+			luceneSmallSetBuckets.add(allAnswersWithUpvotesAndCodeBucketsMap.get(answerId));
 		}
 		
+		//bucketsIdsBigSetScores.clear();
+		bucketsIdsSmallSetScores.clear();
+		String comparingContent; 
 		
-		String comparingContent;
-		bucketsIdsScores.clear();
-		
-		for(Bucket bucket:candidateBuckets) {
-			
-			//get the word vectors for each word of the query
+		/*for(Bucket bucket:luceneBigSetBuckets) {
 			comparingContent = loadBucketContent(bucket,numberOfPostsInfoToMatchAsymmetricSimRelevance);
 			if(StringUtils.isBlank(comparingContent)) {
 				continue;
 			}
+			double simPair = getSimPair(comparingContent, bucket, matrix1,idf1);
 			
-			//get vectors for query2 words
-			double[][] matrix2 = CrokageUtils.getMatrixVectorsForQuery(comparingContent,soContentWordVectorsMap);
+			bucketsIdsBigSetScores.put(bucket.getId(), simPair);
 			
-			//get idfs for query2
-			double[][] idf2 = CrokageUtils.getIDFMatrixForQuery(comparingContent, soIDFVocabularyMap);
+		}*/
+		
+		for(Bucket bucket:luceneSmallSetBuckets) {
+			comparingContent = loadBucketContent(bucket,numberOfPostsInfoToMatchAsymmetricSimRelevance);
+			if(StringUtils.isBlank(comparingContent)) {
+				continue;
+			}
+			double simPair = getSimPair(comparingContent, bucket, matrix1,idf1);
 			
-			double asymScore = CrokageUtils.round(Matrix.simDocPair(matrix1,matrix2,idf1,idf2),6);
-			
-			bucketsIdsScores.put(bucket.getId(), asymScore);
-			
-			//bucket.setTitleScore(simPair);
+			bucketsIdsSmallSetScores.put(bucket.getId(), simPair);
 			
 		}
 				
+		//int topSimilarContents = bucketsIdsBigSetScores.size()*topSimilarContentsAsymRelevanceNumber/100;
+		
 		//sort scores in descending order and consider the first topSimilarQuestionsNumber parameter
-		Map<Integer,Double> topKRelevantAnswersBucketsMap = bucketsIdsScores.entrySet().stream()
+		/*Map<Integer,Double> topKRelevantAnswersBucketsMap = bucketsIdsBigSetScores.entrySet().stream()
+			       .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+			       .limit(topSimilarContentsAsymRelevanceNumber)
+			       .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
+		*/
+		Map<Integer,Double> topKRelevantAnswersBucketsMap = bucketsIdsSmallSetScores.entrySet().stream()
 			       .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
 			       .limit(topSimilarContentsAsymRelevanceNumber)
 			       .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, (e1, e2) -> e1, LinkedHashMap::new));
 		
 		
-		Set<Integer> topKRelevantAnswersIds = topKRelevantAnswersBucketsMap.keySet();
+		luceneSmallSetBuckets=null;
+		luceneBigSetBuckets=null;
 		
+		
+		Set<Integer> topKRelevantAnswersIds = topKRelevantAnswersBucketsMap.keySet();
+		//Set<Integer> topKRelevantAnswersIds = bucketsIdsSmallSetScores.keySet();
 		
 		return topKRelevantAnswersIds;
 		
@@ -387,16 +423,6 @@ public class CrokageApp extends AppAux{
 	
 	
 	
-
-
-	protected Set<Integer> luceneSearch(String processedQuery, Integer smallLimit, Integer bigSetLimit) throws Exception {
-		//List<Bucket> buckets = crokageService.getUpvotedAnswersIdsContentsAndParentContents();
-		
-		Set<Integer> answersIds = luceneSearcherBM25.search(processedQuery, smallLimit,bigSetLimit);
-				
-		return answersIds;
-		
-	}
 
 	
 	private Set<Integer> scoreAnswersByAPIs(Set<String> topClasses, Set<Integer> relevantAnswersIds) {
@@ -562,9 +588,10 @@ public class CrokageApp extends AppAux{
 		String parentTitle;
 		String comparingContent;
 		answersIdsScores.clear();
-		double maxAsymScore=0;
+		double maxSimPair=0;
 		double maxApiScore=0;
-		double maxCosSimScore=0;
+		double maxTfIdfScore=0;
+		double maxBm25Score=0;
 		methodsCounterMap.clear();
 		classesCounterMap.clear();
 		documents.clear();
@@ -585,17 +612,32 @@ public class CrokageApp extends AppAux{
 			//second ranking
 			try {
 				
-				double tfIdfCosineSimScore = vectorSpace.cosineSimilarity(queryDocument, bucket.getDocument());
-				bucket.setTfIdfCosineSimScore(tfIdfCosineSimScore);
-				
-				if(tfIdfCosineSimScore>maxCosSimScore) {
-					maxCosSimScore=tfIdfCosineSimScore;
+				double cosineSimScore = vectorSpace.cosineSimilarity(queryDocument, bucket.getDocument());
+				bucket.setTfIdfCosineSimScore(cosineSimScore);
+				if(cosineSimScore>maxTfIdfScore) {
+					maxTfIdfScore=cosineSimScore;
 				}
 				
-				double asymScore = bucketsIdsScores.get(bucket.getId());
-				bucket.setSimPair(asymScore);
-				if(asymScore>maxAsymScore) {
-					maxAsymScore=asymScore;
+				double bm25Score = bm25ScoreAnswerIdMap.get(bucket.getId());
+				bucket.setBm25Score(bm25Score);
+				if(bm25Score>maxBm25Score) {
+					maxBm25Score=bm25Score;
+				}
+				
+				
+				double simPair= bucketsIdsSmallSetScores.get(bucket.getId());
+				/*if(bucketsIdsBigSetScores.containsKey(bucket.getId())) {
+					simPair = bucketsIdsBigSetScores.get(bucket.getId());
+				}else {
+					simPair = bucketsIdsSmallSetScores.get(bucket.getId());
+				}*/
+				if(simPair==0d) {
+					System.out.println("Huston, we have a problem !!");
+				}
+				
+				bucket.setSimPair(simPair);
+				if(simPair>maxSimPair) {
+					maxSimPair=simPair;
 				}
 				
 				if(!topAnswerParentPairsAnswerIdScoreMap.isEmpty() && topAnswerParentPairsAnswerIdScoreMap.get(bucket.getId())!=null) {
@@ -615,16 +657,17 @@ public class CrokageApp extends AppAux{
 		}
 		
 		
-		sortMethodsByFrequency();
-		
 		
 		//normalization and other relevance boosts
 		for(Bucket bucket:candidateBuckets) {
-				double asymScore = bucket.getSimPair();
-				asymScore = (asymScore / maxAsymScore); //normalization
+				double simPair = bucket.getSimPair();
+				simPair = (simPair / maxSimPair); //normalization
 				
-				double tfIdfCosineSimScore = bucket.getTfIdfCosineSimScore();
-				tfIdfCosineSimScore = (tfIdfCosineSimScore / maxCosSimScore); //normalization
+				double tfIdfScore = bucket.getTfIdfCosineSimScore();
+				tfIdfScore = (tfIdfScore / maxTfIdfScore); //normalization
+				
+				double bm25Score = bucket.getTfIdfCosineSimScore();
+				bm25Score = (bm25Score / maxBm25Score); //normalization
 	
 				double apiAnswerPairScore=0;
 				if(!topAnswerParentPairsAnswerIdScoreMap.isEmpty() && topAnswerParentPairsAnswerIdScoreMap.get(bucket.getId())!=null) {
@@ -632,7 +675,7 @@ public class CrokageApp extends AppAux{
 					apiAnswerPairScore = (apiAnswerPairScore/maxApiScore); //normalization
 				}
 				
-				double finalScore = BotComposer.calculateRankingScore(asymScore,bucket,methodsCounterMap,apiAnswerPairScore,tfIdfCosineSimScore);
+				double finalScore = BotComposer.calculateRankingScore(simPair,bucket,methodsCounterMap,apiAnswerPairScore,tfIdfScore,bm25Score);
 				answersIdsScores.put(bucket.getId(), finalScore);
 				
 			

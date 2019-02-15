@@ -181,8 +181,11 @@ public class AppAux {
 	@Value("${methodWeight}")
 	public Double methodWeight;
 	
-	@Value("${cosSimWeight}")
-	public Double cosSimWeight;
+	@Value("${tfIdfWeight}")
+	public Double tfIdfWeight;
+	
+	@Value("${bm25Weight}")
+	public Double bm25Weight;
 	
 	@Value("${numberOfComposedAnswers}")
 	public Integer numberOfComposedAnswers;
@@ -226,6 +229,7 @@ public class AppAux {
 	protected Map<Integer,String> threadsForUpvotedAnswersWithCodeIdsTitlesMap;
 	protected List<String> wordsAndVectorsLines;
 	//protected Map<Integer,Double> questionsIdsScores;
+	protected Map<Integer,Double> bucketsIdsSmallSetScores;
 	protected Map<Integer,Double> bucketsIdsScores;
 	protected Map<Integer,Double> answersIdsScores;
 	protected Set<String> allWordsSetForBuckets;
@@ -245,6 +249,7 @@ public class AppAux {
 	protected Map<String,Set<Integer>> topAnswersIdsMap;
 	protected Map<Integer,Set<String>> upvotedPostsIdsWithCodeApisMap;
 	protected ArrayList<Document> documents;
+	protected Map<Integer,Float> bm25ScoreAnswerIdMap;
 	
 	public Integer luceneMoreThreadsNumber; 
 	protected String currentQuery;
@@ -260,6 +265,7 @@ public class AppAux {
 		allThreadsIdsContentsMap = new HashMap<>();
 		allAnswersIdsContentsParentContentsMap= new HashMap<>();
 		//questionsIdsScores = new HashMap<>();
+		bucketsIdsSmallSetScores= new HashMap<>();
 		bucketsIdsScores = new HashMap<>();
 		answersIdsScores = new HashMap<>();
 		allWordsSetForBuckets = new HashSet<>();
@@ -289,6 +295,7 @@ public class AppAux {
 		upvotedPostsIdsWithCodeApisMap = new HashMap<>();
 		processedQueries = new ArrayList<>();
 		candidateBuckets = new HashSet<>();
+		bm25ScoreAnswerIdMap = new HashMap<>();
 		
 	}
 	

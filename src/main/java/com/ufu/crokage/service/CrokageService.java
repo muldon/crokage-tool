@@ -74,7 +74,10 @@ public class CrokageService extends AbstractService{
 		metricResult.setClassFreqWeight(BotComposer.getApiWeight());
 		metricResult.setMethodFreqWeight(BotComposer.getMethodFreqWeight());
 		metricResult.setSimWeight(BotComposer.getSemWeight());
-		metricResult.setTfIdfCosSimWeight(BotComposer.getCosSimWeight());
+		metricResult.setBm25weight(BotComposer.getBm25Weight());
+		metricResult.setTfIdfCosSimWeight(BotComposer.getTfIdfWeight());
+		//metricResult.setUpWeight(BotComposer.getUpWeight());
+		//metricResult.setRepWeight(BotComposer.getRepWeight());
 		metricResultRepository.save(metricResult);
 	}
 

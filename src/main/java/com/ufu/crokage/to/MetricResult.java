@@ -20,41 +20,22 @@ public class MetricResult {
     @SequenceGenerator(name="metricsresults_id_seq", sequenceName="metricsresults_id_seq",allocationSize=1)
     @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="metricsresults_id_seq")
     private Integer id;
-	@Column(name="hitk10")
-	private Double hitK10;
+	@Column(name="hitk")
+	private Double hitK;
 	
-	@Column(name="hitk5")
-	private Double hitK5;
 	
-	@Column(name="hitk1")
-	private Double hitK1;
+	@Column(name="mrrk")
+	private Double mrrK;
 	
-	@Column(name="mrrk10")
-	private Double mrrK10;
+
+	@Column(name="mapk")
+	private Double mapK;
 	
-	@Column(name="mrrk5")
-	private Double mrrK5;
+		
+	@Column(name="mrk")
+	private Double mrK;
 	
-	@Column(name="mrrk1")
-	private Double mrrK1;
 	
-	@Column(name="mapk10")
-	private Double mapK10;
-	
-	@Column(name="mapk5")
-	private Double mapK5;
-	
-	@Column(name="mapk1")
-	private Double mapK1;
-	
-	@Column(name="mrk10")
-	private Double mrK10;
-	
-	@Column(name="mrk5")
-	private Double mrK5;
-	
-	@Column(name="mrk1")
-	private Double mrK1;
 	
 	@Column(name="bm25topnsmallresults")
 	private Integer bm25TopNSmallResults;
@@ -92,6 +73,9 @@ public class MetricResult {
 	@Column(name="tfidfcossimweight")
 	public Double tfIdfCosSimWeight;
 	
+	@Column(name="bm25weight")
+	public Double bm25weight;
+	
 	public String approach;
 	
 	@Column(name="topclasses")
@@ -99,155 +83,7 @@ public class MetricResult {
 	
 	private Timestamp date;
 	
-	public Double getHitK10() {
-		return hitK10;
-	}
-	public void setHitK10(Double hitK10) {
-		this.hitK10 = hitK10;
-	}
-	public Double getHitK5() {
-		return hitK5;
-	}
-	public void setHitK5(Double hitK5) {
-		this.hitK5 = hitK5;
-	}
-	public Double getHitK1() {
-		return hitK1;
-	}
-	public void setHitK1(Double hitK1) {
-		this.hitK1 = hitK1;
-	}
-	public Double getMrrK10() {
-		return mrrK10;
-	}
-	public void setMrrK10(Double mrrK10) {
-		this.mrrK10 = mrrK10;
-	}
-	public Double getMrrK5() {
-		return mrrK5;
-	}
-	public void setMrrK5(Double mrrK5) {
-		this.mrrK5 = mrrK5;
-	}
-	public Double getMrrK1() {
-		return mrrK1;
-	}
-	public void setMrrK1(Double mrrK1) {
-		this.mrrK1 = mrrK1;
-	}
-	public Double getMapK10() {
-		return mapK10;
-	}
-	public void setMapK10(Double mapK10) {
-		this.mapK10 = mapK10;
-	}
-	public Double getMapK5() {
-		return mapK5;
-	}
-	public void setMapK5(Double mapK5) {
-		this.mapK5 = mapK5;
-	}
-	public Double getMapK1() {
-		return mapK1;
-	}
-	public void setMapK1(Double mapK1) {
-		this.mapK1 = mapK1;
-	}
-	public Double getMrK10() {
-		return mrK10;
-	}
-	public void setMrK10(Double mrK10) {
-		this.mrK10 = mrK10;
-	}
-	public Double getMrK5() {
-		return mrK5;
-	}
-	public void setMrK5(Double mrK5) {
-		this.mrK5 = mrK5;
-	}
-	public Double getMrK1() {
-		return mrK1;
-	}
-	public void setMrK1(Double mrK1) {
-		this.mrK1 = mrK1;
-	}
-	@Override
-	public String toString() {
-		return " & " + hitK10 + " & " + hitK5 + " & " + hitK1 + " & " + mrrK10 + " & " + mrrK5 + " & " + mrrK1 + " & " + mapK10 + " & " + mapK5 + " & "
-				+ mapK1 + " & " + mrK10 + " & " + mrK5 + " & " + mrK1 + " \\\\";
-	}
-	public Integer getId() {
-		return id;
-	}
-	public void setId(Integer id) {
-		this.id = id;
-	}
-	
-	
-	public Integer getCutoff() {
-		return cutoff;
-	}
-	public void setCutoff(Integer cutoff) {
-		this.cutoff = cutoff;
-	}
-	public String getObs() {
-		return obs;
-	}
-	public void setObs(String obs) {
-		this.obs = obs;
-	}
-	public double getClassFreqWeight() {
-		return classFreqWeight;
-	}
-	public void setClassFreqWeight(double classFreqWeight) {
-		this.classFreqWeight = classFreqWeight;
-	}
-	public double getMethodFreqWeight() {
-		return methodFreqWeight;
-	}
-	public void setMethodFreqWeight(double methodFreqWeight) {
-		this.methodFreqWeight = methodFreqWeight;
-	}
-	public double getRepWeight() {
-		return repWeight;
-	}
-	public void setRepWeight(double repWeight) {
-		this.repWeight = repWeight;
-	}
-	public double getSimWeight() {
-		return simWeight;
-	}
-	public void setSimWeight(double simWeight) {
-		this.simWeight = simWeight;
-	}
-	public double getUpWeight() {
-		return upWeight;
-	}
-	public void setUpWeight(double upWeight) {
-		this.upWeight = upWeight;
-	}
-	public String getApproach() {
-		return approach;
-	}
-	public void setApproach(String approach) {
-		this.approach = approach;
-	}
-	public Integer getTopClasses() {
-		return topClasses;
-	}
-	public void setTopClasses(Integer topClasses) {
-		this.topClasses = topClasses;
-	}
-	
-	public Integer getTopk() {
-		return topk;
-	}
-	public void setTopk(Integer topk) {
-		this.topk = topk;
-	}
-	
-	public MetricResult(String approach,Integer bm25TopNSmallResults,Integer bm25TopNBigResults, Integer topApisScoredPairsPercent, Integer topSimilarTitlesPercent,
-			Integer cutoff, Integer topk, String obs,Integer numberofapiclasses) {
+	public MetricResult(String approach,Integer bm25TopNSmallResults,Integer bm25TopNBigResults, Integer topApisScoredPairsPercent, Integer topSimilarTitlesPercent, Integer cutoff, Integer topk, String obs,Integer numberofapiclasses) {
 		super();
 		this.bm25TopNSmallResults = bm25TopNSmallResults;
 		this.bm25TopNBigResults = bm25TopNBigResults;
@@ -259,15 +95,40 @@ public class MetricResult {
 		this.approach = approach;
 		this.topClasses=numberofapiclasses;
 		this.date = new Timestamp(Calendar.getInstance().getTimeInMillis());
+		
 	}
 	public MetricResult() {
 		super();
 	}
-	public Double getTfIdfCosSimWeight() {
-		return tfIdfCosSimWeight;
+	public Integer getId() {
+		return id;
 	}
-	public void setTfIdfCosSimWeight(Double tfIdfCosSimWeight) {
-		this.tfIdfCosSimWeight = tfIdfCosSimWeight;
+	public void setId(Integer id) {
+		this.id = id;
+	}
+	public Double getHitK() {
+		return hitK;
+	}
+	public void setHitK(Double hitK) {
+		this.hitK = hitK;
+	}
+	public Double getMrrK() {
+		return mrrK;
+	}
+	public void setMrrK(Double mrrK) {
+		this.mrrK = mrrK;
+	}
+	public Double getMapK() {
+		return mapK;
+	}
+	public void setMapK(Double mapK) {
+		this.mapK = mapK;
+	}
+	public Double getMrK() {
+		return mrK;
+	}
+	public void setMrK(Double mrK) {
+		this.mrK = mrK;
 	}
 	public Integer getBm25TopNSmallResults() {
 		return bm25TopNSmallResults;
@@ -281,12 +142,99 @@ public class MetricResult {
 	public void setBm25TopNBigResults(Integer bm25TopNBigResults) {
 		this.bm25TopNBigResults = bm25TopNBigResults;
 	}
+	public Integer getTopApisScoredPairsPercent() {
+		return topApisScoredPairsPercent;
+	}
+	public void setTopApisScoredPairsPercent(Integer topApisScoredPairsPercent) {
+		this.topApisScoredPairsPercent = topApisScoredPairsPercent;
+	}
+	public Integer getTopSimilarContentsAsymRelevanceNumber() {
+		return topSimilarContentsAsymRelevanceNumber;
+	}
+	public void setTopSimilarContentsAsymRelevanceNumber(Integer topSimilarContentsAsymRelevanceNumber) {
+		this.topSimilarContentsAsymRelevanceNumber = topSimilarContentsAsymRelevanceNumber;
+	}
+	public Integer getCutoff() {
+		return cutoff;
+	}
+	public void setCutoff(Integer cutoff) {
+		this.cutoff = cutoff;
+	}
+	public Integer getTopk() {
+		return topk;
+	}
+	public void setTopk(Integer topk) {
+		this.topk = topk;
+	}
+	public String getObs() {
+		return obs;
+	}
+	public void setObs(String obs) {
+		this.obs = obs;
+	}
+	public Double getClassFreqWeight() {
+		return classFreqWeight;
+	}
+	public void setClassFreqWeight(Double classFreqWeight) {
+		this.classFreqWeight = classFreqWeight;
+	}
+	public Double getMethodFreqWeight() {
+		return methodFreqWeight;
+	}
+	public void setMethodFreqWeight(Double methodFreqWeight) {
+		this.methodFreqWeight = methodFreqWeight;
+	}
+	public Double getRepWeight() {
+		return repWeight;
+	}
+	public void setRepWeight(Double repWeight) {
+		this.repWeight = repWeight;
+	}
+	public Double getSimWeight() {
+		return simWeight;
+	}
+	public void setSimWeight(Double simWeight) {
+		this.simWeight = simWeight;
+	}
+	public Double getUpWeight() {
+		return upWeight;
+	}
+	public void setUpWeight(Double upWeight) {
+		this.upWeight = upWeight;
+	}
+	public Double getTfIdfCosSimWeight() {
+		return tfIdfCosSimWeight;
+	}
+	public void setTfIdfCosSimWeight(Double tfIdfCosSimWeight) {
+		this.tfIdfCosSimWeight = tfIdfCosSimWeight;
+	}
+	public String getApproach() {
+		return approach;
+	}
+	public void setApproach(String approach) {
+		this.approach = approach;
+	}
+	public Integer getTopClasses() {
+		return topClasses;
+	}
+	public void setTopClasses(Integer topClasses) {
+		this.topClasses = topClasses;
+	}
 	public Timestamp getDate() {
 		return date;
 	}
 	public void setDate(Timestamp date) {
 		this.date = date;
 	}
+	public Double getBm25weight() {
+		return bm25weight;
+	}
+	public void setBm25weight(Double bm25weight) {
+		this.bm25weight = bm25weight;
+	}
+	
+	
+	
 	
 	
 	

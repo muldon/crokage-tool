@@ -55,6 +55,8 @@ public class Bucket {
 	
 	protected Double tfIdfCosineSimScore;
 	
+	protected Double bm25Score;
+	
 	protected Double simPair;
 	
 	protected String acceptedOrMostUpvotedAnswerOfParentProcessedBody;
@@ -335,6 +337,14 @@ public class Bucket {
 
 	public void setThreadContent(String threadContent) {
 		this.threadContent = threadContent;
+	}
+
+	public Double getBm25Score() {
+		return bm25Score;
+	}
+
+	public void setBm25Score(Double bm25Score) {
+		this.bm25Score = bm25Score;
 	}
 
  

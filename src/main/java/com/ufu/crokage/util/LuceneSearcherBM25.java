@@ -131,36 +131,40 @@ public class LuceneSearcherBM25 {
 	
 	
 
-	public Set<Integer> search(String query, Integer smallSetLimit, Integer bigSetLimit) throws Exception {
+	public Set<Integer> search(String query, Integer smallSetLimit, Map<Integer, Float> bm25ScoreAnswerIdMap) throws Exception {
 		//logger.info("Searching por query: "+query);
 		Set<Integer> smallSetAnswersIds = new LinkedHashSet<>();
-		bigSetAnswersIds.clear();
+		//bigSetAnswersIds.clear();
+		bm25ScoreAnswerIdMap.clear();
 		
 		QueryParser parser = new QueryParser("content", standardAnalyzer);
 		
 		Query myquery = parser.parse(query);
 		
-		TopDocs docs = searcher.search(myquery, bigSetLimit);
+		//TopDocs docs = searcher.search(myquery, bigSetLimit);
+		TopDocs docs = searcher.search(myquery, smallSetLimit);
 				
 		ScoreDoc[] hits = docs.scoreDocs;
-		if(hits.length<bigSetLimit) {
+		/*if(hits.length<bigSetLimit) {
 			bigSetLimit=hits.length;
-		}
+		}*/
 		if(hits.length<smallSetLimit) {
 			smallSetLimit=hits.length;
 		}
 			
-		for (int i = 0; i < bigSetLimit; i++) {
-			ScoreDoc item = hits[i];
-			Document doc = searcher.doc(item.doc);
-			bigSetAnswersIds.add(Integer.valueOf(doc.get("id")));
-		}
-		
 		for (int i = 0; i < smallSetLimit; i++) {
 			ScoreDoc item = hits[i];
 			Document doc = searcher.doc(item.doc);
+			bm25ScoreAnswerIdMap.put(Integer.valueOf(doc.get("id")), item.score);
 			smallSetAnswersIds.add(Integer.valueOf(doc.get("id")));
 		}
+		
+		/*for (int i = smallSetLimit; i < bigSetLimit; i++) {
+			ScoreDoc item = hits[i];
+			Document doc = searcher.doc(item.doc);
+			bm25ScoreAnswerIdMap.put(Integer.valueOf(doc.get("id")), item.score);
+			bigSetAnswersIds.add(Integer.valueOf(doc.get("id")));
+		}*/
 				
 		return smallSetAnswersIds;		
 		

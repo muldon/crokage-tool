@@ -1788,7 +1788,6 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 			//double[] vectors = wordVectorsMap.get(word).stream().mapToDouble(Double::doubleValue).toArray();
 			double[] vectors = wordVectorsMap.get(word);
 			if(vectors==null) {
-				System.out.println("error here: "+word);
 				vectors = new double[100];
 			}
 			matrix[i] = vectors;
