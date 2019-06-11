@@ -107,11 +107,11 @@ public class AppAux {
 	@Value("${INPUT_QUERIES_FILE_NLP2API}")
 	public String INPUT_QUERIES_FILE_NLP2API;
 	
-	@Value("${INPUT_QUERIES_FILE_SELECTED_QUERIES}")
-	public String INPUT_QUERIES_FILE_SELECTED_QUERIES;
+	@Value("${INPUT_QUERIES_FILE_TRAINING}")
+	public String INPUT_QUERIES_FILE_TRAINING;
 	
-	@Value("${INPUT_QUERIES_FILE_TEST_QUERIES}")
-	public String INPUT_QUERIES_FILE_TEST_QUERIES;
+	@Value("${INPUT_QUERIES_FILE_USER_STUDY}")
+	public String INPUT_QUERIES_FILE_USER_STUDY;
 	
 	
 	
@@ -965,11 +965,11 @@ public class AppAux {
 		if(dataSet.equals("nlp2api")) {
 			fileName = INPUT_QUERIES_FILE_NLP2API;
 		
-		}else if(dataSet.equals("selectedqueries-training")) {
-			fileName = INPUT_QUERIES_FILE_SELECTED_QUERIES;
+		}else if(dataSet.equals("selectedqueries-training49")) {
+			fileName = INPUT_QUERIES_FILE_TRAINING;
 		
-		}else if(dataSet.equals("selectedqueries-test")) {
-			fileName = INPUT_QUERIES_FILE_TEST_QUERIES;
+		}else if(dataSet.equals("selectedqueries-user-study")) {
+			fileName = INPUT_QUERIES_FILE_USER_STUDY;
 		}
 		
 		
@@ -1715,9 +1715,9 @@ public class AppAux {
 		}
 		
 		String outputPath=CROKAGE_HOME_DATE_FOLDER;
-		if(dataSet.equals("selectedqueries-test")) {
+		if(dataSet.equals("selectedqueries-user-study")) {
 			outputPath+="crokageDataSetBikerOutputTest.txt";
-		}else if(dataSet.equals("selectedqueries-training")) {
+		}else if(dataSet.equals("selectedqueries-training49")) {
 			outputPath+="crokageDataSetBikerOutputTraining.txt";
 		
 		}else { //nlp2api dataset = API extractors

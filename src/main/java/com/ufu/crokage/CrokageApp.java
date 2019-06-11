@@ -745,7 +745,7 @@ public class CrokageApp extends AppAux{
 		long initTime = System.currentTimeMillis();
 		
 		//load ground truth answers
-		if(!dataSet.equals("selectedqueries-test")){
+		if(!dataSet.equals("selectedqueries-user-study")){
 			loadGroundTruthSelectedQueries();
 		}
 		
