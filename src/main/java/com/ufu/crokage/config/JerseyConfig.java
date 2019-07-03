@@ -22,6 +22,8 @@ import org.glassfish.jersey.server.ResourceConfig;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.stereotype.Component;
 
+import com.ufu.crokage.resources.QueryResource;
+
 @Component
 @ApplicationPath("/crokage")
 @ComponentScan
@@ -29,10 +31,17 @@ public class JerseyConfig extends ResourceConfig {
 
 	public JerseyConfig() {
 		
-		packages("com.ufu.crokage.config");
+		/*packages("com.ufu.crokage.config");
 		packages("com.ufu.crokage.resources");
-		packages("com.ufu.crokage.util");
+		packages("com.ufu.crokage.util");*/
 		
+        register(AppAux.class);
+        register(SimpleCORSFilter.class);
+        register(MyServiceWebAppInitializer.class);
+        
+        register(QueryResource.class);
+        //register(QueryResource.class);
+        
 				
 		
 	}
