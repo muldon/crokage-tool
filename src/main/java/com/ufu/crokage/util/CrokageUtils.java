@@ -1787,7 +1787,9 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 			String word = queryTokens[i];
 			//double[] vectors = wordVectorsMap.get(word).stream().mapToDouble(Double::doubleValue).toArray();
 			double[] vectors = wordVectorsMap.get(word);
+			
 			if(vectors==null) {
+				System.out.println(" word not found... "+word);
 				vectors = new double[100];
 			}
 			matrix[i] = vectors;
@@ -2114,18 +2116,18 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 	    }
 	    
 	    if(!removedSentences.isEmpty()) {
-	    	System.out.println("Removed sentences from postId:"+post.getId());
+	    	//System.out.println("Removed sentences from postId:"+post.getId());
 		    for(CoreSentence eachSentence: removedSentences) {
-		    	System.out.println("Sentence: "+eachSentence);
+		    	//System.out.println("Sentence: "+eachSentence);
 		    	processedBody = processedBody.replace(eachSentence.text(), "");
 		    }
 	    }
 	    
 	    String cleanedBody = removeAllPunctuations(processedBody.trim());
 	    boolean isValid = !StringUtils.isEmpty(cleanedBody.trim());
-	    if(!isValid) {
-	    	System.out.println("Disconsidered answer : "+post.getId());
-	    }
+		/*
+		 * if(!isValid) { System.out.println("Disconsidered answer : "+post.getId()); }
+		 */
 	    
 	    return isValid;
 	}

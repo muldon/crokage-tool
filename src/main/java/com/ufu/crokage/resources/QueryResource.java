@@ -1,5 +1,7 @@
 package com.ufu.crokage.resources;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,6 +38,15 @@ public class QueryResource extends AppAux{
 	
 	@Autowired
 	public CrokageApp crokageApp;
+	
+	private DateTimeFormatter dtf;
+	LocalDateTime now;
+	
+	
+	{
+		dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
+		now = LocalDateTime.now();
+	}
 	
 	@GET
 	@Path("/test/{id}")
@@ -97,7 +108,8 @@ public class QueryResource extends AppAux{
 		List<Post> posts = new ArrayList<>();
 		
 		try{
-			System.out.println(query);
+			String logMessage = "...at: "+dtf.format(now)+" - query: "+query.getQueryText()+ " - num ans:"+query.getNumberOfComposedAnswers();
+			System.out.println(logMessage);
 			
 			if(query==null || StringUtils.isBlank(query.getQueryText())) {
 				errorMessage="Query is null";
@@ -111,7 +123,7 @@ public class QueryResource extends AppAux{
 				posts.add(post);
 				posts.add(post2);*/
 								
-				infoMessage = "ok!";
+				infoMessage = "Answers returned: "+posts.size();
 			}
 		
 		
@@ -119,8 +131,8 @@ public class QueryResource extends AppAux{
 			logger.error("Error ... sorry... : "+e);
 			errorMessage = "Error ... sorry....";
 		}
-		System.out.println("finished !");
-		CrokageUtils.reportElapsedTime(initTime1,"getsolutions");
+		//System.out.println("finished !");
+		//CrokageUtils.reportElapsedTime(initTime1,"getsolutions");
 		
 		return new PostRestTransfer(posts, null, infoMessage,errorMessage);
 	}

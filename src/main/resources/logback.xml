@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
     <include resource="org/springframework/boot/logging/logback/defaults.xml" />
-    <property name="LOG_FILE" value="${LOG_FILE:-${LOG_PATH:-${LOG_TEMP:-${java.io.tmpdir:-/tmp}}/}spring.log}"/>
+    <property name="LOG_FILE" value="${LOG_FILE:-${LOG_PATH:-${LOG_TEMP:-${java.io.tmpdir:-/tmp}}/}crokage.log}"/>
     <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
-    <property name="LOG_FILE" value="${LOG_FILE:-${LOG_PATH:-${LOG_TEMP:-${java.io.tmpdir:-/tmp}}/}spring.log}"/>
+    <property name="LOG_FILE" value="${LOG_FILE:-${LOG_PATH:-${LOG_TEMP:-${java.io.tmpdir:-/tmp}}/}crokage1.log}"/>
     <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
 	<logger name="org.hibernate" level="ERROR"/>
 	<logger name="org.hibernate.SQL" aditivity="false" level="ERROR"/>
@@ -21,7 +21,7 @@
 
     <root level="info">
         <appender-ref ref="CONSOLE"/>
-        <!-- <appender-ref ref="ROLLING-FILE"/> -->
+        <appender-ref ref="ROLLING-FILE"/>
     </root>
 
 </configuration>

@@ -96,19 +96,20 @@ public class CrokageApp extends AppAux{
 		
 		int topk=10;
 		
-		boolean override = false;
-		if(query.getUseExtractors()!=null) {
-			useExtractors=query.getUseExtractors();
-			override=true;
-		}
+		/*
+		 * boolean override = false; if(query.getUseExtractors()!=null) {
+		 * useExtractors=query.getUseExtractors(); override=true; }
+		 */
 		if(query.getNumberOfComposedAnswers()!=null) {
 			numberOfComposedAnswers=query.getNumberOfComposedAnswers();
-			override=true;
+			//override=true;
 		}
 		
-		if(override) {
-			System.out.println("Overriding parameters: \nuseExtractors="+useExtractors+"\nnumberOfComposedAnswers="+numberOfComposedAnswers);
-		}
+		/*
+		 * if(override) {
+		 * System.out.println("Overriding parameters: \nuseExtractors="+useExtractors+
+		 * "\nnumberOfComposedAnswers="+numberOfComposedAnswers); }
+		 */
 		
 		
 		Set<Integer> recommendedResults = runApproach(query);
@@ -158,7 +159,7 @@ public class CrokageApp extends AppAux{
 	
 
 	protected Set<Integer> runApproach(Query query) throws Exception {
-		long initTime = System.currentTimeMillis();
+		//long initTime = System.currentTimeMillis();
 		
 		String rawQuery = query.getQueryText();
 		String processedQuery;
@@ -183,18 +184,17 @@ public class CrokageApp extends AppAux{
 		int sum2=0;
 		
 		processedQuery = crokageUtils.processQuery(rawQuery);
-		System.out.println("Processed query: "+processedQuery);
+		//System.out.println("Processed query: "+processedQuery);
 		
-		if(!useExtractors) {
-			//not using classes, weights are different
-			topSimilarContentsAsymRelevanceNumber=50;
-			apiWeight=0d;
-		}
-		
+		/*
+		 * if(!useExtractors) { //not using classes, weights are different apiWeight=0d;
+		 * }
+		 */
+		topSimilarContentsAsymRelevanceNumber=50;
 		
 		//default is using classes
 		BotComposer.setSemWeight(semWeight);
-	    BotComposer.setApiWeight(apiWeight); 
+	    BotComposer.setApiWeight(0d);   //not using class match
 		BotComposer.setMethodFreqWeight(methodWeight); 
 		BotComposer.setTfIdfWeight(tfIdfWeight);
 		BotComposer.setBm25Weight(bm25Weight);
@@ -217,11 +217,11 @@ public class CrokageApp extends AppAux{
 		//Stage 3: previously provided (getRecommendedApis();)
 		
 		//Stage 4: Score answers by API
-		if(useExtractors) {
-			topClasses = getApisFromExtractors(rawQuery);
-			crokageUtils.setLimitV2(topClasses, numberOfAPIClasses);
-			scoreAnswersByAPIs(topClasses,luceneSmallSetIds);
-		}
+		/*
+		 * if(useExtractors) { topClasses = getApisFromExtractors(rawQuery);
+		 * crokageUtils.setLimitV2(topClasses, numberOfAPIClasses);
+		 * scoreAnswersByAPIs(topClasses,luceneSmallSetIds); }
+		 */
 			
 		//Stage 5: Relevance calculation
 		Set<Integer> topKRelevantAnswersIds = getTopKRelevantAnswers(mergeIds,processedQuery);
@@ -230,7 +230,7 @@ public class CrokageApp extends AppAux{
 		topClasses=null;
 		mergeIds=null;
 		
-		CrokageUtils.reportElapsedTime(initTime,"for running query");
+		//CrokageUtils.reportElapsedTime(initTime,"for running query");
 		
 		return recommendedResults;
 	}
@@ -640,12 +640,13 @@ public class CrokageApp extends AppAux{
 					maxSimPair=simPair;
 				}
 				
-				if(!topAnswerParentPairsAnswerIdScoreMap.isEmpty() && topAnswerParentPairsAnswerIdScoreMap.get(bucket.getId())!=null) {
-					double apiAnswerPairScore = topAnswerParentPairsAnswerIdScoreMap.get(bucket.getId());
-					if(apiAnswerPairScore>maxApiScore) {
-						maxApiScore=apiAnswerPairScore;
-					}
-				}
+				/*
+				 * if(!topAnswerParentPairsAnswerIdScoreMap.isEmpty() &&
+				 * topAnswerParentPairsAnswerIdScoreMap.get(bucket.getId())!=null) { double
+				 * apiAnswerPairScore =
+				 * topAnswerParentPairsAnswerIdScoreMap.get(bucket.getId());
+				 * if(apiAnswerPairScore>maxApiScore) { maxApiScore=apiAnswerPairScore; } }
+				 */
 				
 				countMethods(bucket.getCode(),bucket);
 				
@@ -670,11 +671,13 @@ public class CrokageApp extends AppAux{
 				bm25Score = (bm25Score / maxBm25Score); //normalization
 	
 				double apiAnswerPairScore=0;
-				if(!topAnswerParentPairsAnswerIdScoreMap.isEmpty() && topAnswerParentPairsAnswerIdScoreMap.get(bucket.getId())!=null) {
-					apiAnswerPairScore = topAnswerParentPairsAnswerIdScoreMap.get(bucket.getId());
-					apiAnswerPairScore = (apiAnswerPairScore/maxApiScore); //normalization
-				}
-				
+			/*
+			 * if(!topAnswerParentPairsAnswerIdScoreMap.isEmpty() &&
+			 * topAnswerParentPairsAnswerIdScoreMap.get(bucket.getId())!=null) {
+			 * apiAnswerPairScore =
+			 * topAnswerParentPairsAnswerIdScoreMap.get(bucket.getId()); apiAnswerPairScore
+			 * = (apiAnswerPairScore/maxApiScore); //normalization }
+			 */				
 				double finalScore = BotComposer.calculateRankingScore(simPair,bucket,methodsCounterMap,apiAnswerPairScore,tfIdfScore,bm25Score);
 				answersIdsScores.put(bucket.getId(), finalScore);
 				
