@@ -102,7 +102,6 @@ public class CrokageApp extends AppAux{
 		 */
 		if(query.getNumberOfComposedAnswers()!=null) {
 			numberOfComposedAnswers=query.getNumberOfComposedAnswers();
-			//override=true;
 		}
 		
 		/*

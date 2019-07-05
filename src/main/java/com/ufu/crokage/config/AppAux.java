@@ -78,7 +78,8 @@ public class AppAux {
 	@Value("${SO_UPVOTED_POSTS_WITH_CODE_APIS_FILE}")
 	public String SO_UPVOTED_POSTS_WITH_CODE_APIS_FILE;
 	
-	
+	@Value("${MODEL_VECTOR_SIZE}")
+	public Integer MODEL_VECTOR_SIZE;
 	
 	@Value("${SO_CONTENT_FILE}")
 	public String SO_CONTENT_FILE;

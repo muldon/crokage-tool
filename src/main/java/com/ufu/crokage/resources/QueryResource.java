@@ -48,7 +48,7 @@ public class QueryResource extends AppAux{
 		now = LocalDateTime.now();
 	}
 	
-	@GET
+	/*@GET
 	@Path("/test/{id}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public GenericRestTransfer getTopico(@PathParam("id") Short id)
@@ -93,7 +93,7 @@ public class QueryResource extends AppAux{
 		
 		return new GenericRestTransfer(null, composition, infoMessage,errorMessage);
 	}
-	
+	*/
 
 	
 	@Path("/getsolutions")
@@ -101,10 +101,8 @@ public class QueryResource extends AppAux{
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public PostRestTransfer save(Query query) {
-		String errorMessage = null;
+		String errorMessage = "Error ... sorry... this error has been reported to the developer (estudantecomp@gmail.com).";
 		String infoMessage = null;
-		String composition= "";
-		long initTime1 = System.currentTimeMillis();
 		List<Post> posts = new ArrayList<>();
 		
 		try{
@@ -114,22 +112,14 @@ public class QueryResource extends AppAux{
 			if(query==null || StringUtils.isBlank(query.getQueryText())) {
 				errorMessage="Query is null";
 			}else {
-				//composition = crokageApp.extractAnswers(query);
 				posts = crokageApp.extractAnswers(query);
-				
-				/*Post post = crokageService.findPostById(8881748);
-				Post post2 = crokageService.findPostById(11986716);
-				
-				posts.add(post);
-				posts.add(post2);*/
-								
 				infoMessage = "Answers returned: "+posts.size();
 			}
 		
 		
 		}catch(Exception e){
-			logger.error("Error ... sorry... : "+e);
-			errorMessage = "Error ... sorry....";
+			logger.error(errorMessage+e);
+			
 		}
 		//System.out.println("finished !");
 		//CrokageUtils.reportElapsedTime(initTime1,"getsolutions");

@@ -88,6 +88,9 @@ public class CrokageUtils {
 	@Value("${STOP_WORDS_FILE_PATH}")
 	public String STOP_WORDS_FILE_PATH;
 	
+	@Value("${MODEL_VECTOR_SIZE}")
+	public Integer MODEL_VECTOR_SIZE;
+	
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 	private static Map<String, String> sourceToMaster;
 	private static CharArraySet stopWords;
@@ -109,6 +112,7 @@ public class CrokageUtils {
 	private TregexPattern sentencePattern2;
 	private List<CoreSentence> removedSentences;
 	private List<String> importantWordsList;
+	private static Integer modelVecSize;
 	
 	@Autowired
 	private CosineSimilarity cs1;
@@ -241,6 +245,7 @@ public class CrokageUtils {
 	    
 	    removedSentences = new ArrayList<>();
 	    importantWordsList = Arrays.asList(important_words);
+	    modelVecSize = MODEL_VECTOR_SIZE;
 	}
 	
 	
@@ -1781,7 +1786,7 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 
 	public static double[][] getMatrixVectorsForQuery(String query, Map<String, double[]> wordVectorsMap) {
 		String queryTokens[] = query.trim().split("\\s+");
-		double[][] matrix = new double[queryTokens.length][100];
+		double[][] matrix = new double[queryTokens.length][modelVecSize];
 		
 		for(int i=0; i<queryTokens.length; i++) {
 			String word = queryTokens[i];
@@ -1789,8 +1794,8 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 			double[] vectors = wordVectorsMap.get(word);
 			
 			if(vectors==null) {
-				System.out.println(" word not found... "+word);
-				vectors = new double[100];
+				//System.out.println(" word not found... "+word);
+				vectors = new double[modelVecSize];
 			}
 			matrix[i] = vectors;
 		}
