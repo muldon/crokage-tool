@@ -1548,13 +1548,7 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 		}
 	}
 
-	public static void reduceSet(Map<Integer, Set<String>> goldSetQueriesApis, int k) {
-		Set<Integer> keys = goldSetQueriesApis.keySet();
-		for(Integer key: keys) {
-			Set<String> goldSetApis = goldSetQueriesApis.get(key);
-			setLimit(goldSetApis, k);
-		}
-	}
+	
 
 
 	public static String loadStream(InputStream s) throws Exception {
@@ -1567,14 +1561,6 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 	}
 
 
-	public static <T> void setLimit(Set<T> set, int k) {
-		List<T> items = new ArrayList<T>();
-	    items.addAll(set);
-	    set.clear();
-	    int trim = k>items.size() ? items.size() : k;
-	    set.addAll(items.subList(0,trim));
-		items = null;
-	}
 	
 	public static <K> void setLimitV2(Set<K> set, int k) {
 		Set<K> tmp = new HashSet<>(set);

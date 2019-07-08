@@ -55,7 +55,6 @@ public class CrokageApp extends AppAux{
 		System.out.println("\nConsidering parameters: \n" 
 				+ "\n CROKAGE_HOME: " + CROKAGE_HOME
 				+ "\n TMP_DIR: " + TMP_DIR
-				+ "\n useExtractors: " + useExtractors 
 				+ "\n numberOfComposedAnswers: " + numberOfComposedAnswers
 				+ "\n");
 		
@@ -64,7 +63,7 @@ public class CrokageApp extends AppAux{
 		SearcherParams searcherParams =  new SearcherParams("BM25Similarity", new BM25Similarity(),bm25_k,bm25_b);
 		
 		loadUpvotedAnswersIdsWithCodeContentsAndParentContents();
-		luceneSearcherBM25.buildSearchManager(allAnswersWithUpvotesAndCodeBucketsMap,searcherParams);
+		luceneSearcherBM25.buildSearchManager(allBucketsWithUpvotesMap,searcherParams);
 		allThreadsIdsContentsMap=null;
 		
 		//load all word vectors only once
@@ -117,7 +116,7 @@ public class CrokageApp extends AppAux{
 		
 		Set<Integer> recommendedResults = runApproach(query);
 		
-		CrokageUtils.setLimit(recommendedResults, topk);
+		CrokageUtils.setLimitV2(recommendedResults, topk);
 		
 		ArrayList<Post> sortedBuckets =  processAnswers(recommendedResults,query.getQueryText());
 		

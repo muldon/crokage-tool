@@ -148,9 +148,7 @@ public class AppAux {
 	@Value("${subAction}")
 	public String subAction;
 
-	@Value("${obs}")
-	public String obs;
-
+	
 	@Value("${numberOfAPIClasses}")
 	public Integer numberOfAPIClasses;
 	
@@ -187,16 +185,8 @@ public class AppAux {
 	
 	@Value("${numberOfComposedAnswers}")
 	public Integer numberOfComposedAnswers;
-	
-	@Value("${useExtractors}")
-	public Boolean useExtractors;
-	
-	@Value("${numberOfPostsInfoToMatchTFIDF}")
-	public Integer numberOfPostsInfoToMatchTFIDF; 
-	
-	@Value("${numberOfPostsInfoToMatchAsymmetricSimRelevance}")
-	public Integer numberOfPostsInfoToMatchAsymmetricSimRelevance; 
-	
+		
+			
 	
 	protected long initTime;
 	protected long endTime;
@@ -217,7 +207,7 @@ public class AppAux {
 	protected Map<String,Double> queryIDFVectorsMap;
 	protected Map<Integer,String> allQuestionsIdsTitlesMap;
 	protected Map<Integer,String> allThreadsIdsContentsMap;
-	protected Map<Integer,String> allAnswersIdsContentsParentContentsMap;
+	//protected Map<Integer,String> allAnswersIdsContentsParentContentsMap;
 	protected Map<Integer,Integer> allAnswersWithUpvotesIdsParentIdsMap;
 	protected Map<Integer,Integer> topAnswersWithUpvotesIdsParentIdsMap;
 	protected Map<Integer,Bucket> allAnswersWithUpvotesAndCodeBucketsMap;
@@ -265,7 +255,7 @@ public class AppAux {
 		soContentWordVectorsMap = new HashMap<>();
 		allQuestionsIdsTitlesMap = new HashMap<>();
 		allThreadsIdsContentsMap = new HashMap<>();
-		allAnswersIdsContentsParentContentsMap= new HashMap<>();
+		//allAnswersIdsContentsParentContentsMap= new HashMap<>();
 		//questionsIdsScores = new HashMap<>();
 		bucketsIdsSmallSetScores= new HashMap<>();
 		bucketsIdsScores = new HashMap<>();
@@ -539,7 +529,7 @@ public class AppAux {
 		long initTime2 = System.currentTimeMillis();
 		List<Bucket> buckets = crokageService.getUpvotedAnswersIdsContentsAndParentContents();
 		for(Bucket bucket:buckets) {
-			allAnswersWithUpvotesAndCodeBucketsMap.put(bucket.getId(), bucket);
+			allBucketsWithUpvotesMap.put(bucket.getId(), bucket);
 		}
 		crokageUtils.reportElapsedTime(initTime2,"getUpvotedAnswersIdsContentsAndParentContents");
 		buckets=null;
@@ -1271,23 +1261,6 @@ public class AppAux {
 
 	
 
-
-	protected void loadAllAnswersIdsContentsAndParentContentsMap() {
-		//load threads whose questions has score > 0 
-		List<Bucket> buckets = crokageService.getUpvotedAnswersIdsContentsAndParentContents();
-		System.out.println("buckets recuperados: "+buckets.size());
-		int count=0;
-		for(Bucket bucket: buckets) {
-			count++;
-			if(count%10000==0) {
-				System.out.println(count+" buckets processed...");
-			}
-			String content = loadBucketContent(bucket,5);
-			allAnswersIdsContentsParentContentsMap.put(bucket.getId(), content);
-			
-		}
-		
-	}
 
 
 	protected String loadBucketContent(Bucket bucket,Integer numberOfPostsInfoToMatch) {
