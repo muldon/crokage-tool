@@ -17,6 +17,7 @@ import com.ufu.crokage.repository.ExternalQuestionRepository;
 import com.ufu.crokage.repository.GenericRepository;
 import com.ufu.crokage.repository.MetricResultRepository;
 import com.ufu.crokage.repository.PostsRepository;
+import com.ufu.crokage.repository.QueryRepository;
 import com.ufu.crokage.repository.RankRepository;
 import com.ufu.crokage.repository.RelatedPostRepository;
 import com.ufu.crokage.repository.ResultRepository;
@@ -62,6 +63,10 @@ public abstract class AbstractService {
 	
 	@Autowired
 	protected MetricResultRepository metricResultRepository;
+	
+	@Autowired
+	protected QueryRepository queryRepository;
+	
 	
 	
 	protected int countExcludedPosts;

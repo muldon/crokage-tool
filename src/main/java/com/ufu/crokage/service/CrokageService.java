@@ -1,15 +1,18 @@
 package com.ufu.crokage.service;
 
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import org.hibernate.hql.internal.QuerySplitter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.ufu.crokage.to.Bucket;
 import com.ufu.crokage.to.MetricResult;
 import com.ufu.crokage.to.Post;
+import com.ufu.crokage.to.Query;
 import com.ufu.crokage.util.AbstractService;
 import com.ufu.crokage.util.BotComposer;
 
@@ -81,25 +84,26 @@ public class CrokageService extends AbstractService{
 		metricResultRepository.save(metricResult);
 	}
 
+	@Transactional(readOnly = true)
 	public Integer getMostUpvotedAnswerForQuestionId(Integer questionId) {
 		List<Integer> ids = postsRepository.getMostUpvotedAnswerForQuestionId(questionId);
 		return ids.isEmpty() ? null: ids.get(0);
 	}
 	
 	
-
+	@Transactional(readOnly = true)
 	public Post getMostUpvotedAnswerForQuestion(Integer questionId,Integer answerId) {
 		List<Post> questions = postsRepository.getMostUpvotedAnswerForQuestion(questionId,answerId);
 		return questions.isEmpty() ? null: questions.get(0);
 	}
 
-	
+	@Transactional(readOnly = true)
 	public Map<Integer,String> getThreadsIdsTitlesForUpvotedAnswersWithCode() {
 		return genericRepository.getThreadsIdsTitlesForUpvotedAnswersWithCode();
 	}
 
 	
-	
+	@Transactional(readOnly = true)
 	public Bucket getMostUpvotedAnswerForQuestionId2(Integer questionId) {
 		List<Post> buckets = postsRepository.getMostUpvotedAnswerForQuestionId2(questionId);
 		Post post= buckets.isEmpty() ? null: buckets.get(0);
@@ -113,9 +117,16 @@ public class CrokageService extends AbstractService{
 	}
 
 	
-
+	@Transactional(readOnly = true)
 	public List<Bucket> getUpvotedAnswersIdsContentsAndParentContents() {
 		return genericRepository.getUpvotedAnswersIdsContentsAndParentContents();
+	}
+
+	
+	
+	public void saveQuery(Query query) {
+		query.setDate(getCurrentDate());
+		queryRepository.save(query);		
 	}
 
 	

@@ -118,8 +118,9 @@ public class CrokageApp extends AppAux{
 		
 		CrokageUtils.setLimitV2(recommendedResults, topk);
 		
-		ArrayList<Post> sortedBuckets =  processAnswers(recommendedResults,query.getQueryText());
+		ArrayList<Post> sortedBuckets =  processAnswers(recommendedResults,query.getQuery());
 		
+		crokageService.saveQuery(query);
 		//String composition = CrokageUtils.composeAnswers(query.getQueryText(),sortedBuckets,numberOfComposedAnswers);
 		
 		return sortedBuckets;
@@ -163,7 +164,7 @@ public class CrokageApp extends AppAux{
 	protected Set<Integer> runApproach(Query query) throws Exception {
 		//long initTime = System.currentTimeMillis();
 		
-		String rawQuery = query.getQueryText();
+		String rawQuery = query.getQuery();
 		String processedQuery;
 		Set<String> topClasses=null;
 		Set<Integer> answersWithTopFrequentAPIs=null;
