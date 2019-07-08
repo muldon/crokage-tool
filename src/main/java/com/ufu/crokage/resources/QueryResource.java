@@ -101,7 +101,7 @@ public class QueryResource extends AppAux{
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public PostRestTransfer save(Query query) {
-		String errorMessage = "Error ... sorry... this error has been reported to the developer (estudantecomp@gmail.com).";
+		String errorMessage = null;
 		String infoMessage = null;
 		List<Post> posts = new ArrayList<>();
 		
@@ -118,6 +118,7 @@ public class QueryResource extends AppAux{
 		
 		
 		}catch(Exception e){
+			errorMessage = "Error ... sorry... this error has been reported to the developer (estudantecomp@gmail.com).";
 			logger.error(errorMessage+e);
 			
 		}
