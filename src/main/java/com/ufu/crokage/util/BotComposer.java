@@ -388,10 +388,10 @@ public class BotComposer {
 	}
 
 
-	public static double calculateRankingScore(double simPair, Bucket bucket, Map<String, Integer> methodsCounterMap, double apiAnswerPairScore,double tfIdfCosineSimScore, double bm25Score) {
+	public static double calculateRankingScore(double simPair, double methodFreqScore, double apiAnswerPairScore,double tfIdfCosineSimScore, double bm25Score) {
 		double finalScore;
 		
-		double methodFreqScore = calculateScoreForCommonMethods(bucket.getCode(),methodsCounterMap);
+		//double methodFreqScore = calculateScoreForCommonMethods(bucket.getCode(),methodsCounterMap);
 		
 		/*double repScore = calculateRepScore(bucket.getUserReputation());
 	

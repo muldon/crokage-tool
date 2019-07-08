@@ -1,17 +1,12 @@
 package com.ufu.crokage.util;
 
 import java.io.IOException;
-import java.util.Comparator;
-import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
-import javax.annotation.PostConstruct;
-
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
@@ -37,7 +32,7 @@ import org.springframework.stereotype.Component;
 import com.ufu.crokage.to.Bucket;
 
 @Component
-public class LuceneSearcherBM25 {
+public class LuceneSearcher {
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	private Analyzer standardAnalyzer;
@@ -51,6 +46,8 @@ public class LuceneSearcherBM25 {
 	private IndexSearcher searcher;
 
 	private IndexReader reader;
+	
+	private IndexWriter w;
 
 	private Integer parseErrosNum;
 
@@ -61,11 +58,11 @@ public class LuceneSearcherBM25 {
 	private Set<Integer> bigSetAnswersIds;
 	
 	 
-	public LuceneSearcherBM25() throws Exception {
-		initializeConfigs();
+	public LuceneSearcher() throws Exception {
+		//initializeConfigs();
 	}
 	
-	
+	/*
 	@PostConstruct
 	public void initializeConfigs() throws Exception {
 		parseErrosNum = 0;
@@ -76,44 +73,34 @@ public class LuceneSearcherBM25 {
 		answersCache = new HashMap<>();
 		config = new IndexWriterConfig(standardAnalyzer);
 		//default
-		config.setSimilarity(new BM25Similarity(0.05f, 0.03f));
+		//config.setSimilarity(new BM25Similarity(0.05f, 0.03f));
+		config.setSimilarity(new BM25Similarity(1.2f, 0.75f));
+		//config.setSimilarity(new LMJelinekMercerSimilarity(lambda));
+		//config.setSimilarity(new LMDirichletSimilarity());
+	}*/
 	
-	}
 	
-	
-	public void buildSearchManager(Map<Integer, Bucket> allAnswersWithUpvotesAndCodeBucketsMap,	Map<Integer, String> allThreadsIdsContentsMap) throws Exception {
-		logger.info("LuceneSearcherBM25.buildSearchManager 2. Indexing all threads whose aswers have code: "+allAnswersWithUpvotesAndCodeBucketsMap.size());
-		indexedListSize = allThreadsIdsContentsMap.size();
-		IndexWriterConfig config = new IndexWriterConfig(standardAnalyzer);
-		IndexWriter w = new IndexWriter(index, config);
 		
-		for (Integer answerId: allAnswersWithUpvotesAndCodeBucketsMap.keySet()) {
-			int parentId = allAnswersWithUpvotesAndCodeBucketsMap.get(answerId).getParentId();
-			String finalContent = allThreadsIdsContentsMap.get(parentId);			
-			addDocument(w, finalContent, answerId);
-		}
-		w.close();
-		reader = DirectoryReader.open(index);
-		searcher = new IndexSearcher(reader);
-		
-		
-	}
-
-	
-	public void buildSearchManager(Map<Integer, Bucket> allAnswersWithUpvotesAndCodeBucketsMap) throws Exception {
-		logger.info("LuceneSearcherBM25.buildSearchManager. Indexing all upvoted scored aswers with code: "+allAnswersWithUpvotesAndCodeBucketsMap.size());
+	public void buildSearchManager(Map<Integer, Bucket> allAnswersWithUpvotesAndCodeBucketsMap, SearcherParams searcherParams) throws Exception {
+		logger.info("LuceneSearcher.buildSearchManager: searcherParams="+searcherParams+". Indexing all upvoted scored aswers with code: "+allAnswersWithUpvotesAndCodeBucketsMap.size());
 		long initTime2 = System.currentTimeMillis();
+		standardAnalyzer = new StandardAnalyzer();
+		index = new RAMDirectory();
 		
 		indexedListSize = allAnswersWithUpvotesAndCodeBucketsMap.size();
-		IndexWriterConfig config = new IndexWriterConfig(standardAnalyzer);
-		IndexWriter w = new IndexWriter(index, config);
+		config = new IndexWriterConfig(standardAnalyzer);
+		
+		config.setSimilarity(new BM25Similarity(searcherParams.getK(), searcherParams.getB()));
+		
+		w = new IndexWriter(index, config);
 		
 		Set<Integer> bucketsIds = allAnswersWithUpvotesAndCodeBucketsMap.keySet();
 		
 		for (Integer id: bucketsIds) {
 			Bucket answerBucket = allAnswersWithUpvotesAndCodeBucketsMap.get(id);
-			//String finalContent = answerBucket.getParentProcessedTitle()+" "+answerBucket.getParentProcessedBody()+" "+answerBucket.getParentProcessedCode()+" "+answerBucket.getProcessedBody()+ " "+answerBucket.getProcessedCode();
 			String finalContent = answerBucket.getParentProcessedTitle()+" "+answerBucket.getParentProcessedBody()+" "+answerBucket.getParentProcessedCode()+" "+answerBucket.getProcessedBody()+ " "+answerBucket.getProcessedCode();
+			//String finalContent = answerBucket.getParentProcessedTitleLemma()+" "+answerBucket.getParentProcessedBodyLemma()+" "+answerBucket.getParentProcessedCode()+" "+answerBucket.getProcessedBodyLemma()+ " "+answerBucket.getProcessedCode();
+			//String finalContent = answerBucket.getParentProcessedTitle()+" "+answerBucket.getParentProcessedBody()+" "+answerBucket.getProcessedBody();
 			/*if(!StringUtils.isBlank(answerBucket.getAcceptedAnswerBody())) {
 				finalContent+= " "+answerBucket.getAcceptedAnswerBody();
 			}*/
@@ -122,11 +109,14 @@ public class LuceneSearcherBM25 {
 			addDocument(w, finalContent, id);
 			
 		}
-		w.close();
 		
+		w.close();
 		reader = DirectoryReader.open(index);
 		searcher = new IndexSearcher(reader);
-		CrokageUtils.reportElapsedTime(initTime2,"LuceneSearcherBM25.buildSearchManager");
+		
+		searcher.setSimilarity(new BM25Similarity(searcherParams.getK(), searcherParams.getB()));
+		
+		CrokageUtils.reportElapsedTime(initTime2,"LuceneSearcher.buildSearchManager");
 	}
 	
 	
@@ -148,11 +138,12 @@ public class LuceneSearcherBM25 {
 		/*if(hits.length<bigSetLimit) {
 			bigSetLimit=hits.length;
 		}*/
-		if(hits.length<smallSetLimit) {
+		
+		/*if(hits.length<smallSetLimit) {
 			smallSetLimit=hits.length;
-		}
+		}*/
 			
-		for (int i = 0; i < smallSetLimit; i++) {
+		for (int i = 0; i < hits.length; i++) {
 			ScoreDoc item = hits[i];
 			Document doc = searcher.doc(item.doc);
 			bm25ScoreAnswerIdMap.put(Integer.valueOf(doc.get("id")), item.score);
@@ -168,6 +159,33 @@ public class LuceneSearcherBM25 {
 				
 		return smallSetAnswersIds;		
 		
+	}
+	
+	public Set<Integer> searchDupes(String query, Integer smallSetLimit, Bucket nonMaster) throws Exception {
+		Set<Integer> smallSetAnswersIds = new LinkedHashSet<>();
+		QueryParser parser = new QueryParser("content", standardAnalyzer);
+		Query myquery = parser.parse(query);
+		TopDocs docs = searcher.search(myquery, smallSetLimit);
+				
+		ScoreDoc[] hits = docs.scoreDocs;
+		if(hits.length<smallSetLimit) {
+			smallSetLimit=hits.length;
+		}
+			
+		for (int i = 0; i < smallSetLimit; i++) {
+			ScoreDoc item = hits[i];
+			Document doc = searcher.doc(item.doc);
+			smallSetAnswersIds.add(Integer.valueOf(doc.get("id")));
+		}
+		
+		/*for (int i = smallSetLimit; i < bigSetLimit; i++) {
+			ScoreDoc item = hits[i];
+			Document doc = searcher.doc(item.doc);
+			bm25ScoreAnswerIdMap.put(Integer.valueOf(doc.get("id")), item.score);
+			bigSetAnswersIds.add(Integer.valueOf(doc.get("id")));
+		}*/
+				
+		return smallSetAnswersIds;	
 	}
 
 	/*
@@ -230,6 +248,37 @@ public class LuceneSearcherBM25 {
 	public Set<Integer> getBigSetAnswersIds() {
 		return bigSetAnswersIds;
 	}
+
+
+	public void buildSearchManager(List<Bucket> allUpvotedScoredQuestions) throws IOException {
+		logger.info("LuceneSearcher.buildSearchManager. Indexing all upvoted scored questions: "+allUpvotedScoredQuestions.size());
+		long initTime2 = System.currentTimeMillis();
+		
+		indexedListSize = allUpvotedScoredQuestions.size();
+		IndexWriterConfig config = new IndexWriterConfig(standardAnalyzer);
+		IndexWriter w = new IndexWriter(index, config);
+		
+		for (Bucket bucket: allUpvotedScoredQuestions) {
+			String finalContent = bucket.getParentProcessedTitle()+" "+bucket.getParentProcessedBody()+ " "+bucket.getProcessedCode();
+			if(bucket.getAcceptedAnswerId()!=null) {
+				finalContent+= " "+bucket.getAcceptedOrMostUpvotedAnswerOfParentProcessedBody()+ " "+bucket.getAcceptedOrMostUpvotedAnswerOfParentProcessedCode();
+			}
+			addDocument(w, finalContent, bucket.getId());
+			
+		}
+		w.close();
+		
+		reader = DirectoryReader.open(index);
+		searcher = new IndexSearcher(reader);
+		CrokageUtils.reportElapsedTime(initTime2,"LuceneSearcher.buildSearchManager");
+		
+	}
+
+
+	
+
+
+	
 
 
 	

@@ -398,9 +398,10 @@ public class CrokageUtils {
 	    return tagValues;
 	}
 	
-	public static Set<String> getMethodCalls(String str) {
-	    final Set<String> methodCalls = new HashSet<String>();
-	    final Matcher matcher = METHOD_CALLS_PATTERN.matcher(str);
+	public static Set<String> getMethodCalls(String str, String language) {
+	    Set<String> methodCalls = new HashSet<String>();
+	    Matcher matcher= METHOD_CALLS_PATTERN.matcher(str);
+	    		
 	    while (matcher.find()) {
 	        methodCalls.add(matcher.group(0));
 	    }
@@ -1792,6 +1793,9 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 			String word = queryTokens[i];
 			//double[] vectors = wordVectorsMap.get(word).stream().mapToDouble(Double::doubleValue).toArray();
 			double[] vectors = wordVectorsMap.get(word);
+			if(vectors.length!=modelVecSize) {
+				System.out.println(" word with different size... "+word);
+			}
 			
 			if(vectors==null) {
 				//System.out.println(" word not found... "+word);
@@ -1799,7 +1803,9 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 			}
 			matrix[i] = vectors;
 		}
-				
+			
+		
+		
 		return matrix;
 	}
 	

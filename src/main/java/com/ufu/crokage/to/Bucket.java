@@ -1,5 +1,8 @@
 package com.ufu.crokage.to;
 
+import java.util.Map;
+import java.util.Set;
+
 import javax.persistence.Id;
 import javax.xml.bind.annotation.XmlRootElement;
 
@@ -45,9 +48,17 @@ public class Bucket {
 	
 	protected String parentProcessedTitle;
 	
+	protected String parentProcessedTitleLemma;
+	
 	protected String parentProcessedBody;
 	
+	protected String parentProcessedBodyLemma;
+	
 	protected String parentProcessedCode;
+	
+    private String processedBodyLemma;
+	
+    private String processedTitleLemma;
 	
 	protected Double titleScore;
 	
@@ -64,6 +75,28 @@ public class Bucket {
 	protected String acceptedOrMostUpvotedAnswerOfParentProcessedCode;
 	
 	protected String threadContent;
+	
+	protected Set<Bucket> answers;
+	
+	protected String topics;
+	
+	protected String hotTopics;
+	
+	protected Map<Integer,Double> hotTopicsIdValueMap;
+	
+	protected Map<Integer,Double> topicsIdValueMap;
+	
+	protected Set<Integer> topScoredAnswersSet;
+		
+	private String topScoredAnswers;
+	
+	protected Double topicScore;
+	
+	protected Integer intersectionSize;
+	
+	protected Integer tagId;
+	
+	protected Set<String> methods;
 	
 	public Integer getId() {
 		return id;
@@ -140,9 +173,10 @@ public class Bucket {
 
 	
 
+
 	@Override
 	public String toString() {
-		return "Bucket [id=" + id + ", body=" + body + ", code=" + code + ", calculatedScore=" + calculatedScore + "]";
+		return "Bucket [id=" + id + "]";
 	}
 
 	public Integer getUserReputation() {
@@ -347,13 +381,160 @@ public class Bucket {
 		this.bm25Score = bm25Score;
 	}
 
- 
-	
+	public String getProcessedBodyLemma() {
+		return processedBodyLemma;
+	}
+
+	public void setProcessedBodyLemma(String processedBodyLemma) {
+		this.processedBodyLemma = processedBodyLemma;
+	}
+
+	public String getProcessedTitleLemma() {
+		return processedTitleLemma;
+	}
+
+	public void setProcessedTitleLemma(String processedTitleLemma) {
+		this.processedTitleLemma = processedTitleLemma;
+	}
+
+	public Set<Bucket> getAnswers() {
+		return answers;
+	}
+
+	public void setAnswers(Set<Bucket> answers) {
+		this.answers = answers;
+	}
+
+	public String getParentProcessedBodyLemma() {
+		return parentProcessedBodyLemma;
+	}
+
+	public void setParentProcessedBodyLemma(String parentProcessedBodyLemma) {
+		this.parentProcessedBodyLemma = parentProcessedBodyLemma;
+	}
+
+	public String getParentProcessedTitleLemma() {
+		return parentProcessedTitleLemma;
+	}
+
+	public void setParentProcessedTitleLemma(String parentProcessedTitleLemma) {
+		this.parentProcessedTitleLemma = parentProcessedTitleLemma;
+	}
+
+	public String getTopics() {
+		return topics;
+	}
+
+	public void setTopics(String topics) {
+		this.topics = topics;
+	}
+
+	public String getHotTopics() {
+		return hotTopics;
+	}
+
+	public void setHotTopics(String hotTopics) {
+		this.hotTopics = hotTopics;
+	}
+
+	public Map<Integer, Double> getHotTopicsIdValueMap() {
+		return hotTopicsIdValueMap;
+	}
+
+	public void setHotTopicsIdValueMap(Map<Integer, Double> hotTopicsIdValueMap) {
+		this.hotTopicsIdValueMap = hotTopicsIdValueMap;
+	}
 
 	
-	
+
+	public String getTopScoredAnswers() {
+		return topScoredAnswers;
+	}
+
+	public void setTopScoredAnswers(String topScoredAnswers) {
+		this.topScoredAnswers = topScoredAnswers;
+	}
+
+	public Set<Integer> getTopScoredAnswersSet() {
+		return topScoredAnswersSet;
+	}
+
+	public void setTopScoredAnswersSet(Set<Integer> topScoredAnswersSet) {
+		this.topScoredAnswersSet = topScoredAnswersSet;
+	}
+
+	public Double getTopicScore() {
+		return topicScore;
+	}
+
+	public void setTopicScore(Double topicScore) {
+		this.topicScore = topicScore;
+	}
+
+	public Map<Integer, Double> getTopicsIdValueMap() {
+		return topicsIdValueMap;
+	}
+
+	public void setTopicsIdValueMap(Map<Integer, Double> topicsIdValueMap) {
+		this.topicsIdValueMap = topicsIdValueMap;
+	}
+
+	public Integer getIntersectionSize() {
+		return intersectionSize;
+	}
+
+	public void setIntersectionSize(Integer intersectionSize) {
+		this.intersectionSize = intersectionSize;
+	}
+
+	public Set<String> getMethods() {
+		return methods;
+	}
+
+	public void setMethods(Set<String> methods) {
+		this.methods = methods;
+	}
+
+	public Integer getTagId() {
+		return tagId;
+	}
+
+	public void setTagId(Integer tagId) {
+		this.tagId = tagId;
+	}
 
 	
+	public enum TagEnum {
+		JAVA (1), 
+	    PHP (2),
+	    PYTHON (3);
+	  
+	    private final Integer id;
+		
+		TagEnum(Integer id){
+			this.id = id;
+		}
+		
+		
+		
+	    public static TagEnum getTagEnum(Integer id){
+	    	switch(id){
+	    		case(1): return JAVA;
+	    		case(2): return PHP;
+	    		case(3): return PYTHON;
+	    	  	}
+	    	return null;
+	    }
+	
+		public Integer getId() {
+			return id;
+		}
+	
+		
+	
+	}
+
+
 	
     
 }

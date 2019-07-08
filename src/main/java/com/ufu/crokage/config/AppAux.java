@@ -4,13 +4,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.nio.charset.Charset;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -38,7 +35,7 @@ import com.ufu.crokage.to.Post;
 import com.ufu.crokage.to.UserEvaluation;
 import com.ufu.crokage.util.BotComposer;
 import com.ufu.crokage.util.CrokageUtils;
-import com.ufu.crokage.util.LuceneSearcherBM25;
+import com.ufu.crokage.util.LuceneSearcher;
 
 public class AppAux {
 
@@ -55,12 +52,18 @@ public class AppAux {
 	protected BotComposer botComposer;
 	
 	@Autowired
-	protected LuceneSearcherBM25 luceneSearcherBM25;
+	protected LuceneSearcher luceneSearcherBM25;
 	
 	//app variables
 
 	@Value("${TMP_DIR}")
 	public String TMP_DIR;
+	
+	@Value("${BM25_K}")
+	public Float bm25_k;
+	
+	@Value("${BM25_B}")
+	public Float bm25_b;
 	
 	@Value("${CROKAGE_HOME}")
 	public String CROKAGE_HOME;
@@ -151,18 +154,12 @@ public class AppAux {
 	@Value("${numberOfAPIClasses}")
 	public Integer numberOfAPIClasses;
 	
-	@Value("${topkArr}")
-	public String[] topkArr;
 	
-	@Value("${limitQueries}")
-	public Integer limitQueries;
-	
+		
 	@Value("${dataSet}")
 	public String dataSet;
 
 	
-	@Value("${cutoff}")
-	public Integer cutoff;
 	
 	@Value("${bm25TopNBigLimit}")
 	public Integer bm25TopNBigLimit;
@@ -251,10 +248,14 @@ public class AppAux {
 	protected Map<Integer,Set<String>> upvotedPostsIdsWithCodeApisMap;
 	protected ArrayList<Document> documents;
 	protected Map<Integer,Float> bm25ScoreAnswerIdMap;
+	public Integer contentTypeTFIDF;
+	public Integer contentTypeSemanticSim; 
+	public Integer cutoff;
 	
 	public Integer luceneMoreThreadsNumber; 
 	protected String currentQuery;
 	protected Set<Bucket> candidateBuckets;
+	protected Map<Integer,Bucket> allBucketsWithUpvotesMap;
 	
 	protected void initializeVariables() {
 		subAction = subAction !=null ? subAction.toLowerCase().trim(): null;
@@ -297,6 +298,12 @@ public class AppAux {
 		processedQueries = new ArrayList<>();
 		candidateBuckets = new HashSet<>();
 		bm25ScoreAnswerIdMap = new HashMap<>();
+		allBucketsWithUpvotesMap = new HashMap<>();
+		
+		numberOfAPIClasses=30;
+		contentTypeTFIDF=3;
+		contentTypeSemanticSim= 2;
+		cutoff=5;
 		
 	}
 	
@@ -596,85 +603,6 @@ public class AppAux {
 	}
 
 
-	protected void loadGroundTruthSelectedQueries() throws Exception {
-		List<UserEvaluation> evaluationsWithBothUsersScales = new ArrayList<>();
-		crokageUtils.readGroundTruthFile(evaluationsWithBothUsersScales,QUERIES_AND_SO_ANSWERS_AGREEMENT,4,5);
-		//System.out.println("Number of analyzed posts: "+evaluationsWithBothUsersScales.size());
-		
-		List<UserEvaluation> validEvaluations = new ArrayList<>();
-		for(UserEvaluation userEvaluation:evaluationsWithBothUsersScales) {
-			int likert1 = userEvaluation.getLikertScaleUser1();
-			int likert2 = userEvaluation.getLikertScaleUser2();
-			
-			int diff = Math.abs(likert1 - likert2);
-			if(diff>1) {
-				continue;
-			}
-			
-			double meanFull = (likert1+likert2)/(double)2;
-			double meanLikert=0d;
-			meanLikert = CrokageUtils.round(meanFull,2);
-			userEvaluation.setMeanLikert(meanLikert);
-			
-			if(userEvaluation.getPostId().equals(1305454)) {
-				System.out.println();
-			}
-			
-			
-			if(meanLikert>=4) { 
-				
-				Post answer=null;
-				try {
-				
-				//verify if post contain APIs
-				answer = crokageService.findPostById(userEvaluation.getPostId());
-				Set<String> classes = crokageUtils.extractClassesFromProcessedCode(answer.getCode());
-				if(!classes.isEmpty()) {
-					validEvaluations.add(userEvaluation);
-				}
-				
-				} catch (Throwable e2) {
-					System.out.println("Error trying to extract classes from post: "+answer.getId());
-				}
-				
-			}
-		}
-		
-		
-		//System.out.println("Number of posts containing correct answers: "+validEvaluations.size());
-		
-		
-		if(queries==null || queries.isEmpty()) {
-			queries = readInputQueries(); //selectedQueries
-		}
-				
-		for(String query: queries) {
-			
-			Map<String,Set<Integer>> strIdsMap = validEvaluations.stream()
-					.filter(e -> Objects.equals(e.getQuery(), query))
-					.collect(Collectors.groupingBy(e -> new String(e.getQuery()),
-			         	     Collectors.mapping(UserEvaluation::getPostId, Collectors.toSet())));
-					
-			groundTruthSelectedQueriesAnswersIdsMap.putAll(strIdsMap);		
-			
-		}
-		
-		
-		System.out.println("Number of queries whose mean likert is > 4: "+groundTruthSelectedQueriesAnswersIdsMap.size());
-		
-		
-		List<String> originalQueriesList = new ArrayList<>(queries);
-		
-		queries.clear();
-		queries.addAll(groundTruthSelectedQueriesAnswersIdsMap.keySet());
-		
-		System.out.println("Size of ground truth considering only posts with api calls:"+groundTruthSelectedQueriesAnswersIdsMap.size()+ " \nNew queries list size: "+queries.size());
-		
-		originalQueriesList.removeAll(groundTruthSelectedQueriesAnswersIdsMap.keySet());
-		
-		System.out.println("Excluded queries: "+originalQueriesList);
-		
-	}
 	
 
 
@@ -898,49 +826,6 @@ public class AppAux {
 
 
 	
-	/*
-	 * Extended version of getQueriesAndApisFromFile where the generated queries can be equal
-	 */
-	protected void getQueriesAndApisFromFileMayContainDupes(Map<Integer, Set<String>> queriesApis, String fileName) throws IOException {
-		if(queriesApis==null) {
-			queriesApis = new LinkedHashMap<>();
-		}
-		
-		// reading output from generated file
-		List<String> queriesAndApis = Files.readAllLines(Paths.get(fileName), Charsets.UTF_8);
-		if(limitQueries!=null) {
-			queriesAndApis = queriesAndApis.subList(0, 2*limitQueries);
-		}
-		Iterator<String> it = queriesAndApis.iterator();
-		int key = 1;
-		while(it.hasNext()) {
-			String query = "";
-			String queryApis = "";
-			if(it.hasNext()) {
-				query = it.next();
-				if(it.hasNext()) {
-					queryApis = it.next(); //APIs are in even lines
-				}
-			}
-			
-			queryApis = queryApis.replaceAll("\\s+"," ");
-			
-			List<String> rankedApis = Arrays.asList(queryApis.split(" ")).stream().map(String::trim).collect(Collectors.toList());
-			int k = numberOfAPIClasses;
-			if (rankedApis.size() < k) {
-				//logger.warn("The number of retrieved APIs for query is lower than the number of rack classes set as parameter. Ajusting the parameter to -->" + rankedApis.size() + " apis");
-				k = rankedApis.size();
-			}
-			
-			Set<String> rankedApisSet = new LinkedHashSet<String>(rankedApis);
-			CrokageUtils.setLimit(rankedApisSet, k);
-			queriesApis.put(key, rankedApisSet);
-			//System.out.println("discovered classes for query: "+query+ " ->  " + queriesApis.get(key));
-			key++;
-		}
-			
-	}
-
 
 	
 	protected List<UserEvaluation> loadExcelGroundTruthQuestionsAndLikerts() throws IOException {
@@ -960,37 +845,7 @@ public class AppAux {
 
 
 
-	public List<String> readInputQueries() throws Exception {
-		//long initTime = System.currentTimeMillis();
-		String fileName = "";
-		if(dataSet.equals("nlp2api")) {
-			fileName = INPUT_QUERIES_FILE_NLP2API;
-		
-		}else if(dataSet.equals("selectedqueries-training49")) {
-			fileName = INPUT_QUERIES_FILE_TRAINING;
-		
-		}else if(dataSet.equals("selectedqueries-user-study")) {
-			fileName = INPUT_QUERIES_FILE_USER_STUDY;
-		}
-		
-		
-		// read queries from file
-		File inputQueriesFile = new File(fileName);
-		if(!inputQueriesFile.exists()) { 
-		    //generateInputQueriesForCrokageDataSetFromExcelGroudTruth();
-			throw new Exception("Input queries file needed...");
-		}
-		
-		List<String> queries = FileUtils.readLines(inputQueriesFile, "utf-8");
-		if(limitQueries!=null) {
-			queries = queries.subList(0, limitQueries);
-		}
-		
-		return queries;
-
-	}
-
-
+	
 	
 	protected Map<Integer, Set<String>> getGoldSetByEvaluations(Map<Integer, Set<String>> goldSetMap, List<UserEvaluation> evaluationsWithBothUsersScales,String fileName) throws FileNotFoundException {
 		//long initTime = System.currentTimeMillis();
@@ -1390,41 +1245,7 @@ public class AppAux {
 
 
 
-	protected void checkConditions() throws Exception {
-		
-		//check queries sizes
-		checkQueries();
-		
-		checkFiles();
-		
-		
-	}
-
-
-	private void checkQueries() throws Exception {
-		queries = readInputQueries();
-		String processedQuery;
-		int minSize=10;
-		int maxSize=0;
-		
-		for(String query: queries) {
-			processedQuery = crokageUtils.processQuery(query);
-			String[] words = processedQuery.split("\\s+");
-			
-			int size = words.length;
-			if(size>maxSize) {
-				maxSize=size;
-			}
-			if(size<minSize) {
-				minSize=size;
-			}
-		}
-		
-		System.out.println("Min size: "+minSize+ " - Max size:"+maxSize);
-		
-		
-	}
-
+	
 
 	private void checkFiles() throws Exception {
 		
@@ -1471,48 +1292,60 @@ public class AppAux {
 
 	protected String loadBucketContent(Bucket bucket,Integer numberOfPostsInfoToMatch) {
 		StringBuffer stringBuffer = new StringBuffer();
-		if(numberOfPostsInfoToMatch==1) {
-			if(!StringUtils.isBlank(bucket.getParentProcessedTitle())) {
-				stringBuffer.append(bucket.getParentProcessedTitle());
-			}
-		}else if(numberOfPostsInfoToMatch==2) {
-			if(!StringUtils.isBlank(bucket.getParentProcessedTitle())) {
-				stringBuffer.append(bucket.getParentProcessedTitle());
-			}
-			if(!StringUtils.isBlank(bucket.getProcessedBody())) {
-				stringBuffer.append(" ");
-				stringBuffer.append(bucket.getProcessedBody());
-			}
-		}else if(numberOfPostsInfoToMatch==3) {
-			if(!StringUtils.isBlank(bucket.getParentProcessedTitle())) {
-				stringBuffer.append(bucket.getParentProcessedTitle());
-			}
-			if(!StringUtils.isBlank(bucket.getParentProcessedBody())) {
-				stringBuffer.append(" ");
-				stringBuffer.append(bucket.getParentProcessedBody());
-			}
-			if(!StringUtils.isBlank(bucket.getProcessedBody())) {
-				stringBuffer.append(" ");
-				stringBuffer.append(bucket.getProcessedBody());
-			}
+		
+		switch(numberOfPostsInfoToMatch) {
+		
+			case 1:
+				stringBuffer.append(bucket.getProcessedTitle());
+				break;
 			
-		}else if(numberOfPostsInfoToMatch==4) {
-			if(!StringUtils.isBlank(bucket.getParentProcessedTitle())) {
-				stringBuffer.append(bucket.getParentProcessedTitle());
-			}
-			if(!StringUtils.isBlank(bucket.getParentProcessedBody())) {
-				stringBuffer.append(" ");
-				stringBuffer.append(bucket.getParentProcessedBody());
-			}
-			if(!StringUtils.isBlank(bucket.getProcessedBody())) {
-				stringBuffer.append(" ");
-				stringBuffer.append(bucket.getProcessedBody());
-			}
-			if(!StringUtils.isBlank(bucket.getProcessedCode())) {
-				stringBuffer.append(" ");
-				stringBuffer.append(bucket.getProcessedCode());
-			}
-		}else if(numberOfPostsInfoToMatch==5) {
+			case 2:
+				if(!StringUtils.isBlank(bucket.getParentProcessedTitle())) {
+					stringBuffer.append(bucket.getParentProcessedTitle());
+				}
+				if(!StringUtils.isBlank(bucket.getProcessedBody())) {
+					stringBuffer.append(" ");
+					stringBuffer.append(bucket.getProcessedBody());
+				}
+				break;	
+			
+				
+			
+			case 3:
+				if(!StringUtils.isBlank(bucket.getParentProcessedTitle())) {
+					stringBuffer.append(bucket.getParentProcessedTitle());
+				}
+				if(!StringUtils.isBlank(bucket.getParentProcessedBody())) {
+					stringBuffer.append(" ");
+					stringBuffer.append(bucket.getParentProcessedBody());
+				}
+				if(!StringUtils.isBlank(bucket.getProcessedBody())) {
+					stringBuffer.append(" ");
+					stringBuffer.append(bucket.getProcessedBody());
+				}
+				break;
+				
+			
+			
+			case 4: 
+				if(!StringUtils.isBlank(bucket.getParentProcessedTitle())) {
+					stringBuffer.append(bucket.getParentProcessedTitle());
+				}
+				if(!StringUtils.isBlank(bucket.getParentProcessedBody())) {
+					stringBuffer.append(" ");
+					stringBuffer.append(bucket.getParentProcessedBody());
+				}
+				if(!StringUtils.isBlank(bucket.getProcessedBody())) {
+					stringBuffer.append(" ");
+					stringBuffer.append(bucket.getProcessedBody());
+				}
+				if(!StringUtils.isBlank(bucket.getProcessedCode())) {
+					stringBuffer.append(" ");
+					stringBuffer.append(bucket.getProcessedCode());
+				}
+				break;
+				
+			case 5:
 				if(!StringUtils.isBlank(bucket.getParentProcessedTitle())) {
 					stringBuffer.append(bucket.getParentProcessedTitle());
 				}
@@ -1532,49 +1365,57 @@ public class AppAux {
 					stringBuffer.append(" ");
 					stringBuffer.append(bucket.getParentProcessedCode());
 				}
-				
-		}else if(numberOfPostsInfoToMatch==6) {
-			if(!StringUtils.isBlank(bucket.getParentProcessedTitle())) {
-				stringBuffer.append(bucket.getParentProcessedTitle());
-			}
-			if(!StringUtils.isBlank(bucket.getParentProcessedBody())) {
-				stringBuffer.append(" ");
-				stringBuffer.append(bucket.getParentProcessedBody());
-			}
-			if(!StringUtils.isBlank(bucket.getProcessedBody())) {
-				stringBuffer.append(" ");
-				stringBuffer.append(bucket.getProcessedBody());
-			}
-			if(!StringUtils.isBlank(bucket.getParentProcessedCode())) {
-				stringBuffer.append(" ");
-				stringBuffer.append(bucket.getParentProcessedCode());
-			}
-		}else if(numberOfPostsInfoToMatch==6) {
-			if(!StringUtils.isBlank(bucket.getParentProcessedBody())) {
-				stringBuffer.append(bucket.getParentProcessedBody());
-			}
-		}else if(numberOfPostsInfoToMatch==7) {
-			if(!StringUtils.isBlank(bucket.getParentProcessedBody())) {
-				stringBuffer.append(bucket.getParentProcessedBody());
-			}
-			if(!StringUtils.isBlank(bucket.getParentProcessedCode())) {
-				stringBuffer.append(" ");
-				stringBuffer.append(bucket.getParentProcessedCode());
-			}
-		}else if(numberOfPostsInfoToMatch==8) {
-			if(!StringUtils.isBlank(bucket.getParentProcessedTitle())) {
-				stringBuffer.append(bucket.getParentProcessedTitle());
-			}
-			if(!StringUtils.isBlank(bucket.getProcessedBody())) {
-				stringBuffer.append(" ");
-				stringBuffer.append(bucket.getProcessedBody());
-			}
-			if(!StringUtils.isBlank(bucket.getProcessedCode())) {
-				stringBuffer.append(" ");
-				stringBuffer.append(bucket.getProcessedCode());
-			}
+				break;
 			
+			case 6:
+				if(!StringUtils.isBlank(bucket.getParentProcessedTitle())) {
+					stringBuffer.append(bucket.getParentProcessedTitle());
+				}
+				if(!StringUtils.isBlank(bucket.getParentProcessedBody())) {
+					stringBuffer.append(" ");
+					stringBuffer.append(bucket.getParentProcessedBody());
+				}
+				if(!StringUtils.isBlank(bucket.getProcessedBody())) {
+					stringBuffer.append(" ");
+					stringBuffer.append(bucket.getProcessedBody());
+				}
+				if(!StringUtils.isBlank(bucket.getParentProcessedCode())) {
+					stringBuffer.append(" ");
+					stringBuffer.append(bucket.getParentProcessedCode());
+				}
+				break;
+				
+			case 7:
+				if(!StringUtils.isBlank(bucket.getParentProcessedBody())) {
+					stringBuffer.append(bucket.getParentProcessedBody());
+				}
+				if(!StringUtils.isBlank(bucket.getParentProcessedCode())) {
+					stringBuffer.append(" ");
+					stringBuffer.append(bucket.getParentProcessedCode());
+				}
+				break;
+				
+			case 8: 
+				if(!StringUtils.isBlank(bucket.getParentProcessedTitle())) {
+					stringBuffer.append(bucket.getParentProcessedTitle());
+				}
+				if(!StringUtils.isBlank(bucket.getProcessedBody())) {
+					stringBuffer.append(" ");
+					stringBuffer.append(bucket.getProcessedBody());
+				}
+				if(!StringUtils.isBlank(bucket.getProcessedCode())) {
+					stringBuffer.append(" ");
+					stringBuffer.append(bucket.getProcessedCode());
+				}
+				break;
+			
+		
+				
+				
+			
+				
 		}
+		
 			
 	
 		return stringBuffer.toString();
@@ -1665,113 +1506,7 @@ public class AppAux {
 	
 
 
-	protected void extractAPIsFromNLP2Api() throws Exception {
-		
-		if(queries==null) {
-			queries = readInputQueries();
-		}
-		
-		if(queries==null) {
-			queries = readInputQueries();
-		}
-		
-		String outputPath=CROKAGE_HOME_DATE_FOLDER;
-		
-		if(dataSet.equals("nlp2api")) { //API extractors
-			outputPath+="nlp2ApiDataSetNlp2ApiOutput.txt";
-			
-		}else { 
-			outputPath+=dataSet+"-"+NLP2API_OUTPUT_QUERIES_FILE;
-		}
-		
-		
-		getQueriesAndApisFromFileMayContainDupes(nlp2ApiQueriesApisMap,outputPath);
-		
-		
-	}
-	
-	protected void extractAPIsFromRACK() throws Exception {
-		if(queries==null) {
-			queries = readInputQueries();
-		}
-		
-		String outputPath=CROKAGE_HOME_DATE_FOLDER;
-		
-		if(dataSet.equals("nlp2api")) { //API extractors
-			outputPath+="nlp2ApiDataSetRackOutput.txt";
-			
-		}else { 
-			outputPath+=dataSet+"-"+RACK_OUTPUT_QUERIES_FILE;
-		}
-				
-		getQueriesAndApisFromFileMayContainDupes(rackQueriesApisMap,outputPath);
-	
-		
-	}
-	
-	protected void extractAPIsFromBIKER() throws Exception {
-		// BIKER
-		if(queries==null) {
-			queries = readInputQueries();
-		}
-		
-		String outputPath=CROKAGE_HOME_DATE_FOLDER;
-		if(dataSet.equals("selectedqueries-user-study")) {
-			outputPath+="crokageDataSetBikerOutputTest.txt";
-		}else if(dataSet.equals("selectedqueries-training49")) {
-			outputPath+="crokageDataSetBikerOutputTraining.txt";
-		
-		}else { //nlp2api dataset = API extractors
-			outputPath+="nlp2ApiDataSetBikerOutput.txt";
-		}
-		
-			
-		
-		int key = 1;
-		// reading output from BIKER
-		List<String> queriesWithApis = Files.readAllLines(Paths.get(outputPath), Charsets.UTF_8);
-		if(limitQueries!=null) {
-			queriesWithApis = queriesWithApis.subList(0, limitQueries);
-		}
-		for(String generatedLine: queriesWithApis) {
-			String parts[] = generatedLine.split("=  ");
-			List<String> rankedApis = Arrays.asList(parts[1].split("### ")).stream().map(String::trim).collect(Collectors.toList());
-			rankedApis.remove("");
-			
-			int k = numberOfAPIClasses;
-			if (rankedApis.size() < k) {
-				k = rankedApis.size();
-			}
-			
-			Set<String> rankedApisSetWithMethods = new LinkedHashSet<String>(rankedApis);
-			bikerQueriesApisClassesAndMethodsMap.put(key, rankedApisSetWithMethods);
-			
-			Set<String> rankedApisSetClassesOnly = new LinkedHashSet<String>();
-			for(String api: rankedApisSetWithMethods) {
-				rankedApisSetClassesOnly.add(api.split("\\.")[0]);
-			}
-			
-			CrokageUtils.setLimit(rankedApisSetClassesOnly,k);
-			bikerQueriesApisClassesMap.put(key, rankedApisSetClassesOnly);
-		
-			key++;
-		}
-		
-	
-		
-	}
 
-
-
-	protected void generateGroundTruthThreads() throws Exception {
-		//load input queries considering dataset
-		queries = readInputQueries();
-		//load ground truth answers
-		loadGroundTruthSelectedQueries();
-		//load ground truth threads
-		getGroundTruthSelectedQueriesQuestionsIdsMap();
-		
-	}
 
 
 
