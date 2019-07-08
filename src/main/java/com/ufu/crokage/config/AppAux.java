@@ -160,8 +160,6 @@ public class AppAux {
 	@Value("${semWeight}")
 	public Double semWeight;
 	
-	@Value("${apiWeight}")
-	public Double apiWeight;
 	
 	@Value("${methodWeight}")
 	public Double methodWeight;

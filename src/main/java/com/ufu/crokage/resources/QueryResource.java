@@ -106,10 +106,10 @@ public class QueryResource extends AppAux{
 		List<Post> posts = new ArrayList<>();
 		
 		try{
-			String logMessage = "...at: "+dtf.format(now)+" - query: "+query.getQuery()+ " - num ans:"+query.getNumberOfComposedAnswers();
+			String logMessage = "...at: "+dtf.format(now)+" - query: "+query.getQueryText()+ " - num ans:"+query.getNumberOfComposedAnswers();
 			System.out.println(logMessage);
 			
-			if(query==null || StringUtils.isBlank(query.getQuery())) {
+			if(query==null || StringUtils.isBlank(query.getQueryText())) {
 				errorMessage="Query is null";
 			}else {
 				posts = crokageApp.extractAnswers(query);

@@ -22,7 +22,8 @@ public class Query {
     @GeneratedValue(strategy=GenerationType.SEQUENCE, generator="query_id_seq")
 	private Integer id;
 	
-	private String query;
+	@Column(name="querytext")
+	private String queryText;
 	
 	@Column(name="numberofcomposedanswers")
 	private Integer numberOfComposedAnswers;
@@ -41,12 +42,14 @@ public class Query {
 		this.id = id;
 	}
 
-	public String getQuery() {
-		return query;
+	
+
+	public String getQueryText() {
+		return queryText;
 	}
 
-	public void setQuery(String queryText) {
-		this.query = queryText;
+	public void setQueryText(String queryText) {
+		this.queryText = queryText;
 	}
 
 	public Integer getNumberOfComposedAnswers() {
@@ -71,7 +74,7 @@ public class Query {
 
 	@Override
 	public String toString() {
-		return "Query [id=" + id + ", query=" + query + ", numberOfComposedAnswers=" + numberOfComposedAnswers
+		return "Query [id=" + id + ", query=" + queryText + ", numberOfComposedAnswers=" + numberOfComposedAnswers
 				+ ", ipAddress=" + ipAddress + ", date=" + date + "]";
 	}
 
