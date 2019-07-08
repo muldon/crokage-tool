@@ -20,6 +20,7 @@ import com.ufu.crokage.repository.PostsRepository;
 import com.ufu.crokage.repository.QueryRepository;
 import com.ufu.crokage.repository.RankRepository;
 import com.ufu.crokage.repository.RelatedPostRepository;
+import com.ufu.crokage.repository.ResultEvaluationRepository;
 import com.ufu.crokage.repository.ResultRepository;
 import com.ufu.crokage.repository.UsersRepository;
 import com.ufu.crokage.to.Comment;
@@ -66,6 +67,9 @@ public abstract class AbstractService {
 	
 	@Autowired
 	protected QueryRepository queryRepository;
+	
+	@Autowired
+	protected ResultEvaluationRepository resultEvaluationRepository;
 	
 	
 	

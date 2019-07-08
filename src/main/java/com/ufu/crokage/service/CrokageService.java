@@ -1,11 +1,9 @@
 package com.ufu.crokage.service;
 
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import org.hibernate.hql.internal.QuerySplitter;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,6 +11,7 @@ import com.ufu.crokage.to.Bucket;
 import com.ufu.crokage.to.MetricResult;
 import com.ufu.crokage.to.Post;
 import com.ufu.crokage.to.Query;
+import com.ufu.crokage.to.ResultEvaluation;
 import com.ufu.crokage.util.AbstractService;
 import com.ufu.crokage.util.BotComposer;
 
@@ -130,7 +129,15 @@ public class CrokageService extends AbstractService{
 	}
 
 	
+	public void saveResultEvaluation(ResultEvaluation resultEvaluation) {
+		resultEvaluation.setDate(getCurrentDate());
+		resultEvaluationRepository.save(resultEvaluation);		
+	}
 
+	@Transactional(readOnly = true)
+	public Query findQueryById(int id) {
+		return queryRepository.findOne(id);
+	}
 	
 	
 	
