@@ -118,7 +118,7 @@ public class CrokageApp extends AppAux{
 		
 		CrokageUtils.setLimitV2(recommendedResults, topk);
 		
-		ArrayList<Post> sortedBuckets =  processAnswers(recommendedResults,query.getQueryText());
+		ArrayList<Post> sortedBuckets =  processAnswers(recommendedResults,query);
 		
 		crokageService.saveQuery(query);
 		//String composition = CrokageUtils.composeAnswers(query.getQueryText(),sortedBuckets,numberOfComposedAnswers);
@@ -127,9 +127,21 @@ public class CrokageApp extends AppAux{
 	}
 
 	
-	private ArrayList<Post> processAnswers(Set<Integer> answersIds, String query) {
-		Iterator<Integer> it = answersIds.iterator();
+	private ArrayList<Post> processAnswers(Set<Integer> answersIds, Query query) {
 		ArrayList<Post> posts = new ArrayList<>();
+		
+		if(query.getReduceSentences()==null || !query.getReduceSentences()) {
+			for(Integer id:answersIds) {
+				posts.add(crokageService.findPostById(id));
+				if(posts.size()==numberOfComposedAnswers) {
+					break;
+				}
+			}
+			return posts;
+		}
+		
+		Iterator<Integer> it = answersIds.iterator();
+		
 		boolean stop=false;
 		
 		for(int i=0; i<answersIds.size(); i++) {
@@ -139,7 +151,7 @@ public class CrokageApp extends AppAux{
 			
 			if(it.hasNext()) {
 				Post post = crokageService.findPostById(it.next());
-				boolean isRelevant = crokageUtils.processSentences(post,query);
+				boolean isRelevant = crokageUtils.processSentences(post,query.getQueryText());
 				if(!isRelevant) {
 					stop = false;
 					i--;
