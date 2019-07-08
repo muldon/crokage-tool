@@ -9,6 +9,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
@@ -32,6 +33,10 @@ public class Query {
 	private String ipAddress;
 	
 	private Timestamp date;
+	
+	
+	@Transient
+	private Boolean reduceSentences;
 	
 
 	public Integer getId() {
@@ -84,6 +89,14 @@ public class Query {
 
 	public void setDate(Timestamp date) {
 		this.date = date;
+	}
+
+	public Boolean getReduceSentences() {
+		return reduceSentences;
+	}
+
+	public void setReduceSentences(Boolean reduceSentences) {
+		this.reduceSentences = reduceSentences;
 	}
 	
 

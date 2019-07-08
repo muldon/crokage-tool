@@ -35,9 +35,10 @@ public class JerseyConfig extends ResourceConfig {
 		packages("com.ufu.crokage.resources");
 		packages("com.ufu.crokage.util");*/
 		
-        register(AppAux.class);
-        register(SimpleCORSFilter.class);
-        register(MyServiceWebAppInitializer.class);
+		/*
+		 * register(AppAux.class); register(SimpleCORSFilter.class);
+		 * register(MyServiceWebAppInitializer.class);
+		 */
         
         register(QueryResource.class);
         //register(QueryResource.class);
