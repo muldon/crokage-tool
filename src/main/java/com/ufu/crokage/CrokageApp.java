@@ -64,7 +64,7 @@ public class CrokageApp extends AppAux{
 		
 		loadUpvotedAnswersIdsWithCodeContentsAndParentContents();
 		luceneSearcherBM25.buildSearchManager(allBucketsWithUpvotesMap,searcherParams);
-		allThreadsIdsContentsMap=null;
+		
 		
 		//load all word vectors only once
 		readSoContentWordVectorsForAllWords();
@@ -78,11 +78,6 @@ public class CrokageApp extends AppAux{
 		//read idf vocabulary map (word, idf)
 		crokageUtils.readIDFVocabulary(soIDFVocabularyMap);
 		
-		resetAPIExtractors();
-		
-		//loadThreadsForUpvotedAnswersWithCodeIdsTitlesMap();
-		loadUpvotedPostsWithCodeApisMap();
-				
 		CrokageUtils.reportElapsedTime(initTime1,"loading models");
 
 		

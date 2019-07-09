@@ -234,6 +234,11 @@ public class AppAux {
 	protected Set<Bucket> candidateBuckets;
 	protected Map<Integer,Bucket> allBucketsWithUpvotesMap;
 	
+	
+
+
+
+
 	protected void initializeVariables() {
 		subAction = subAction !=null ? subAction.toLowerCase().trim(): null;
 		dataSet = dataSet !=null ? dataSet.toLowerCase().trim(): null;
@@ -522,31 +527,31 @@ public class AppAux {
 		
 	}
 	
-	protected Set<Integer> getAllThreadsForAnswersWithUpvotesAndCodeBucketsMap() {
+	/*protected Set<Integer> getAllThreadsForAnswersWithUpvotesAndCodeBucketsMap() {
 		Set<Integer> keys = allAnswersWithUpvotesAndCodeBucketsMap.keySet();
 		Set<Integer> threadsIds = new HashSet<>();
 		for(Integer key: keys) {
 			threadsIds.add(allAnswersWithUpvotesAndCodeBucketsMap.get(key).getParentId());
 		}
 		return threadsIds;	
-	}
+	}*/
 
 
 	
-	protected void loadThreadsForUpvotedAnswersWithCodeIdsTitlesMap() {
+	/*protected void loadThreadsForUpvotedAnswersWithCodeIdsTitlesMap() {
 		threadsForUpvotedAnswersWithCodeIdsTitlesMap = crokageService.getThreadsIdsTitlesForUpvotedAnswersWithCode();
 		
-	}
+	}*/
 
 
-	protected void loadUpvotedPostsWithCodeApisMap() throws Exception {
+	/*protected void loadUpvotedPostsWithCodeApisMap() throws Exception {
 		long initTime = System.currentTimeMillis();
 		upvotedPostsIdsWithCodeApisMap.putAll(CrokageUtils.readPostsIdsApisMap(SO_UPVOTED_POSTS_WITH_CODE_APIS_FILE));
 		crokageUtils.reportElapsedTime(initTime,"loadUpvotedPostsWithCodeApisMap");
 	}
+	*/
 	
-	
-
+/*
 	protected void calculateApiScore(AnswerParentPair answerParentPair, Set<String> topClasses) {
 		Set<String> allApis = new HashSet<>();
 		ArrayList<String> topClassesArray = new ArrayList<>(topClasses);
@@ -576,7 +581,7 @@ public class AppAux {
 		answerParentPair.setApiScore(score);
 		topClassesArray= null;
 		allApis=null;
-	}
+	}*/
 
 
 	
@@ -1252,6 +1257,15 @@ public class AppAux {
 	}
 
 
-	
+	public Map<Integer, Bucket> getAllBucketsWithUpvotesMap() {
+		return allBucketsWithUpvotesMap;
+	}
+
+
+
+
+	public void setAllBucketsWithUpvotesMap(Map<Integer, Bucket> allBucketsWithUpvotesMap) {
+		this.allBucketsWithUpvotesMap = allBucketsWithUpvotesMap;
+	}
 	
 }

@@ -116,7 +116,7 @@ public class QueryResource extends AppAux{
 			}else {
 				posts = crokageApp.extractAnswers(query);
 				crokageService.saveQuery(query);
-				CrokageUtils.extractTags(posts,tags,allBucketsWithUpvotesMap);
+				CrokageUtils.extractTags(posts,tags,crokageApp.getAllBucketsWithUpvotesMap());
 				infoMessage = "Answers returned: "+posts.size();
 			}
 		
