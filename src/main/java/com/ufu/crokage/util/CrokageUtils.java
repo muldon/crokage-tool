@@ -66,6 +66,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.base.Charsets;
 import com.google.common.io.Resources;
 import com.ufu.crokage.repository.GenericRepository;
+import com.ufu.crokage.to.Bucket;
 import com.ufu.crokage.to.ExternalQuestion;
 import com.ufu.crokage.to.Post;
 import com.ufu.crokage.to.UserEvaluation;
@@ -2165,10 +2166,10 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 		return body.trim();
 	}
 
-	public static void extractTags(List<Post> posts, Set<String> tags) {
+	public static void extractTags(List<Post> posts, Set<String> tags, Map<Integer, Bucket> allBucketsWithUpvotesMap) {
 		String tagGroup = "";
 		for(Post post:posts) {
-			tagGroup = post.getTags().replaceAll("<", " ").replaceAll(">", " ");
+			tagGroup = allBucketsWithUpvotesMap.get(post.getId()).getTags().replaceAll("<", " ").replaceAll(">", " ");
 			tags.addAll(Arrays.asList(StringUtils.split(tagGroup)));
 		}
 		

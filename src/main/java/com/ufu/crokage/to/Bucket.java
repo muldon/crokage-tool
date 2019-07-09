@@ -96,6 +96,8 @@ public class Bucket {
 	
 	protected Integer tagId;
 	
+	protected String tags;
+	
 	protected Set<String> methods;
 	
 	public Integer getId() {
@@ -532,6 +534,15 @@ public class Bucket {
 	
 		
 	
+	}
+
+
+	public String getTags() {
+		return tags;
+	}
+
+	public void setTags(String tags) {
+		this.tags = tags;
 	}
 
 

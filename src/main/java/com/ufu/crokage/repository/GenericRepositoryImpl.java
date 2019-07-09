@@ -491,7 +491,7 @@ public class GenericRepositoryImpl implements GenericRepository {
 	@Override
 	public List<Bucket> getUpvotedAnswersIdsContentsAndParentContents() {
 		System.out.println("getUpvotedAnswersIdsContentsAndParentContents ...");
-		String sql = " select po.id,parent.processedtitle,parent.processedbody as parentBody,parent.processedcode as parentCode,po.processedbody,po.processedcode,po.code,parent.id as parentId, parent.acceptedanswerid as acceptedanswerid "
+		String sql = " select po.id,parent.processedtitle,parent.processedbody as parentBody,parent.processedcode as parentCode,po.processedbody,po.processedcode,po.code,parent.id as parentId, parent.acceptedanswerid as acceptedanswerid, parent.tags "
 				+ " from postsmin po, postsmin parent"
 				+ " where po.posttypeid=2"
 				+ " and po.parentid = parent.id"  
@@ -515,6 +515,7 @@ public class GenericRepositoryImpl implements GenericRepository {
 			bucket.setCode((String) row[6]);
 			bucket.setParentId((Integer) row[7]);
 			bucket.setAcceptedAnswerId((Integer) row[8]);
+			bucket.setTags((String) row[9]); //parent tags
 			result.add(bucket);			
 		}
 		
