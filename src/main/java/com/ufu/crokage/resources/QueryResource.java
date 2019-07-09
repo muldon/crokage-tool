@@ -108,7 +108,7 @@ public class QueryResource extends AppAux{
 		Set<String> tags = new LinkedHashSet<>();
 		
 		try{
-			String logMessage = "...at: "+dtf.format(now)+" - query: "+query.getQueryText()+ " - num ans:"+query.getNumberOfComposedAnswers()+ " - reduce sentences: "+query.getReduceSentences();
+			String logMessage = "...at: "+dtf.format(now)+" - query: "+query.getQueryText()+ " - num ans:"+query.getNumberOfComposedAnswers()+ " - reduce sentences: "+query.getReduceSentences()+ " - ip:"+query.getIpAddress();
 			System.out.println(logMessage);
 					
 			if(query==null || StringUtils.isBlank(query.getQueryText())) {
