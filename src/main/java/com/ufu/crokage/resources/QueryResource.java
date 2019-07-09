@@ -3,13 +3,13 @@ package com.ufu.crokage.resources;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.ws.rs.Consumes;
-import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
@@ -101,10 +101,11 @@ public class QueryResource extends AppAux{
 	@POST	
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public PostRestTransfer save(Query query) {
+	public PostRestTransfer getsolutions(Query query) {
 		String errorMessage = null;
 		String infoMessage = null;
 		List<Post> posts = new ArrayList<>();
+		Set<String> tags = new LinkedHashSet<>();
 		
 		try{
 			String logMessage = "...at: "+dtf.format(now)+" - query: "+query.getQueryText()+ " - num ans:"+query.getNumberOfComposedAnswers()+ " - reduce sentences: "+query.getReduceSentences();
@@ -115,6 +116,7 @@ public class QueryResource extends AppAux{
 			}else {
 				posts = crokageApp.extractAnswers(query);
 				crokageService.saveQuery(query);
+				CrokageUtils.extractTags(posts,tags);
 				infoMessage = "Answers returned: "+posts.size();
 			}
 		
@@ -127,7 +129,7 @@ public class QueryResource extends AppAux{
 		//System.out.println("finished !");
 		//CrokageUtils.reportElapsedTime(initTime1,"getsolutions");
 		
-		return new PostRestTransfer(posts, null,query.getId() ,infoMessage,errorMessage);
+		return new PostRestTransfer(posts, null,tags,query.getId(),infoMessage,errorMessage);
 	}
 	
 	@Path("/saveRating")

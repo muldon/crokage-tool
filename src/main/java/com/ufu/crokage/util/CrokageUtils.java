@@ -2165,4 +2165,13 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 		return body.trim();
 	}
 
+	public static void extractTags(List<Post> posts, Set<String> tags) {
+		String tagGroup = "";
+		for(Post post:posts) {
+			tagGroup = post.getTags().replaceAll("<", " ").replaceAll(">", " ");
+			tags.addAll(Arrays.asList(StringUtils.split(tagGroup)));
+		}
+		
+	}
+
 }

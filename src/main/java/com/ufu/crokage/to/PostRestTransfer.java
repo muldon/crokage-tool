@@ -1,19 +1,22 @@
 package com.ufu.crokage.to;
 
 import java.util.List;
+import java.util.Set;
 
 public class PostRestTransfer extends GenericRestTransfer{
 	public List<Post> posts;
+	public Set<String> tags;
 	public Integer queryId;
 	
 
-	public PostRestTransfer(List posts, String descricao, Integer queryId, String infoMessage, String errorMessage)
+	public PostRestTransfer(List posts, String descricao,Set<String> tags, Integer queryId, String infoMessage, String errorMessage)
 	{
 		this.posts = posts;
 		this.errorMessage = errorMessage;
 		this.infoMessage = infoMessage;
 		this.descricao = descricao;
 		this.queryId = queryId;
+		this.tags= tags;
 		
 	}
 	
