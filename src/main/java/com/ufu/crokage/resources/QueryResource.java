@@ -142,6 +142,7 @@ public class QueryResource extends AppAux{
 		try{
 			String logMessage = "...saving evaluation: "+resultEvaluation;
 			System.out.println(logMessage);
+			crokageService.saveResultEvaluation(resultEvaluation);
 			infoMessage = "Thanks for evaluating...";
 		
 		}catch(Exception e){
