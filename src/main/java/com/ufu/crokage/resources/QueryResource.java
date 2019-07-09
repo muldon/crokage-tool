@@ -134,10 +134,9 @@ public class QueryResource extends AppAux{
 	@POST	
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public PostRestTransfer saveRating(ResultEvaluation resultEvaluation) {
+	public GenericRestTransfer saveRating(ResultEvaluation resultEvaluation) {
 		String errorMessage = null;
 		String infoMessage = null;
-		List<Post> posts = new ArrayList<>();
 		
 		try{
 			String logMessage = "...saving evaluation: "+resultEvaluation;
@@ -153,7 +152,7 @@ public class QueryResource extends AppAux{
 		//System.out.println("finished !");
 		//CrokageUtils.reportElapsedTime(initTime1,"getsolutions");
 		
-		return new PostRestTransfer(posts, null,null ,infoMessage,errorMessage);
+		return new GenericRestTransfer(resultEvaluation.getId(),null ,infoMessage,errorMessage);
 	}
 	
 	
