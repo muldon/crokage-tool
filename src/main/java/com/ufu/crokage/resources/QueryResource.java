@@ -25,6 +25,7 @@ import com.ufu.crokage.to.GenericRestTransfer;
 import com.ufu.crokage.to.Post;
 import com.ufu.crokage.to.PostRestTransfer;
 import com.ufu.crokage.to.Query;
+import com.ufu.crokage.to.ResultEvaluation;
 import com.ufu.crokage.util.CrokageUtils;
 
 
@@ -113,6 +114,7 @@ public class QueryResource extends AppAux{
 				errorMessage="Query is null";
 			}else {
 				posts = crokageApp.extractAnswers(query);
+				crokageService.saveQuery(query);
 				infoMessage = "Answers returned: "+posts.size();
 			}
 		
@@ -125,7 +127,32 @@ public class QueryResource extends AppAux{
 		//System.out.println("finished !");
 		//CrokageUtils.reportElapsedTime(initTime1,"getsolutions");
 		
-		return new PostRestTransfer(posts, null, infoMessage,errorMessage);
+		return new PostRestTransfer(posts, null,query.getId() ,infoMessage,errorMessage);
+	}
+	
+	@Path("/saveRating")
+	@POST	
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public PostRestTransfer saveRating(ResultEvaluation resultEvaluation) {
+		String errorMessage = null;
+		String infoMessage = null;
+		List<Post> posts = new ArrayList<>();
+		
+		try{
+			String logMessage = "...saving evaluation: "+resultEvaluation;
+			System.out.println(logMessage);
+			infoMessage = "Thanks for evaluating...";
+		
+		}catch(Exception e){
+			errorMessage = "Error ... sorry... this error has been reported to the developer (estudantecomp@gmail.com).";
+			logger.error(errorMessage+e);
+			
+		}
+		//System.out.println("finished !");
+		//CrokageUtils.reportElapsedTime(initTime1,"getsolutions");
+		
+		return new PostRestTransfer(posts, null,null ,infoMessage,errorMessage);
 	}
 	
 	

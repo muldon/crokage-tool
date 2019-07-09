@@ -4,14 +4,16 @@ import java.util.List;
 
 public class PostRestTransfer extends GenericRestTransfer{
 	public List<Post> posts;
+	public Integer queryId;
 	
 
-	public PostRestTransfer(List posts, String descricao, String infoMessage, String errorMessage)
+	public PostRestTransfer(List posts, String descricao, Integer queryId, String infoMessage, String errorMessage)
 	{
 		this.posts = posts;
 		this.errorMessage = errorMessage;
 		this.infoMessage = infoMessage;
 		this.descricao = descricao;
+		this.queryId = queryId;
 		
 	}
 	
@@ -49,6 +51,15 @@ public class PostRestTransfer extends GenericRestTransfer{
 	public void setPosts(List<Post> posts) {
 		this.posts = posts;
 	}
+
+	public Integer getQueryId() {
+		return queryId;
+	}
+
+	public void setQueryId(Integer queryId) {
+		this.queryId = queryId;
+	}
+	
 	
 	
 

@@ -120,7 +120,6 @@ public class CrokageApp extends AppAux{
 		
 		ArrayList<Post> sortedBuckets =  processAnswers(recommendedResults,query);
 		
-		crokageService.saveQuery(query);
 		//String composition = CrokageUtils.composeAnswers(query.getQueryText(),sortedBuckets,numberOfComposedAnswers);
 		
 		return sortedBuckets;
