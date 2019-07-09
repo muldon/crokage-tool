@@ -85,10 +85,12 @@ public class ResultEvaluation {
 
 	
 
+	
+
 	@Override
 	public String toString() {
-		return "ResultEvaluation [id=" + id + ", query=" + query + ", postsIds=" + postsIds + ", likertValue="
-				+ likertValue + ", date=" + date + "]";
+		return "ResultEvaluation [id=" + id + ", queryId=" + queryId + ", postsIds=" + postsIds + ", likertValue="
+				+ likertValue + ", date=" + date + ", query=" + query + "]";
 	}
 
 	public Timestamp getDate() {
