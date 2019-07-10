@@ -118,6 +118,9 @@ public class Post{
 	
 	@Transient
 	private Integer relationTypeId;
+	
+	@Transient
+	private List<String> tagsList;
 		
 
 	public Post() {
@@ -454,6 +457,14 @@ public class Post{
 
 	public void setParent(Post parent) {
 		this.parent = parent;
+	}
+
+	public List<String> getTagsList() {
+		return tagsList;
+	}
+
+	public void setTagsList(List<String> tagsList) {
+		this.tagsList = tagsList;
 	}
 
 	

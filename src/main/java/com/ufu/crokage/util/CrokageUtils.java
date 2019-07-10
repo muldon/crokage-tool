@@ -2170,7 +2170,7 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 		String tagGroup = "";
 		for(Post post:posts) {
 			tagGroup = allBucketsWithUpvotesMap.get(post.getId()).getTags().replaceAll("<", " ").replaceAll(">", " ");
-			tags.addAll(Arrays.asList(StringUtils.split(tagGroup)));
+			post.setTagsList(Arrays.asList(StringUtils.split(tagGroup)));
 		}
 		
 	}
