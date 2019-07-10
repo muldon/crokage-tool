@@ -1780,14 +1780,15 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 			String word = queryTokens[i];
 			//double[] vectors = wordVectorsMap.get(word).stream().mapToDouble(Double::doubleValue).toArray();
 			double[] vectors = wordVectorsMap.get(word);
-			if(vectors.length!=modelVecSize) {
-				System.out.println(" word with different size... "+word);
-			}
-			
 			if(vectors==null) {
 				//System.out.println(" word not found... "+word);
 				vectors = new double[modelVecSize];
+			} else if(vectors.length!=modelVecSize) {
+				System.out.println(" word with different size... "+word);
+				throw new RuntimeException();
 			}
+			
+			
 			matrix[i] = vectors;
 		}
 			
