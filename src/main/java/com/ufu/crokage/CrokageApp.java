@@ -45,7 +45,7 @@ public class CrokageApp extends AppAux{
 	protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 	
 	
-	@PostConstruct
+	//@PostConstruct
 	public void init() throws Exception {
 		long initTime = System.currentTimeMillis();
 		System.out.println("Initializing CrokageApp app...");
