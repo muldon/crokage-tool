@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.ufu.crokage.CrokageApp;
 import com.ufu.crokage.config.AppAux;
+import com.ufu.crokage.exception.CrokageException;
 import com.ufu.crokage.to.GenericRestTransfer;
 import com.ufu.crokage.to.Post;
 import com.ufu.crokage.to.PostRestTransfer;
@@ -121,6 +122,10 @@ public class QueryResource extends AppAux{
 			}
 		
 		
+		}catch(CrokageException c){
+			errorMessage = c.getMessage();
+			logger.error(errorMessage);
+			
 		}catch(Exception e){
 			errorMessage = "Error ... sorry... this error has been reported to the developer (estudantecomp@gmail.com).";
 			logger.error(errorMessage+e);

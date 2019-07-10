@@ -25,10 +25,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.ufu.crokage.config.AppAux;
+import com.ufu.crokage.exception.CrokageException;
 import com.ufu.crokage.tfidf.Corpus;
 import com.ufu.crokage.tfidf.Document;
 import com.ufu.crokage.tfidf.VectorSpaceModel;
-import com.ufu.crokage.to.AnswerParentPair;
 import com.ufu.crokage.to.Bucket;
 import com.ufu.crokage.to.Post;
 import com.ufu.crokage.to.Query;
@@ -197,7 +197,9 @@ public class CrokageApp extends AppAux{
 		
 		processedQuery = crokageUtils.processQuery(rawQuery);
 		//System.out.println("Processed query: "+processedQuery);
-		
+		if(StringUtils.isBlank(processedQuery)){
+			throw new CrokageException("Query:" + rawQuery+ " poorly formulated, please reformulate it and try again.");
+		}
 		
 		//default is using classes
 		BotComposer.setSemWeight(semWeight);
