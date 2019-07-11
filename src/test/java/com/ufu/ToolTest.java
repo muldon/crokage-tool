@@ -34,6 +34,7 @@ public class ToolTest {
 
 		try {
 
+			for(int i=0; i<100; i++) {
 			Client client = Client.create();
 
 			WebResource webResource = client.resource("http://isel.ufu.br:8080/crokage/query/getsolutions");
@@ -50,6 +51,7 @@ public class ToolTest {
 			System.out.println("Output from Server .... \n");
 			String output = response.getEntity(String.class);
 			System.out.println(output);
+			}
 
 		  } catch (Exception e) {
 
