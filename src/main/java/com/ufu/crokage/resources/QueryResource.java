@@ -42,12 +42,12 @@ public class QueryResource extends AppAux{
 	public CrokageApp crokageApp;
 	
 	private DateTimeFormatter dtf;
-	LocalDateTime now;
+	
 	
 	
 	{
 		dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
-		now = LocalDateTime.now();
+		
 	}
 	
 	/*@GET
@@ -107,6 +107,8 @@ public class QueryResource extends AppAux{
 		String infoMessage = null;
 		List<Post> posts = new ArrayList<>();
 		Set<String> tags = new LinkedHashSet<>();
+		LocalDateTime now = LocalDateTime.now();
+		
 		
 		try{
 			String logMessage = "...at: "+dtf.format(now)+" - query: "+query.getQueryText()+ " - num ans:"+query.getNumberOfComposedAnswers()+ " - reduce sentences: "+query.getReduceSentences()+ " - ip:"+query.getIpAddress();
