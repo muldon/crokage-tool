@@ -1,0 +1,467 @@
+"id","querytext","ipaddress","date","numberofcomposedanswers","likertvalue"
+5967,how do i generate a cryptographic checksum,"88.130.183.68",2019-08-19 09:43:34,5,3
+5964,Map Array to DB,,2019-08-19 09:43:05,5,5
+5960,how do i read a file line by line,"88.130.183.68",2019-08-19 09:42:49,5,3
+5954,how do i declare a rest request handler,"88.130.183.68",2019-08-19 09:42:03,5,1
+5936,How to create an thread?,"80.153.70.66",2019-08-19 09:40:24,5,5
+5907,How to sort a list,"157.119.108.26",2019-08-19 09:36:00,5,3
+5875,what means generic,"91.224.226.197",2019-08-19 09:29:44,5,4
+5869,create a random number,"91.224.226.197",2019-08-19 09:29:03,5,4
+5864,how to populate listview swift ios,"37.49.65.67",2019-08-19 09:28:42,5,1
+5857,Hide MessageInputBar swift messagekit,"37.49.65.67",2019-08-19 09:28:04,5,1
+5840,how to get number of element in a list,"91.224.226.197",2019-08-19 09:27:11,5,1
+5830,How to download a file on selenium,"43.247.159.4",2019-08-19 09:25:53,5,5
+5818,How rename files in a folder,"43.247.159.4",2019-08-19 09:24:24,5,5
+5816,how do iterate and filter to a stream,"195.114.23.34",2019-08-19 09:24:03,5,5
+5787,cast char to int,,2019-08-19 09:20:32,5,1
+5769,get Text from a file,,2019-08-19 09:18:32,5,2
+5726,How to download a webseite,,2019-08-19 09:11:32,10,2
+5724,how to declare a singleton,"141.32.28.12",2019-08-19 09:11:14,10,1
+5714,what is a lambda expression?,,2019-08-19 09:09:55,5,2
+5694,how to clone an object,,2019-08-19 09:08:45,5,3
+5687,how to sort a list,,2019-08-19 09:08:19,5,5
+5672,how to traverse a stream recursive,,2019-08-19 09:05:56,5,2
+5666,Add SSL to Java RMI,,2019-08-19 09:05:08,5,5
+5599,Create a socket,"213.68.42.195",2019-08-19 08:55:44,5,2
+5518,How to unitest in java,"10.48.9.164",2019-08-19 08:46:51,5,2
+5518,How to unitest in java,"10.48.9.164",2019-08-19 08:46:51,5,3
+5396,how to convert string to int in python,,2019-08-19 08:34:03,5,5
+5383,How to remove a key from object in javascript,,2019-08-19 08:32:48,5,1
+5381,odbc connection to mysql,"89.22.110.189",2019-08-19 08:32:43,5,4
+5373,how increment a variable,"89.22.110.189",2019-08-19 08:32:09,5,4
+5353,How to read an entire file into a string,"98.115.216.3",2019-08-19 08:30:39,5,5
+5352,javax json jsonarray add json object,"197.250.226.62",2019-08-19 08:30:36,5,5
+5352,javax json jsonarray add json object,"197.250.226.62",2019-08-19 08:30:36,5,5
+5348,how can i give my program arguments,"92.196.56.255",2019-08-19 08:30:14,5,3
+5320,parse html with regex,,2019-08-19 08:26:50,5,5
+5281,how to prevent two threads from modifying the same variable at the sam,"92.196.56.255",2019-08-19 08:23:46,5,1
+5252,How to basic?,"176.95.196.18",2019-08-19 08:21:03,5,1
+5199,Delete last character from string,"185.39.104.68",2019-08-19 08:17:10,5,5
+5163,print hello world,,2019-08-19 08:13:59,5,2
+5152,How to implement a method?,,2019-08-19 08:11:56,10,4
+5151,Writing a text file,"80.147.3.94",2019-08-19 08:11:56,5,5
+5146,How to sort a list?,"80.147.3.94",2019-08-19 08:10:48,5,5
+5127,How to remove element from an array?,"59.144.134.146",2019-08-19 08:09:06,5,5
+5103,sql,,2019-08-19 08:06:00,5,5
+5098,merge k sorted lists,"185.85.220.201",2019-08-19 08:05:21,5,1
+5096,How to declarate an abstract class,"212.17.87.182",2019-08-19 08:05:12,5,1
+5095,Sort an array,"106.78.182.155",2019-08-19 08:05:06,5,5
+5095,Sort an array,"106.78.182.155",2019-08-19 08:05:06,5,5
+5089,what is the difference between an array and an arraylist,"62.96.41.227",2019-08-19 08:04:53,5,2
+5075,how do I append another list to a existing one?,,2019-08-19 08:02:31,5,4
+4988,spring boot security remove default login,"139.167.211.119",2019-08-19 07:07:23,5,1
+4973,how delete element from array,"83.81.20.113",2019-08-19 07:01:49,5,4
+4959,How to make ascii art,"82.225.177.93",2019-08-19 06:52:42,5,4
+4958,Convert image to ascii,"82.225.177.93",2019-08-19 06:52:06,5,2
+4930,wrap lines in a paragraph,"213.78.87.157",2019-08-19 06:36:30,5,1
+4886,how to remove an element from an array,"85.2.251.163",2019-08-19 06:09:52,5,5
+4881,How to avoid sql injection,"213.215.21.238",2019-08-19 06:04:58,5,5
+4860,how to write an event store,,2019-08-19 05:45:14,5,3
+4831,java,"14.98.94.22",2019-08-19 05:26:02,5,5
+4806,Get Size of an Array,"31.209.82.134",2019-08-19 04:58:02,5,3
+4785,add column like excel,"86.98.222.72",2019-08-19 04:44:57,5,2
+4767,How to connect to a websocket using a proxy?,"80.120.111.94",2019-08-19 04:33:42,5,2
+4752,how to remove every second element from a linked list,,2019-08-19 04:21:58,5,1
+4746,How to convert int to string,"5.197.13.207",2019-08-19 04:17:21,5,1
+4718,regex how to search for telephone number,"113.164.233.66",2019-08-19 04:04:14,5,5
+4715,How to compare two strings in javascript,"128.106.134.56",2019-08-19 04:03:44,5,3
+4702,how to parse yaml to data structure,,2019-08-19 03:58:57,5,1
+4687,how to search an arraylist,,2019-08-19 03:48:18,5,5
+4672,how to sort a file,"58.26.27.118",2019-08-19 03:34:36,5,5
+4640,How to remove objects in two dimensional list like structure,"79.228.173.50",2019-08-19 03:18:16,5,2
+4633,How to get website?,"131.165.63.132",2019-08-19 03:11:45,5,5
+4632,How to stable sort an array,"79.228.173.50",2019-08-19 03:11:26,5,1
+4580,How to convert an array of arrays to lists of lists?,"95.195.145.5",2019-08-19 02:24:15,5,1
+4570,How do I make a new scope in CDI,"27.33.215.66",2019-08-19 02:15:00,5,2
+4564,parse xml and save it in to sqlite database,"84.253.216.236",2019-08-19 02:12:05,5,2
+4535,how to remove element from list,"73.140.252.232",2019-08-19 01:40:29,5,2
+4530,How to expand environment variables in a string using .NET?,"193.169.48.48",2019-08-19 01:31:34,5,4
+4524,How to write WCF service without SOAP action routing?,"193.169.48.48",2019-08-19 01:27:48,5,1
+4476,redirect stdin,,2019-08-19 00:23:46,5,3
+4452,How do I pass an arbitrary object to an explicit intention on Android,,2019-08-19 00:08:57,5,5
+4447,is epstein alive,"76.179.98.218",2019-08-19 00:04:38,5,1
+4444,why would woodchucks whittle wood when whacking water would wield wet?,"76.179.98.218",2019-08-19 00:03:21,5,1
+4442,how to calculate how many dead hookers fit in a trunk,"76.179.98.218",2019-08-19 00:01:25,5,1
+4430,python delete 4th item of a list,"71.179.2.242",2019-08-18 23:48:34,5,1
+4429,pandas sort array,"71.179.2.242",2019-08-18 23:47:56,5,5
+4425,Dictionary,"85.240.89.38",2019-08-18 23:43:34,10,1
+4410,edit a tree,"216.24.101.18",2019-08-18 23:18:51,5,3
+4409,concatenate two arrays,,2019-08-18 23:18:35,5,3
+4403,Remove a substring from a string,"157.131.111.168",2019-08-18 23:03:32,5,3
+4401,map video onto sphere,"58.96.14.20",2019-08-18 22:56:20,5,3
+4396,Cxf how to sign a soap request,"93.169.85.87",2019-08-18 22:51:42,5,5
+4378,erase disk,,2019-08-18 22:38:48,5,1
+4372,How to remove an element from an array?,"110.145.221.130",2019-08-18 22:34:01,5,4
+4364,how to implement a factory?,"73.168.38.116",2019-08-18 22:23:17,5,5
+4356,how to change a private field,"136.24.205.156",2019-08-18 22:18:11,5,1
+4346,Animation in xojo,"71.88.219.236",2019-08-18 22:12:36,5,1
+4317,how to emboss text in jpg,"23.233.2.228",2019-08-18 21:48:15,5,5
+4316,how to create a service to watch for dirfectory changes,"23.233.2.228",2019-08-18 21:47:14,5,5
+4260,how to make linked list,,2019-08-18 21:14:20,5,5
+4252,how  to draw string with different colors depending on the characters,"70.95.186.90",2019-08-18 21:05:35,5,1
+4244,App log in,"58.178.219.100",2019-08-18 20:55:07,5,1
+4242,monitor the program's own cpu usage programmatically,"107.202.144.164",2019-08-18 20:54:36,5,5
+4241,connect to multiple monitors displays,"107.202.144.164",2019-08-18 20:53:47,5,4
+4239,add a config file to my program at launch,"107.202.144.164",2019-08-18 20:53:09,5,4
+4224,append,"109.186.234.87",2019-08-18 20:43:27,5,3
+4204,how to remove an element from an ordered array,"91.178.191.206",2019-08-18 18:52:40,5,2
+4171,how to convert int to string,"193.234.156.231",2019-08-18 16:13:55,5,5
+4169,subscribe to queue,,2019-08-18 16:03:22,5,2
+4168,create temporary file,"73.99.9.241",2019-08-18 15:56:37,5,5
+4163,How to verify optionnals,"70.26.231.84",2019-08-18 15:27:39,5,1
+4161,how to rollback git commit,"191.183.196.212",2019-08-18 15:21:40,5,2
+4140,How to convert array to string,"71.231.120.109",2019-08-18 13:49:37,5,5
+4113,how to deserialize json string to object with jackson,"5.128.252.46",2019-08-18 11:56:29,1,1
+4109,how to deserialize json string to object with jackson,"5.128.252.46",2019-08-18 11:55:13,5,4
+4104,how to deserialize json string to object,"5.128.252.46",2019-08-18 11:50:55,5,5
+4078,how to remove duplicates,"93.204.192.40",2019-08-18 10:37:55,5,4
+4044,what is an iterator,,2019-08-18 09:26:24,10,4
+4038,how to connect to mysql database,,2019-08-18 08:59:38,5,5
+4033,How to create an array,"116.72.124.104",2019-08-18 08:42:07,5,5
+4023,how can i open the contents of a zip file,"161.29.154.194",2019-08-18 07:13:14,5,5
+4018,reverse array,,2019-08-18 06:47:52,5,5
+4017,http request,,2019-08-18 06:47:33,5,3
+4016,final keyword,"79.164.158.151",2019-08-18 06:45:59,5,5
+4005,remove from a linked list,"138.201.106.83",2019-08-18 06:23:18,5,5
+4000,calculate a 1km buffer around a line,,2019-08-18 06:20:29,5,5
+3997,how to create a geotiff,,2019-08-18 06:17:32,5,4
+3995,how to display a shapefile,,2019-08-18 06:15:36,5,5
+3949,How do I automate mouse clicks?,,2019-08-17 21:40:52,5,5
+3948,yeet,,2019-08-17 21:34:44,5,5
+3947,increment race condition,,2019-08-17 21:33:49,5,5
+3874,why is java bad,,2019-08-17 12:23:08,5,1
+3869,How to reverse an array in python,"151.230.170.124",2019-08-17 11:58:02,1,5
+3866,call default method,"93.212.100.237",2019-08-17 11:38:22,5,2
+3853,How to convert a file to a uri,"109.91.35.104",2019-08-17 09:48:47,5,2
+3835,How to join two URL?,"109.112.69.141",2019-08-17 08:02:43,5,3
+3834,How to join two URLs?,"109.112.69.141",2019-08-17 08:02:17,5,1
+3831,Use default values in function parameters.,"49.199.143.195",2019-08-17 07:16:07,5,5
+3808,android view,"119.226.188.58",2019-08-17 04:13:08,5,3
+3808,android view,"119.226.188.58",2019-08-17 04:13:08,5,4
+3808,android view,"119.226.188.58",2019-08-17 04:13:08,5,5
+3805,how to parse html in java ?,,2019-08-17 04:00:51,5,4
+3804,how to read a file into a string ?,,2019-08-17 03:59:52,5,1
+3802,OutOfMemory,"182.75.243.154",2019-08-17 03:57:43,5,5
+3802,OutOfMemory,"182.75.243.154",2019-08-17 03:57:43,5,5
+3801,how to extend array,"45.127.192.176",2019-08-17 03:57:37,5,5
+3766,how to delete a file,,2019-08-16 22:20:25,5,5
+3764,How do I map a function over a list in parallel?,"216.243.20.131",2019-08-16 21:49:02,5,1
+3763,How do I press a button in Java Swing when I press enter?,"216.243.20.131",2019-08-16 21:46:49,5,4
+3755,how do I connect text field with button in javaFx,"209.141.119.26",2019-08-16 20:32:07,5,5
+3748,write EOF character in file,,2019-08-16 19:55:36,5,5
+3723,traipse a directory tree,,2019-08-16 18:36:53,5,4
+3722,singleton without static,"185.217.1.11",2019-08-16 18:32:53,5,5
+3705,how to remove an element from an array,,2019-08-16 17:32:42,10,5
+3690,how create an xor linked list,"91.64.149.1",2019-08-16 17:08:46,5,1
+3665,poll keystroke,"205.175.226.99",2019-08-16 16:22:28,10,2
+3656,How to map multiple objects to DTO with MapStruct?,"201.47.221.13",2019-08-16 16:01:40,1,1
+3652,how to make a get request in angularjs,"50.237.103.18",2019-08-16 15:58:34,10,1
+3644,reverse an element in array,"76.80.56.18",2019-08-16 15:37:07,5,5
+3633,how garbage collection works,"37.193.243.184",2019-08-16 15:22:42,5,1
+3632,What is size of long,"37.193.243.184",2019-08-16 15:22:17,5,1
+3622,convert string to array,,2019-08-16 14:55:26,10,2
+3619,How to count from 1 to 10,"43.229.88.175",2019-08-16 14:48:08,5,5
+3592,how to remove characters from a string,"197.94.193.221",2019-08-16 14:01:47,5,5
+3585,how do I reverse a byte array?,"4.15.115.167",2019-08-16 13:47:48,5,1
+3574,How to turn string into JSON,,2019-08-16 13:30:06,5,5
+3567,java choose between two numbers randomly,"73.181.104.135",2019-08-16 13:19:12,5,5
+3547,What is an array?,"81.134.137.114",2019-08-16 12:54:53,5,2
+3546,java spring multiple components use single kafka producer,"73.181.104.135",2019-08-16 12:54:42,5,4
+3541,how to provide a comparator to a stream sorted() method,"67.226.130.5",2019-08-16 12:41:49,5,5
+3527,pandas drop duplicate indexes,,2019-08-16 12:14:36,5,1
+3523,Convert python float to string,,2019-08-16 12:12:58,5,1
+3519,Shuffle a list,,2019-08-16 12:05:30,5,4
+3514,Create a class named BAa,"46.86.45.241",2019-08-16 11:59:51,5,1
+3510,how to add elements of a list,,2019-08-16 11:53:03,5,3
+3510,how to add elements of a list,,2019-08-16 11:53:03,5,5
+3510,how to add elements of a list,,2019-08-16 11:53:03,5,4
+3502,How to catch errors in java,"207.188.76.74",2019-08-16 11:44:45,5,5
+3500,"How to have a "" in a string java","207.188.76.74",2019-08-16 11:44:20,5,1
+3495,How to insert item at a specific index in a list,"207.188.76.74",2019-08-16 11:43:18,5,5
+3493,How to convert string of int to int,"207.188.76.74",2019-08-16 11:42:36,5,5
+3480,reverse a linked list?,,2019-08-16 11:29:02,5,5
+3472,get current date,"195.212.29.174",2019-08-16 11:18:39,5,5
+3470,how to write file in scala,"185.196.238.27",2019-08-16 11:15:27,10,5
+3468,String to InputStream,"216.251.118.195",2019-08-16 11:14:18,5,5
+3453,call C++ method in java,,2019-08-16 10:59:06,5,1
+3433,How to calculate F-score,"150.242.86.40",2019-08-16 10:38:49,5,1
+3425,how to add more memory,,2019-08-16 10:30:47,5,1
+3411,How to sort an array?,"129.13.197.253",2019-08-16 10:21:00,5,4
+3410,fiz buzz,"82.217.171.15",2019-08-16 10:20:51,5,5
+3409,How to sort ab array?,"129.13.197.253",2019-08-16 10:20:28,5,1
+3396,how to merge two arrays,"14.143.7.250",2019-08-16 09:53:52,5,1
+3385,Remove element in arraylist loop,"195.191.106.73",2019-08-16 09:48:04,1,2
+3383,Remove element in arraylist loop,"195.191.106.73",2019-08-16 09:46:31,5,3
+3340,How to remove an element from an array,"112.196.154.124",2019-08-16 08:24:00,5,5
+3339,hashmap,"195.159.183.42",2019-08-16 08:17:44,1,4
+3335,Hello world,"195.159.183.42",2019-08-16 08:16:49,5,2
+3323,How do i create my own hashcode function?,"79.230.60.57",2019-08-16 07:59:35,5,4
+3318,How to find a pattern in all files in a folder,"155.4.76.160",2019-08-16 07:55:33,5,5
+3315,How do I reverse a string,"155.4.76.160",2019-08-16 07:54:33,5,5
+3309,How to make a class immutable?,"159.180.231.192",2019-08-16 07:44:31,5,4
+3300,How to implement neural network,,2019-08-16 07:22:49,5,4
+3297,How to reverse sort list of names,,2019-08-16 07:22:11,5,5
+3266,how to insert into an array,"188.39.108.163",2019-08-16 06:30:15,5,5
+3240,How to remove an element from arraylist,,2019-08-16 05:52:25,5,4
+3231,convert integer to string,,2019-08-16 05:44:11,5,4
+3227,how to write test cases for angular2 form control,"195.26.3.225",2019-08-16 05:40:33,5,1
+3226,how to write test cases for angular2 form control,"195.26.3.225",2019-08-16 05:39:46,5,1
+3217,difference between string and stringbuilder,"185.49.81.167",2019-08-16 05:19:17,5,3
+3169,how to convert from input stream to outputstream,"81.240.252.220",2019-08-16 03:50:26,5,1
+3163,how to avoid concurrent modification exception,"202.149.209.230",2019-08-16 03:44:34,5,3
+3161,how to sort an array,"202.149.209.230",2019-08-16 03:43:20,5,5
+3148,How to add two numbers?,"77.4.115.227",2019-08-16 03:21:04,5,3
+3142,how to create main class,,2019-08-16 02:38:31,5,4
+3122,How to watch file?,,2019-08-16 01:43:54,5,5
+3120,How to make get request?,,2019-08-16 01:43:20,5,1
+3108,remove an element from array,"124.92.205.39",2019-08-16 00:53:21,5,1
+3097,resize array,"142.59.81.227",2019-08-16 00:27:01,5,2
+3096,print to console,"142.59.81.227",2019-08-16 00:25:46,5,1
+3081,How to output custom date string,"73.238.25.3",2019-08-15 23:00:05,5,4
+3080,find second last element of array,,2019-08-15 22:37:07,5,1
+3069,convert number to string,"203.174.131.194",2019-08-15 22:09:31,5,5
+3062,how to push to array,"103.74.209.165",2019-08-15 21:39:55,5,3
+3020,how to add an element to a linked list,"4.7.14.6",2019-08-15 19:53:31,5,4
+3010,How to command line output from a java program,"24.190.242.176",2019-08-15 19:33:30,5,5
+3007,JavaFx progressbar,,2019-08-15 19:31:27,10,4
+2986,how to handle exception,"71.202.242.167",2019-08-15 18:54:34,5,4
+2955,How can I force the text in the input field of the command line to sho,,2019-08-15 18:15:09,5,1
+2943,How to determine if a given date is a weekday,,2019-08-15 17:46:49,5,2
+2924,how to filter elements of an array,,2019-08-15 17:24:28,5,4
+2922,operator overloading,"96.255.209.36",2019-08-15 17:14:14,5,5
+2906,How to save data to a file,"50.84.176.166",2019-08-15 16:49:50,5,4
+2904,bigquery run query from file,"186.30.51.173",2019-08-15 16:44:45,5,1
+2887,Read resources in Maven projects,"113.172.30.235",2019-08-15 16:08:27,5,5
+2879,How to run concurrent jobs,"12.139.157.2",2019-08-15 15:58:19,5,4
+2867,how to insert an element array in a given position,"89.133.229.141",2019-08-15 15:34:11,10,2
+2837,Why is do I get zero when I should get a fraction?,"155.92.252.40",2019-08-15 14:49:17,5,4
+2836,How to avoid integer division,"155.92.252.40",2019-08-15 14:47:18,5,3
+2835,How to get IntelliJ to run my code?,"155.92.252.40",2019-08-15 14:46:24,5,1
+2823,Change fragment of Activity,,2019-08-15 14:34:46,5,1
+2821,Reverse each string in a list,,2019-08-15 14:34:04,5,1
+2820,how to find the mean of floats in python,"98.114.181.41",2019-08-15 14:29:57,5,1
+2797,how to avoid a deadlock,"89.101.246.13",2019-08-15 13:47:14,5,5
+2748,convert numeric date to alphanumeric date,"79.179.47.211",2019-08-15 12:43:38,5,4
+2722,How to convert array to list,,2019-08-15 12:09:03,5,5
+2718,split string by spaces,"171.61.114.180",2019-08-15 12:05:46,5,1
+2716,how to learn the language,"81.31.64.21",2019-08-15 12:05:11,5,5
+2681,how can I detect array changes in javascript,"108.245.8.156",2019-08-15 11:34:00,5,1
+2671,what is a thread?,"124.123.80.29",2019-08-15 11:19:44,5,1
+2652,spring data delete a single column,,2019-08-15 11:03:05,5,4
+2649,generate html from xpath,,2019-08-15 11:01:51,10,1
+2645,How do I enable SSL?,,2019-08-15 11:00:09,5,5
+2639,How should I combine strings?,,2019-08-15 10:58:31,5,4
+2637,how to create a window,"101.161.2.179",2019-08-15 10:56:33,5,1
+2629,get date from string,"80.95.188.129",2019-08-15 10:53:47,5,5
+2599,how to execute rxjava delay on current thread,"178.253.241.230",2019-08-15 10:23:37,5,5
+2577,how to read an array from properties file in spring mvc,,2019-08-15 10:03:04,5,5
+2556,Create a list of hashes,,2019-08-15 09:35:06,10,3
+2553,How to count multiple occurrences in string?,,2019-08-15 09:34:31,10,4
+2552,How to make one class inherit from more than one class?,,2019-08-15 09:34:29,5,3
+2544,print on new line,"72.69.224.12",2019-08-15 09:32:22,5,5
+2532,find the matching lines from two different arrays,"46.208.216.113",2019-08-15 09:20:36,10,5
+2524,Filter dataset to exclude duplicates in SQL,"23.30.23.193",2019-08-15 09:10:12,5,2
+2504,how are annotations used,"189.100.10.90",2019-08-15 08:57:43,10,2
+2496,how to generate uuid for spring data jdbc?,"93.195.51.218",2019-08-15 08:50:09,5,1
+2494,How to reverse a string,,2019-08-15 08:48:50,5,5
+2487,how to quit a C# program?,"193.47.104.34",2019-08-15 08:41:11,5,5
+2480,how to exit a wpf programm?,"193.47.104.34",2019-08-15 08:40:06,5,1
+2477,How to delete files recursivelly,"85.140.1.197",2019-08-15 08:32:02,5,5
+2448,How to remove an element from an array,,2019-08-15 07:47:15,5,5
+2435,send http request asynchronously,"91.141.128.201",2019-08-15 07:29:58,5,3
+2432,How do I copy a lot of data to SQL Server?,,2019-08-15 07:25:40,10,1
+2428,how to 'kill' a process ---,,2019-08-15 07:19:13,5,5
+2410,get string data from url,"80.242.32.219",2019-08-15 06:56:45,5,3
+2404,java stream to exactly one element,,2019-08-15 06:43:02,5,2
+2398,collectors tomap with null values,"92.79.91.68",2019-08-15 06:19:31,5,3
+2392,groupby substring in jpql query,"92.79.91.68",2019-08-15 06:13:19,5,1
+2386,load site definitions from magnolia jcr,"193.240.236.186",2019-08-15 06:08:26,5,2
+2385,How to copy a list,"60.243.148.114",2019-08-15 06:04:25,5,5
+2310,How to increase the size of an array,,2019-08-15 04:41:49,5,5
+2306,perform regex to extract date from string,"174.21.186.146",2019-08-15 04:33:47,10,4
+2292,convert text to base64,"31.160.146.210",2019-08-15 04:11:22,5,5
+2290,switch case fall through,"43.225.184.3",2019-08-15 04:03:58,5,5
+2272,How to delete an object,,2019-08-15 03:47:02,5,2
+2268,how to remove an array element,"103.233.114.65",2019-08-15 03:38:39,10,5
+2245,how to find the size of a hashmap,"142.116.24.173",2019-08-15 02:57:05,1,1
+2235,How to split a string into an array,"121.44.239.207",2019-08-15 02:39:42,5,5
+2227,How to copy the InputStream,"152.165.25.114",2019-08-15 02:17:10,5,5
+2220,how to add an element to a stream,"128.250.0.142",2019-08-15 01:58:30,5,5
+2215,convert from arraylist to array,"45.79.84.209",2019-08-15 01:17:53,5,5
+2207,sort a list,"153.3.216.95",2019-08-15 00:56:15,5,5
+2207,sort a list,"153.3.216.95",2019-08-15 00:56:15,5,5
+2186,Get parent class name,"99.184.99.120",2019-08-15 00:20:14,5,5
+2168,generate regex for indian phone number,,2019-08-14 23:52:11,5,4
+2167,How to delete an element from hashMap by key,"39.110.215.97",2019-08-14 23:49:59,5,1
+2156,using streams remove all special characters from a very large file,"141.156.160.131",2019-08-14 23:29:06,5,2
+2155,How to find the largest product of two numbers less than 1000 that is,"108.49.187.144",2019-08-14 23:29:05,5,4
+2130,how to print to screen,"98.240.163.174",2019-08-14 22:42:39,5,5
+2130,how to print to screen,"98.240.163.174",2019-08-14 22:42:39,5,5
+2124,remove newlines,"45.17.211.63",2019-08-14 22:34:27,5,5
+2123,hashtable and hashmap difference,"46.242.11.72",2019-08-14 22:33:49,5,5
+2096,How to get the nth character from a string,"193.119.58.151",2019-08-14 21:59:41,5,3
+2089,How to invert binary tree,,2019-08-14 21:51:53,5,1
+2074,How to add two numbers,,2019-08-14 21:33:28,5,5
+2069,what is the difference between inheritance and extension,"109.93.34.231",2019-08-14 21:26:57,5,5
+2053,create a list,,2019-08-14 21:02:44,5,5
+2048,How to return the contents of a file as a string,"138.235.70.20",2019-08-14 21:00:31,5,5
+2031,How to read from a serial port,"50.242.71.249",2019-08-14 20:46:06,5,5
+2001,how to remove an element from an array,,2019-08-14 20:19:42,5,5
+1986,how to perform base64 encoding,"104.36.248.13",2019-08-14 20:07:08,5,5
+1985,How do I extract only the overlaping keys in two objects,"73.189.152.250",2019-08-14 20:06:10,5,2
+1979,How to handle json responses,"173.56.10.230",2019-08-14 20:00:03,5,2
+1973,How to add an element to an array,"71.63.248.177",2019-08-14 19:55:09,5,5
+1958,how to implement a steiner tree?,,2019-08-14 19:32:39,5,3
+1954,regex to remove numbers,,2019-08-14 19:29:03,5,5
+1950,convert string to integer,,2019-08-14 19:25:31,5,5
+1922,How to define a class,"85.150.116.71",2019-08-14 19:05:12,5,1
+1901,undefined vs null javascript,,2019-08-14 18:52:05,5,1
+1895,convert integer to string,"80.170.69.175",2019-08-14 18:50:16,5,1
+1877,how to sort array,"186.231.22.170",2019-08-14 18:40:10,5,5
+1874,inputstream to string,"207.140.28.70",2019-08-14 18:39:05,5,5
+1865,how can I use python libraries,"191.55.4.164",2019-08-14 18:35:43,5,1
+1856,How can I use python libraries?,,2019-08-14 18:30:46,10,5
+1853,how to reverse elements of an array,"165.225.57.46",2019-08-14 18:26:36,5,2
+1851,how to get the length of a string,"165.225.57.46",2019-08-14 18:25:57,5,5
+1831,How to paginate results in Firebase,"104.132.11.106",2019-08-14 18:20:42,5,1
+1819,how to make the computer call the police on me,"216.162.42.85",2019-08-14 18:15:09,5,5
+1778,How would you call an api?,"66.170.243.1",2019-08-14 18:00:56,5,3
+1772,How would you read a file?,"66.170.243.1",2019-08-14 17:59:16,5,5
+1760,How to calculate cumulative hash,"176.63.16.70",2019-08-14 17:55:53,5,4
+1745,javascript get length without throw error,,2019-08-14 17:52:46,5,1
+1744,how to iterate array of arrays,"190.247.90.11",2019-08-14 17:52:43,5,2
+1737,turn char array into string,"50.194.211.238",2019-08-14 17:50:40,5,5
+1736,string concatenation,"41.204.44.79",2019-08-14 17:50:19,5,5
+1736,string concatenation,"41.204.44.79",2019-08-14 17:50:19,5,5
+1722,How to turn array into string,"50.194.211.238",2019-08-14 17:44:27,5,3
+1716,swift how do I sort an array with a custom comparator,"17.194.8.20",2019-08-14 17:42:28,5,2
+1713,How to mix audio in ffmpeg?,,2019-08-14 17:40:28,5,1
+1712,how to sort characters in a string,"104.58.241.59",2019-08-14 17:40:05,5,5
+1701,Convert string to a number,"191.219.106.176",2019-08-14 17:36:37,5,4
+1701,Convert string to a number,"191.219.106.176",2019-08-14 17:36:37,5,5
+1701,Convert string to a number,"191.219.106.176",2019-08-14 17:36:37,5,5
+1701,Convert string to a number,"191.219.106.176",2019-08-14 17:36:37,5,5
+1689,Webflow interaction to react,"41.80.8.162",2019-08-14 17:30:12,5,1
+1656,How to use SOAP with Node JS?,"69.245.10.166",2019-08-14 17:22:40,5,1
+1654,hot to use deferred customactions,"66.162.42.211",2019-08-14 17:22:02,5,1
+1651,How to disable blue notification badges on vscode,,2019-08-14 17:21:32,5,1
+1632,append item in javascript,,2019-08-14 17:13:00,5,1
+1620,White HTTP post request,"141.136.173.33",2019-08-14 17:08:52,5,5
+1613,length of an array python,"73.94.73.189",2019-08-14 17:06:01,5,1
+1600,How to find the focused textarea in JavaScript?,"185.113.98.215",2019-08-14 17:01:49,5,1
+1590,open a file in go,,2019-08-14 16:57:11,5,1
+1574,How to declare a recursive tree data structure,"73.15.206.81",2019-08-14 16:51:46,5,5
+1564,c# SMO showPLAN,,2019-08-14 16:46:13,5,1
+1563,powershell custom type accelerator,,2019-08-14 16:45:42,5,1
+1554,How to accept super type in generics,"46.187.226.103",2019-08-14 16:43:06,5,3
+1550,how to display a calendar,"89.240.35.63",2019-08-14 16:42:43,5,3
+1546,How to filter a dtresm,"46.187.226.103",2019-08-14 16:42:04,5,2
+1543,flutter qr ios,"190.42.184.45",2019-08-14 16:40:18,5,2
+1515,how to delete last item in a python list,"73.233.80.228",2019-08-14 16:31:17,5,1
+1509,Call a REST API,"66.234.123.55",2019-08-14 16:29:41,5,4
+1508,how to for loop in javascript,"80.162.27.72",2019-08-14 16:29:41,5,1
+1506,How parse email,"12.26.189.66",2019-08-14 16:29:28,5,3
+1502,How to call a REST API from PowerShell,"66.234.123.55",2019-08-14 16:28:40,5,1
+1494,protect xxe,,2019-08-14 16:26:58,5,5
+1464,how to remove the disabled attribute with jquery,,2019-08-14 16:20:57,5,1
+1417,how to write bytes to a tcp socket stream?,"46.208.232.148",2019-08-14 16:10:26,5,1
+1416,How to remove an element from array,"74.71.236.67",2019-08-14 16:10:15,5,5
+1392,Instant from timestamp,"77.2.20.6",2019-08-14 16:04:39,5,4
+1384,Count all characters in the text and return top 5 characters,"198.179.137.206",2019-08-14 16:02:19,5,5
+1369,how to find list in string,"78.141.198.173",2019-08-14 15:59:13,5,1
+1361,loop for 6 times,"155.93.165.196",2019-08-14 15:57:13,1,1
+1360,for loop,"155.93.165.196",2019-08-14 15:57:03,1,1
+1349,How to build rest service in java,,2019-08-14 15:53:59,5,5
+1317,websocket,,2019-08-14 15:48:11,5,5
+1282,How to flatten an array,"178.48.164.252",2019-08-14 15:39:53,5,5
+1260,How to remove an element from an array,"198.24.6.220",2019-08-14 15:35:17,5,5
+1247,how to get context in a static method on android,,2019-08-14 15:32:25,5,5
+1245,spring databuffer to string,,2019-08-14 15:32:03,5,1
+1238,How to run js in java,"212.149.213.96",2019-08-14 15:31:13,5,3
+1232,how to fix cannot find symbol,"70.89.204.241",2019-08-14 15:30:21,5,2
+1213,keras non trainable parameter,"103.5.135.109",2019-08-14 15:25:41,5,1
+1201,instantiate through reflection,,2019-08-14 15:24:01,5,5
+1193,connect to ssh,,2019-08-14 15:23:01,5,4
+1164,how can i add an hour to a date in javascript,"64.98.120.140",2019-08-14 15:10:05,5,1
+1146,remove element from array,,2019-08-14 15:04:00,1,5
+1133,HTML5 Canvas draw resizable grid,,2019-08-14 15:00:14,5,2
+1132,how to convert a Integer stream to int array,"106.193.162.45",2019-08-14 15:00:07,5,5
+1130,HTML5 Canvas draw sizable grid,,2019-08-14 14:59:16,5,3
+1090,How to get all the keys in a dictionary?,"99.105.210.72",2019-08-14 14:49:54,5,5
+1077,How to escape characters in json,"69.75.213.26",2019-08-14 14:48:29,5,5
+1067,How do I find the first element in array javascript,"50.200.188.46",2019-08-14 14:44:15,5,1
+1063,How to iterate over elements in an ArrayList?,"69.75.247.58",2019-08-14 14:43:57,5,5
+1042,create a directory structure recursively,"107.77.232.175",2019-08-14 14:40:15,5,4
+1039,sort ip addresses,"91.17.39.251",2019-08-14 14:39:36,5,5
+1036,How to remove an element from an Array?,"50.247.143.233",2019-08-14 14:39:23,5,5
+1029,Static meabing,"106.51.132.11",2019-08-14 14:38:24,10,5
+1029,Static meabing,"106.51.132.11",2019-08-14 14:38:24,10,5
+1025,add to end of array,"104.132.5.76",2019-08-14 14:36:56,5,5
+1024,how to create singleton class,"99.230.230.95",2019-08-14 14:36:38,1,1
+1021,how to insert an element array in a given position,"191.55.4.164",2019-08-14 14:36:10,5,4
+1013,how to insert an element array in a given position,"191.55.4.164",2019-08-14 14:35:00,5,5
+1010,how to insert an element array in a given position,"191.55.4.164",2019-08-14 14:34:30,5,3
+1007,how to insert an element array in a given position,"191.55.4.164",2019-08-14 14:34:04,5,5
+998,how to insert an element array in a given position,"191.55.4.164",2019-08-14 14:32:52,5,1
+995,open xml c# diagonal boarder,,2019-08-14 14:32:45,5,1
+994,How to convert a string to an int,,2019-08-14 14:32:44,5,4
+992,How to remove element from an array,"188.39.52.234",2019-08-14 14:32:41,5,4
+990,openxml c# diagonal boarder,,2019-08-14 14:32:07,5,1
+989,how to insert an element array in a given position,"191.55.4.164",2019-08-14 14:32:06,5,1
+984,How to add to the beginning of an array,,2019-08-14 14:31:23,5,5
+971,how to insert an element array in a given position,"191.55.4.164",2019-08-14 14:30:18,5,1
+947,remove an element from an array in javascript,,2019-08-14 14:25:41,5,2
+943,How to create an interface in typescript,,2019-08-14 14:25:18,5,1
+940,Check if a user is running IE10,,2019-08-14 14:24:58,5,1
+939,how to open an ssl connection,"177.106.181.189",2019-08-14 14:24:52,5,3
+927,Move mouse,,2019-08-14 14:23:05,5,5
+911,javascript jest Received function did not throw,"70.15.4.245",2019-08-14 14:20:09,5,1
+908,how to remove an element from array,"131.228.197.9",2019-08-14 14:19:46,5,1
+901,"Connect ""Logitech MX Anywhere mouse"" in Ubuntu",,2019-08-14 14:17:40,10,1
+899,Connect Logitech MX Anywhere in Ubuntu,,2019-08-14 14:17:16,10,1
+896,how do I add headers to a reponse in flask,,2019-08-14 14:15:45,5,1
+869,convert dictionary to array,"50.226.143.34",2019-08-14 14:09:33,5,4
+866,How to initialize list c#,,2019-08-14 14:08:20,5,1
+850,android countdown timer,"198.169.126.201",2019-08-14 14:05:21,10,4
+838,add multiple django annotations to queryset,"184.71.95.30",2019-08-14 14:02:14,5,1
+815,can we suspend/disable Control-M job for a period of time strictly fro,,2019-08-14 13:57:35,5,1
+811,add to beginning of list clojure,,2019-08-14 13:55:52,5,1
+799,Get remaining disk space iOS swift,,2019-08-14 13:52:35,5,1
+788,How to remove duplicates from array?,"95.90.241.156",2019-08-14 13:48:37,5,5
+768,How to clean an array in javaScript,"103.129.233.13",2019-08-14 13:41:51,5,1
+766,python cx_oracle when password includes @,"198.81.129.207",2019-08-14 13:41:31,5,1
+756,"How to print ""hello world""?",,2019-08-14 13:36:32,5,3
+754,crozier,"140.172.116.130",2019-08-14 13:35:41,5,1
+749,how do I do null coalescing in swift,"170.218.219.21",2019-08-14 13:31:54,5,1
+745,c# httpresponsemessage invalidheaders,"156.76.147.55",2019-08-14 13:29:45,5,1
+722,Delete temporary files automatically,"91.159.204.142",2019-08-14 13:10:25,5,2
+720,How to log data?,,2019-08-14 13:09:05,10,2
+716,How can I convert from java to c#,"62.232.251.245",2019-08-14 13:07:54,5,1
+708,Execute Powershell script in C#,"46.28.102.0",2019-08-14 13:03:44,5,2
+708,Execute Powershell script in C#,"46.28.102.0",2019-08-14 13:03:44,5,1
+700,how to define singleton,"81.144.255.50",2019-08-14 12:58:38,5,1
+694,how to create singleton,"81.144.255.50",2019-08-14 12:57:47,5,2
+689,get type information of generic,"81.144.255.50",2019-08-14 12:56:47,5,4
+662,binary search from scratch in c++,"68.171.144.187",2019-08-14 12:49:04,5,1
+659,how do i remove the last element of a list in python,,2019-08-14 12:46:21,5,1
+657,remove last element from a list python,,2019-08-14 12:46:03,5,1
+652,How to merge two objects in Javascript,"101.112.48.133",2019-08-14 12:44:18,5,4
+646,how to remove an element from an array,"86.20.41.125",2019-08-14 12:42:44,5,4
+643,How to sort a javascript dictionary,"24.141.139.178",2019-08-14 12:42:20,5,1
+642,How to sort a javascript dictionary,"24.141.139.178",2019-08-14 12:41:39,5,1
+637,how to reverse a list,,2019-08-14 12:40:00,5,5
+627,How do I remove an item from an array in javascript?,"80.195.70.102",2019-08-14 12:35:59,5,1
+607,how do I print hello world,"209.244.4.106",2019-08-14 12:29:08,5,1
+604,delete item from list,"158.106.114.106",2019-08-14 12:27:24,5,1
+600,clone object javascript,"158.106.114.106",2019-08-14 12:26:48,5,1
+600,clone object javascript,"158.106.114.106",2019-08-14 12:26:48,5,1
+594,"502 bad gateway running a jsp on tomcat",,2019-08-14 12:19:04,5,1
+593,acknowledge SqsListener message,"73.118.138.156",2019-08-14 12:19:00,10,1
+590,can we add multiple base packages to spring component scanning,,2019-08-14 12:16:20,5,5
+577,sql find gaps in time series,"159.121.170.2",2019-08-14 12:10:55,5,1
+538,itk image registration how to register,,2019-08-14 11:59:27,5,1
+536,how to freeze a table header using jquery,,2019-08-14 11:58:28,5,1
+524,how can I detect array changes in javascript,"108.245.8.156",2019-08-14 11:54:19,5,1
+520,Java load file from classpath,"63.135.178.220",2019-08-14 11:53:04,5,5
+519,How to add two lists,"115.112.74.134",2019-08-14 11:52:30,5,4
+480,null pointer exception,"38.142.141.162",2019-08-14 11:31:33,5,1
