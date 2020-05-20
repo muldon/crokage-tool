@@ -15,6 +15,7 @@ import java.io.StringReader;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.Timestamp;
@@ -86,8 +87,8 @@ public class CrokageUtils {
 	@Value("${SO_IDF_VOCABULARY}")
 	public String SO_IDF_VOCABULARY;
 	
-	@Value("${STOP_WORDS_FILE_PATH}")
-	public String STOP_WORDS_FILE_PATH;
+	/*@Value("${STOP_WORDS_FILE_PATH}")
+	public String STOP_WORDS_FILE_PATH;*/
 	
 	@Value("${MODEL_VECTOR_SIZE}")
 	public Integer MODEL_VECTOR_SIZE;
@@ -230,7 +231,15 @@ public class CrokageUtils {
 		parentPostsCache = new HashMap<Integer, Post>();
 		answerPostsCache = new HashMap<Integer, Post>();
 		
-		stopWordsList = Files.readAllLines(Paths.get(STOP_WORDS_FILE_PATH)); 
+		String resourceName = "stop_words_english_total.txt";
+		InputStream input = getClass().getResourceAsStream("/resources/" + resourceName);
+        if (input == null) {
+            // this is how we load file within editor (eg eclipse)
+            input = getClass().getClassLoader().getResourceAsStream(resourceName);
+        }
+        stopWordsList = IOUtils.readLines(input, StandardCharsets.UTF_8);
+		
+		//stopWordsList = Files.readAllLines(Paths.get(STOP_WORDS_FILE_PATH)); 
 		
 		 // set up pipeline properties
 	    Properties props = new Properties();
@@ -1566,19 +1575,18 @@ public static String removeSpecialSymbolsTitles(String finalContent) {
 	public static <K> void setLimitV2(Set<K> set, int k) {
 		Set<K> tmp = new HashSet<>(set);
 		
-		if(k<set.size()) {
-			List<K> items = new ArrayList<K>();
-		    items.addAll(set);
-		    int trim = k>items.size() ? items.size() : k;
-		    items = items.subList(0,trim);
+		List<K> items = new ArrayList<K>();
+	    items.addAll(set);
+	    int trim = k>items.size() ? items.size() : k;
+	    items = items.subList(0,trim);
+		
+	    for(K id: tmp) {
+	    	if(!items.contains(id)) {
+	    		set.remove(id);
+	    	}
+	    }
 			
-		    for(K id: tmp) {
-		    	if(!items.contains(id)) {
-		    		set.remove(id);
-		    	}
-		    }
-			
-		}
+		
 				
 	}
 

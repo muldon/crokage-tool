@@ -1,12 +1,14 @@
 package com.ufu.crokage.util;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.collections4.CollectionUtils;
+import javax.annotation.PostConstruct;
+
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
@@ -57,38 +59,41 @@ public class LuceneSearcher {
 	
 	private Set<Integer> bigSetAnswersIds;
 	
-	 
-	public LuceneSearcher() throws Exception {
-		//initializeConfigs();
-	}
+	private QueryParser parser;
 	
-	/*
+	 
+	/*public LuceneSearcher() throws Exception {
+		initializeConfigs();
+	}*/
+	
+	
 	@PostConstruct
 	public void initializeConfigs() throws Exception {
 		parseErrosNum = 0;
 		standardAnalyzer = new StandardAnalyzer();
-		bigSetAnswersIds = new LinkedHashSet<>();
+		//bigSetAnswersIds = new LinkedHashSet<>();
 		// 1. create the index
 		index = new RAMDirectory();
-		answersCache = new HashMap<>();
+		//answersCache = new HashMap<>();
 		config = new IndexWriterConfig(standardAnalyzer);
 		//default
 		//config.setSimilarity(new BM25Similarity(0.05f, 0.03f));
-		config.setSimilarity(new BM25Similarity(1.2f, 0.75f));
+		//config.setSimilarity(new BM25Similarity(1.2f, 0.75f));
 		//config.setSimilarity(new LMJelinekMercerSimilarity(lambda));
 		//config.setSimilarity(new LMDirichletSimilarity());
-	}*/
+		parser = new QueryParser("content", standardAnalyzer);
+	}
 	
 	
 		
 	public void buildSearchManager(Map<Integer, Bucket> allAnswersWithUpvotesAndCodeBucketsMap, SearcherParams searcherParams) throws Exception {
 		logger.info("LuceneSearcher.buildSearchManager: searcherParams="+searcherParams+". Indexing all upvoted scored aswers with code: "+allAnswersWithUpvotesAndCodeBucketsMap.size());
 		long initTime2 = System.currentTimeMillis();
-		standardAnalyzer = new StandardAnalyzer();
-		index = new RAMDirectory();
+		//standardAnalyzer = new StandardAnalyzer();
+		//index = new RAMDirectory();
 		
 		indexedListSize = allAnswersWithUpvotesAndCodeBucketsMap.size();
-		config = new IndexWriterConfig(standardAnalyzer);
+		//config = new IndexWriterConfig(standardAnalyzer);
 		
 		config.setSimilarity(new BM25Similarity(searcherParams.getK(), searcherParams.getB()));
 		
@@ -127,8 +132,6 @@ public class LuceneSearcher {
 		//bigSetAnswersIds.clear();
 		bm25ScoreAnswerIdMap.clear();
 		
-		QueryParser parser = new QueryParser("content", standardAnalyzer);
-		
 		Query myquery = parser.parse(query);
 		
 		//TopDocs docs = searcher.search(myquery, bigSetLimit);
@@ -156,7 +159,9 @@ public class LuceneSearcher {
 			bm25ScoreAnswerIdMap.put(Integer.valueOf(doc.get("id")), item.score);
 			bigSetAnswersIds.add(Integer.valueOf(doc.get("id")));
 		}*/
-				
+		myquery=null;
+		docs=null;
+		hits=null;
 		return smallSetAnswersIds;		
 		
 	}
