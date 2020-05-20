@@ -55,7 +55,7 @@ public class CrokageApp extends AppAux{
 		System.out.println("\nConsidering parameters: \n" 
 				+ "\n CROKAGE_HOME: " + CROKAGE_HOME
 				+ "\n TMP_DIR: " + TMP_DIR
-				+ "\n numberOfComposedAnswers: " + numberOfComposedAnswers
+				//+ "\n numberOfComposedAnswers: " + numberOfComposedAnswers
 				+ "\n");
 		
 		long initTime1 = System.currentTimeMillis();
@@ -94,26 +94,12 @@ public class CrokageApp extends AppAux{
 		
 		int topk=query.getNumberOfComposedAnswers();
 		
-		/*
-		 * boolean override = false; if(query.getUseExtractors()!=null) {
-		 * useExtractors=query.getUseExtractors(); override=true; }
-		 */
-		if(query.getNumberOfComposedAnswers()!=null) {
-			numberOfComposedAnswers=query.getNumberOfComposedAnswers();
-		}
-		
-		/*
-		 * if(override) {
-		 * System.out.println("Overriding parameters: \nuseExtractors="+useExtractors+
-		 * "\nnumberOfComposedAnswers="+numberOfComposedAnswers); }
-		 */
-		
-		
 		Set<Integer> recommendedResults = runApproach(query);
 		
-		CrokageUtils.setLimitV2(recommendedResults, topk);
+		//int limit = 20; 
+		//CrokageUtils.setLimitV2(recommendedResults, limit);
 		
-		ArrayList<Post> sortedBuckets =  processAnswers(recommendedResults,query);
+		List<Post> sortedBuckets =  processAnswers(recommendedResults,query);
 		
 		//String composition = CrokageUtils.composeAnswers(query.getQueryText(),sortedBuckets,numberOfComposedAnswers);
 		
@@ -123,11 +109,12 @@ public class CrokageApp extends AppAux{
 	
 	private ArrayList<Post> processAnswers(Set<Integer> answersIds, Query query) {
 		ArrayList<Post> posts = new ArrayList<>();
+		int topk=query.getNumberOfComposedAnswers();
 		
 		if(query.getReduceSentences()==null || !query.getReduceSentences()) {
 			for(Integer id:answersIds) {
 				posts.add(crokageService.findPostById(id));
-				if(posts.size()==numberOfComposedAnswers) {
+				if(posts.size()==topk) {
 					break;
 				}
 			}
@@ -136,25 +123,53 @@ public class CrokageApp extends AppAux{
 		
 		Iterator<Integer> it = answersIds.iterator();
 		
-		boolean stop=false;
+//		boolean stop=false;
 		
-		for(int i=0; i<answersIds.size(); i++) {
-			if((i+1) >=numberOfComposedAnswers) {
-				stop = true;
-			}
+//		for(int i=0; i<answersIds.size(); i++) {
+//			if((i+1) >=topk) {
+//				stop = true;
+//			}
+//			
+//			if(it.hasNext()) {
+//				Post post = crokageService.findPostById(it.next());
+//				
+//				//paper implementation
+//				//boolean isRelevant = crokageUtils.processSentences(post,query.getQueryText());
+//				
+//				//user study implementation
+//				boolean isRelevant = !StringUtils.isBlank(post.getProcessedBody());
+//				
+//				if(!isRelevant) {
+//					stop = false;
+//					i--;
+//					System.out.println("Not relevant, discarding... "+post.getId());
+//				}else {
+//					posts.add(post);
+//				}
+//			}
+//			
+//			if(stop) {
+//				break;
+//			}
+//		}
+		
+		for(Integer id: answersIds) {
 			
-			if(it.hasNext()) {
-				Post post = crokageService.findPostById(it.next());
-				boolean isRelevant = crokageUtils.processSentences(post,query.getQueryText());
-				if(!isRelevant) {
-					stop = false;
-					i--;
-				}else {
-					posts.add(post);
-				}
-			}
+			Post post = crokageService.findPostById(id);
 			
-			if(stop) {
+			//paper implementation
+			//boolean isRelevant = crokageUtils.processSentences(post,query.getQueryText());
+			
+			//user study implementation
+			boolean blankProcessedBody = StringUtils.isBlank(post.getProcessedBody());
+			boolean blankProcessedCode = StringUtils.isBlank(post.getProcessedCode());
+			
+			if(blankProcessedBody || blankProcessedCode) {
+				System.out.println("Not relevant, discarding... "+post.getId());
+			}else {
+				posts.add(post);
+			}
+			if(posts.size()==topk) {
 				break;
 			}
 		}
