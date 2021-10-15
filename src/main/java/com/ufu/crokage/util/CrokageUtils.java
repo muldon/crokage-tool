@@ -87,8 +87,7 @@ public class CrokageUtils {
 	@Value("${SO_IDF_VOCABULARY}")
 	public String SO_IDF_VOCABULARY;
 	
-	/*@Value("${STOP_WORDS_FILE_PATH}")
-	public String STOP_WORDS_FILE_PATH;*/
+ 
 	
 	@Value("${MODEL_VECTOR_SIZE}")
 	public Integer MODEL_VECTOR_SIZE;

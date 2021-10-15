@@ -514,40 +514,7 @@ public class CrokageApp extends AppAux{
 	
 
 
-
-	protected void buildLuceneIndex() {
-		long start = System.currentTimeMillis();
-		IndexLucene indexer = new IndexLucene(SO_DIRECTORY_INDEX, SO_DIRECTORY_FILES);
-		indexer.indexCorpusFiles();
-		crokageUtils.reportElapsedTime(start, "buildLuceneIndex");
-		
-	}
-
-
-
-
-
-	protected void buildIDFVocabulary() throws IOException {
-		//each post has been saved in each line
-		Set<String> wordsSet = new HashSet<>();
-		System.out.println("reading contents lines...");
-		List<String> contentLines = Files.readAllLines(Paths.get(SO_CONTENT_FILE));
-		System.out.println("lines:  "+contentLines.size());
-		for(String line: contentLines) {
-			wordsSet.addAll(Arrays.stream(line.split(" +")).collect(Collectors.toSet()));
-		}
-		contentLines=null;
-		System.out.println("Wordset built. Now calculating idfs for "+wordsSet.size()+ " words");
-		Map<String, Double> idfs = new IDFCalc(SO_DIRECTORY_INDEX, wordsSet).calculateIDFOnly();
-		
-		//all file into a String
-		System.out.println("writing idfs to file...");
-		crokageUtils.writeMapToFile(idfs,SO_IDF_VOCABULARY );
-		
-	}
-
-
-
+  
 
 
 	protected void readSoContentWordVectorsForAllWords() throws IOException {

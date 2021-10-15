@@ -68,12 +68,8 @@ public class AppAux {
 	@Value("${CROKAGE_HOME}")
 	public String CROKAGE_HOME;
 	
-	@Value("${BIKER_ANSWERS_SUMMARIES_TRAINING}")
-	public String BIKER_ANSWERS_SUMMARIES_TRAINING;
-	
-	
-	@Value("${RECOMMENDED_ANSWERS_QUERIES_CACHE}")
-	public String RECOMMENDED_ANSWERS_QUERIES_CACHE;
+ 
+	 
 	
 	@Value("${BIG_MAP_INVERTED_INDEX_APIS_FILE_PATH}")
 	public String BIG_MAP_INVERTED_INDEX_APIS_FILE_PATH;
@@ -93,54 +89,7 @@ public class AppAux {
 	@Value("${SO_CONTENT_WORD_VECTORS}")
 	public String SO_CONTENT_WORD_VECTORS;
 	
-	@Value("${SO_DIRECTORY_FILES}")
-	public String SO_DIRECTORY_FILES;
-	
-	@Value("${SO_DIRECTORY_INDEX}")
-	public String SO_DIRECTORY_INDEX;
-	
-	@Value("${QUERIES_AND_SO_ANSWERS_TO_EVALUATE}")
-	public String QUERIES_AND_SO_ANSWERS_TO_EVALUATE;
-	
-	@Value("${QUERIES_AND_SO_ANSWERS_AGREEMENT}")
-	public String QUERIES_AND_SO_ANSWERS_AGREEMENT;
-		
-	@Value("${NLP2API_GOLD_SET_FILE}")
-	public String NLP2API_GOLD_SET_FILE;
-	
-	@Value("${INPUT_QUERIES_FILE_NLP2API}")
-	public String INPUT_QUERIES_FILE_NLP2API;
-	
-	@Value("${INPUT_QUERIES_FILE_TRAINING}")
-	public String INPUT_QUERIES_FILE_TRAINING;
-	
-	@Value("${INPUT_QUERIES_FILE_USER_STUDY}")
-	public String INPUT_QUERIES_FILE_USER_STUDY;
-	
-	
-	
-	@Value("${CROKAGE_HOME_DATE_FOLDER}")
-	public String CROKAGE_HOME_DATE_FOLDER;
-		
-			
-	
-	@Value("${RACK_OUTPUT_QUERIES_FILE}")
-	public String RACK_OUTPUT_QUERIES_FILE;
-		
-	
-	@Value("${NLP2API_OUTPUT_QUERIES_FILE}")
-	public String NLP2API_OUTPUT_QUERIES_FILE;
-	
-	@Value("${MATRIX_KAPPA_BEFORE_AGREEMENT}")
-	public String MATRIX_KAPPA_BEFORE_AGREEMENT;
-	
-	@Value("${MATRIX_KAPPA_AFTER_AGREEMENT}")
-	public String MATRIX_KAPPA_AFTER_AGREEMENT;
-	
-	
-	@Value("${ANSWERS_DIRECTORY}")
-	public String ANSWERS_DIRECTORY;
-	
+	  
 	
 	@Value("${action}")
 	public String action;
@@ -443,32 +392,9 @@ public class AppAux {
 		return found / goldSetIds.size();
 	}
 
+ 
 
-	protected void buildMatrixForKappaAfterAgreement() throws IOException {
-		List<UserEvaluation> evaluationsWithBothUsersScales = new ArrayList<>();
-		crokageUtils.readGroundTruthFile(evaluationsWithBothUsersScales,QUERIES_AND_SO_ANSWERS_AGREEMENT,4,5);
-		crokageUtils.buildMatrixForKappa(evaluationsWithBothUsersScales, MATRIX_KAPPA_AFTER_AGREEMENT);
-		
-	}
-
-
-
-
-
-	protected void buildMatrixForKappaBeforeAgreement() throws IOException {
-		List<UserEvaluation> evaluationsWithBothUsersScales = new ArrayList<>();
-		crokageUtils.readGroundTruthFile(evaluationsWithBothUsersScales,QUERIES_AND_SO_ANSWERS_TO_EVALUATE+".xlsx",2,3);
-		crokageUtils.buildMatrixForKappa(evaluationsWithBothUsersScales, MATRIX_KAPPA_BEFORE_AGREEMENT);
-		
-	}
-
-
-
-	protected void buildFileForAgreementPhaseHighlightingDifferences() {
-		crokageUtils.buildFileForAgreementPhaseHighlightingDifferences(QUERIES_AND_SO_ANSWERS_TO_EVALUATE+".xlsx",QUERIES_AND_SO_ANSWERS_AGREEMENT);
-		
-	}
-
+ 
 
 
 	public String assembleContentsByThreads(Set<Integer> parentIds, List<Bucket> answersBucketsWithCode) {
@@ -952,34 +878,7 @@ public class AppAux {
 
 
 
-	
-
-	private void checkFiles() throws Exception {
-		
-		
-		File file2 = new File(NLP2API_OUTPUT_QUERIES_FILE);
-		boolean exists2 = file2.exists();
-		if(!exists2) {
-			throw new Exception("File "+file2.getAbsolutePath()+ " must exist. Has it been provided ? ");
-		}
-		
-		File file3 = new File(RACK_OUTPUT_QUERIES_FILE);
-		boolean exists3 = file3.exists();
-		if(!exists3) {
-			throw new Exception("File "+file3.getAbsolutePath()+ " must exist. Has it been provided ? ");
-		}
-		
-	}
-
-
-	
-
-
-
-	
-
-
-
+	 
 	protected String loadBucketContent(Bucket bucket,Integer numberOfPostsInfoToMatch) {
 		StringBuffer stringBuffer = new StringBuffer();
 		
