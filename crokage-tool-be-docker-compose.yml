@@ -7,7 +7,7 @@ services:
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres_container:5432/stackoverflow2018crokagetool      
       spring_datasource_username: postgres
-      spring_datasource_password: lascamibm5k  
+      spring_datasource_password: mypostgrespass  
       TMP_DIR: /home/rodrigo/tmp
       JAVA_TOOL_OPTIONS: "-Xmx25G"
       logging_path: /home/rodrigo/tmp
