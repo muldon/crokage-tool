@@ -1,0 +1,31 @@
+version: '3.5'
+
+services:
+  crokage-tool-be:
+    container_name: crokage-tool-be
+    image: rodrigofgs/crokage-tool-be:1.0.1
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres_container:5432/stackoverflow2018crokagetool      
+      spring_datasource_username: postgres
+      spring_datasource_password: lascamibm5k  
+      TMP_DIR: /home/rodrigo/tmp
+      JAVA_TOOL_OPTIONS: "-Xmx25G"
+      logging_path: /home/rodrigo/tmp
+    ports:
+      - "8080:8080"   
+    volumes:
+      - /home/rodrigo/tmp/crokage-replication-package/tmp:/home/rodrigo/tmp/
+      - /home/rodrigo/tmp/crokage-tool-be/logs:/home/rodrigo/tmp/logs      
+    restart: unless-stopped  
+    networks:
+      - postgres-compose-network   
+    deploy:
+      resources:
+          limits:
+            memory: 25GM
+          reservations:
+            memory: 5GM 
+   
+networks: 
+  postgres-compose-network:
+    driver: bridge
