@@ -1,0 +1,38 @@
+version: '3.5'
+
+services:
+  postgres-db:
+    container_name: postgres_container
+    image: rodrigofgs/mypostgres:1.1
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: mypostgrespass
+    volumes:
+       - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped  
+    networks:
+      - postgres-compose-network    
+      
+  pgadmin:
+    container_name: pgadmin_container
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "estudantecomp@gmail.com"
+      PGADMIN_DEFAULT_PASSWORD: "pgadmin4-2021"
+    ports:
+      - "16543:80"
+    depends_on:
+      - postgres-db
+    restart: unless-stopped 
+    networks:
+      - postgres-compose-network     
+    
+  
+volumes:
+  postgres-data:  
+  
+networks: 
+  postgres-compose-network:
+    driver: bridge

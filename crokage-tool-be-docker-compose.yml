@@ -3,7 +3,7 @@ version: '3.5'
 services:
   crokage-tool-be:
     container_name: crokage-tool-be
-    image: rodrigofgs/crokage-tool-be:1.0.1
+    image: rodrigofgs/crokage-tool-be:1.0.2
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres_container:5432/stackoverflow2018crokagetool      
       spring_datasource_username: postgres
