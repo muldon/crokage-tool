@@ -1,5 +1,5 @@
 # crokage
-Crowd Knowledge Answer Generator. This project is the back-end implementation of the [original work](https://github.com/muldon/CROKAGE-replication-package). 
+Crowd Knowledge Answer Generator. This project is the back-end implementation of the [original work](https://github.com/muldon/CROKAGE-replication-package). The front-end project is [here](https://github.com/muldon/crokage-tool-fe). 
 
 # Prerequisites
 1. [Docker - without sudo](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-20-04
@@ -16,7 +16,7 @@ should return the list of running containers.
 # Installation
 
 1. Download the files, as in [here](https://github.com/muldon/CROKAGE-replication-package#running-the-tool-mode-1---replication-package). Extract the files to your work dir, like /home/rodrigo/tmp/crokage-replication-package. 
-2. Download and edit the files postgres-docker-compose.yml and crokage-tool-be-docker.yml of this repository (crokage-tool). Set your database POSTGRES_PASSWORD credential (the same for both files). On crokage-tool-be-docker.yml, set your work dir (in replace of /home/rodrigo/tmp/crokage-replication-package). Don't change the other variables (including TMP_DIR). 
+2. Download and edit the files postgres-docker-compose.yml and crokage-tool-be-docker-compose.yml of this repository (crokage-tool). Set your database POSTGRES_PASSWORD credential (the same for both files). On crokage-tool-be-docker-compose.yml, set your work dir (in replace of /home/rodrigo/tmp/crokage-replication-package). Don't change the other variables (including TMP_DIR). 
 
 4. On your work dir, run postgres-docker-compose.yml file:
 ```
