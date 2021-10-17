@@ -53,7 +53,6 @@ public class CrokageApp extends AppAux{
 		action = StringUtils.trim(action);
 		
 		System.out.println("\nConsidering parameters: \n" 
-				+ "\n CROKAGE_HOME: " + CROKAGE_HOME
 				+ "\n TMP_DIR: " + TMP_DIR
 				//+ "\n numberOfComposedAnswers: " + numberOfComposedAnswers
 				+ "\n");
@@ -370,94 +369,13 @@ public class CrokageApp extends AppAux{
 	}
 
 
-	private Set<String> getApisFromExtractors(String rawQuery) {
-		Set<String> rackApis = getApisFromRack(rawQuery);
-		Set<String> nlpApis = getApisFromNlp(rawQuery);
-	
-		nlpApis.addAll(rackApis);
-		
-		return nlpApis;
-	}
+	 
 
 
 
+ 
 
-
-	private Set<String> getApisFromNlp(String rawQuery) {
-		Set<String> nlp = null;
-		try {
-			String jarPath = CROKAGE_HOME;
-			//String command = "java -jar "+jarPath+ "/myNlp2Api.jar "+ "-K 10 -task reformulate -query How do I send an HTML email?";
-			List<String> command = new ArrayList<String>();
-		    
-		    command.add("java");
-		    command.add("-jar");
-		    command.add(jarPath+"/myNlp2Api.jar");
-		    command.add("-K");
-		    command.add("10");
-		    command.add("-task");
-		    command.add("reformulate");
-		    command.add("-query");
-		    command.add(rawQuery);
-			
-			ProcessBuilder pb = new ProcessBuilder(command);
-			Process p = pb.start();
-			p.waitFor();
-			String output = CrokageUtils.loadStream(p.getInputStream());
-			String error = CrokageUtils.loadStream(p.getErrorStream());
-			int rc = p.waitFor();
-			String apis[] = output.split("\n");
-			apis = ArrayUtils.remove(apis, 0);
-			apis = ArrayUtils.remove(apis, 0);
-			apis = ArrayUtils.remove(apis, 0);
-			apis = ArrayUtils.remove(apis, 0);
-			if(StringUtils.isBlank(apis[0])) {
-				apis = ArrayUtils.remove(apis, 0);
-			}
-			apis = apis[0].split(" ");
-			nlp = new LinkedHashSet<String>(Arrays.asList(apis));
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
-		return nlp;
-	}
-
-
-
-
-
-	private Set<String> getApisFromRack(String rawQuery) {
-		Set<String> rackApis = null;
-		try {
-			
-			String jarPath = CROKAGE_HOME;
-			List<String> command = new ArrayList<String>();
-		    
-		    command.add("java");
-		    command.add("-jar");
-		    command.add(jarPath+"/rack-exec.jar");
-		    command.add("-K");
-		    command.add("10");
-		    command.add("-task");
-		    command.add("suggestAPI");
-		    command.add("-query");
-		    command.add(rawQuery);
-			
-			ProcessBuilder pb = new ProcessBuilder(command);
-			Process p = pb.start();
-			p.waitFor();
-			String output = CrokageUtils.loadStream(p.getInputStream());
-			String error = CrokageUtils.loadStream(p.getErrorStream());
-			int rc = p.waitFor();
-			String apis[] = output.split("\n");
-			apis = ArrayUtils.remove(apis, 0);
-			rackApis = new LinkedHashSet<String>(Arrays.asList(apis));
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return rackApis;
-	}
+ 
 
 
 	private double getSimPair(String comparingContent, String processedQuery) {

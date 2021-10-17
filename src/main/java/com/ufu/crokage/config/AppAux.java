@@ -65,11 +65,7 @@ public class AppAux {
 	@Value("${BM25_B}")
 	public Float bm25_b;
 	
-	@Value("${CROKAGE_HOME}")
-	public String CROKAGE_HOME;
-	
- 
-	 
+	 	 
 	
 	@Value("${BIG_MAP_INVERTED_INDEX_APIS_FILE_PATH}")
 	public String BIG_MAP_INVERTED_INDEX_APIS_FILE_PATH;

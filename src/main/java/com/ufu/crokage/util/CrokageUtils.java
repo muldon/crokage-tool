@@ -258,20 +258,7 @@ public class CrokageUtils {
 	}
 	
 	
-
-	/*private void configureEnvironmentVariables() {
-		if(!StringUtils.isBlank(bikerHome)) {
-			BIKER_HOME=bikerHome;
-		}
-		if(!StringUtils.isBlank(crokageHome)) {
-			CROKAGE_HOME=crokageHome;
-		}
-		if(!StringUtils.isBlank(tmpDir)) {
-			TMP_DIR=tmpDir;
-		}
-		
-		
-	}*/
+ 
 
 
 	
