@@ -3,7 +3,7 @@ version: '3.5'
 services:
   postgres-db:
     container_name: postgres_container
-    image: rodrigofgs/mypostgres:1.1
+    image: rodrigofgs/postgres:1.0
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: mypostgrespass
