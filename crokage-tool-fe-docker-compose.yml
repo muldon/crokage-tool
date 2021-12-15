@@ -1,0 +1,21 @@
+version: '3.5'
+
+services:
+  crokage-tool-fe:
+    container_name: crokage-tool-fe
+    image: rodrigofgs/crokage-tool-fe:1.0.2   
+    ports:
+      - "9002:9002"       
+    restart: unless-stopped  
+    networks:
+      - postgres-compose-network       
+    deploy:
+      resources:
+          limits:
+            memory: 64M
+          reservations:
+            memory: 64M 
+   
+networks: 
+  postgres-compose-network:
+    driver: bridge
