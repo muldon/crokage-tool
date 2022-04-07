@@ -5,7 +5,8 @@ services:
     container_name: crokage-tool-fe
     image: rodrigofgs/crokage-tool-fe:1.0.2   
     ports:
-      - "9002:9002"       
+      - "9001:9000"      
+      - "35729:35729" 
     restart: unless-stopped  
     networks:
       - postgres-compose-network       
